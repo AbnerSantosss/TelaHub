@@ -49,7 +49,7 @@ services:
         - VITE_API_URL=/api
     restart: unless-stopped
     ports:
-      - "8096:80"
+      - "8097:80"
     networks:
       - display_network
 
