@@ -6,11 +6,18 @@ import {
   Save, Plus, Trash2, X,
   Image as ImageIcon, Type, CloudSun, Clock, Calendar, CalendarDays,
   Settings, Layers, Home, Move, Upload, Link as LinkIcon, CheckCircle2,
-  Maximize2, Film, Info, Loader2, MonitorPlay, Rss, Globe, Gift, Search, Palette, Map, Layout, MoveHorizontal, GripVertical
+  Maximize2, Film, Info, Loader2, MonitorPlay, Rss, Globe, Gift, Search, Palette, Map, Layout, MoveHorizontal, GripVertical,
+  FileText, ListTodo, Timer, ClipboardList, Utensils, TrendingUp, Code2, Database, StickyNote, Camera, BookOpen
 } from 'lucide-react';
 import { getDisplays, saveDisplay, uploadMedia } from '../services/storage';
 import { Display, Page, WidgetType, LayoutItem } from '../types';
-import { LiveClock, WeatherWidget, RssFeed, FullInfoWidget } from './Player';
+import { 
+  LiveClock, WeatherWidget, RssFeed, FullInfoWidget,
+  NotesWidget, TodoWidget, CountdownWidget, ChoresWidget, MealPlanWidget,
+  MarketWatchWidget, BrowserSnapshotWidget, GoogleDocsWidget, OfficeDocsWidget,
+  PowerBIWidget, EmbedHtmlWidget, AirtableWidget, PdfDocumentWidget,
+  getAlignmentClasses
+} from './Player';
 import { SizeInput } from './SizeInput';
 import { MediaLibrary } from './MediaLibrary';
 
@@ -125,6 +132,7 @@ const Editor: React.FC = () => {
   const [containerWidth, setContainerWidth] = useState(1200);
   const [pageToDelete, setPageToDelete] = useState<number | null>(null);
   const [isClearingScene, setIsClearingScene] = useState(false);
+  const [activeMealDay, setActiveMealDay] = useState<string>('Segunda');
 
   const [showBgAnimModal, setShowBgAnimModal] = useState(false);
   const [mediaLibraryConfig, setMediaLibraryConfig] = useState<{ isOpen: boolean, onSelect: (url: string) => void, allowedTypes: 'image' | 'video' | 'all' } | null>(null);
@@ -231,15 +239,53 @@ const Editor: React.FC = () => {
   };
 
   const addWidget = (type: WidgetType) => {
+    let defaultWidth = 8;
+    let defaultHeight = 6;
+
+    if (type === WidgetType.VIDEO || type === WidgetType.IFRAME || type === WidgetType.CALENDAR || type === WidgetType.GIF || type === WidgetType.FULL_INFO) {
+      defaultWidth = 12;
+      defaultHeight = 8;
+    } else if (type === WidgetType.RSS) {
+      defaultWidth = 12;
+      defaultHeight = 6;
+    } else if (type === WidgetType.NOTES) {
+      defaultWidth = 12;
+      defaultHeight = 8;
+    } else if (type === WidgetType.TODO) {
+      defaultWidth = 12;
+      defaultHeight = 10;
+    } else if (type === WidgetType.COUNTDOWN) {
+      defaultWidth = 12;
+      defaultHeight = 6;
+    } else if (type === WidgetType.CHORES) {
+      defaultWidth = 16;
+      defaultHeight = 10;
+    } else if (type === WidgetType.MEAL_PLAN) {
+      defaultWidth = 18;
+      defaultHeight = 12;
+    } else if (type === WidgetType.MARKET_WATCH) {
+      defaultWidth = 16;
+      defaultHeight = 8;
+    } else if (type === WidgetType.BROWSER_SNAPSHOT) {
+      defaultWidth = 18;
+      defaultHeight = 12;
+    } else if (type === WidgetType.GOOGLE_DOCS || type === WidgetType.OFFICE_DOCS || type === WidgetType.EMBED_HTML || type === WidgetType.PDF_DOCUMENT) {
+      defaultWidth = 16;
+      defaultHeight = 12;
+    } else if (type === WidgetType.POWER_BI || type === WidgetType.AIRTABLE) {
+      defaultWidth = 18;
+      defaultHeight = 12;
+    }
+
     const newWidget: LayoutItem = {
       i: Math.random().toString(36).substr(2, 9),
       x: 18,
       y: 10,
-      w: type === WidgetType.VIDEO || type === WidgetType.IFRAME || type === WidgetType.CALENDAR || type === WidgetType.GIF || type === WidgetType.FULL_INFO ? 12 : (type === WidgetType.RSS ? 12 : 8),
-      h: type === WidgetType.VIDEO || type === WidgetType.IFRAME || type === WidgetType.CALENDAR || type === WidgetType.GIF || type === WidgetType.FULL_INFO ? 8 : (type === WidgetType.RSS ? 6 : 6),
+      w: defaultWidth,
+      h: defaultHeight,
       type,
       data: {
-        content: type === WidgetType.TEXT ? 'NOVO TEXTO' : '',
+        content: type === WidgetType.TEXT ? 'NOVO TEXTO' : (type === WidgetType.NOTES ? '📝 Bloco de Notas\n\n• Use esta nota para deixar recados ou avisos importantes no display!\n• Suporta quebra de linhas e emojis.' : ''),
         url: type === WidgetType.IMAGE ? 'https://picsum.photos/400/300' : (type === WidgetType.IFRAME ? 'https://www.wikipedia.org' : (type === WidgetType.GIF ? 'https://media.giphy.com/media/3o7TKSjRrfIPjei72E/giphy.gif' : '')),
         videoUrl: type === WidgetType.VIDEO ? 'https://www.youtube.com/watch?v=YhYaHfpz6lo' : '',
         rssUrl: type === WidgetType.RSS ? 'https://g1.globo.com/rss/g1/tecnologia/' : '',
@@ -248,6 +294,81 @@ const Editor: React.FC = () => {
         model: type === WidgetType.WEATHER ? 'simple' : (type === WidgetType.CLOCK ? 'standard' : undefined),
         color: '#ffffff',
         fontSize: '2vw',
+        fillContainer: true,
+        contentAlignment: 'stretch',
+        fitContainerMode: 'stretch',
+        notesConfig: type === WidgetType.NOTES ? {
+          fontFamily: 'Inter',
+          fontSize: '1.2rem',
+          textColor: '#ffffff',
+          backgroundColor: 'rgba(30, 41, 59, 0.7)',
+          paperTheme: 'glass'
+        } : undefined,
+        todoConfig: type === WidgetType.TODO ? {
+          title: '📋 Tarefas Diárias',
+          items: [
+            { id: '1', text: 'Reunião de Alinhamento (09:00)', done: false },
+            { id: '2', text: 'Revisar metas da equipe', done: true },
+            { id: '3', text: 'Organizar recepção', done: false }
+          ]
+        } : undefined,
+        countdownConfig: type === WidgetType.COUNTDOWN ? {
+          title: '⏰ Lançamento do Novo Site',
+          targetDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 16),
+          expiredMessage: '🚀 O lançamento chegou!',
+          theme: 'bold-gradient'
+        } : undefined,
+        choresConfig: type === WidgetType.CHORES ? {
+          title: '🧹 Quadro de Deveres',
+          items: [
+            { id: '1', chore: 'Regar as plantas', assignee: 'Carlos', day: 'Segunda', done: false },
+            { id: '2', chore: 'Organizar estoque', assignee: 'Mariana', day: 'Terça', done: true },
+            { id: '3', chore: 'Trocar café da recepção', assignee: 'Vítor', day: 'Quarta', done: false }
+          ]
+        } : undefined,
+        mealPlanConfig: type === WidgetType.MEAL_PLAN ? {
+          title: '🍽️ Cardápio da Semana',
+          days: {
+            'Segunda': { breakfast: 'Tapioca + Café', lunch: 'Arroz, Feijão, Frango', dinner: 'Sopa de Legumes', snacks: 'Fruta' },
+            'Terça': { breakfast: 'Pão Integral + Suco', lunch: 'Purê de Batata, Carne', dinner: 'Salada Completa', snacks: 'Iogurte' },
+            'Quarta': { breakfast: 'Cuscuz com Ovo', lunch: 'Macarrão com Almôndegas', dinner: 'Sanduíche Natural', snacks: 'Castanhas' },
+            'Quinta': { breakfast: 'Tapioca + Café', lunch: 'Arroz Integral, Peixe', dinner: 'Omelete com Queijo', snacks: 'Fruta' },
+            'Sexta': { breakfast: 'Panqueca de Aveia', lunch: 'Feijoada Leve, Couve', dinner: 'Wrap Integral', snacks: 'Iogurte' }
+          }
+        } : undefined,
+        marketWatchConfig: type === WidgetType.MARKET_WATCH ? {
+          title: '📊 Mercado Financeiro',
+          symbols: ['IBOV', 'PETR4.SA', 'VALE3.SA', 'BTC-USD'],
+          layout: 'list'
+        } : undefined,
+        browserSnapshotConfig: type === WidgetType.BROWSER_SNAPSHOT ? {
+          url: 'https://g1.globo.com',
+          updateIntervalMinutes: 15
+        } : undefined,
+        googleDocsConfig: type === WidgetType.GOOGLE_DOCS ? {
+          url: '',
+          docType: 'document'
+        } : undefined,
+        officeDocsConfig: type === WidgetType.OFFICE_DOCS ? {
+          url: '',
+          docType: 'word'
+        } : undefined,
+        powerBiConfig: type === WidgetType.POWER_BI ? {
+          embedUrl: ''
+        } : undefined,
+        embedWebsiteConfig: type === WidgetType.IFRAME ? {
+          url: 'https://www.wikipedia.org',
+          interactive: false
+        } : undefined,
+        embedHtmlConfig: type === WidgetType.EMBED_HTML ? {
+          html: '<div style="padding: 20px; text-align: center; background: linear-gradient(135deg, #1e1b4b, #311042); color: #fff; border-radius: 12px; font-family: sans-serif; height: 100%; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; align-items: center;">\n  <h2 style="margin-top:0; color: #22d3ee; margin-bottom: 8px;">HTML Customizado 🚀</h2>\n  <p style="margin-bottom: 12px;">Edite este bloco digitando qualquer código HTML ou JS no painel lateral!</p>\n  <span style="font-size: 32px;">💻</span>\n</div>'
+        } : undefined,
+        airtableConfig: type === WidgetType.AIRTABLE ? {
+          shareUrl: ''
+        } : undefined,
+        pdfDocumentConfig: type === WidgetType.PDF_DOCUMENT ? {
+          pdfUrl: ''
+        } : undefined,
         zIndex: type === WidgetType.FULL_INFO ? 0 : 10
       }
     };
@@ -325,13 +446,22 @@ const Editor: React.FC = () => {
     const containerHeight = containerRef.current?.clientHeight || 0;
     const requiredRows = containerHeight > 0 && rowHeight > 0 ? Math.ceil(containerHeight / rowHeight) : 27;
     
-    // Update widget to full screen
+    // Update widget to full screen with proper data flags
     const fullScreenWidget = {
       ...currentWidget,
       x: 0,
       y: 0,
       w: GRID_COLS,
-      h: requiredRows
+      h: requiredRows,
+      data: {
+        ...currentWidget.data,
+        fillContainer: true,
+        fullScreenMode: true,
+        contentAlignment: 'stretch' as const,
+        fitContainerMode: 'stretch' as const,
+        padding: '0px',
+        margin: '0px',
+      }
     };
     
     currentPage.layout = [fullScreenWidget];
@@ -644,29 +774,68 @@ const Editor: React.FC = () => {
         <aside className={`absolute md:relative left-0 top-0 h-full w-72 bg-slate-900 border-r border-slate-800 overflow-y-auto z-[60] shadow-xl transition-transform duration-300 ease-in-out ${showLeftSidebar ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
           <div className="p-5 border-b border-slate-800">
              <h3 className="text-[10px] font-black text-cyan-500 uppercase tracking-widest mb-4 flex items-center gap-2">
-               <Layers size={12} /> Widgets
+               <Layers size={12} /> Biblioteca de Widgets
              </h3>
-             <div className="grid grid-cols-2 gap-3">
-              <WidgetTool icon={<ImageIcon size={20} />} label="Imagem" onClick={() => addWidget(WidgetType.IMAGE)} />
-              <WidgetTool icon={<Film size={20} />} label="Vídeo" onClick={() => addWidget(WidgetType.VIDEO)} />
-              <WidgetTool icon={<Type size={20} />} label="Texto" onClick={() => addWidget(WidgetType.TEXT)} />
-              <WidgetTool icon={<Clock size={20} />} label="Relógio" onClick={() => addWidget(WidgetType.CLOCK)} />
-              <WidgetTool icon={<Calendar size={20} />} label="Agenda" onClick={() => addWidget(WidgetType.CALENDAR)} />
-              <WidgetTool icon={<CloudSun size={20} />} label="Clima" onClick={() => addWidget(WidgetType.WEATHER)} />
-              <WidgetTool icon={<Layout size={20} />} label="Completo" onClick={() => addWidget(WidgetType.FULL_INFO)} />
-              <WidgetTool icon={<Rss size={20} />} label="Notícias" onClick={() => addWidget(WidgetType.RSS)} />
-              <WidgetTool icon={<Globe size={20} />} label="Website" onClick={() => addWidget(WidgetType.IFRAME)} />
-              <WidgetTool icon={<Gift size={20} />} label="GIF" onClick={() => addWidget(WidgetType.GIF)} />
-            </div>
-            
-            <div className="mt-4 pt-4 border-t border-slate-800">
-               <button 
-                 onClick={() => setIsClearingScene(true)}
-                 className="w-full flex items-center justify-center gap-2 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 rounded-lg text-[10px] font-bold transition-colors border border-rose-500/20 uppercase tracking-wider"
-               >
-                 <Trash2 size={12} /> Limpar Todos os Widgets
-               </button>
-            </div>
+             
+             {/* Básicos */}
+             <div className="mb-4">
+               <h4 className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-2">Básicos</h4>
+               <div className="grid grid-cols-2 gap-2">
+                 <WidgetTool icon={<ImageIcon size={16} />} label="Imagem" onClick={() => addWidget(WidgetType.IMAGE)} />
+                 <WidgetTool icon={<Film size={16} />} label="Vídeo" onClick={() => addWidget(WidgetType.VIDEO)} />
+                 <WidgetTool icon={<Type size={16} />} label="Texto" onClick={() => addWidget(WidgetType.TEXT)} />
+                 <WidgetTool icon={<Gift size={16} />} label="GIF" onClick={() => addWidget(WidgetType.GIF)} />
+                 <WidgetTool icon={<Globe size={16} />} label="Web" onClick={() => addWidget(WidgetType.IFRAME)} />
+               </div>
+             </div>
+
+             {/* Utilitários */}
+             <div className="mb-4">
+               <h4 className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-2">Utilitários</h4>
+               <div className="grid grid-cols-2 gap-2">
+                 <WidgetTool icon={<Clock size={16} />} label="Relógio" onClick={() => addWidget(WidgetType.CLOCK)} />
+                 <WidgetTool icon={<CloudSun size={16} />} label="Clima" onClick={() => addWidget(WidgetType.WEATHER)} />
+                 <WidgetTool icon={<Layout size={16} />} label="Completo" onClick={() => addWidget(WidgetType.FULL_INFO)} />
+                 <WidgetTool icon={<Rss size={16} />} label="RSS" onClick={() => addWidget(WidgetType.RSS)} />
+                 <WidgetTool icon={<Calendar size={16} />} label="Agenda" onClick={() => addWidget(WidgetType.CALENDAR)} />
+               </div>
+             </div>
+
+             {/* Interativos */}
+             <div className="mb-4">
+               <h4 className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-2">Interativos</h4>
+               <div className="grid grid-cols-2 gap-2">
+                 <WidgetTool icon={<StickyNote size={16} className="text-yellow-400" />} label="Notas" onClick={() => addWidget(WidgetType.NOTES)} />
+                 <WidgetTool icon={<ListTodo size={16} className="text-emerald-400" />} label="Tarefas" onClick={() => addWidget(WidgetType.TODO)} />
+                 <WidgetTool icon={<Timer size={16} className="text-rose-400" />} label="Contador" onClick={() => addWidget(WidgetType.COUNTDOWN)} />
+                 <WidgetTool icon={<ClipboardList size={16} className="text-cyan-400" />} label="Deveres" onClick={() => addWidget(WidgetType.CHORES)} />
+                 <WidgetTool icon={<Utensils size={16} className="text-amber-400" />} label="Meal Plan" onClick={() => addWidget(WidgetType.MEAL_PLAN)} />
+               </div>
+             </div>
+
+             {/* Integrações */}
+             <div className="mb-4">
+               <h4 className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-2">Integrações</h4>
+               <div className="grid grid-cols-2 gap-2">
+                 <WidgetTool icon={<TrendingUp size={16} className="text-green-400" />} label="Bolsa" onClick={() => addWidget(WidgetType.MARKET_WATCH)} />
+                 <WidgetTool icon={<Camera size={16} className="text-blue-400" />} label="Snapshot" onClick={() => addWidget(WidgetType.BROWSER_SNAPSHOT)} />
+                 <WidgetTool icon={<FileText size={16} className="text-cyan-500" />} label="G Docs" onClick={() => addWidget(WidgetType.GOOGLE_DOCS)} />
+                 <WidgetTool icon={<BookOpen size={16} className="text-blue-500" />} label="Office Docs" onClick={() => addWidget(WidgetType.OFFICE_DOCS)} />
+                 <WidgetTool icon={<Layout size={16} className="text-amber-500" />} label="Power BI" onClick={() => addWidget(WidgetType.POWER_BI)} />
+                 <WidgetTool icon={<Database size={16} className="text-rose-500" />} label="Airtable" onClick={() => addWidget(WidgetType.AIRTABLE)} />
+                 <WidgetTool icon={<FileText size={16} className="text-red-500" />} label="PDF" onClick={() => addWidget(WidgetType.PDF_DOCUMENT)} />
+                 <WidgetTool icon={<Code2 size={16} className="text-indigo-400" />} label="HTML" onClick={() => addWidget(WidgetType.EMBED_HTML)} />
+               </div>
+             </div>
+             
+             <div className="mt-4 pt-4 border-t border-slate-800">
+                <button 
+                  onClick={() => setIsClearingScene(true)}
+                  className="w-full flex items-center justify-center gap-2 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 rounded-lg text-[10px] font-bold transition-colors border border-rose-500/20 uppercase tracking-wider"
+                >
+                  <Trash2 size={12} /> Limpar Todos os Widgets
+                </button>
+             </div>
           </div>
 
           {/* Layers Sidebar Section */}
@@ -694,6 +863,19 @@ const Editor: React.FC = () => {
                        case WidgetType.RSS: return <Rss size={14} />;
                        case WidgetType.IFRAME: return <Globe size={14} />;
                        case WidgetType.GIF: return <Gift size={14} />;
+                       case WidgetType.NOTES: return <StickyNote size={14} className="text-yellow-400" />;
+                       case WidgetType.TODO: return <ListTodo size={14} className="text-emerald-400" />;
+                       case WidgetType.COUNTDOWN: return <Timer size={14} className="text-rose-400" />;
+                       case WidgetType.CHORES: return <ClipboardList size={14} className="text-cyan-400" />;
+                       case WidgetType.MEAL_PLAN: return <Utensils size={14} className="text-amber-400" />;
+                       case WidgetType.MARKET_WATCH: return <TrendingUp size={14} className="text-green-400" />;
+                       case WidgetType.BROWSER_SNAPSHOT: return <Camera size={14} className="text-blue-400" />;
+                       case WidgetType.GOOGLE_DOCS: return <FileText size={14} className="text-cyan-500" />;
+                       case WidgetType.OFFICE_DOCS: return <BookOpen size={14} className="text-blue-500" />;
+                       case WidgetType.POWER_BI: return <Layout size={14} className="text-amber-500" />;
+                       case WidgetType.EMBED_HTML: return <Code2 size={14} className="text-indigo-400" />;
+                       case WidgetType.AIRTABLE: return <Database size={14} className="text-rose-500" />;
+                       case WidgetType.PDF_DOCUMENT: return <FileText size={14} className="text-red-500" />;
                        default: return <Layers size={14} />;
                      }
                    };
@@ -710,6 +892,19 @@ const Editor: React.FC = () => {
                        case WidgetType.RSS: return 'Notícias';
                        case WidgetType.IFRAME: return 'Website';
                        case WidgetType.GIF: return 'GIF';
+                       case WidgetType.NOTES: return 'Notas';
+                       case WidgetType.TODO: return 'Tarefas';
+                       case WidgetType.COUNTDOWN: return 'Contador';
+                       case WidgetType.CHORES: return 'Deveres';
+                       case WidgetType.MEAL_PLAN: return 'Meal Plan';
+                       case WidgetType.MARKET_WATCH: return 'Bolsa';
+                       case WidgetType.BROWSER_SNAPSHOT: return 'Snapshot';
+                       case WidgetType.GOOGLE_DOCS: return 'G Docs';
+                       case WidgetType.OFFICE_DOCS: return 'Office Docs';
+                       case WidgetType.POWER_BI: return 'Power BI';
+                       case WidgetType.EMBED_HTML: return 'HTML';
+                       case WidgetType.AIRTABLE: return 'Airtable';
+                       case WidgetType.PDF_DOCUMENT: return 'PDF';
                        default: return 'Widget';
                      }
                    };
@@ -1023,13 +1218,22 @@ const Editor: React.FC = () => {
                }}>
           </div>
           
-          <div className="absolute top-4 left-4 flex items-center gap-2 text-slate-600 text-[10px] font-black uppercase tracking-widest bg-slate-900/80 px-3 py-1.5 rounded-full border border-slate-800 backdrop-blur-sm z-20">
-            <Maximize2 size={12} className="text-cyan-500" /> Canvas Livre 16:9
+          <div className={`absolute top-4 left-4 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest bg-slate-900/80 px-3 py-1.5 rounded-full border backdrop-blur-sm z-20 ${
+            display.orientation === 'vertical'
+              ? 'text-purple-400 border-purple-800'
+              : 'text-slate-600 border-slate-800'
+          }`}>
+            <Maximize2 size={12} className={display.orientation === 'vertical' ? 'text-purple-500' : 'text-cyan-500'} />
+            {display.orientation === 'vertical' ? 'Canvas Livre 9:16 — Vertical' : 'Canvas Livre 16:9 — Horizontal'}
           </div>
           
           <div 
             ref={containerRef}
-            className="w-full h-full max-w-[100%] max-h-[100%] aspect-video bg-black shadow-2xl relative border border-slate-800 rounded-sm overflow-hidden"
+            className={`h-full bg-black shadow-2xl relative border border-slate-800 rounded-sm overflow-hidden ${
+              display.orientation === 'vertical'
+                ? 'aspect-[9/16] max-h-full w-auto'
+                : 'w-full max-w-[100%] aspect-video'
+            }`}
             onClick={() => setSelectedWidget(null)}
           >
             {activePage.backgroundVideoUrl && (
@@ -1090,7 +1294,30 @@ const Editor: React.FC = () => {
                     className={`group transition-all ${selectedWidget === w.i ? 'border border-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.3)]' : 'border border-transparent hover:border-white/20 hover:bg-white/5'} ${w.data.backgroundAnimation ? getBackgroundAnimationClass(w.data.backgroundAnimation) : (selectedWidget === w.i ? 'bg-slate-900/50 backdrop-blur-sm' : '')}`}
                     style={{ zIndex: selectedWidget === w.i ? 999 : (w.data.zIndex !== undefined ? w.data.zIndex : 10) }}
                   >
-                    <div className="w-full h-full relative overflow-hidden flex items-center justify-center">
+                    <div 
+                      className={`w-full h-full relative overflow-hidden flex ${getAlignmentClasses(w.data.fillContainer ? 'stretch' : w.data.contentAlignment)}`}
+                      style={{
+                        padding: w.data.padding || undefined,
+                        margin: w.data.margin || undefined,
+                      }}
+                    >
+                      {w.data.fullScreenMode && (
+                        <div className="absolute top-2 right-2 z-30 bg-cyan-950/80 border border-cyan-500/50 backdrop-blur-sm text-cyan-400 text-[9px] font-black uppercase px-2 py-0.5 rounded-full shadow-[0_0_10px_rgba(6,182,212,0.3)] pointer-events-none animate-pulse flex items-center gap-1">
+                          <span>📺 Tela Cheia (100% da TV)</span>
+                        </div>
+                      )}
+
+                      {/* Background Image Layer for fullscreen widgets */}
+                      {w.data.fullScreenMode && w.data.backgroundImage && (
+                        <div 
+                          className="absolute inset-0 z-0 bg-center bg-no-repeat pointer-events-none"
+                          style={{
+                            backgroundImage: `url(${w.data.backgroundImage})`,
+                            backgroundSize: 'cover',
+                          }}
+                        />
+                      )}
+
                       <div className={`drag-handle absolute cursor-move z-20 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-b from-cyan-500/10 to-transparent ${w.type === WidgetType.IFRAME && w.data.iframeConfig?.interactive ? 'top-0 left-0 right-0 h-8 bg-cyan-500/80 backdrop-blur-sm border-b border-cyan-400 flex items-center justify-center text-[10px] font-bold text-white shadow-lg' : 'inset-0'}`}>
                         {w.type === WidgetType.IFRAME && w.data.iframeConfig?.interactive && 'Arraste ou Clique aqui para selecionar'}
                       </div>
@@ -1108,7 +1335,10 @@ const Editor: React.FC = () => {
                              ) : (
                                <video 
                                  src={w.data.videoUrl} 
-                                 className="w-full h-full object-cover opacity-80" 
+                                 className="w-full h-full opacity-80" 
+                                 style={{
+                                   objectFit: (w.data.fillContainer || w.data.fitContainerMode === 'stretch') ? 'fill' : (w.data.fitContainerMode || 'cover')
+                                 }}
                                  autoPlay={w.data.videoConfig?.autoplay !== false}
                                  muted={w.data.videoConfig?.mute !== false}
                                  loop={w.data.videoConfig?.loop !== false}
@@ -1126,14 +1356,14 @@ const Editor: React.FC = () => {
                       )}
                       {w.type === WidgetType.IMAGE && (
                         w.data.url ? (
-                          <div className="w-full h-full flex items-center justify-center overflow-hidden">
+                          <div className={`w-full h-full flex ${getAlignmentClasses(w.data.fillContainer ? 'stretch' : w.data.contentAlignment)} overflow-hidden`}>
                             <img 
                               src={w.data.url} 
-                              className="pointer-events-none select-none" 
+                              className="pointer-events-none select-none w-full h-full" 
                               style={{ 
-                                width: '100%', 
+                                width: '100%',
                                 height: '100%',
-                                objectFit: w.data.imageConfig?.objectFit || 'cover',
+                                objectFit: (w.data.fillContainer || w.data.fitContainerMode === 'stretch') ? 'fill' : (w.data.fitContainerMode || w.data.imageConfig?.objectFit || 'cover'),
                                 transform: `scale(${w.data.imageConfig?.scale || 1})`,
                                 transformOrigin: 'center'
                               }} 
@@ -1145,16 +1375,41 @@ const Editor: React.FC = () => {
                       )}
                       {w.type === WidgetType.GIF && (
                         w.data.url ? (
-                          <div className="w-full h-full relative bg-black/20">
-                             <img src={w.data.url} className="absolute inset-0 w-full h-full object-contain pointer-events-none select-none" />
+                          <div className={`w-full h-full relative bg-black/20 flex ${getAlignmentClasses(w.data.fillContainer ? 'stretch' : w.data.contentAlignment)}`}>
+                             <img 
+                               src={w.data.url} 
+                               className="pointer-events-none select-none w-full h-full"
+                               style={{
+                                 width: '100%',
+                                 height: '100%',
+                                 objectFit: (w.data.fillContainer || w.data.fitContainerMode === 'stretch') ? 'fill' : (w.data.fitContainerMode || 'cover')
+                               }}
+                             />
                           </div>
                         ) : (
                           <div className="flex flex-col items-center"><Gift className="text-slate-700 mb-2" size={32} /><span className="text-[10px] text-slate-600 font-bold uppercase">GIF</span></div>
                         )
                       )}
                       {w.type === WidgetType.TEXT && (
-                        <div className="w-full h-full flex items-center justify-center p-2">
-                          <p className="text-center font-bold pointer-events-none select-none break-words overflow-hidden leading-tight drop-shadow-lg" style={{ color: w.data.color, fontSize: w.data.fontSize }}>{w.data.content}</p>
+                        <div 
+                          className="w-full h-full flex"
+                          style={{ 
+                            alignItems: (w.data.fillContainer || w.data.contentAlignment === 'stretch') ? 'stretch' : w.data.contentAlignment === 'start' ? 'flex-start' : w.data.contentAlignment === 'end' ? 'flex-end' : 'center',
+                            justifyContent: (w.data.fillContainer || w.data.contentAlignment === 'stretch') ? 'stretch' : w.data.contentAlignment === 'start' ? 'flex-start' : w.data.contentAlignment === 'end' ? 'flex-end' : w.data.textConfig?.textAlign === 'left' ? 'flex-start' : w.data.textConfig?.textAlign === 'right' ? 'flex-end' : 'center',
+                            padding: w.data.padding !== undefined ? w.data.padding : '0.5rem',
+                          }}
+                        >
+                          <p 
+                            className="font-bold pointer-events-none select-none break-words overflow-hidden leading-tight drop-shadow-lg" 
+                            style={{ 
+                              color: w.data.color, 
+                              fontSize: w.data.textConfig?.fontSize || w.data.fontSize || 'inherit',
+                              textAlign: w.data.textConfig?.textAlign || 'center',
+                              width: '100%'
+                            }}
+                          >
+                            {w.data.content}
+                          </p>
                         </div>
                       )}
                       {w.type === WidgetType.CLOCK && (
@@ -1238,6 +1493,72 @@ const Editor: React.FC = () => {
                            />
                         </div>
                       )}
+                      
+                      {w.type === WidgetType.NOTES && (
+                        <div className="w-full h-full overflow-hidden pointer-events-none">
+                          <NotesWidget data={w.data} />
+                        </div>
+                      )}
+                      {w.type === WidgetType.TODO && (
+                        <div className="w-full h-full overflow-hidden pointer-events-none">
+                          <TodoWidget data={w.data} />
+                        </div>
+                      )}
+                      {w.type === WidgetType.COUNTDOWN && (
+                        <div className="w-full h-full overflow-hidden pointer-events-none">
+                          <CountdownWidget data={w.data} />
+                        </div>
+                      )}
+                      {w.type === WidgetType.CHORES && (
+                        <div className="w-full h-full overflow-hidden pointer-events-none">
+                          <ChoresWidget data={w.data} />
+                        </div>
+                      )}
+                      {w.type === WidgetType.MEAL_PLAN && (
+                        <div className="w-full h-full overflow-hidden pointer-events-none">
+                          <MealPlanWidget data={w.data} />
+                        </div>
+                      )}
+                      {w.type === WidgetType.MARKET_WATCH && (
+                        <div className="w-full h-full overflow-hidden pointer-events-none">
+                          <MarketWatchWidget data={w.data} />
+                        </div>
+                      )}
+                      {w.type === WidgetType.BROWSER_SNAPSHOT && (
+                        <div className="w-full h-full overflow-hidden pointer-events-none">
+                          <BrowserSnapshotWidget data={w.data} />
+                        </div>
+                      )}
+                      {w.type === WidgetType.GOOGLE_DOCS && (
+                        <div className="w-full h-full overflow-hidden pointer-events-none">
+                          <GoogleDocsWidget data={w.data} />
+                        </div>
+                      )}
+                      {w.type === WidgetType.OFFICE_DOCS && (
+                        <div className="w-full h-full overflow-hidden pointer-events-none">
+                          <OfficeDocsWidget data={w.data} />
+                        </div>
+                      )}
+                      {w.type === WidgetType.POWER_BI && (
+                        <div className="w-full h-full overflow-hidden pointer-events-none">
+                          <PowerBIWidget data={w.data} />
+                        </div>
+                      )}
+                      {w.type === WidgetType.EMBED_HTML && (
+                        <div className="w-full h-full overflow-hidden pointer-events-none">
+                          <EmbedHtmlWidget data={w.data} />
+                        </div>
+                      )}
+                      {w.type === WidgetType.AIRTABLE && (
+                        <div className="w-full h-full overflow-hidden pointer-events-none">
+                          <AirtableWidget data={w.data} />
+                        </div>
+                      )}
+                      {w.type === WidgetType.PDF_DOCUMENT && (
+                        <div className="w-full h-full overflow-hidden pointer-events-none">
+                          <PdfDocumentWidget data={w.data} />
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -1297,37 +1618,20 @@ const Editor: React.FC = () => {
                     <div className="flex items-center justify-between bg-slate-900 p-2 rounded border border-slate-800">
                       <span className="text-[10px] text-slate-400">Cor de Fundo</span>
                       <div className="flex items-center gap-2">
+                        {currentWidget.data.backgroundColor && (
+                          <button 
+                            onClick={() => updateWidgetData(selectedWidget!, { backgroundColor: undefined })}
+                            className="text-[9px] text-rose-500 hover:text-rose-400 mr-2"
+                          >
+                            Limpar Cor
+                          </button>
+                        )}
                         <input 
                           type="color" 
                           value={currentWidget.data.backgroundColor || '#000000'} 
                           onChange={(e) => updateWidgetData(selectedWidget!, { backgroundColor: e.target.value })}
                           className="w-6 h-6 rounded cursor-pointer border-none p-0 outline-none"
                         />
-                      </div>
-                    </div>
-                    {/* Z-Index Control Block */}
-                    <div className="flex flex-col gap-1 bg-slate-900 p-2 rounded border border-slate-800">
-                      <span className="text-[10px] text-slate-400">Camada (Z-Index)</span>
-                      <div className="flex items-center gap-2">
-                         <input 
-                           type="number"
-                           value={currentWidget.data.zIndex !== undefined ? currentWidget.data.zIndex : 10}
-                           onChange={(e) => updateWidgetData(selectedWidget!, { zIndex: parseInt(e.target.value) || 0 })}
-                           className="w-full bg-slate-950 border border-slate-700 rounded p-1.5 text-xs text-white outline-none focus:border-cyan-500"
-                           min="0"
-                           max="999"
-                         />
-                      </div>
-                      <p className="text-[8px] text-slate-500 mt-1 leading-tight">Painéis 'Completo' iniciam no fundo (0). Demais iniciam acima (10). Aumente para trazer para frente.</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        {currentWidget.data.backgroundColor && (
-                          <button 
-                            onClick={() => updateWidgetData(selectedWidget!, { backgroundColor: undefined })}
-                            className="text-[9px] text-rose-500 hover:text-rose-400"
-                          >
-                            Limpar Cor
-                          </button>
-                        )}
                       </div>
                     </div>
                   </div>
@@ -1988,19 +2292,13 @@ const Editor: React.FC = () => {
                       <option value="vertical">Vertical (Empilhado)</option>
                     </select>
 
-                    <label className="text-[9px] font-black text-slate-500 uppercase flex items-center gap-1 mt-4"><Type size={10} /> Tamanho da Fonte</label>
-                    <input 
-                      type="range" 
-                      min="2" 
-                      max="30" 
-                      value={parseInt(currentWidget.data.fontSize?.replace('vw', '') || '8')} 
-                      onChange={(e) => updateWidgetData(selectedWidget!, { fontSize: `${e.target.value}vw` })} 
-                      className="w-full accent-cyan-500" 
+                    <SizeInput 
+                      label="Tamanho da Fonte"
+                      value={currentWidget.data.fontSize}
+                      onChange={(val) => updateWidgetData(selectedWidget!, { fontSize: val })}
+                      placeholder="8cqw"
+                      isFont={true}
                     />
-                    <div className="flex justify-between text-[8px] text-slate-500 mt-1 font-mono">
-                      <span>Pequeno</span>
-                      <span>Grande</span>
-                    </div>
 
                     <p className="text-[9px] text-slate-600 leading-relaxed mt-2">
                       Se definido, o relógio mostrará o horário local dessa cidade. Caso contrário, mostrará o horário do sistema.
@@ -2306,9 +2604,13 @@ const Editor: React.FC = () => {
                       <SizeInput 
                         label="Tamanho da Fonte"
                         value={currentWidget.data.textConfig?.fontSize || currentWidget.data.fontSize} // Fallback to old fontSize
-                        onChange={(val) => updateWidgetData(selectedWidget!, { textConfig: { ...currentWidget.data.textConfig, fontSize: val } })}
+                        onChange={(val) => updateWidgetData(selectedWidget!, { 
+                          textConfig: { ...(currentWidget.data.textConfig || {}), fontSize: val },
+                          fontSize: val
+                        })}
                         placeholder="4cqw"
                         step={0.5}
+                        isFont={true}
                       />
                       
                       <div>
@@ -2408,6 +2710,760 @@ const Editor: React.FC = () => {
                     </div>
                   </div>
                 )}
+                {currentWidget.type === WidgetType.NOTES && (
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Recado / Conteúdo</label>
+                      <textarea
+                        value={currentWidget.data.content || ''}
+                        onChange={e => updateWidgetData(selectedWidget!, { content: e.target.value })}
+                        className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500 h-28"
+                        placeholder="Digite o recado aqui..."
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Tema do Bloco</label>
+                      <select
+                        value={currentWidget.data.notesConfig?.paperTheme || 'glass'}
+                        onChange={e => updateWidgetData(selectedWidget!, { notesConfig: { ...currentWidget.data.notesConfig, paperTheme: e.target.value as any } })}
+                        className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500 cursor-pointer"
+                      >
+                        <option value="glass">Glassmorphism (Translúcido)</option>
+                        <option value="yellow-sticky">Post-it Amarelo</option>
+                        <option value="purple-haze">Purple Haze (Neon Roxo)</option>
+                        <option value="neon-glow">Cyberpunk Neon</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Fonte</label>
+                      <select
+                        value={currentWidget.data.notesConfig?.fontFamily || 'sans'}
+                        onChange={e => updateWidgetData(selectedWidget!, { notesConfig: { ...currentWidget.data.notesConfig, fontFamily: e.target.value } })}
+                        className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500 cursor-pointer"
+                      >
+                        <option value="sans">Sans-serif (Moderna)</option>
+                        <option value="serif">Serif (Clássica)</option>
+                        <option value="mono">Monospace (Código)</option>
+                        <option value="display">Display (Negrito)</option>
+                      </select>
+                    </div>
+                    <SizeInput 
+                      label="Tamanho da Fonte"
+                      value={currentWidget.data.notesConfig?.fontSize}
+                      onChange={(val) => updateWidgetData(selectedWidget!, { notesConfig: { ...currentWidget.data.notesConfig, fontSize: val } })}
+                      placeholder="16px"
+                      isFont={true}
+                    />
+                  </div>
+                )}
+                {currentWidget.type === WidgetType.TODO && (
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Título da Lista</label>
+                      <input
+                        type="text"
+                        value={currentWidget.data.todoConfig?.title || 'Lista de Tarefas'}
+                        onChange={e => updateWidgetData(selectedWidget!, { todoConfig: { ...currentWidget.data.todoConfig, title: e.target.value } })}
+                        className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Adicionar Tarefa</label>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          id={`new-todo-${currentWidget.i}`}
+                          placeholder="Nova tarefa..."
+                          onKeyDown={e => {
+                            if (e.key === 'Enter') {
+                              const input = e.currentTarget;
+                              if (input.value.trim()) {
+                                const items = currentWidget.data.todoConfig?.items || [];
+                                const newItem = { id: Math.random().toString(36).substr(2, 9), text: input.value.trim(), done: false };
+                                updateWidgetData(selectedWidget!, { todoConfig: { ...currentWidget.data.todoConfig, items: [...items, newItem] } });
+                                input.value = '';
+                              }
+                            }
+                          }}
+                          className="flex-1 bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500"
+                        />
+                        <button
+                          onClick={() => {
+                            const input = document.getElementById(`new-todo-${currentWidget.i}`) as HTMLInputElement;
+                            if (input && input.value.trim()) {
+                              const items = currentWidget.data.todoConfig?.items || [];
+                              const newItem = { id: Math.random().toString(36).substr(2, 9), text: input.value.trim(), done: false };
+                              updateWidgetData(selectedWidget!, { todoConfig: { ...currentWidget.data.todoConfig, items: [...items, newItem] } });
+                              input.value = '';
+                            }
+                          }}
+                          className="bg-indigo-600 hover:bg-indigo-500 px-3 rounded text-white text-xs font-bold"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+                    <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+                      <label className="text-[9px] font-black text-slate-500 uppercase block">Tarefas ({currentWidget.data.todoConfig?.items?.length || 0})</label>
+                      {(currentWidget.data.todoConfig?.items || []).map((item: any) => (
+                        <div key={item.id} className="flex items-center justify-between bg-slate-900/60 p-2 rounded border border-slate-800 gap-2">
+                          <div className="flex items-center gap-2 truncate">
+                            <input
+                              type="checkbox"
+                              checked={item.done}
+                              onChange={e => {
+                                const items = currentWidget.data.todoConfig.items.map((i: any) => i.id === item.id ? { ...i, done: e.target.checked } : i);
+                                updateWidgetData(selectedWidget!, { todoConfig: { ...currentWidget.data.todoConfig, items } });
+                              }}
+                              className="rounded border-slate-700 bg-slate-950 text-indigo-600 focus:ring-indigo-500"
+                            />
+                            <span className={`text-xs truncate ${item.done ? 'line-through text-slate-500' : 'text-slate-200'}`}>{item.text}</span>
+                          </div>
+                          <button
+                            onClick={() => {
+                              const items = currentWidget.data.todoConfig.items.filter((i: any) => i.id !== item.id);
+                              updateWidgetData(selectedWidget!, { todoConfig: { ...currentWidget.data.todoConfig, items } });
+                            }}
+                            className="text-rose-400 hover:text-rose-300 transition-colors shrink-0"
+                          >
+                            <Trash2 size={12} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {currentWidget.type === WidgetType.COUNTDOWN && (
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Título</label>
+                      <input
+                        type="text"
+                        value={currentWidget.data.countdownConfig?.title || ''}
+                        onChange={e => updateWidgetData(selectedWidget!, { countdownConfig: { ...currentWidget.data.countdownConfig, title: e.target.value } })}
+                        className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500"
+                        placeholder="Ex: Lançamento"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Data Alvo</label>
+                      <input
+                        type="datetime-local"
+                        value={currentWidget.data.countdownConfig?.targetDate || ''}
+                        onChange={e => updateWidgetData(selectedWidget!, { countdownConfig: { ...currentWidget.data.countdownConfig, targetDate: e.target.value } })}
+                        className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Mensagem ao Terminar</label>
+                      <input
+                        type="text"
+                        value={currentWidget.data.countdownConfig?.expiredMessage || ''}
+                        onChange={e => updateWidgetData(selectedWidget!, { countdownConfig: { ...currentWidget.data.countdownConfig, expiredMessage: e.target.value } })}
+                        className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500"
+                        placeholder="Ex: Chegou o momento!"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Tema</label>
+                      <select
+                        value={currentWidget.data.countdownConfig?.theme || 'glass'}
+                        onChange={e => updateWidgetData(selectedWidget!, { countdownConfig: { ...currentWidget.data.countdownConfig, theme: e.target.value as any } })}
+                        className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500 cursor-pointer"
+                      >
+                        <option value="glass">Glassmorphism</option>
+                        <option value="neon">Neon Vermelho</option>
+                        <option value="bold-gradient">Gradiente Forte</option>
+                        <option value="minimal">Minimalista</option>
+                      </select>
+                    </div>
+                  </div>
+                )}
+                {currentWidget.type === WidgetType.CHORES && (
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Título</label>
+                      <input
+                        type="text"
+                        value={currentWidget.data.choresConfig?.title || ''}
+                        onChange={e => updateWidgetData(selectedWidget!, { choresConfig: { ...currentWidget.data.choresConfig, title: e.target.value } })}
+                        className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500"
+                      />
+                    </div>
+                    
+                    <div className="bg-slate-900/40 p-2 rounded border border-slate-800 space-y-2">
+                      <span className="text-[9px] font-black text-slate-400 uppercase block">Adicionar Dever</span>
+                      <input
+                        type="text"
+                        id={`new-chore-text-${currentWidget.i}`}
+                        placeholder="Nome da atividade..."
+                        className="w-full bg-slate-950 border border-slate-700 rounded p-1.5 text-xs text-white outline-none focus:border-cyan-500"
+                      />
+                      <div className="grid grid-cols-2 gap-2">
+                        <input
+                          type="text"
+                          id={`new-chore-assignee-${currentWidget.i}`}
+                          placeholder="Responsável..."
+                          className="bg-slate-950 border border-slate-700 rounded p-1.5 text-xs text-white outline-none focus:border-cyan-500"
+                        />
+                        <select
+                          id={`new-chore-day-${currentWidget.i}`}
+                          className="bg-slate-950 border border-slate-700 rounded p-1.5 text-xs text-white outline-none focus:border-cyan-500 cursor-pointer"
+                        >
+                          <option value="Segunda">Segunda</option>
+                          <option value="Terça">Terça</option>
+                          <option value="Quarta">Quarta</option>
+                          <option value="Quinta">Quinta</option>
+                          <option value="Sexta">Sexta</option>
+                          <option value="Sábado">Sábado</option>
+                          <option value="Domingo">Domingo</option>
+                        </select>
+                      </div>
+                      <button
+                        onClick={() => {
+                          const textInput = document.getElementById(`new-chore-text-${currentWidget.i}`) as HTMLInputElement;
+                          const assInput = document.getElementById(`new-chore-assignee-${currentWidget.i}`) as HTMLInputElement;
+                          const daySelect = document.getElementById(`new-chore-day-${currentWidget.i}`) as HTMLSelectElement;
+                          if (textInput?.value.trim() && assInput?.value.trim()) {
+                            const items = currentWidget.data.choresConfig?.items || [];
+                            const newItem = {
+                              id: Math.random().toString(36).substr(2, 9),
+                              chore: textInput.value.trim(),
+                              assignee: assInput.value.trim(),
+                              day: daySelect.value,
+                              done: false
+                            };
+                            updateWidgetData(selectedWidget!, { choresConfig: { ...currentWidget.data.choresConfig, items: [...items, newItem] } });
+                            textInput.value = '';
+                            assInput.value = '';
+                          }
+                        }}
+                        className="w-full py-1.5 bg-indigo-600 hover:bg-indigo-500 rounded text-white text-xs font-bold transition-colors"
+                      >
+                        Adicionar
+                      </button>
+                    </div>
+
+                    <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+                      <label className="text-[9px] font-black text-slate-500 uppercase block">Lista de Deveres</label>
+                      {(currentWidget.data.choresConfig?.items || []).map((item: any) => (
+                        <div key={item.id} className="flex items-center justify-between bg-slate-900/60 p-2 rounded border border-slate-800 gap-2 text-xs">
+                          <div className="truncate flex-1">
+                            <div className="font-semibold text-slate-200 truncate">{item.chore}</div>
+                            <div className="text-[9px] text-slate-400 flex items-center gap-1.5 mt-0.5">
+                              <span className="bg-slate-850 px-1 py-0.5 rounded text-indigo-400 font-bold">{item.assignee}</span>
+                              <span>•</span>
+                              <span>{item.day}</span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={item.done}
+                              onChange={e => {
+                                const items = currentWidget.data.choresConfig.items.map((i: any) => i.id === item.id ? { ...i, done: e.target.checked } : i);
+                                updateWidgetData(selectedWidget!, { choresConfig: { ...currentWidget.data.choresConfig, items } });
+                              }}
+                              className="rounded border-slate-700 bg-slate-950 text-indigo-600 focus:ring-indigo-500"
+                            />
+                            <button
+                              onClick={() => {
+                                const items = currentWidget.data.choresConfig.items.filter((i: any) => i.id !== item.id);
+                                updateWidgetData(selectedWidget!, { choresConfig: { ...currentWidget.data.choresConfig, items } });
+                              }}
+                              className="text-rose-400 hover:text-rose-300"
+                            >
+                              <Trash2 size={12} />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {currentWidget.type === WidgetType.MEAL_PLAN && (
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Título</label>
+                      <input
+                        type="text"
+                        value={currentWidget.data.mealPlanConfig?.title || ''}
+                        onChange={e => updateWidgetData(selectedWidget!, { mealPlanConfig: { ...currentWidget.data.mealPlanConfig, title: e.target.value } })}
+                        className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Dia para Editar</label>
+                      <select
+                        className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500 cursor-pointer"
+                        value={activeMealDay}
+                        onChange={(e) => setActiveMealDay(e.target.value)}
+                      >
+                        <option value="Segunda">Segunda-feira</option>
+                        <option value="Terça">Terça-feira</option>
+                        <option value="Quarta">Quarta-feira</option>
+                        <option value="Quinta">Quinta-feira</option>
+                        <option value="Sexta">Sexta-feira</option>
+                        <option value="Sábado">Sábado</option>
+                        <option value="Domingo">Domingo</option>
+                      </select>
+                    </div>
+
+                    {(() => {
+                      const daysData = currentWidget.data.mealPlanConfig?.days || {};
+                      const dayMeal = daysData[activeMealDay] || {};
+
+                      const updateMeal = (mealKey: string, val: string) => {
+                        const updatedDays = {
+                          ...daysData,
+                          [activeMealDay]: {
+                            ...dayMeal,
+                            [mealKey]: val
+                          }
+                        };
+                        updateWidgetData(selectedWidget!, { mealPlanConfig: { ...currentWidget.data.mealPlanConfig, days: updatedDays } });
+                      };
+
+                      return (
+                        <div className="bg-slate-900/40 p-2.5 rounded border border-slate-800 space-y-2">
+                          <span className="text-[9px] font-black text-cyan-400 uppercase block">Refeições de {activeMealDay}</span>
+                          <div>
+                            <label className="text-[8px] text-slate-400 block mb-0.5">Café da Manhã</label>
+                            <input
+                              type="text"
+                              value={dayMeal.breakfast || ''}
+                              onChange={e => updateMeal('breakfast', e.target.value)}
+                              className="w-full bg-slate-950 border border-slate-700 rounded p-1 text-xs text-white outline-none focus:border-cyan-500"
+                              placeholder="Ex: Ovos, Pão e Café"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-[8px] text-slate-400 block mb-0.5">Almoço</label>
+                            <input
+                              type="text"
+                              value={dayMeal.lunch || ''}
+                              onChange={e => updateMeal('lunch', e.target.value)}
+                              className="w-full bg-slate-950 border border-slate-700 rounded p-1 text-xs text-white outline-none focus:border-cyan-500"
+                              placeholder="Ex: Frango com Salada e Arroz"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-[8px] text-slate-400 block mb-0.5">Jantar</label>
+                            <input
+                              type="text"
+                              value={dayMeal.dinner || ''}
+                              onChange={e => updateMeal('dinner', e.target.value)}
+                              className="w-full bg-slate-950 border border-slate-700 rounded p-1 text-xs text-white outline-none focus:border-cyan-500"
+                              placeholder="Ex: Sopa leve"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-[8px] text-slate-400 block mb-0.5">Lanches</label>
+                            <input
+                              type="text"
+                              value={dayMeal.snacks || ''}
+                              onChange={e => updateMeal('snacks', e.target.value)}
+                              className="w-full bg-slate-950 border border-slate-700 rounded p-1 text-xs text-white outline-none focus:border-cyan-500"
+                              placeholder="Ex: Frutas ou Mix de Castanhas"
+                            />
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </div>
+                )}
+                {currentWidget.type === WidgetType.MARKET_WATCH && (
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Título</label>
+                      <input
+                        type="text"
+                        value={currentWidget.data.marketWatchConfig?.title || ''}
+                        onChange={e => updateWidgetData(selectedWidget!, { marketWatchConfig: { ...currentWidget.data.marketWatchConfig, title: e.target.value } })}
+                        className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Layout</label>
+                      <select
+                        value={currentWidget.data.marketWatchConfig?.layout || 'grid'}
+                        onChange={e => updateWidgetData(selectedWidget!, { marketWatchConfig: { ...currentWidget.data.marketWatchConfig, layout: e.target.value as any } })}
+                        className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500 cursor-pointer"
+                      >
+                        <option value="grid">Grade (Cards)</option>
+                        <option value="list">Lista Vertical</option>
+                        <option value="ticker">Fita Corrediça (Ticker)</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Adicionar Símbolo</label>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          id={`new-symbol-${currentWidget.i}`}
+                          placeholder="Ex: AAPL, BTC-USD, EURUSD=X"
+                          className="flex-1 bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500 uppercase"
+                          onKeyDown={e => {
+                            if (e.key === 'Enter') {
+                              const input = e.currentTarget;
+                              if (input.value.trim()) {
+                                const symbols = currentWidget.data.marketWatchConfig?.symbols || [];
+                                const sym = input.value.trim().toUpperCase();
+                                if (!symbols.includes(sym)) {
+                                  updateWidgetData(selectedWidget!, { marketWatchConfig: { ...currentWidget.data.marketWatchConfig, symbols: [...symbols, sym] } });
+                                }
+                                input.value = '';
+                              }
+                            }
+                          }}
+                        />
+                        <button
+                          onClick={() => {
+                            const input = document.getElementById(`new-symbol-${currentWidget.i}`) as HTMLInputElement;
+                            if (input && input.value.trim()) {
+                              const symbols = currentWidget.data.marketWatchConfig?.symbols || [];
+                              const sym = input.value.trim().toUpperCase();
+                              if (!symbols.includes(sym)) {
+                                updateWidgetData(selectedWidget!, { marketWatchConfig: { ...currentWidget.data.marketWatchConfig, symbols: [...symbols, sym] } });
+                              }
+                              input.value = '';
+                            }
+                          }}
+                          className="bg-indigo-600 hover:bg-indigo-500 px-3 rounded text-white text-xs font-bold"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5 pt-1">
+                      {(currentWidget.data.marketWatchConfig?.symbols || []).map((sym: string) => (
+                        <span key={sym} className="flex items-center gap-1 bg-slate-900 border border-slate-700 px-2 py-0.5 rounded text-[10px] text-white font-mono font-bold">
+                          {sym}
+                          <button
+                            onClick={() => {
+                              const symbols = currentWidget.data.marketWatchConfig.symbols.filter((s: string) => s !== sym);
+                              updateWidgetData(selectedWidget!, { marketWatchConfig: { ...currentWidget.data.marketWatchConfig, symbols } });
+                            }}
+                            className="text-rose-400 hover:text-rose-300 font-bold ml-1"
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {currentWidget.type === WidgetType.BROWSER_SNAPSHOT && (
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">URL do Site</label>
+                      <input
+                        type="text"
+                        value={currentWidget.data.browserSnapshotConfig?.url || ''}
+                        onChange={e => updateWidgetData(selectedWidget!, { browserSnapshotConfig: { ...currentWidget.data.browserSnapshotConfig, url: e.target.value } })}
+                        className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500"
+                        placeholder="Ex: https://g1.globo.com"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Intervalo de Atualização (minutos)</label>
+                      <input
+                        type="number"
+                        value={currentWidget.data.browserSnapshotConfig?.updateIntervalMinutes || 10}
+                        onChange={e => updateWidgetData(selectedWidget!, { browserSnapshotConfig: { ...currentWidget.data.browserSnapshotConfig, updateIntervalMinutes: parseInt(e.target.value) || 10 } })}
+                        className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500"
+                      />
+                    </div>
+                  </div>
+                )}
+                {currentWidget.type === WidgetType.GOOGLE_DOCS && (
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Tipo de Documento</label>
+                      <select
+                        value={currentWidget.data.googleDocsConfig?.docType || 'document'}
+                        onChange={e => updateWidgetData(selectedWidget!, { googleDocsConfig: { ...currentWidget.data.googleDocsConfig, docType: e.target.value as any } })}
+                        className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500 cursor-pointer"
+                      >
+                        <option value="document">Google Documentos (Doc)</option>
+                        <option value="spreadsheet">Google Planilhas (Sheets)</option>
+                        <option value="presentation">Google Apresentações (Slides)</option>
+                        <option value="form">Google Formulários (Forms)</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Link de Compartilhamento</label>
+                      <input
+                        type="text"
+                        value={currentWidget.data.googleDocsConfig?.url || ''}
+                        onChange={e => updateWidgetData(selectedWidget!, { googleDocsConfig: { ...currentWidget.data.googleDocsConfig, url: e.target.value } })}
+                        className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500"
+                        placeholder="Cole o link completo do Google Docs..."
+                      />
+                    </div>
+                    <p className="text-[9px] text-slate-400 leading-normal italic">
+                      Certifique-se de que o documento esteja visível para "Qualquer pessoa com o link" para que seja exibido sem login.
+                    </p>
+                  </div>
+                )}
+                {currentWidget.type === WidgetType.OFFICE_DOCS && (
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Tipo do Arquivo</label>
+                      <select
+                        value={currentWidget.data.officeDocsConfig?.docType || 'word'}
+                        onChange={e => updateWidgetData(selectedWidget!, { officeDocsConfig: { ...currentWidget.data.officeDocsConfig, docType: e.target.value as any } })}
+                        className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500 cursor-pointer"
+                      >
+                        <option value="word">Microsoft Word</option>
+                        <option value="excel">Microsoft Excel</option>
+                        <option value="powerpoint">Microsoft PowerPoint</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Link de Incorporação (Embed Link)</label>
+                      <input
+                        type="text"
+                        value={currentWidget.data.officeDocsConfig?.url || ''}
+                        onChange={e => updateWidgetData(selectedWidget!, { officeDocsConfig: { ...currentWidget.data.officeDocsConfig, url: e.target.value } })}
+                        className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500"
+                        placeholder="Cole o link gerado pelo OneDrive embed..."
+                      />
+                    </div>
+                  </div>
+                )}
+                {currentWidget.type === WidgetType.POWER_BI && (
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">URL de Incorporação (Embed URL)</label>
+                      <input
+                        type="text"
+                        value={currentWidget.data.powerBiConfig?.embedUrl || ''}
+                        onChange={e => updateWidgetData(selectedWidget!, { powerBiConfig: { ...currentWidget.data.powerBiConfig, embedUrl: e.target.value } })}
+                        className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500"
+                        placeholder="Cole o link https://app.powerbi.com/reportEmbed..."
+                      />
+                    </div>
+                  </div>
+                )}
+                {currentWidget.type === WidgetType.EMBED_HTML && (
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Código HTML / Widget Customizado</label>
+                      <textarea
+                        value={currentWidget.data.embedHtmlConfig?.html || ''}
+                        onChange={e => updateWidgetData(selectedWidget!, { embedHtmlConfig: { html: e.target.value } })}
+                        className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white font-mono outline-none focus:border-cyan-500 h-44"
+                        placeholder="<!-- Insira seu HTML, CSS ou Script aqui -->"
+                      />
+                    </div>
+                  </div>
+                )}
+                {currentWidget.type === WidgetType.AIRTABLE && (
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">URL de Compartilhamento do Airtable</label>
+                      <input
+                        type="text"
+                        value={currentWidget.data.airtableConfig?.shareUrl || ''}
+                        onChange={e => updateWidgetData(selectedWidget!, { airtableConfig: { shareUrl: e.target.value } })}
+                        className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500"
+                        placeholder="https://airtable.com/embed/shr..."
+                      />
+                    </div>
+                  </div>
+                )}
+                {currentWidget.type === WidgetType.PDF_DOCUMENT && (
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">URL do Arquivo PDF</label>
+                      <input
+                        type="text"
+                        value={currentWidget.data.pdfDocumentConfig?.pdfUrl || ''}
+                        onChange={e => updateWidgetData(selectedWidget!, { pdfDocumentConfig: { pdfUrl: e.target.value } })}
+                        className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500"
+                        placeholder="https://exemplo.com/documento.pdf"
+                      />
+                    </div>
+                  </div>
+                )}
+                
+                {/* Ajustes de Layout */}
+                <div className="pt-4 mt-4 border-t border-slate-800 space-y-4">
+                  <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-wider flex items-center gap-1.5"><Layout size={12} className="text-cyan-400" /> Ajustes de Layout</h4>
+                  
+                  {/* Grid de Switches */}
+                  <div className="grid grid-cols-1 gap-2">
+                    <label className={`flex items-center gap-3 text-[11px] text-slate-300 cursor-pointer p-2.5 rounded-lg border transition-all w-full select-none ${currentWidget.data.fillContainer ? 'bg-cyan-950/40 border-cyan-500/50 ring-1 ring-cyan-500/20' : 'bg-slate-950/60 border-slate-800/80 hover:border-cyan-500/30 hover:bg-slate-950'}`}>
+                      <input 
+                        type="checkbox" 
+                        checked={currentWidget.data.fillContainer || false} 
+                        onChange={(e) => {
+                          const checked = e.target.checked;
+                          updateWidgetData(selectedWidget!, { 
+                            fillContainer: checked,
+                            fullScreenMode: checked,
+                            contentAlignment: checked ? 'stretch' : 'center',
+                            fitContainerMode: checked ? 'stretch' : '',
+                            padding: checked ? '0px' : currentWidget.data.padding,
+                            margin: checked ? '0px' : currentWidget.data.margin,
+                          });
+                          if (checked) {
+                            setFullScreen();
+                          }
+                        }}
+                        className="rounded border-slate-700 bg-slate-900 text-cyan-500 focus:ring-0 w-4 h-4 cursor-pointer"
+                      />
+                      <div className="flex flex-col">
+                        <span className="font-bold text-slate-200">Preencher Container</span>
+                        <span className="text-[9px] text-slate-500 leading-tight">Widget de complemento em tela cheia — ocupa 100% da tela, de canto a canto</span>
+                      </div>
+                    </label>
+
+                    <label className={`flex items-center gap-3 text-[11px] text-slate-300 cursor-pointer p-2.5 rounded-lg border transition-all w-full select-none ${currentWidget.data.fullScreenMode ? 'bg-indigo-950/40 border-indigo-500/50 ring-1 ring-indigo-500/20' : 'bg-slate-950/60 border-slate-800/80 hover:border-cyan-500/30 hover:bg-slate-950'}`}>
+                      <input 
+                        type="checkbox" 
+                        checked={currentWidget.data.fullScreenMode || false} 
+                        onChange={(e) => {
+                          const checked = e.target.checked;
+                          updateWidgetData(selectedWidget!, { 
+                            fullScreenMode: checked,
+                            ...(checked ? {
+                              fillContainer: true,
+                              contentAlignment: 'stretch',
+                              fitContainerMode: 'stretch',
+                              padding: '0px',
+                              margin: '0px',
+                            } : {})
+                          });
+                          if (checked) {
+                            setFullScreen();
+                          }
+                        }}
+                        className="rounded border-slate-700 bg-slate-900 text-cyan-500 focus:ring-0 w-4 h-4 cursor-pointer"
+                      />
+                      <div className="flex flex-col">
+                        <span className="font-bold text-slate-200">Tela Cheia (100% da TV)</span>
+                        <span className="text-[9px] text-slate-500 leading-tight">Força o widget a preencher toda a tela da TV</span>
+                      </div>
+                    </label>
+                  </div>
+
+                  {/* Painel de Tela Cheia — aparece quando fillContainer está ativo */}
+                  {currentWidget.data.fillContainer && (
+                    <div className="bg-gradient-to-b from-cyan-950/30 to-slate-950/80 p-3 rounded-xl border border-cyan-500/30 space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Maximize2 size={12} className="text-cyan-400" />
+                        <span className="text-[9px] font-black text-cyan-400 uppercase tracking-wider">Modo Tela Cheia Ativo</span>
+                      </div>
+                      
+                      {/* Imagem de Fundo do Widget */}
+                      <div>
+                        <label className="text-[9px] font-black text-slate-400 uppercase mb-1 block">Imagem de Fundo (Opcional)</label>
+                        <input
+                          type="text"
+                          value={currentWidget.data.backgroundImage || ''}
+                          onChange={e => updateWidgetData(selectedWidget!, { backgroundImage: e.target.value })}
+                          className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500"
+                          placeholder="URL da imagem de fundo..."
+                        />
+                        <button
+                          onClick={() => {
+                            setMediaLibraryConfig({
+                              isOpen: true,
+                              allowedTypes: 'image' as const,
+                              onSelect: (url: string) => {
+                                updateWidgetData(selectedWidget!, { backgroundImage: url });
+                              }
+                            });
+                          }}
+                          className="w-full mt-1.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded text-[10px] font-bold uppercase transition-colors flex items-center justify-center gap-2"
+                        >
+                          <Upload size={12} />
+                          Selecionar Imagem de Fundo
+                        </button>
+                      </div>
+
+                      {/* Botão de Preenchimento Automático */}
+                      <button
+                        onClick={() => {
+                          setFullScreen();
+                        }}
+                        className="w-full py-2.5 bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-600 hover:from-indigo-500 hover:via-violet-500 hover:to-indigo-500 text-white rounded-lg text-xs font-black uppercase tracking-wider transition-all shadow-lg shadow-indigo-900/30 flex items-center justify-center gap-2 relative overflow-hidden group"
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+                        <Maximize2 size={14} className="relative z-10" />
+                        <span className="relative z-10">Preencher Tela Inteira</span>
+                      </button>
+                      <p className="text-[8px] text-amber-400/80 text-center leading-tight">
+                        ⚠️ Atenção: Isso removerá todos os outros widgets desta cena e deixará o widget ocupando 100% da tela como fundo.
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Fit Container Mode */}
+                  {!currentWidget.data.fillContainer && (
+                    <div className="animate-in fade-in duration-200">
+                      <label className="text-[9px] font-black text-slate-500 uppercase block mb-1">Ajuste de Preenchimento (Fit)</label>
+                      <select 
+                        value={currentWidget.data.fitContainerMode || ""}
+                        onChange={(e) => updateWidgetData(selectedWidget!, { fitContainerMode: e.target.value as any })}
+                        className="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-white outline-none focus:border-cyan-500 cursor-pointer hover:border-slate-700 transition-colors"
+                      >
+                        <option value="">Padrão (Preenchimento inteligente)</option>
+                        <option value="cover">Cortar e Preencher (Cover)</option>
+                        <option value="contain">Conter Inteiro (Contain)</option>
+                        <option value="stretch">Esticar Tudo (Stretch)</option>
+                        <option value="none">Tamanho Real (None)</option>
+                      </select>
+                    </div>
+                  )}
+
+                  {/* Alinhamento Interno */}
+                  {!currentWidget.data.fillContainer && (
+                    <div className="animate-in fade-in duration-200">
+                      <label className="text-[9px] font-black text-slate-500 uppercase block mb-1.5">Alinhamento Interno do Conteúdo</label>
+                      <div className="grid grid-cols-4 gap-1">
+                        {[
+                          { val: "start", label: "Esquerda" },
+                          { val: "center", label: "Centro" },
+                          { val: "end", label: "Direita" },
+                          { val: "stretch", label: "Esticar" },
+                        ].map((align) => (
+                          <button
+                            key={align.val}
+                            type="button"
+                            onClick={() => updateWidgetData(selectedWidget!, { contentAlignment: align.val as any })}
+                            className={`py-1 rounded text-[9px] font-bold uppercase transition-all border ${
+                              (currentWidget.data.contentAlignment === align.val || (!currentWidget.data.contentAlignment && align.val === "center"))
+                                ? "bg-cyan-500/20 border-cyan-500 text-cyan-400" 
+                                : "bg-slate-950 border-slate-800 text-slate-500 hover:border-slate-700"
+                            }`}
+                          >
+                            {align.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Padding e Margin */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <SizeInput 
+                      label="Padding Interno"
+                      value={currentWidget.data.padding}
+                      onChange={(val) => updateWidgetData(selectedWidget!, { padding: val })}
+                      placeholder="0px"
+                    />
+                    <SizeInput 
+                      label="Margem Externa"
+                      value={currentWidget.data.margin}
+                      onChange={(val) => updateWidgetData(selectedWidget!, { margin: val })}
+                      placeholder="0px"
+                    />
+                  </div>
+                </div>
                 
                 <div className="pt-6 border-t border-slate-800 mt-auto">
                   <h4 className="text-[9px] font-black text-slate-600 uppercase mb-3">Geometria</h4>

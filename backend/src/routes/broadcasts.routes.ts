@@ -1,6 +1,8 @@
 import { Router, Request, Response } from 'express';
 import { authMiddleware } from '../middlewares/auth.middleware';
 import { broadcastService } from '../services/broadcast.service';
+import { sseService } from '../services/sse.service';
+import prisma from '../lib/prisma';
 
 const router = Router();
 
@@ -54,6 +56,25 @@ router.post('/', authMiddleware, async (req: Request, res: Response): Promise<vo
       createdBy: created_by || null,
     });
 
+    // Notificar os displays vinculados a este broadcast via SSE
+    if (broadcast.displayIds) {
+      try {
+        const displayIds = typeof broadcast.displayIds === 'string'
+          ? JSON.parse(broadcast.displayIds)
+          : broadcast.displayIds;
+        
+        if (Array.isArray(displayIds)) {
+          displayIds.forEach((displayId: string) => {
+            sseService.notifyDisplayUpdate(displayId).catch(err => {
+              console.error('Erro ao notificar display via SSE após salvar broadcast:', err);
+            });
+          });
+        }
+      } catch (err) {
+        console.error('Erro ao processar displayIds do broadcast para SSE:', err);
+      }
+    }
+
     res.json(broadcast);
   } catch (error: any) {
     console.error('Erro ao salvar broadcast:', error);
@@ -64,7 +85,33 @@ router.post('/', authMiddleware, async (req: Request, res: Response): Promise<vo
 // DELETE /api/broadcasts/:id
 router.delete('/:id', authMiddleware, async (req: Request, res: Response): Promise<void> => {
   try {
+    // Buscar o broadcast antes de excluir para saber quais displays atualizar
+    const broadcast = await prisma.broadcast.findUnique({
+      where: { id: req.params.id as string },
+      select: { displayIds: true }
+    });
+
     await broadcastService.delete(req.params.id as string);
+
+    // Notificar os displays vinculados via SSE
+    if (broadcast && broadcast.displayIds) {
+      try {
+        const displayIds = typeof broadcast.displayIds === 'string'
+          ? JSON.parse(broadcast.displayIds)
+          : broadcast.displayIds;
+
+        if (Array.isArray(displayIds)) {
+          displayIds.forEach((displayId: string) => {
+            sseService.notifyDisplayUpdate(displayId).catch(err => {
+              console.error('Erro ao notificar display via SSE após deletar broadcast:', err);
+            });
+          });
+        }
+      } catch (err) {
+        console.error('Erro ao processar displayIds do broadcast deletado para SSE:', err);
+      }
+    }
+
     res.json({ message: 'Broadcast removido com sucesso.' });
   } catch (error: any) {
     console.error('Erro ao deletar broadcast:', error);

@@ -114,9 +114,12 @@ export const getDisplays = async (): Promise<Display[]> => {
   }
 };
 
-export const getDisplayBySlug = async (slug: string): Promise<Display | undefined> => {
+export const getDisplayBySlug = async (slug: string, lastVersion?: number): Promise<Display | undefined> => {
   try {
-    return await api.get<Display>(`/displays/slug/${slug}`);
+    const url = lastVersion !== undefined 
+      ? `/displays/slug/${slug}?lastVersion=${lastVersion}` 
+      : `/displays/slug/${slug}`;
+    return await api.get<Display>(url);
   } catch {
     return undefined;
   }
@@ -131,18 +134,24 @@ export const getDisplayById = async (id: string): Promise<Display | undefined> =
 };
 
 // Versão pública (sem auth) — usada pelo Player (TV) após vinculação
-export const getDisplayByIdPublic = async (id: string): Promise<Display | undefined> => {
+export const getDisplayByIdPublic = async (id: string, lastVersion?: number): Promise<Display | undefined> => {
   try {
-    return await api.get<Display>(`/displays/player/${id}`);
+    const url = lastVersion !== undefined 
+      ? `/displays/player/${id}?lastVersion=${lastVersion}` 
+      : `/displays/player/${id}`;
+    return await api.get<Display>(url);
   } catch {
     return undefined;
   }
 };
 
 // Retorna apenas o timestamp de atualização — ultra-leve (~20 bytes)
-export const getDisplayVersion = async (slug: string): Promise<number | null> => {
+export const getDisplayVersion = async (slug: string, lastVersion?: number): Promise<number | null> => {
   try {
-    const result = await api.get<{ updatedAt: number } | null>(`/displays/slug/${slug}/version`);
+    const url = lastVersion !== undefined 
+      ? `/displays/slug/${slug}/version?lastVersion=${lastVersion}` 
+      : `/displays/slug/${slug}/version`;
+    const result = await api.get<{ updatedAt: number } | null>(url);
     // null = 304 Not Modified (sem mudanças)
     if (result === null) return null;
     return result.updatedAt;

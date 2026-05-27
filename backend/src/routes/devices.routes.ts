@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { authMiddleware } from '../middlewares/auth.middleware';
 import { deviceService } from '../services/device.service';
+import { sseService } from '../services/sse.service';
 
 const router = Router();
 
@@ -66,6 +67,11 @@ router.get('/:id/status', async (req: Request, res: Response): Promise<void> => 
   }
 });
 
+// GET /api/devices/player/:id/live — Conexão SSE em tempo real (Player Pareado)
+router.get('/player/:id/live', (req: Request, res: Response): void => {
+  sseService.addClient('device', req.params.id as string, res);
+});
+
 // POST /api/devices/link
 router.post('/link', authMiddleware, async (req: Request, res: Response): Promise<void> => {
   try {
@@ -82,6 +88,11 @@ router.post('/link', authMiddleware, async (req: Request, res: Response): Promis
       res.status(404).json({ error: 'Dispositivo não encontrado ou já vinculado.' });
       return;
     }
+
+    // Notificar dispositivo via SSE em tempo real
+    sseService.notifyDeviceUpdate(device.id).catch(err => {
+      console.error('Erro ao notificar pareamento de device via SSE:', err);
+    });
 
     res.json({ message: 'Dispositivo vinculado com sucesso.' });
   } catch (error: any) {
@@ -112,6 +123,12 @@ router.patch('/:id/display', authMiddleware, async (req: Request, res: Response)
     }
 
     await deviceService.updateDisplayId(req.params.id as string, displayId);
+    
+    // Notificar dispositivo sobre reatribuição de display via SSE
+    sseService.notifyDeviceUpdate(req.params.id as string).catch(err => {
+      console.error('Erro ao notificar reatribuição de display via SSE:', err);
+    });
+
     res.json({ message: 'Display do dispositivo atualizado.' });
   } catch (error: any) {
     console.error('Erro ao atualizar display do dispositivo:', error);
@@ -123,6 +140,12 @@ router.patch('/:id/display', authMiddleware, async (req: Request, res: Response)
 router.delete('/:id', authMiddleware, async (req: Request, res: Response): Promise<void> => {
   try {
     await deviceService.unlink(req.params.id as string);
+    
+    // Notificar dispositivo sobre desvinculação/remoção via SSE
+    sseService.notifyDeviceUpdate(req.params.id as string).catch(err => {
+      console.error('Erro ao notificar remoção de dispositivo via SSE:', err);
+    });
+
     res.json({ message: 'Dispositivo removido.' });
   } catch (error: any) {
     console.error('Erro ao remover dispositivo:', error);

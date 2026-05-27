@@ -1,7 +1,12 @@
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
-import { CloudSun, Rss, Monitor, Loader2, Home, ChevronRight, MoreHorizontal, ChevronLeft, Cloud, CloudRain, CloudLightning, Snowflake, Sun, Search, Map } from 'lucide-react';
+import { 
+  CloudSun, Rss, Monitor, Loader2, Home, ChevronRight, MoreHorizontal, ChevronLeft, 
+  Cloud, CloudRain, CloudLightning, Snowflake, Sun, Search, Map,
+  StickyNote, ListTodo, Hourglass, ClipboardList, Utensils, TrendingUp, TrendingDown, 
+  ArrowUpRight, ArrowDownRight, Globe, FileText, Code2, Database, Layers, CheckSquare
+} from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, AreaChart, Area, ComposedChart, Line } from 'recharts';
 import { motion, AnimatePresence } from 'motion/react';
 import { getDisplayBySlug, checkDeviceStatus, registerDevice, getDisplayByIdPublic, getBroadcasts, heartbeatDevice, getDisplayVersion } from '../services/storage';
@@ -88,6 +93,21 @@ const getWeatherAnimationClass = (code: number, isDay: number = 1) => {
   if (code >= 95) return 'bg-anim-storm'; // Thunderstorm
   
   return isNight ? 'bg-anim-clear-night' : 'bg-anim-gradient-flow'; // Default
+};
+
+export const getAlignmentClasses = (alignment?: 'start' | 'center' | 'end' | 'stretch') => {
+  switch (alignment) {
+    case 'start':
+      return 'items-start justify-start';
+    case 'center':
+      return 'items-center justify-center';
+    case 'end':
+      return 'items-end justify-end';
+    case 'stretch':
+      return 'items-stretch justify-stretch';
+    default:
+      return 'items-center justify-center';
+  }
 };
 
 const Player: React.FC = () => {
@@ -328,7 +348,7 @@ const Player: React.FC = () => {
     const interval = setInterval(async () => {
       if (slug) {
         // Primeiro checa a versão (ultra-leve ~20 bytes) antes de buscar o display completo
-        const version = await getDisplayVersion(slug);
+        const version = await getDisplayVersion(slug, lastUpdateRef.current);
         // null = 304 Not Modified OU erro — não precisa atualizar
         if (version !== null && version !== lastUpdateRef.current) {
           await loadDisplayBySlug(slug);
@@ -344,13 +364,100 @@ const Player: React.FC = () => {
     return () => clearInterval(interval);
   }, [deviceStatus, display, slug, deviceId]);
 
+  // Conexão Server-Sent Events (SSE) para atualizações instantâneas em tempo real (com Polling leve como fallback)
+  useEffect(() => {
+    const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+    let eventSource: EventSource | null = null;
+    let reconnectTimeout: any = null;
+
+    const connectSSE = () => {
+      if (slug) {
+        console.log(`🔌 [SSE] Conectando via slug: ${slug}`);
+        eventSource = new EventSource(`${API_BASE}/displays/slug/${slug}/live`);
+      } else if (deviceId) {
+        console.log(`🔌 [SSE] Conectando via deviceId: ${deviceId}`);
+        eventSource = new EventSource(`${API_BASE}/devices/player/${deviceId}/live`);
+      } else {
+        return;
+      }
+
+      eventSource.onopen = () => {
+        console.log("🟢 [SSE] Conexão em tempo real estabelecida com sucesso.");
+      };
+
+      eventSource.onerror = (err) => {
+        console.warn("⚠️ [SSE] Conexão perdida ou falha. Tentando reconectar em 5 segundos...", err);
+        eventSource?.close();
+        if (reconnectTimeout) clearTimeout(reconnectTimeout);
+        reconnectTimeout = setTimeout(connectSSE, 5000);
+      };
+
+      eventSource.addEventListener('message', async (e) => {
+        try {
+          const data = JSON.parse(e.data);
+          
+          if (data.status === 'connected') {
+            console.log("📡 [SSE] Canal de comunicação ativo.");
+            return;
+          }
+          if (data.type === 'ping') {
+            return; // keep-alive
+          }
+
+          console.log("⚡ [SSE] Sinal de atualização recebido:", data);
+
+          if (slug) {
+            // Em modo slug direto, apenas recarrega o display
+            await loadDisplayBySlug(slug);
+          } else if (deviceId) {
+            // Em modo pareamento, verifica o status atualizado do dispositivo no banco
+            const device = await checkDeviceStatus(deviceId);
+            if (device) {
+              if (device.status === 'linked' && device.display_id) {
+                setDeviceStatus('linked');
+                await loadDisplayById(device.display_id);
+              } else if (device.status === 'pending') {
+                setDeviceStatus('pending');
+                setDisplay(null);
+                if (device.pairing_code) {
+                  setPairingCode(device.pairing_code);
+                }
+              }
+            } else {
+              // Dispositivo removido no painel
+              setDeviceStatus('pending');
+              setDisplay(null);
+            }
+          }
+        } catch (err) {
+          console.error("❌ [SSE] Erro ao tratar evento do SSE:", err);
+        }
+      });
+    };
+
+    connectSSE();
+
+    return () => {
+      if (eventSource) {
+        eventSource.close();
+      }
+      if (reconnectTimeout) {
+        clearTimeout(reconnectTimeout);
+      }
+    };
+  }, [slug, deviceId, deviceStatus]);
+
   const loadDisplayBySlug = async (slugToLoad: string) => {
     try {
-      const data = await getDisplayBySlug(slugToLoad);
+      const data = await getDisplayBySlug(slugToLoad, lastUpdateRef.current);
       if (data) {
-        if (data.updatedAt !== lastUpdateRef.current) {
+        const versionTime = typeof data.updatedAt === 'string' 
+          ? new Date(data.updatedAt).getTime() 
+          : Number(data.updatedAt);
+
+        if (versionTime !== lastUpdateRef.current) {
           setDisplay(data);
-          lastUpdateRef.current = data.updatedAt;
+          lastUpdateRef.current = versionTime;
         }
         setLoading(false);
       }
@@ -361,12 +468,16 @@ const Player: React.FC = () => {
 
   const loadDisplayById = async (displayId: string) => {
     try {
-      const data = await getDisplayByIdPublic(displayId);
+      const data = await getDisplayByIdPublic(displayId, lastUpdateRef.current);
       
       if (data) {
-        if (data.updatedAt !== lastUpdateRef.current) {
+        const versionTime = typeof data.updatedAt === 'string' 
+          ? new Date(data.updatedAt).getTime() 
+          : Number(data.updatedAt);
+
+        if (versionTime !== lastUpdateRef.current) {
           setDisplay(data);
-          lastUpdateRef.current = data.updatedAt;
+          lastUpdateRef.current = versionTime;
         }
         setLoading(false);
       }
@@ -560,12 +671,24 @@ const Player: React.FC = () => {
               <div 
                 key={w.i}
                 style={{
-                  gridColumn: `${w.x + 1} / span ${w.w}`, 
-                  gridRow: `${w.y + 1} / span ${w.h}`,
-                  zIndex: w.data.zIndex !== undefined ? w.data.zIndex : 10,
+                  gridColumn: w.data.fullScreenMode ? '1 / span 48' : `${w.x + 1} / span ${w.w}`, 
+                  gridRow: w.data.fullScreenMode ? '1 / span 27' : `${w.y + 1} / span ${w.h}`,
+                  zIndex: w.data.fullScreenMode ? 99999 : (w.data.zIndex !== undefined ? w.data.zIndex : 10),
+                  padding: w.data.padding || undefined,
+                  margin: w.data.margin || undefined,
                 }}
-                className={`w-full h-full relative overflow-hidden flex items-center justify-center ${w.data.backgroundAnimation ? getBackgroundAnimationClass(w.data.backgroundAnimation) : ''}`}
+                className={`w-full h-full relative overflow-hidden flex ${getAlignmentClasses(w.data.fillContainer ? 'stretch' : w.data.contentAlignment)} ${w.data.backgroundAnimation ? getBackgroundAnimationClass(w.data.backgroundAnimation) : ''}`}
               >
+                {/* Background Image Layer for fullscreen widgets */}
+                {w.data.fullScreenMode && w.data.backgroundImage && (
+                  <div 
+                    className="absolute inset-0 z-0 bg-center bg-no-repeat"
+                    style={{
+                      backgroundImage: `url(${w.data.backgroundImage})`,
+                      backgroundSize: 'cover',
+                    }}
+                  />
+                )}
                 {w.type === WidgetType.VIDEO && w.data.videoUrl && (
                    isYouTubeUrl(w.data.videoUrl) ? (
                      <iframe 
@@ -577,7 +700,12 @@ const Player: React.FC = () => {
                    ) : (
                      <video 
                        src={w.data.videoUrl} 
-                       className={`w-full h-full object-cover bg-black ${w.data.videoConfig?.controls ? 'pointer-events-auto' : 'pointer-events-none'}`}
+                       className={`bg-black ${w.data.videoConfig?.controls ? 'pointer-events-auto' : 'pointer-events-none'}`}
+                       style={{
+                         width: '100%',
+                         height: '100%',
+                         objectFit: (w.data.fillContainer || w.data.fitContainerMode === 'stretch') ? 'fill' : (w.data.fitContainerMode || 'cover')
+                       }}
                        autoPlay={w.data.videoConfig?.autoplay !== false}
                        preload="auto"
                        muted={w.data.videoConfig?.mute !== false}
@@ -594,34 +722,46 @@ const Player: React.FC = () => {
                    )
                 )}
                 {w.type === WidgetType.IMAGE && w.data.url && (
-                  <div className="w-full h-full flex items-center justify-center overflow-hidden">
+                  <div className={`w-full h-full flex ${getAlignmentClasses(w.data.fillContainer ? 'stretch' : w.data.contentAlignment)} overflow-hidden`}>
                     <img 
                       src={w.data.url} 
-                      className="object-cover" 
+                      className="w-full h-full" 
                       alt="" 
                       style={{ 
-                        width: w.data.width ? `${w.data.width}px` : '100%', 
-                        height: w.data.height ? `${w.data.height}px` : '100%' 
+                        width: '100%',
+                        height: '100%',
+                        objectFit: (w.data.fillContainer || w.data.fitContainerMode === 'stretch') ? 'fill' : (w.data.fitContainerMode || 'cover'),
                       }} 
                     />
                   </div>
                 )}
                 {w.type === WidgetType.GIF && w.data.url && (
-                  <div className="w-full h-full bg-black/20 flex items-center justify-center">
-                    <img src={w.data.url} className="w-full h-full object-contain" alt="" />
+                  <div className={`w-full h-full bg-black/20 flex ${getAlignmentClasses(w.data.fillContainer ? 'stretch' : w.data.contentAlignment)}`}>
+                    <img 
+                      src={w.data.url} 
+                      alt="" 
+                      className="w-full h-full"
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: (w.data.fillContainer || w.data.fitContainerMode === 'stretch') ? 'fill' : (w.data.fitContainerMode || 'cover')
+                      }}
+                    />
                   </div>
                 )}
                 {w.type === WidgetType.TEXT && (
                   <div 
-                    className="w-full h-full flex items-center p-8"
+                    className="w-full h-full flex"
                     style={{ 
-                      justifyContent: w.data.textConfig?.textAlign === 'left' ? 'flex-start' : w.data.textConfig?.textAlign === 'right' ? 'flex-end' : 'center',
+                      alignItems: (w.data.fillContainer || w.data.contentAlignment === 'stretch') ? 'stretch' : w.data.contentAlignment === 'start' ? 'flex-start' : w.data.contentAlignment === 'end' ? 'flex-end' : 'center',
+                      justifyContent: (w.data.fillContainer || w.data.contentAlignment === 'stretch') ? 'stretch' : w.data.contentAlignment === 'start' ? 'flex-start' : w.data.contentAlignment === 'end' ? 'flex-end' : w.data.textConfig?.textAlign === 'left' ? 'flex-start' : w.data.textConfig?.textAlign === 'right' ? 'flex-end' : 'center',
                       textAlign: w.data.textConfig?.textAlign || 'center',
                       color: w.data.color, 
                       fontSize: w.data.textConfig?.fontSize || w.data.fontSize?.replace('vw', 'cqw') || '4cqw',
                       fontFamily: w.data.textConfig?.fontFamily,
                       fontWeight: w.data.textConfig?.fontWeight || 'bold',
                       fontStyle: w.data.textConfig?.fontStyle || 'normal',
+                      padding: w.data.padding !== undefined ? w.data.padding : '2rem',
                     }}
                   >
                     <p 
@@ -751,18 +891,54 @@ const Player: React.FC = () => {
                     className="w-full h-full border-none absolute inset-0" 
                     style={{
                       filter: (w.data.calendarConfig?.theme === 'dark' || w.data.calendarConfig?.theme === 'neon') ? 'invert(1) hue-rotate(180deg) contrast(0.9) saturate(0.8)' : 'none',
-                      mixBlendMode: w.data.calendarConfig?.transparent 
-                        ? ((w.data.calendarConfig?.theme === 'dark' || w.data.calendarConfig?.theme === 'neon') ? 'screen' : 'multiply') 
-                        : 'normal'
                     }}
                     scrolling="no"
                     title="Google Calendar"
                   />
-                </div>
-              </div>
-            )}
-          </div>
-        ))}
+                 </div>
+               </div>
+             )}
+             {w.type === WidgetType.NOTES && (
+               <NotesWidget data={w.data} />
+             )}
+             {w.type === WidgetType.TODO && (
+               <TodoWidget data={w.data} />
+             )}
+             {w.type === WidgetType.COUNTDOWN && (
+               <CountdownWidget data={w.data} />
+             )}
+             {w.type === WidgetType.CHORES && (
+               <ChoresWidget data={w.data} />
+             )}
+             {w.type === WidgetType.MEAL_PLAN && (
+               <MealPlanWidget data={w.data} />
+             )}
+             {w.type === WidgetType.MARKET_WATCH && (
+               <MarketWatchWidget data={w.data} />
+             )}
+             {w.type === WidgetType.BROWSER_SNAPSHOT && (
+               <BrowserSnapshotWidget data={w.data} />
+             )}
+             {w.type === WidgetType.GOOGLE_DOCS && (
+               <GoogleDocsWidget data={w.data} />
+             )}
+             {w.type === WidgetType.OFFICE_DOCS && (
+               <OfficeDocsWidget data={w.data} />
+             )}
+             {w.type === WidgetType.POWER_BI && (
+               <PowerBIWidget data={w.data} />
+             )}
+             {w.type === WidgetType.EMBED_HTML && (
+               <EmbedHtmlWidget data={w.data} />
+             )}
+             {w.type === WidgetType.AIRTABLE && (
+               <AirtableWidget data={w.data} />
+             )}
+             {w.type === WidgetType.PDF_DOCUMENT && (
+               <PdfDocumentWidget data={w.data} />
+             )}
+           </div>
+         ))}
         </div>
       </div>
 
@@ -2346,6 +2522,703 @@ export const FullInfoWidget: React.FC<{
             </div>
           )}
         </div>
+      </div>
+    </div>
+  );
+};
+
+// ==========================================
+// 1. NOTES WIDGET
+// ==========================================
+export const NotesWidget: React.FC<{ data: any }> = ({ data }) => {
+  const config = data.notesConfig || {};
+  const theme = config.paperTheme || 'glass';
+  const text = data.content || 'Sua nota aqui...';
+
+  const getThemeClass = () => {
+    switch (theme) {
+      case 'yellow-sticky':
+        return 'bg-gradient-to-br from-amber-100 to-yellow-200 text-slate-800 border-l-4 border-yellow-400 rotate-[-1deg] shadow-lg';
+      case 'purple-haze':
+        return 'bg-gradient-to-br from-purple-950/70 via-indigo-900/60 to-purple-900/70 text-purple-100 border border-purple-500/30 backdrop-blur-md shadow-2xl';
+      case 'neon-glow':
+        return 'bg-slate-950 text-cyan-400 border border-cyan-500/70 shadow-[0_0_20px_rgba(6,182,212,0.4)] font-mono';
+      case 'glass':
+      default:
+        return 'bg-white/10 backdrop-blur-xl border border-white/20 text-white shadow-2xl';
+    }
+  };
+
+  const getFontFamily = () => {
+    switch (config.fontFamily) {
+      case 'serif': return 'font-serif';
+      case 'mono': return 'font-mono';
+      case 'display': return 'font-black tracking-tight';
+      default: return 'font-sans';
+    }
+  };
+
+  return (
+    <div className={`w-full h-full p-6 flex flex-col justify-start rounded-2xl overflow-y-auto ${getThemeClass()}`}>
+      <div className="flex items-center gap-2 mb-3 shrink-0 opacity-80 border-b border-white/10 pb-2">
+        <StickyNote size={18} className="text-cyan-400 animate-pulse" />
+        <span className="text-xs uppercase tracking-widest font-bold">Nota / Recado</span>
+      </div>
+      <div 
+        className={`flex-1 overflow-y-auto whitespace-pre-wrap leading-relaxed ${getFontFamily()}`}
+        style={{
+          fontSize: config.fontSize || '1.1rem',
+          color: config.textColor || undefined
+        }}
+      >
+        {text}
+      </div>
+    </div>
+  );
+};
+
+// ==========================================
+// 2. TODO WIDGET
+// ==========================================
+export const TodoWidget: React.FC<{ data: any }> = ({ data }) => {
+  const config = data.todoConfig || { items: [] };
+  const items = config.items || [];
+  const title = config.title || 'Lista de Tarefas';
+
+  const total = items.length;
+  const doneCount = items.filter((i: any) => i.done).length;
+  const progressPercent = total > 0 ? Math.round((doneCount / total) * 100) : 0;
+
+  return (
+    <div className="w-full h-full p-6 bg-slate-950/60 backdrop-blur-xl border border-white/10 rounded-2xl flex flex-col justify-between text-white overflow-hidden shadow-2xl">
+      <div className="shrink-0">
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <ListTodo size={20} className="text-cyan-400" />
+            <h3 className="font-extrabold tracking-tight text-lg">{title}</h3>
+          </div>
+          <span className="text-xs font-mono bg-cyan-500/20 text-cyan-400 px-2 py-0.5 rounded-full font-bold">
+            {doneCount}/{total}
+          </span>
+        </div>
+        
+        {/* Progress Bar */}
+        <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden mb-4 relative">
+          <motion.div 
+            className="h-full bg-gradient-to-r from-cyan-400 to-indigo-500 rounded-full"
+            initial={{ width: 0 }}
+            animate={{ width: `${progressPercent}%` }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+          />
+        </div>
+      </div>
+
+      <div className="flex-1 overflow-y-auto space-y-2 pr-1 custom-scrollbar">
+        {items.length === 0 ? (
+          <div className="h-full flex items-center justify-center text-slate-500 text-sm italic">
+            Nenhuma tarefa pendente.
+          </div>
+        ) : (
+          items.map((item: any) => (
+            <div 
+              key={item.id} 
+              className={`flex items-center gap-3 p-2.5 rounded-xl border transition-all duration-300 ${
+                item.done 
+                  ? 'bg-slate-900/30 border-slate-800/40 text-slate-500 line-through' 
+                  : 'bg-white/5 border-white/5 text-slate-200 hover:bg-white/10'
+              }`}
+            >
+              <div className={`w-5 h-5 rounded flex items-center justify-center shrink-0 border transition-all duration-300 ${
+                item.done 
+                  ? 'bg-cyan-500/20 border-cyan-400 text-cyan-400' 
+                  : 'border-slate-500'
+              }`}>
+                {item.done && <CheckSquare size={14} className="stroke-[3]" />}
+              </div>
+              <span className="text-sm font-medium truncate flex-1">{item.text}</span>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+};
+
+// ==========================================
+// 3. COUNTDOWN WIDGET
+// ==========================================
+export const CountdownWidget: React.FC<{ data: any }> = ({ data }) => {
+  const config = data.countdownConfig || { targetDate: '' };
+  const targetDateStr = config.targetDate;
+  const title = config.title || 'Contagem Regressiva';
+  const expiredMsg = config.expiredMessage || 'Tempo Esgotado!';
+  const theme = config.theme || 'glass';
+
+  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0, expired: true });
+
+  useEffect(() => {
+    if (!targetDateStr) return;
+
+    const interval = setInterval(() => {
+      const difference = +new Date(targetDateStr) - +new Date();
+      if (difference <= 0) {
+        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0, expired: true });
+        clearInterval(interval);
+      } else {
+        setTimeLeft({
+          days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+          hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+          minutes: Math.floor((difference / 1000 / 60) % 60),
+          seconds: Math.floor((difference / 1000) % 60),
+          expired: false
+        });
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [targetDateStr]);
+
+  const getThemeClass = () => {
+    switch (theme) {
+      case 'neon':
+        return 'bg-black border border-rose-500 shadow-[0_0_20px_rgba(244,63,94,0.3)] text-rose-500 font-mono';
+      case 'bold-gradient':
+        return 'bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 border border-white/20 text-white shadow-2xl';
+      case 'minimal':
+        return 'bg-transparent text-white border border-white/5';
+      case 'glass':
+      default:
+        return 'bg-white/5 backdrop-blur-xl border border-white/10 text-white shadow-2xl';
+    }
+  };
+
+  if (timeLeft.expired) {
+    return (
+      <div className={`w-full h-full flex flex-col items-center justify-center p-6 rounded-2xl text-center ${getThemeClass()}`}>
+        <Hourglass size={36} className="text-cyan-400 mb-3 animate-spin" />
+        <h4 className="text-2xl font-black uppercase tracking-wider animate-pulse">{expiredMsg}</h4>
+      </div>
+    );
+  }
+
+  const Segment: React.FC<{ value: number, label: string }> = ({ value, label }) => (
+    <div className="flex flex-col items-center bg-black/40 rounded-xl px-4 py-3 border border-white/5 min-w-[70px]">
+      <span className="text-3xl font-black tracking-tight tabular-nums">{value.toString().padStart(2, '0')}</span>
+      <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider mt-1">{label}</span>
+    </div>
+  );
+
+  return (
+    <div className={`w-full h-full p-6 rounded-2xl flex flex-col justify-between ${getThemeClass()}`}>
+      <div className="flex items-center gap-2 mb-2 shrink-0">
+        <Hourglass size={18} className="text-cyan-400 animate-pulse" />
+        <h3 className="text-sm font-black uppercase tracking-widest">{title}</h3>
+      </div>
+      <div className="flex justify-around items-center gap-2 flex-1 my-2">
+        <Segment value={timeLeft.days} label="Dias" />
+        <span className="text-2xl font-bold text-white/50 animate-pulse">:</span>
+        <Segment value={timeLeft.hours} label="Horas" />
+        <span className="text-2xl font-bold text-white/50 animate-pulse">:</span>
+        <Segment value={timeLeft.minutes} label="Minutos" />
+        <span className="text-2xl font-bold text-white/50 animate-pulse">:</span>
+        <Segment value={timeLeft.seconds} label="Segundos" />
+      </div>
+    </div>
+  );
+};
+
+// ==========================================
+// 4. CHORES WIDGET
+// ==========================================
+export const ChoresWidget: React.FC<{ data: any }> = ({ data }) => {
+  const config = data.choresConfig || { items: [] };
+  const items = config.items || [];
+  const title = config.title || 'Quadro de Deveres';
+
+  // Gerador de HSL dinâmico para os badges
+  const getAssigneeColor = (name: string) => {
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) {
+      hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const h = Math.abs(hash % 360);
+    return `hsla(${h}, 70%, 50%, 0.25)`;
+  };
+
+  return (
+    <div className="w-full h-full p-6 bg-slate-950/60 backdrop-blur-xl border border-white/10 rounded-2xl flex flex-col justify-between text-white overflow-hidden shadow-2xl">
+      <div className="flex items-center gap-2 mb-3 shrink-0">
+        <ClipboardList size={20} className="text-cyan-400" />
+        <h3 className="font-extrabold tracking-tight text-lg">{title}</h3>
+      </div>
+
+      <div className="flex-1 overflow-y-auto space-y-2 pr-1 custom-scrollbar">
+        {items.length === 0 ? (
+          <div className="h-full flex items-center justify-center text-slate-500 text-sm italic">
+            Nenhuma tarefa cadastrada.
+          </div>
+        ) : (
+          items.map((item: any) => (
+            <div 
+              key={item.id} 
+              className={`flex items-center justify-between p-3 rounded-xl border bg-white/5 border-white/5 transition-all duration-300 ${item.done ? 'opacity-50' : 'hover:bg-white/10'}`}
+            >
+              <div className="flex flex-col min-w-0 flex-1 mr-2">
+                <span className={`text-sm font-bold truncate ${item.done ? 'line-through text-slate-500' : 'text-slate-200'}`}>
+                  {item.chore}
+                </span>
+                {item.day && (
+                  <span className="text-[10px] font-mono text-cyan-400 mt-0.5 uppercase tracking-wider">{item.day}</span>
+                )}
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <span 
+                  className="text-xs px-2.5 py-1 rounded-full font-black border border-white/10 uppercase tracking-widest"
+                  style={{ backgroundColor: getAssigneeColor(item.assignee), color: '#ffffff' }}
+                >
+                  {item.assignee}
+                </span>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+};
+
+// ==========================================
+// 5. MEAL PLAN WIDGET
+// ==========================================
+export const MealPlanWidget: React.FC<{ data: any }> = ({ data }) => {
+  const config = data.mealPlanConfig || { days: {} };
+  const title = config.title || 'Cardápio Semanal';
+  const days = config.days || {};
+  const dayNames = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'];
+
+  return (
+    <div className="w-full h-full p-6 bg-slate-950/60 backdrop-blur-xl border border-white/10 rounded-2xl flex flex-col justify-between text-white overflow-hidden shadow-2xl">
+      <div className="flex items-center gap-2 mb-3 shrink-0">
+        <Utensils size={20} className="text-amber-400" />
+        <h3 className="font-extrabold tracking-tight text-lg">{title}</h3>
+      </div>
+
+      <div className="flex-1 overflow-x-auto flex gap-4 pb-2 pr-1 custom-scrollbar items-stretch">
+        {dayNames.map(day => {
+          const meal = days[day] || {};
+          const hasMeals = meal.breakfast || meal.lunch || meal.dinner || meal.snacks;
+
+          return (
+            <div key={day} className="flex-1 min-w-[200px] bg-white/5 border border-white/5 rounded-xl p-3 flex flex-col justify-between transition-all duration-300 hover:bg-white/10">
+              <h4 className="text-xs font-black uppercase text-amber-400 tracking-widest border-b border-white/10 pb-1.5 mb-2">{day}</h4>
+              
+              {hasMeals ? (
+                <div className="space-y-2 flex-1 flex flex-col justify-around">
+                  {meal.breakfast && (
+                    <div className="text-[11px] leading-tight">
+                      <span className="font-bold text-slate-400 uppercase tracking-widest block text-[9px] mb-0.5">Café</span>
+                      <p className="truncate font-semibold text-slate-200">{meal.breakfast}</p>
+                    </div>
+                  )}
+                  {meal.lunch && (
+                    <div className="text-[11px] leading-tight">
+                      <span className="font-bold text-slate-400 uppercase tracking-widest block text-[9px] mb-0.5">Almoço</span>
+                      <p className="truncate font-semibold text-slate-200">{meal.lunch}</p>
+                    </div>
+                  )}
+                  {meal.dinner && (
+                    <div className="text-[11px] leading-tight">
+                      <span className="font-bold text-slate-400 uppercase tracking-widest block text-[9px] mb-0.5">Jantar</span>
+                      <p className="truncate font-semibold text-slate-200">{meal.dinner}</p>
+                    </div>
+                  )}
+                  {meal.snacks && (
+                    <div className="text-[11px] leading-tight">
+                      <span className="font-bold text-slate-400 uppercase tracking-widest block text-[9px] mb-0.5">Lanche</span>
+                      <p className="truncate font-semibold text-slate-200">{meal.snacks}</p>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="flex-1 flex items-center justify-center text-[11px] text-slate-500 italic">
+                  Sem refeições.
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+// ==========================================
+// 6. MARKET WATCH WIDGET
+// ==========================================
+export const MarketWatchWidget: React.FC<{ data: any }> = ({ data }) => {
+  const config = data.marketWatchConfig || { symbols: [] };
+  const symbols = config.symbols && config.symbols.length > 0 ? config.symbols : ['AAPL', 'BTC-USD', 'EUR-USD', 'TSLA'];
+  const title = config.title || 'Mercado Financeiro';
+  
+  // Simulador financeiro altamente estético com flutuação a cada 2s
+  const [marketData, setMarketData] = useState<{[sym: string]: { price: number, pct: number, isUp: boolean, history: { value: number }[] }}>({});
+
+  useEffect(() => {
+    // Inicialização mock de dados realistas
+    const initData: any = {};
+    symbols.forEach((sym: string) => {
+      let basePrice = 150;
+      if (sym.includes('BTC')) basePrice = 64500;
+      else if (sym.includes('ETH')) basePrice = 3100;
+      else if (sym.includes('EUR')) basePrice = 1.08;
+      else if (sym.includes('TSLA')) basePrice = 175;
+      else if (sym.includes('NVDA')) basePrice = 900;
+      else if (sym.includes('PETR4')) basePrice = 36.5;
+
+      const history = Array.from({ length: 10 }, () => ({
+        value: basePrice * (1 + (Math.random() - 0.5) * 0.02)
+      }));
+
+      initData[sym] = {
+        price: basePrice,
+        pct: (Math.random() - 0.4) * 3, // leve bias positivo
+        isUp: true,
+        history
+      };
+      initData[sym].isUp = initData[sym].pct >= 0;
+    });
+    setMarketData(initData);
+
+    const interval = setInterval(() => {
+      setMarketData(prev => {
+        const next = { ...prev };
+        Object.keys(next).forEach(sym => {
+          const item = next[sym];
+          if (!item) return;
+          const fluctuation = (Math.random() - 0.48) * 0.004; // leve viés de subida
+          const newPrice = item.price * (1 + fluctuation);
+          const newPct = item.pct + fluctuation * 100;
+          const newHistory = [...item.history.slice(1), { value: newPrice }];
+          next[sym] = {
+            price: Number(newPrice.toFixed(sym.includes('EUR') ? 4 : 2)),
+            pct: Number(newPct.toFixed(2)),
+            isUp: newPct >= 0,
+            history: newHistory
+          };
+        });
+        return next;
+      });
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [JSON.stringify(symbols)]);
+
+  return (
+    <div className="w-full h-full p-6 bg-slate-950/60 backdrop-blur-xl border border-white/10 rounded-2xl flex flex-col justify-between text-white overflow-hidden shadow-2xl">
+      <div className="flex items-center gap-2 mb-3 shrink-0 border-b border-white/5 pb-2">
+        <TrendingUp size={20} className="text-emerald-400" />
+        <h3 className="font-extrabold tracking-tight text-lg">{title}</h3>
+      </div>
+
+      <div className="flex-1 overflow-y-auto space-y-3 pr-1 custom-scrollbar">
+        {symbols.map((sym: string) => {
+          const item = marketData[sym];
+          if (!item) return null;
+
+          return (
+            <div key={sym} className="flex items-center justify-between p-2 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all duration-300">
+              <div className="w-1/4">
+                <span className="font-black text-sm uppercase tracking-wider block">{sym}</span>
+                <span className="text-[10px] text-slate-500 font-mono">Bolsa / Realtime</span>
+              </div>
+              
+              {/* Sparkline Chart */}
+              <div className="w-1/3 h-8 flex items-center overflow-hidden">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={item.history}>
+                    <defs>
+                      <linearGradient id={`grad-${sym}`} x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor={item.isUp ? "#10b981" : "#ef4444"} stopOpacity={0.4}/>
+                        <stop offset="95%" stopColor={item.isUp ? "#10b981" : "#ef4444"} stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <Area type="monotone" dataKey="value" stroke={item.isUp ? "#10b981" : "#ef4444"} strokeWidth={1.5} fillOpacity={1} fill={`url(#grad-${sym})`} isAnimationActive={false} />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+
+              <div className="text-right flex flex-col items-end">
+                <span className="font-mono font-black text-sm tabular-nums">
+                  {sym.includes('EUR') ? '€' : '$'} {item.price.toLocaleString('pt-BR', { minimumFractionDigits: sym.includes('EUR') ? 4 : 2 })}
+                </span>
+                <span className={`text-xs font-black font-mono flex items-center gap-0.5 mt-0.5 tabular-nums ${item.isUp ? 'text-emerald-400' : 'text-rose-500'}`}>
+                  {item.isUp ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
+                  {item.isUp ? '+' : ''}{item.pct}%
+                </span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+// ==========================================
+// 7. BROWSER SNAPSHOT WIDGET
+// ==========================================
+export const BrowserSnapshotWidget: React.FC<{ data: any }> = ({ data }) => {
+  const config = data.browserSnapshotConfig || { url: '' };
+  const rawUrl = config.url || 'https://google.com';
+  
+  // Sanitizar URL
+  const getCleanUrl = (u: string) => {
+    if (!/^https?:\/\//i.test(u)) {
+      return `https://${u}`;
+    }
+    return u;
+  };
+
+  const url = getCleanUrl(rawUrl);
+
+  return (
+    <div className="w-full h-full rounded-2xl overflow-hidden border border-white/10 flex flex-col bg-slate-900 shadow-2xl relative">
+      {/* Moldura de Navegador */}
+      <div className="bg-slate-950 p-3 shrink-0 flex items-center gap-3 border-b border-white/5 select-none">
+        <div className="flex gap-1.5 shrink-0">
+          <span className="w-3 h-3 rounded-full bg-rose-500"></span>
+          <span className="w-3 h-3 rounded-full bg-amber-500"></span>
+          <span className="w-3 h-3 rounded-full bg-emerald-500"></span>
+        </div>
+        <div className="flex-1 bg-slate-900 text-white/50 text-[10px] font-mono px-3 py-1 rounded-md border border-white/5 truncate flex items-center gap-1.5 justify-center">
+          <Globe size={10} className="text-cyan-400" />
+          <span>{url}</span>
+        </div>
+      </div>
+      {/* Iframe em escala */}
+      <div className="flex-1 bg-white relative overflow-hidden">
+        <iframe 
+          src={url} 
+          className="absolute inset-0 w-full h-full border-none"
+          title="Browser snapshot"
+          sandbox="allow-scripts allow-same-origin allow-popups"
+        />
+        <div className="absolute inset-0 bg-transparent pointer-events-none" />
+      </div>
+    </div>
+  );
+};
+
+// ==========================================
+// 8. EMBED HTML WIDGET
+// ==========================================
+export const EmbedHtmlWidget: React.FC<{ data: any }> = ({ data }) => {
+  const config = data.embedHtmlConfig || { html: '' };
+  const html = config.html || '<div style="color: white; font-family: sans-serif; text-align: center; padding: 20px;">Cole seu código HTML customizado aqui.</div>';
+
+  return (
+    <div className="w-full h-full rounded-2xl overflow-hidden border border-white/10 bg-black/10 flex items-center justify-center">
+      <iframe 
+        srcDoc={html} 
+        className="w-full h-full border-none bg-transparent"
+        title="Custom HTML Embed"
+        sandbox="allow-scripts allow-same-origin"
+      />
+    </div>
+  );
+};
+
+// ==========================================
+// 9. GOOGLE DOCS WIDGET
+// ==========================================
+export const GoogleDocsWidget: React.FC<{ data: any }> = ({ data }) => {
+  const config = data.googleDocsConfig || { url: '', docType: 'document' };
+  const rawUrl = config.url || '';
+  const type = config.docType || 'document';
+
+  // Sanitiza a URL para embed
+  const getEmbeddableUrl = (u: string, t: string) => {
+    if (!u) return '';
+    let base = u.split('/edit')[0];
+    if (t === 'spreadsheet') {
+      return `${base}/preview?widget=true&headers=false`;
+    } else if (t === 'presentation') {
+      return `${base}/embed?start=true&loop=true&delayms=5000`;
+    } else if (t === 'form') {
+      return u; // forms são embedados diretamente
+    }
+    return `${base}/preview`;
+  };
+
+  const embedUrl = getEmbeddableUrl(rawUrl, type);
+
+  return (
+    <div className="w-full h-full rounded-2xl overflow-hidden border border-white/10 bg-slate-900 flex flex-col shadow-2xl relative">
+      <div className="bg-slate-950 p-3 shrink-0 flex items-center justify-between border-b border-white/5">
+        <div className="flex items-center gap-2">
+          <FileText size={16} className="text-blue-400" />
+          <span className="text-xs uppercase font-extrabold tracking-widest text-slate-200">Google Workspace</span>
+        </div>
+        <span className="text-[9px] bg-blue-500/20 text-blue-300 border border-blue-500/30 px-2 py-0.5 rounded uppercase tracking-wider font-black">{type}</span>
+      </div>
+      <div className="flex-1 bg-white relative">
+        {embedUrl ? (
+          <iframe 
+            src={embedUrl} 
+            className="w-full h-full border-none"
+            title="Google Docs Embed"
+          />
+        ) : (
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-500 text-sm gap-2">
+            <Globe size={24} />
+            <span>Nenhum documento incorporado.</span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// ==========================================
+// 10. OFFICE DOCS WIDGET
+// ==========================================
+export const OfficeDocsWidget: React.FC<{ data: any }> = ({ data }) => {
+  const config = data.officeDocsConfig || { url: '', docType: 'word' };
+  const rawUrl = config.url || '';
+  const type = config.docType || 'word';
+
+  // Usamos o visualizador oficial de embed do Office Web Apps
+  const embedUrl = rawUrl ? `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(rawUrl)}` : '';
+
+  return (
+    <div className="w-full h-full rounded-2xl overflow-hidden border border-white/10 bg-slate-900 flex flex-col shadow-2xl relative">
+      <div className="bg-slate-950 p-3 shrink-0 flex items-center justify-between border-b border-white/5">
+        <div className="flex items-center gap-2">
+          <Layers size={16} className="text-orange-500" />
+          <span className="text-xs uppercase font-extrabold tracking-widest text-slate-200">Microsoft Office 365</span>
+        </div>
+        <span className="text-[9px] bg-orange-500/20 text-orange-400 border border-orange-500/30 px-2 py-0.5 rounded uppercase tracking-wider font-black">{type}</span>
+      </div>
+      <div className="flex-1 bg-white relative">
+        {embedUrl ? (
+          <iframe 
+            src={embedUrl} 
+            className="w-full h-full border-none"
+            title="Office Docs Embed"
+          />
+        ) : (
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-500 text-sm gap-2">
+            <Globe size={24} />
+            <span>Nenhuma planilha ou doc incorporado.</span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// ==========================================
+// 11. POWER BI WIDGET
+// ==========================================
+export const PowerBIWidget: React.FC<{ data: any }> = ({ data }) => {
+  const config = data.powerBiConfig || { embedUrl: '' };
+  const embedUrl = config.embedUrl || '';
+
+  return (
+    <div className="w-full h-full rounded-2xl overflow-hidden border border-white/10 bg-slate-900 flex flex-col shadow-2xl relative">
+      <div className="bg-slate-950 p-3 shrink-0 flex items-center gap-2 border-b border-white/5">
+        <TrendingUp size={16} className="text-yellow-400" />
+        <span className="text-xs uppercase font-extrabold tracking-widest text-slate-200">Power BI Dashboard</span>
+      </div>
+      <div className="flex-1 bg-slate-950 relative">
+        {embedUrl ? (
+          <iframe 
+            src={embedUrl} 
+            className="w-full h-full border-none"
+            title="Power BI Dashboard Embed"
+            allowFullScreen
+          />
+        ) : (
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-500 text-sm gap-2">
+            <Globe size={24} />
+            <span>Nenhum painel do Power BI configurado.</span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// ==========================================
+// 12. AIRTABLE WIDGET
+// ==========================================
+export const AirtableWidget: React.FC<{ data: any }> = ({ data }) => {
+  const config = data.airtableConfig || { shareUrl: '' };
+  const shareUrl = config.shareUrl || '';
+
+  // Sanitiza a URL de base para embed
+  const getEmbedUrl = (u: string) => {
+    if (!u) return '';
+    if (u.includes('/embed/')) return u;
+    return u.replace('airtable.com/', 'airtable.com/embed/');
+  };
+
+  const embedUrl = getEmbedUrl(shareUrl);
+
+  return (
+    <div className="w-full h-full rounded-2xl overflow-hidden border border-white/10 bg-slate-900 flex flex-col shadow-2xl relative">
+      <div className="bg-slate-950 p-3 shrink-0 flex items-center gap-2 border-b border-white/5">
+        <Database size={16} className="text-rose-500" />
+        <span className="text-xs uppercase font-extrabold tracking-widest text-slate-200">Airtable Database</span>
+      </div>
+      <div className="flex-1 bg-slate-900 relative">
+        {embedUrl ? (
+          <iframe 
+            src={embedUrl} 
+            className="w-full h-full border-none"
+            title="Airtable Base Embed"
+            style={{ background: 'transparent' }}
+          />
+        ) : (
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-500 text-sm gap-2">
+            <Globe size={24} />
+            <span>Nenhuma base Airtable configurada.</span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// ==========================================
+// 13. PDF DOCUMENT WIDGET
+// ==========================================
+export const PdfDocumentWidget: React.FC<{ data: any }> = ({ data }) => {
+  const config = data.pdfDocumentConfig || { pdfUrl: '' };
+  const pdfUrl = config.pdfUrl || '';
+
+  // Esconder barra do PDF nativo se necessário
+  const embedUrl = pdfUrl ? `${pdfUrl}#toolbar=0` : '';
+
+  return (
+    <div className="w-full h-full rounded-2xl overflow-hidden border border-white/10 bg-slate-900 flex flex-col shadow-2xl relative">
+      <div className="bg-slate-950 p-3 shrink-0 flex items-center gap-2 border-b border-white/5">
+        <FileText size={16} className="text-red-500" />
+        <span className="text-xs uppercase font-extrabold tracking-widest text-slate-200">Documento PDF</span>
+      </div>
+      <div className="flex-1 bg-slate-950 relative">
+        {embedUrl ? (
+          <iframe 
+            src={embedUrl} 
+            className="w-full h-full border-none bg-slate-800"
+            title="PDF Document Embed"
+          />
+        ) : (
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-500 text-sm gap-2">
+            <FileText size={24} />
+            <span>Nenhum documento PDF configurado.</span>
+          </div>
+        )}
       </div>
     </div>
   );

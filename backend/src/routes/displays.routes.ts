@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { authMiddleware } from '../middlewares/auth.middleware';
 import { displayService } from '../services/display.service';
+import { sseService } from '../services/sse.service';
 
 const router = Router();
 
@@ -25,9 +26,17 @@ router.get('/slug/:slug/version', async (req: Request, res: Response): Promise<v
       return;
     }
 
-    // Cache condicional via ETag
-    const etag = `"${version.updatedAt.getTime()}"`;
-    if (req.headers['if-none-match'] === etag) {
+    // Cache condicional via ETag ou Query Parameter/Header
+    const currentVersionTime = String(version.updatedAt.getTime());
+    const etag = `"${currentVersionTime}"`;
+    const lastVersionQuery = req.query.lastVersion ? String(req.query.lastVersion) : null;
+    const lastVersionHeader = req.headers['x-last-version'] ? String(req.headers['x-last-version']) : null;
+    const clientVersion = lastVersionQuery || lastVersionHeader;
+
+    if (
+      req.headers['if-none-match'] === etag ||
+      (clientVersion && clientVersion === currentVersionTime)
+    ) {
       res.status(304).end();
       return;
     }
@@ -41,6 +50,11 @@ router.get('/slug/:slug/version', async (req: Request, res: Response): Promise<v
   }
 });
 
+// GET /api/displays/slug/:slug/live — Conexão SSE em tempo real (Player)
+router.get('/slug/:slug/live', (req: Request, res: Response): void => {
+  sseService.addClient('slug', req.params.slug as string, res);
+});
+
 // GET /api/displays/slug/:slug (PÚBLICO — Player)
 router.get('/slug/:slug', async (req: Request, res: Response): Promise<void> => {
   try {
@@ -51,9 +65,17 @@ router.get('/slug/:slug', async (req: Request, res: Response): Promise<void> => 
       return;
     }
 
-    // Cache condicional via ETag
-    const etag = `"${display.updatedAt}"`;
-    if (req.headers['if-none-match'] === etag) {
+    // Cache condicional via ETag ou Query Parameter/Header
+    const currentVersionTime = String(display.updatedAt.getTime());
+    const etag = `"${currentVersionTime}"`;
+    const lastVersionQuery = req.query.lastVersion ? String(req.query.lastVersion) : null;
+    const lastVersionHeader = req.headers['x-last-version'] ? String(req.headers['x-last-version']) : null;
+    const clientVersion = lastVersionQuery || lastVersionHeader;
+
+    if (
+      req.headers['if-none-match'] === etag ||
+      (clientVersion && clientVersion === currentVersionTime)
+    ) {
       res.status(304).end();
       return;
     }
@@ -77,6 +99,23 @@ router.get('/player/:id', async (req: Request, res: Response): Promise<void> => 
       return;
     }
 
+    // Cache condicional via ETag ou Query Parameter/Header
+    const currentVersionTime = String(display.updatedAt.getTime());
+    const etag = `"${currentVersionTime}"`;
+    const lastVersionQuery = req.query.lastVersion ? String(req.query.lastVersion) : null;
+    const lastVersionHeader = req.headers['x-last-version'] ? String(req.headers['x-last-version']) : null;
+    const clientVersion = lastVersionQuery || lastVersionHeader;
+
+    if (
+      req.headers['if-none-match'] === etag ||
+      (clientVersion && clientVersion === currentVersionTime)
+    ) {
+      res.status(304).end();
+      return;
+    }
+
+    res.set('ETag', etag);
+    res.set('Cache-Control', 'no-cache');
     res.json(display);
   } catch (error: any) {
     console.error('Erro ao buscar display para player:', error);
@@ -121,6 +160,12 @@ router.post('/', authMiddleware, async (req: Request, res: Response): Promise<vo
     }
 
     const display = await displayService.save({ id, name, slug, pages: pages || [], coverImage });
+    
+    // Notificar players em tempo real via SSE
+    sseService.notifyDisplayUpdate(display.id).catch(err => {
+      console.error('Erro ao notificar SSE após salvar display:', err);
+    });
+
     res.json(display);
   } catch (error: any) {
     console.error('Erro ao salvar display:', error);

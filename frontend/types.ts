@@ -9,7 +9,20 @@ export enum WidgetType {
   RSS = 'RSS',
   CALENDAR = 'CALENDAR',
   GIF = 'GIF',
-  FULL_INFO = 'FULL_INFO'
+  FULL_INFO = 'FULL_INFO',
+  NOTES = 'NOTES',
+  TODO = 'TODO',
+  COUNTDOWN = 'COUNTDOWN',
+  CHORES = 'CHORES',
+  MEAL_PLAN = 'MEAL_PLAN',
+  MARKET_WATCH = 'MARKET_WATCH',
+  BROWSER_SNAPSHOT = 'BROWSER_SNAPSHOT',
+  GOOGLE_DOCS = 'GOOGLE_DOCS',
+  OFFICE_DOCS = 'OFFICE_DOCS',
+  POWER_BI = 'POWER_BI',
+  EMBED_HTML = 'EMBED_HTML',
+  AIRTABLE = 'AIRTABLE',
+  PDF_DOCUMENT = 'PDF_DOCUMENT'
 }
 
 export interface RssFeedConfig {
@@ -96,6 +109,78 @@ export interface WidgetData {
   textSize?: number;
   numberSize?: number;
   zIndex?: number; // Added to handle layering/overlapping
+  notesConfig?: {
+    fontFamily?: string;
+    fontSize?: string;
+    textColor?: string;
+    backgroundColor?: string;
+    paperTheme?: 'glass' | 'yellow-sticky' | 'purple-haze' | 'neon-glow';
+  };
+  todoConfig?: {
+    title?: string;
+    items: { id: string; text: string; done: boolean }[];
+  };
+  countdownConfig?: {
+    title?: string;
+    targetDate: string;
+    expiredMessage?: string;
+    theme?: 'neon' | 'glass' | 'minimal' | 'bold-gradient';
+  };
+  choresConfig?: {
+    title?: string;
+    items: { id: string; chore: string; assignee: string; day?: string; done?: boolean }[];
+  };
+  mealPlanConfig?: {
+    title?: string;
+    days: {
+      [day: string]: {
+        breakfast?: string;
+        lunch?: string;
+        dinner?: string;
+        snacks?: string;
+      }
+    };
+  };
+  marketWatchConfig?: {
+    title?: string;
+    symbols: string[];
+    layout?: 'grid' | 'list' | 'ticker';
+  };
+  browserSnapshotConfig?: {
+    url: string;
+    updateIntervalMinutes?: number;
+  };
+  googleDocsConfig?: {
+    url: string;
+    docType: 'document' | 'spreadsheet' | 'presentation' | 'form';
+  };
+  officeDocsConfig?: {
+    url: string;
+    docType: 'word' | 'excel' | 'powerpoint';
+  };
+  powerBiConfig?: {
+    embedUrl: string;
+  };
+  embedWebsiteConfig?: {
+    url: string;
+    interactive?: boolean;
+  };
+  embedHtmlConfig?: {
+    html: string;
+  };
+  airtableConfig?: {
+    shareUrl: string;
+  };
+  pdfDocumentConfig?: {
+    pdfUrl: string;
+  };
+  fillContainer?: boolean;
+  autoSize?: boolean;
+  contentAlignment?: 'start' | 'center' | 'end' | 'stretch';
+  padding?: string;
+  margin?: string;
+  fullScreenMode?: boolean;
+  fitContainerMode?: 'none' | 'cover' | 'contain' | 'stretch';
 }
 
 export interface LayoutItem {
@@ -143,6 +228,7 @@ export interface Display {
   pages: Page[];
   updatedAt: number;
   coverImage?: string;
+  orientation?: 'horizontal' | 'vertical';
 }
 
 export interface User {

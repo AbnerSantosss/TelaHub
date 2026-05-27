@@ -25,6 +25,7 @@ const Dashboard: React.FC = () => {
 
   // Form States
   const [newDisplayName, setNewDisplayName] = useState('');
+  const [newDisplayOrientation, setNewDisplayOrientation] = useState<'horizontal' | 'vertical'>('horizontal');
 
   // Link Device Form States
   const [linkCode, setLinkCode] = useState('');
@@ -182,6 +183,7 @@ const Dashboard: React.FC = () => {
   // --- Display Handlers ---
   const openCreateModal = () => {
     setNewDisplayName('');
+    setNewDisplayOrientation('horizontal');
     setIsModalOpen(true);
   };
 
@@ -205,7 +207,8 @@ const Dashboard: React.FC = () => {
         name: newDisplayName,
         slug,
         pages: [{ id: 'p' + Date.now(), order: 1, duration: 15, layout: [] }],
-        updatedAt: Date.now()
+        updatedAt: Date.now(),
+        orientation: newDisplayOrientation
       };
 
       await saveDisplay(newDisplay);
@@ -556,7 +559,54 @@ const Dashboard: React.FC = () => {
                 placeholder="Ex: Recepção, Vitrine..."
                 className="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-slate-100 placeholder:text-slate-600 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition-all font-medium"
               />
-              <div className="mt-8 flex gap-3 justify-end">
+
+              {/* Orientation Selector */}
+              <label className="block text-sm font-bold text-slate-400 mt-6 mb-3 uppercase tracking-wider">Orientação da Tela</label>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setNewDisplayOrientation('horizontal')}
+                  className={`flex flex-col items-center justify-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                    newDisplayOrientation === 'horizontal'
+                      ? 'border-cyan-500 bg-cyan-500/10 shadow-[0_0_16px_rgba(34,211,238,0.2)]'
+                      : 'border-slate-700 bg-slate-950 hover:border-slate-500'
+                  }`}
+                >
+                  {/* 16:9 preview */}
+                  <div className={`w-16 h-9 rounded border-2 flex items-center justify-center transition-colors ${
+                    newDisplayOrientation === 'horizontal' ? 'border-cyan-400 bg-cyan-500/10' : 'border-slate-600 bg-slate-800'
+                  }`}>
+                    <Monitor size={14} className={newDisplayOrientation === 'horizontal' ? 'text-cyan-400' : 'text-slate-500'} />
+                  </div>
+                  <div className="text-center">
+                    <p className={`text-xs font-bold ${ newDisplayOrientation === 'horizontal' ? 'text-cyan-400' : 'text-slate-400' }`}>Horizontal</p>
+                    <p className="text-[10px] text-slate-600 font-mono">16:9 — TV / Monitor</p>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setNewDisplayOrientation('vertical')}
+                  className={`flex flex-col items-center justify-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                    newDisplayOrientation === 'vertical'
+                      ? 'border-purple-500 bg-purple-500/10 shadow-[0_0_16px_rgba(168,85,247,0.2)]'
+                      : 'border-slate-700 bg-slate-950 hover:border-slate-500'
+                  }`}
+                >
+                  {/* 9:16 preview */}
+                  <div className={`w-9 h-16 rounded border-2 flex items-center justify-center transition-colors ${
+                    newDisplayOrientation === 'vertical' ? 'border-purple-400 bg-purple-500/10' : 'border-slate-600 bg-slate-800'
+                  }`}>
+                    <Tv size={14} className={newDisplayOrientation === 'vertical' ? 'text-purple-400' : 'text-slate-500'} />
+                  </div>
+                  <div className="text-center">
+                    <p className={`text-xs font-bold ${ newDisplayOrientation === 'vertical' ? 'text-purple-400' : 'text-slate-400' }`}>Vertical</p>
+                    <p className="text-[10px] text-slate-600 font-mono">9:16 — Totem / Kiosk</p>
+                  </div>
+                </button>
+              </div>
+
+              <div className="mt-6 flex gap-3 justify-end">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
@@ -1337,7 +1387,18 @@ const Dashboard: React.FC = () => {
               </div>
 
               <div className="p-6 relative">
-                <h3 className="text-xl font-bold text-slate-100 mb-1 tracking-tight group-hover:text-cyan-400 transition-colors">{display.name}</h3>
+                <div className="flex items-start justify-between gap-2 mb-1">
+                  <h3 className="text-xl font-bold text-slate-100 tracking-tight group-hover:text-cyan-400 transition-colors">{display.name}</h3>
+                  {display.orientation === 'vertical' ? (
+                    <span className="flex items-center gap-1 bg-purple-500/10 border border-purple-500/30 text-purple-400 text-[9px] font-black px-2 py-0.5 rounded-full flex-shrink-0 mt-1">
+                      <Tv size={10} /> 9:16
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-1 bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-[9px] font-black px-2 py-0.5 rounded-full flex-shrink-0 mt-1">
+                      <Monitor size={10} /> 16:9
+                    </span>
+                  )}
+                </div>
                 <p className="text-[10px] text-slate-500 mb-6 font-mono truncate uppercase tracking-wider">ID: {display.slug}</p>
 
                 <div className="flex flex-col gap-3">
