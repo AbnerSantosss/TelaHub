@@ -21,7 +21,7 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     ports:
-      - "3006:3001"
+      - "3026:3001"
     environment:
       - DATABASE_URL=postgresql://display_user:display_password_secreta@db:5432/display_db?schema=public
       - JWT_SECRET=${JWT_SECRET:-mude_isso_em_producao_super_secreto}
