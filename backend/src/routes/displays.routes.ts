@@ -152,14 +152,14 @@ router.get('/:id', authMiddleware, async (req: Request, res: Response): Promise<
 // POST /api/displays (Cria ou atualiza)
 router.post('/', authMiddleware, async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id, name, slug, pages, coverImage } = req.body;
+    const { id, name, slug, pages, coverImage, orientation } = req.body;
 
     if (!name || !slug) {
       res.status(400).json({ error: 'Nome e slug são obrigatórios.' });
       return;
     }
 
-    const display = await displayService.save({ id, name, slug, pages: pages || [], coverImage });
+    const display = await displayService.save({ id, name, slug, pages: pages || [], coverImage, orientation });
     
     // Notificar players em tempo real via SSE
     sseService.notifyDisplayUpdate(display.id).catch(err => {

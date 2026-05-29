@@ -168,6 +168,7 @@ export const saveDisplay = async (display: Display): Promise<void> => {
     slug: display.slug,
     pages: display.pages,
     coverImage: display.coverImage && display.coverImage.trim() !== '' ? display.coverImage : null,
+    orientation: display.orientation || 'horizontal',
   });
 };
 

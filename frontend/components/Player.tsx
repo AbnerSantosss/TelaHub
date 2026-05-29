@@ -549,7 +549,7 @@ const Player: React.FC = () => {
                />
             </div>
             <h1 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-200 to-slate-400 tracking-tight">
-              Officecom<span className="text-cyan-400">Display</span>
+              Tela<span className="text-[#00D8F6]">Hub</span>
             </h1>
           </div>
           
@@ -661,18 +661,24 @@ const Player: React.FC = () => {
             <div className={`absolute inset-0 z-0 ${getBackgroundAnimationClass(page.backgroundAnimation)}`} />
           )}
 
-          {/* Container for Widgets - 16:9 by default, or Full Screen if RSS Ticker is present */}
+          {/* Container for Widgets - adapts to display orientation */}
           <div 
-            className={`relative z-10 w-full h-full overflow-hidden ${hasFullScreenRss ? '' : 'max-w-[calc(100vh*16/9)] max-h-[calc(100vw*9/16)]'}`}
+            className={`relative z-10 w-full h-full overflow-hidden ${hasFullScreenRss ? '' : (
+              display.orientation === 'vertical'
+                ? 'max-w-[calc(100vh*9/16)] max-h-screen'
+                : 'max-w-[calc(100vh*16/9)] max-h-[calc(100vw*9/16)]'
+            )}`}
             style={{ containerType: 'size' }}
           >
-            <div className="absolute inset-0 w-full h-full grid grid-cols-48 grid-rows-27 gap-0">
+            <div className={`absolute inset-0 w-full h-full grid gap-0 ${
+              display.orientation === 'vertical' ? 'grid-cols-27-v grid-rows-48-v' : 'grid-cols-48 grid-rows-27'
+            }`}>
             {page.layout.map(w => (
               <div 
                 key={w.i}
                 style={{
-                  gridColumn: w.data.fullScreenMode ? '1 / span 48' : `${w.x + 1} / span ${w.w}`, 
-                  gridRow: w.data.fullScreenMode ? '1 / span 27' : `${w.y + 1} / span ${w.h}`,
+                  gridColumn: w.data.fullScreenMode ? (display.orientation === 'vertical' ? '1 / span 27' : '1 / span 48') : `${w.x + 1} / span ${w.w}`, 
+                  gridRow: w.data.fullScreenMode ? (display.orientation === 'vertical' ? '1 / span 48' : '1 / span 27') : `${w.y + 1} / span ${w.h}`,
                   zIndex: w.data.fullScreenMode ? 99999 : (w.data.zIndex !== undefined ? w.data.zIndex : 10),
                   padding: w.data.padding || undefined,
                   margin: w.data.margin || undefined,
@@ -946,6 +952,8 @@ const Player: React.FC = () => {
       <style>{`
         .grid-cols-48 { grid-template-columns: repeat(48, minmax(0, 1fr)); }
         .grid-rows-27 { grid-template-rows: repeat(27, minmax(0, 1fr)); }
+        .grid-cols-27-v { grid-template-columns: repeat(27, minmax(0, 1fr)); }
+        .grid-rows-48-v { grid-template-rows: repeat(48, minmax(0, 1fr)); }
         @keyframes progress-width { from { width: 0%; } to { width: 100%; } }
         @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slide-up { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -1465,8 +1473,8 @@ export const RssFeed: React.FC<{url: string, config?: any, widgetData?: any}> = 
                 )}
                 
                 <p className="mt-auto text-[10px] text-slate-500 pt-2 font-mono border-t border-slate-800/50 w-full truncate flex items-center gap-2 shrink-0 z-10 bg-slate-900">
-                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-500"></span>
-                  <span className="uppercase tracking-wider font-bold text-cyan-500">{currentItem.author || 'Fonte Externa'}</span> 
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#7C3AED]"></span>
+                  <span className="uppercase tracking-wider font-bold text-[#7C3AED]">{currentItem.author || 'Fonte Externa'}</span> 
                   <span className="opacity-50">•</span> 
                   {new Date(currentItem.pubDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                 </p>
@@ -1572,8 +1580,8 @@ export const RssFeed: React.FC<{url: string, config?: any, widgetData?: any}> = 
             />
             
             <p className="text-[10px] text-slate-400 font-mono flex items-center gap-2 border-t border-white/10 pt-3 w-full">
-              <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 shadow-[0_0_5px_rgba(6,182,212,0.8)]"></span>
-              <span className="uppercase tracking-wider font-bold text-cyan-400">{currentItem.author || 'Fonte Externa'}</span> 
+              <span className="w-1.5 h-1.5 rounded-full bg-[#7C3AED] shadow-[0_0_5px_rgba(124,58,237,0.8)]"></span>
+              <span className="uppercase tracking-wider font-bold text-[#7C3AED]">{currentItem.author || 'Fonte Externa'}</span> 
               <span className="opacity-50">•</span> 
               <span className="opacity-80">{new Date(currentItem.pubDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
             </p>
@@ -2542,7 +2550,7 @@ export const NotesWidget: React.FC<{ data: any }> = ({ data }) => {
       case 'purple-haze':
         return 'bg-gradient-to-br from-purple-950/70 via-indigo-900/60 to-purple-900/70 text-purple-100 border border-purple-500/30 backdrop-blur-md shadow-2xl';
       case 'neon-glow':
-        return 'bg-slate-950 text-cyan-400 border border-cyan-500/70 shadow-[0_0_20px_rgba(6,182,212,0.4)] font-mono';
+        return 'bg-slate-950 text-[#7C3AED] border border-[#7C3AED]/70 shadow-[0_0_20px_rgba(124,58,237,0.4)] font-mono';
       case 'glass':
       default:
         return 'bg-white/10 backdrop-blur-xl border border-white/20 text-white shadow-2xl';
@@ -2594,10 +2602,10 @@ export const TodoWidget: React.FC<{ data: any }> = ({ data }) => {
       <div className="shrink-0">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
-            <ListTodo size={20} className="text-cyan-400" />
+            <ListTodo size={20} className="text-[#7C3AED]" />
             <h3 className="font-extrabold tracking-tight text-lg">{title}</h3>
           </div>
-          <span className="text-xs font-mono bg-cyan-500/20 text-cyan-400 px-2 py-0.5 rounded-full font-bold">
+          <span className="text-xs font-mono bg-[#7C3AED]/20 text-[#7C3AED] px-2 py-0.5 rounded-full font-bold">
             {doneCount}/{total}
           </span>
         </div>
@@ -2605,7 +2613,7 @@ export const TodoWidget: React.FC<{ data: any }> = ({ data }) => {
         {/* Progress Bar */}
         <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden mb-4 relative">
           <motion.div 
-            className="h-full bg-gradient-to-r from-cyan-400 to-indigo-500 rounded-full"
+            className="h-full bg-gradient-to-r from-[#7C3AED] to-[#A855F7] rounded-full"
             initial={{ width: 0 }}
             animate={{ width: `${progressPercent}%` }}
             transition={{ duration: 0.8, ease: "easeOut" }}
@@ -2630,7 +2638,7 @@ export const TodoWidget: React.FC<{ data: any }> = ({ data }) => {
             >
               <div className={`w-5 h-5 rounded flex items-center justify-center shrink-0 border transition-all duration-300 ${
                 item.done 
-                  ? 'bg-cyan-500/20 border-cyan-400 text-cyan-400' 
+                  ? 'bg-[#7C3AED]/20 border-[#7C3AED]/50 text-[#7C3AED]' 
                   : 'border-slate-500'
               }`}>
                 {item.done && <CheckSquare size={14} className="stroke-[3]" />}
@@ -2695,7 +2703,7 @@ export const CountdownWidget: React.FC<{ data: any }> = ({ data }) => {
   if (timeLeft.expired) {
     return (
       <div className={`w-full h-full flex flex-col items-center justify-center p-6 rounded-2xl text-center ${getThemeClass()}`}>
-        <Hourglass size={36} className="text-cyan-400 mb-3 animate-spin" />
+        <Hourglass size={36} className="text-[#7C3AED] mb-3 animate-spin" />
         <h4 className="text-2xl font-black uppercase tracking-wider animate-pulse">{expiredMsg}</h4>
       </div>
     );
@@ -2711,7 +2719,7 @@ export const CountdownWidget: React.FC<{ data: any }> = ({ data }) => {
   return (
     <div className={`w-full h-full p-6 rounded-2xl flex flex-col justify-between ${getThemeClass()}`}>
       <div className="flex items-center gap-2 mb-2 shrink-0">
-        <Hourglass size={18} className="text-cyan-400 animate-pulse" />
+        <Hourglass size={18} className="text-[#7C3AED] animate-pulse" />
         <h3 className="text-sm font-black uppercase tracking-widest">{title}</h3>
       </div>
       <div className="flex justify-around items-center gap-2 flex-1 my-2">
@@ -2748,7 +2756,7 @@ export const ChoresWidget: React.FC<{ data: any }> = ({ data }) => {
   return (
     <div className="w-full h-full p-6 bg-slate-950/60 backdrop-blur-xl border border-white/10 rounded-2xl flex flex-col justify-between text-white overflow-hidden shadow-2xl">
       <div className="flex items-center gap-2 mb-3 shrink-0">
-        <ClipboardList size={20} className="text-cyan-400" />
+        <ClipboardList size={20} className="text-[#7C3AED]" />
         <h3 className="font-extrabold tracking-tight text-lg">{title}</h3>
       </div>
 
@@ -2768,7 +2776,7 @@ export const ChoresWidget: React.FC<{ data: any }> = ({ data }) => {
                   {item.chore}
                 </span>
                 {item.day && (
-                  <span className="text-[10px] font-mono text-cyan-400 mt-0.5 uppercase tracking-wider">{item.day}</span>
+                  <span className="text-[10px] font-mono text-[#7C3AED] mt-0.5 uppercase tracking-wider">{item.day}</span>
                 )}
               </div>
               <div className="flex items-center gap-2 shrink-0">

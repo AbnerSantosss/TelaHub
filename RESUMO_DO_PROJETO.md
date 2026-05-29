@@ -25,6 +25,7 @@ O projeto adota uma arquitetura moderna e totalmente desacoplada:
 - **Roteamento:** React Router DOM.
 - **Estilização:** TailwindCSS (v4), Motion (framer-motion) para transições fluidas e ícones Lucide React.
 - **Componentes de Layout/Gráficos:** React Grid Layout (painel organizador) e Recharts (gráficos financeiros).
+- **Interface e Login:** Tela de login split-screen no desktop com copywriting de marketing e widgets interativos animados via Framer Motion, com layout 100% responsivo para visualização simplificada e centralizada em dispositivos móveis.
 
 ### **Backend (API REST)**
 - **Framework:** Node.js com Express (v5) e TypeScript.

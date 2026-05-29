@@ -17,8 +17,8 @@
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
 .react-grid-item.react-grid-placeholder {
-  background: rgba(34, 211, 238, 0.1) !important;
-  border: 1px dashed rgba(34, 211, 238, 0.5) !important;
+  background: rgba(124, 58, 237, 0.1) !important;
+  border: 1px dashed rgba(124, 58, 237, 0.5) !important;
   border-radius: 8px !important;
   opacity: 0.8 !important;
   z-index: 2 !important;
@@ -102,8 +102,8 @@
 .bg-anim-tech-grid {
   background-color: #000;
   background-image: 
-    linear-gradient(rgba(0, 255, 255, 0.1) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 255, 255, 0.1) 1px, transparent 1px);
+    linear-gradient(rgba(124, 58, 237, 0.15) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(124, 58, 237, 0.15) 1px, transparent 1px);
   background-size: 40px 40px;
   animation: tech-grid-move 4s linear infinite;
 }
@@ -229,3 +229,130 @@
   background-size: 30px 30px;
   animation: rain-fall 0.5s linear infinite, lightning 5s infinite;
 }
+
+/* --- Brand Color Definitions & Utility Classes --- */
+:root {
+  --brand-bg: #1C1D22;       /* Cinza Corporativo Fosco */
+  --brand-surface: #2D3139;  /* Cinza Mineral */
+  --brand-accent: #7C3AED;   /* Violeta Tecnológico Premium */
+  --brand-text-high: #F3F4F6;/* Branco Suave */
+  --brand-text-sec: #9CA3AF; /* Cinza Neutro */
+}
+
+/* Custom utility overrides */
+.bg-brand-bg {
+  background-color: var(--brand-bg) !important;
+}
+
+.bg-brand-surface {
+  background-color: var(--brand-surface) !important;
+}
+
+.bg-brand-accent {
+  background-color: var(--brand-accent) !important;
+}
+
+.text-brand-accent {
+  color: var(--brand-accent) !important;
+}
+
+.text-brand-high {
+  color: var(--brand-text-high) !important;
+}
+
+.text-brand-sec {
+  color: var(--brand-text-sec) !important;
+}
+
+.border-brand-accent {
+  border-color: var(--brand-accent) !important;
+}
+
+.border-brand-surface {
+  border-color: var(--brand-surface) !important;
+}
+
+.border-brand-sec {
+  border-color: var(--brand-text-sec) !important;
+}
+
+/* Premium Buttons Styling */
+.btn-brand-primary {
+  background-color: var(--brand-accent) !important;
+  color: var(--brand-text-high) !important;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 0 15px rgba(124, 58, 237, 0.25);
+}
+
+.btn-brand-primary:hover:not(:disabled) {
+  background-color: #6D28D9 !important;
+  box-shadow: 0 0 25px rgba(124, 58, 237, 0.5);
+  transform: translateY(-1px);
+}
+
+.btn-brand-primary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-brand-secondary {
+  background-color: transparent !important;
+  border: 1px solid var(--brand-text-sec) !important;
+  color: var(--brand-text-high) !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-brand-secondary:hover:not(:disabled) {
+  border-color: var(--brand-text-high) !important;
+  background-color: rgba(156, 163, 175, 0.08) !important;
+}
+
+/* Liquid Metal Premium Hover Animation */
+.liquid-metal-btn {
+  background-image: linear-gradient(135deg, #7C3AED 0%, #A855F7 50%, #7C3AED 100%);
+  background-size: 200% auto;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 15px rgba(124, 58, 237, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.liquid-metal-btn:hover:not(:disabled) {
+  background-position: right center;
+  box-shadow: 0 8px 25px rgba(124, 58, 237, 0.45), 0 0 0 2px rgba(124, 58, 237, 0.2);
+  transform: translateY(-1.5px);
+}
+
+/* Dot Matrix Loader Animations */
+@keyframes dot-matrix-pulse {
+  0%, 100% {
+    opacity: 0.25;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+.dot-matrix-dot {
+  animation: dot-matrix-pulse 1.2s ease-in-out infinite;
+}
+
+.dot-matrix-dot:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.dot-matrix-dot:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+.dot-matrix-dot:nth-child(4) {
+  animation-delay: 0.45s;
+}
+
+.dot-matrix-dot:nth-child(5) {
+  animation-delay: 0.6s;
+}
+
+.dot-matrix-dot:nth-child(6) {
+  animation-delay: 0.75s;
+}
+

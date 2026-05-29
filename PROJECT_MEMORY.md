@@ -39,6 +39,12 @@ O projeto "Display Office" consiste em uma aplicação full-stack para gerenciam
 - **Gestão de Segredos:** Criar fluxos para chaves de terceiros (SMTP, Database URI, JWT Secret) por ambiente de CI/CD.
 
 ## Histórico de Alterações (Changelog)
+- **[Tela de Login Split-Screen Premium e Responsiva - Maio/2026]**:
+  - **Reestruturação Visual (Desktop)**: Modificação da tela de login (`Login.tsx`) para adotar o padrão moderno de duas colunas (split-screen).
+  - **Copywriting Institucional**: Inclusão de painel esquerdo dedicado com textos de marketing em português descrevendo o ecossistema TelaHub (gestão remota, widgets e SSE).
+  - **Micro-animações de Produto**: Criação de três cartões conceituais animados flutuantes via Framer Motion (`motion/react`) que simulam widgets reais (clima, painel financeiro e lista de afazeres).
+  - **Responsividade Avançada**: Ocultação automática da coluna institucional em resoluções mobile, mantendo o formulário centralizado.
+  - **Integridade da Lógica**: Preservação sem efeitos colaterais de toda a lógica original de autenticação, tratamento de erros e recursos como "Lembrar meu usuário".
 - **[Atualização Premium de Widgets (Concorrência) - Maio/2026]**:
   - **13 Novos Widgets Premium**: Integração completa de novos widgets interativos e de terceiros que colocam a plataforma em patamar superior de mercado:
     - *Bloco de Notas (`NOTES`)*: Notas adesivas estilizadas com temas premium (yellow-sticky, glassmorphism, neon, purple-haze).
@@ -58,4 +64,10 @@ O projeto "Display Office" consiste em uma aplicação full-stack para gerenciam
   - **Padronização de Versões do Player**: Refatoração do componente `Player.tsx` para armazenar a versão do display estritamente como números (Unix timestamp em milissegundos), evitando type mismatches em verificações de versão subsequentes.
   - **Resolução de Erros de Compilação**: Correção de bug de tipagem no arquivo `broadcasts.routes.ts` (casting de `req.params.id as string`), garantindo compilação bem-sucedida do TypeScript no backend.
   - **Ambiente de Testes Isolado (Staging)**: Criação da branch `production` e alteração das portas de contêineres no `docker-compose.yml` (`frontend` para `8097`, `backend` para `3006`, `pgadmin` para `5051`) para permitir implantação concomitante via Portainer e testes através do Cloudflare Tunnel sem afetar as portas padrão (`8095`, `3005`, `5050`) do ambiente principal.
+- **[Redesign Visual UI/UX - Corporate Amethyst - Maio/2026]**:
+  - **Identidade Visual B2B Premium**: Transição total para a paleta de cores sofisticada: fundo base `#1C1D22` (Cinza Corporativo), cards e modais `#2D3139` (Cinza Mineral), e destaques ativos `#7C3AED` (Violeta Tecnológico) com efeitos de glow e sombras sutis.
+  - **Tipografia Unificada**: Configuração padrão global para a fonte 'Space Grotesk' e refinamento da hierarquia visual.
+  - **Polimento nos Painéis e Telas de Login**: Redesenho completo do login (`Login.tsx`, `ForgotPassword.tsx`, `ResetPassword.tsx`), painel administrativo (`Dashboard.tsx`), e navegação (`App.tsx`).
+  - **Reformulação dos Editores**: Atualização das barras laterais de ferramentas, catálogo, controle de camadas e painéis de propriedades em `Editor.tsx` e `SceneEditor.tsx`, eliminando cores ciano/laranja obsoletas.
+  - **Redesenho Fino dos Widgets no Player**: Modernização da barra de progresso do `TodoWidget`, temas neon do `NotesWidget`, cronômetros do `CountdownWidget`, badges do `ChoresWidget` e cabeçalhos de notícias no player (`Player.tsx`), garantindo um visual de Glassmorphism Premium unificado sem alterar nenhuma regra de negócio ou funcionalidade.
 - **[Ata de Criação]**: Criação inicial da documentação contínua de memória técnica do projeto (`PROJECT_MEMORY.md`). Constatado que o `README.md` original do frontend era um template placeholder, fazendo necessária a implementação deste arquivo root que concentra o status do projeto.

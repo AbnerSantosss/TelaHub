@@ -1,7 +1,7 @@
 {
-  "name": "officecom-display-backend",
+  "name": "telahub-backend",
   "version": "1.0.0",
-  "description": "Backend API para OfficeCom Display",
+  "description": "Backend API para TelaHub",
   "main": "dist/server.js",
   "scripts": {
     "dev": "tsx watch src/server.ts",

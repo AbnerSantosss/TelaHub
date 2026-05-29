@@ -87,7 +87,7 @@ function emailLayout(content: string): string {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OfficeCom Display</title>
+  <title>TelaHub</title>
 </head>
 <body style="margin:0;padding:0;background-color:${COLORS.bgDark};font-family:'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:${COLORS.bgDark};padding:40px 0;">
@@ -100,10 +100,10 @@ function emailLayout(content: string): string {
             <td style="padding:40px 40px 24px;text-align:center;background:linear-gradient(180deg,#111827 0%,${COLORS.bgCard} 100%);">
               <!-- Logo Icon -->
               <div style="width:72px;height:72px;margin:0 auto 20px;background:linear-gradient(135deg,${COLORS.bgCardAlt} 0%,${COLORS.bgCard} 100%);border-radius:16px;border:1px solid ${COLORS.border};display:inline-block;line-height:72px;box-shadow:0 0 30px rgba(34,211,238,0.2);overflow:hidden;">
-                <img src="cid:logo" alt="OfficeCom Display" width="48" height="48" style="vertical-align:middle;" />
+                <img src="cid:logo" alt="TelaHub" width="48" height="48" style="vertical-align:middle;" />
               </div>
               <h1 style="margin:0;font-size:26px;font-weight:800;letter-spacing:-0.5px;">
-                <span style="color:${COLORS.textPrimary};">Officecom</span><span style="color:${COLORS.cyan};">Display</span>
+                <span style="color:${COLORS.textPrimary};">Tela</span><span style="color:${COLORS.cyan};">Hub</span>
               </h1>
               <p style="margin:8px 0 0;color:${COLORS.textMuted};font-size:13px;font-weight:500;">
                 Gerenciamento inteligente de mídia digital corporativa
@@ -127,7 +127,7 @@ function emailLayout(content: string): string {
           <tr>
             <td style="padding:20px 40px 28px;border-top:1px solid ${COLORS.bgCardAlt};text-align:center;">
               <p style="margin:0;color:${COLORS.textDark};font-size:11px;line-height:1.6;">
-                Este é um e-mail automático do <strong>OfficeCom Display</strong>.<br>
+                Este é um e-mail automático do <strong>TelaHub</strong>.<br>
                 Se você não reconhece esta ação, ignore este e-mail com segurança.
               </p>
             </td>
@@ -137,7 +137,7 @@ function emailLayout(content: string): string {
 
         <!-- Sub-footer -->
         <p style="margin:20px 0 0;color:${COLORS.bgCardAlt};font-size:10px;text-align:center;font-family:monospace;">
-          &copy; ${new Date().getFullYear()} OfficeCom Display System
+          &copy; ${new Date().getFullYear()} TelaHub System
         </p>
       </td>
     </tr>
@@ -170,7 +170,7 @@ function emailButton(label: string, url: string): string {
 function getInviteTemplate(email: string, password: string): string {
   const content = `
     <h2 style="margin:0 0 8px;color:${COLORS.textPrimary};font-size:20px;font-weight:700;">
-      🎉 Bem-vindo ao OfficeCom Display!
+      🎉 Bem-vindo ao TelaHub!
     </h2>
     <p style="margin:0 0 24px;color:${COLORS.textSecondary};font-size:14px;line-height:1.7;">
       Um administrador criou uma conta para você. Use as credenciais abaixo para fazer seu primeiro acesso:
@@ -225,7 +225,7 @@ function getResetPasswordTemplate(resetUrl: string): string {
       🔐 Redefinição de Senha
     </h2>
     <p style="margin:0 0 24px;color:${COLORS.textSecondary};font-size:14px;line-height:1.7;">
-      Recebemos uma solicitação para redefinir sua senha no OfficeCom Display. 
+      Recebemos uma solicitação para redefinir sua senha no TelaHub. 
       Clique no botão abaixo para criar uma nova senha:
     </p>
 
@@ -286,9 +286,9 @@ export async function sendInviteEmail(to: string, password: string): Promise<voi
   const html = getInviteTemplate(to, password);
 
   await transporter.sendMail({
-    from: `"OfficeCom Display" <${smtp!.user}>`,
+    from: `"TelaHub" <${smtp!.user}>`,
     to,
-    subject: '🎉 Você foi convidado para o OfficeCom Display!',
+    subject: '🎉 Você foi convidado para o TelaHub!',
     html,
     attachments: getLogoAttachment(),
   });
@@ -308,9 +308,9 @@ export async function sendResetPasswordEmail(to: string, token: string): Promise
   const html = getResetPasswordTemplate(resetUrl);
 
   await transporter.sendMail({
-    from: `"OfficeCom Display" <${smtp!.user}>`,
+    from: `"TelaHub" <${smtp!.user}>`,
     to,
-    subject: '🔐 Redefinição de Senha — OfficeCom Display',
+    subject: '🔐 Redefinição de Senha — TelaHub',
     html,
     attachments: getLogoAttachment(),
   });

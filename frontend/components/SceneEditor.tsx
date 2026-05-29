@@ -48,9 +48,10 @@ const getEmbedUrl = (url: string, config?: { autoplay?: boolean, mute?: boolean,
 interface SceneEditorProps {
   page: Page;
   onChange: (page: Page) => void;
+  orientation?: 'horizontal' | 'vertical';
 }
 
-const SceneEditor: React.FC<SceneEditorProps> = ({ page, onChange }) => {
+const SceneEditor: React.FC<SceneEditorProps> = ({ page, onChange, orientation = 'horizontal' }) => {
   const [selectedWidget, setSelectedWidget] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [containerWidth, setContainerWidth] = useState(1200);
@@ -316,7 +317,7 @@ const SceneEditor: React.FC<SceneEditorProps> = ({ page, onChange }) => {
           <WidgetTool icon={<StickyNote size={18} className="text-yellow-400" />} label="Notas" onClick={() => addWidget(WidgetType.NOTES)} />
           <WidgetTool icon={<ListTodo size={18} className="text-emerald-400" />} label="Tarefas" onClick={() => addWidget(WidgetType.TODO)} />
           <WidgetTool icon={<Timer size={18} className="text-rose-400" />} label="Contador" onClick={() => addWidget(WidgetType.COUNTDOWN)} />
-          <WidgetTool icon={<ClipboardList size={18} className="text-cyan-400" />} label="Deveres" onClick={() => addWidget(WidgetType.CHORES)} />
+          <WidgetTool icon={<ClipboardList size={18} className="text-[#7C3AED]" />} label="Deveres" onClick={() => addWidget(WidgetType.CHORES)} />
           <WidgetTool icon={<Utensils size={18} className="text-amber-400" />} label="Meal Plan" onClick={() => addWidget(WidgetType.MEAL_PLAN)} />
 
           <div className="w-px h-6 bg-slate-800 mx-1 flex-shrink-0"></div>
@@ -324,7 +325,7 @@ const SceneEditor: React.FC<SceneEditorProps> = ({ page, onChange }) => {
           {/* Integrações */}
           <WidgetTool icon={<TrendingUp size={18} className="text-green-400" />} label="Bolsa" onClick={() => addWidget(WidgetType.MARKET_WATCH)} />
           <WidgetTool icon={<Camera size={18} className="text-blue-400" />} label="Snapshot" onClick={() => addWidget(WidgetType.BROWSER_SNAPSHOT)} />
-          <WidgetTool icon={<FileText size={18} className="text-cyan-500" />} label="G Docs" onClick={() => addWidget(WidgetType.GOOGLE_DOCS)} />
+          <WidgetTool icon={<FileText size={18} className="text-[#7C3AED]" />} label="G Docs" onClick={() => addWidget(WidgetType.GOOGLE_DOCS)} />
           <WidgetTool icon={<BookOpen size={18} className="text-blue-500" />} label="Office Docs" onClick={() => addWidget(WidgetType.OFFICE_DOCS)} />
           <WidgetTool icon={<Layout size={18} className="text-amber-500" />} label="Power BI" onClick={() => addWidget(WidgetType.POWER_BI)} />
           <WidgetTool icon={<Database size={18} className="text-rose-500" />} label="Airtable" onClick={() => addWidget(WidgetType.AIRTABLE)} />
@@ -364,11 +365,14 @@ const SceneEditor: React.FC<SceneEditorProps> = ({ page, onChange }) => {
           <div
             ref={containerRef}
             data-canvas-ref
-            className="relative bg-black shadow-[0_0_100px_rgba(0,0,0,0.5)] border border-slate-800 overflow-hidden shrink-0"
+            className={`relative bg-black shadow-[0_0_100px_rgba(0,0,0,0.5)] border border-slate-800 overflow-hidden shrink-0 ${
+              orientation === 'vertical' ? 'h-full w-auto' : 'w-full'
+            }`}
             style={{
-              width: '100%',
-              maxWidth: '1200px',
-              aspectRatio: '16/9',
+              ...(orientation === 'vertical'
+                ? { maxHeight: '100%', aspectRatio: '9/16' }
+                : { maxWidth: '1200px', aspectRatio: '16/9' }
+              ),
               backgroundImage: page.backgroundImage ? `url(${page.backgroundImage})` : 'none',
               backgroundSize: 'cover',
               backgroundPosition: 'center'
@@ -382,12 +386,12 @@ const SceneEditor: React.FC<SceneEditorProps> = ({ page, onChange }) => {
               margin={[0, 0]}
               onLayoutChange={handleLayoutChange}
               draggableHandle=".drag-handle"
-              resizeHandle={<div className="absolute bottom-0 right-0 p-1 cursor-se-resize text-cyan-500 opacity-0 group-hover:opacity-100 transition-opacity"><MoveHorizontal size={12} /></div>}
+              resizeHandle={<div className="absolute bottom-0 right-0 p-1 cursor-se-resize text-[#7C3AED] opacity-0 group-hover:opacity-100 transition-opacity"><MoveHorizontal size={12} /></div>}
             >
               {page.layout.map(w => (
                 <div
                   key={w.i}
-                  className={`group relative border transition-all ${selectedWidget === w.i ? 'border-cyan-500 ring-2 ring-cyan-500/20 z-20' : 'border-transparent hover:border-slate-700'}`}
+                  className={`group relative border transition-all ${selectedWidget === w.i ? 'border-[#7C3AED] ring-2 ring-cyan-500/20 z-20' : 'border-transparent hover:border-slate-700'}`}
                   onClick={(e) => { e.stopPropagation(); setSelectedWidget(w.i); }}
                 >
                   <div className="drag-handle absolute top-0 left-0 w-full h-4 bg-slate-900/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 cursor-move flex items-center justify-center z-10 transition-opacity">
@@ -395,7 +399,7 @@ const SceneEditor: React.FC<SceneEditorProps> = ({ page, onChange }) => {
                   </div>
 
                   {w.data.fullScreenMode && (
-                    <div className="absolute top-5 right-2 z-30 bg-cyan-950/80 border border-cyan-500/50 backdrop-blur-sm text-cyan-400 text-[8px] font-black uppercase px-2 py-0.5 rounded-full shadow-[0_0_10px_rgba(6,182,212,0.3)] pointer-events-none animate-pulse flex items-center gap-1">
+                    <div className="absolute top-5 right-2 z-30 bg-cyan-950/80 border border-[#7C3AED]/50 backdrop-blur-sm text-[#7C3AED] text-[8px] font-black uppercase px-2 py-0.5 rounded-full shadow-[0_0_10px_rgba(6,182,212,0.3)] pointer-events-none animate-pulse flex items-center gap-1">
                       <span>📺 Tela Cheia</span>
                     </div>
                   )}
@@ -434,21 +438,28 @@ const SceneEditor: React.FC<SceneEditorProps> = ({ page, onChange }) => {
 
         {/* PROPERTIES PANEL */}
         {selectedWidget && currentWidget && (
-          <div className="w-80 bg-slate-900 border-l border-slate-800 p-6 overflow-y-auto custom-scrollbar animate-in slide-in-from-right duration-300 z-40">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="font-black text-xs uppercase tracking-widest text-slate-400 flex items-center gap-2">
-                <Settings size={14} className="text-cyan-500" /> Propriedades
-              </h3>
-              <button onClick={() => setSelectedWidget(null)} className="text-slate-500 hover:text-white transition-colors">
-                <X size={18} />
-              </button>
-            </div>
+          <>
+            {/* Backdrop overlay for mobile properties panel */}
+            <div 
+              className="fixed inset-0 bg-black/60 z-30 md:hidden animate-in fade-in duration-200" 
+              onClick={() => setSelectedWidget(null)}
+            />
+            <div className="absolute md:relative right-0 top-0 h-full w-80 bg-slate-900 border-l border-slate-800 p-6 overflow-y-auto custom-scrollbar z-40 shadow-2xl transition-all duration-300 animate-in slide-in-from-right duration-300">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="font-black text-xs uppercase tracking-widest text-slate-400 flex items-center gap-2">
+                  <Settings size={14} className="text-[#7C3AED]" /> Propriedades
+                </h3>
+                <button onClick={() => setSelectedWidget(null)} className="text-slate-500 hover:text-white transition-colors">
+                  <X size={18} />
+                </button>
+              </div>
 
-            <div className="space-y-6">
-              {/* Common Properties */}
-              {renderWidgetControls(currentWidget, updateWidgetData, setMediaLibraryConfig, setFullScreen, restoreSize, originalSizes, page, onChange)}
+              <div className="space-y-6">
+                {/* Common Properties */}
+                {renderWidgetControls(currentWidget, updateWidgetData, setMediaLibraryConfig, setFullScreen, restoreSize, originalSizes, page, onChange)}
+              </div>
             </div>
-          </div>
+          </>
         )}
       </div>
 
@@ -640,7 +651,7 @@ const renderWidgetControls = (
             <textarea
               value={w.data.content}
               onChange={e => updateData(w.i, { content: e.target.value })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500 h-24"
+              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#7C3AED] h-24"
             />
           </div>
           
@@ -670,7 +681,7 @@ const renderWidgetControls = (
                   type="text" 
                   value={w.data.color || '#ffffff'} 
                   onChange={e => updateData(w.i, { color: e.target.value })} 
-                  className="w-full bg-slate-950 border border-slate-700 rounded text-[10px] text-slate-300 px-2 uppercase font-mono outline-none focus:border-cyan-500" 
+                  className="w-full bg-slate-950 border border-slate-700 rounded text-[10px] text-slate-300 px-2 uppercase font-mono outline-none focus:border-[#7C3AED]" 
                 />
               </div>
             </div>
@@ -684,7 +695,7 @@ const renderWidgetControls = (
             type="text"
             value={w.data.url}
             onChange={e => updateData(w.i, { url: e.target.value })}
-            className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500 mb-2"
+            className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#7C3AED] mb-2"
           />
           <button
             onClick={() => {
@@ -710,7 +721,7 @@ const renderWidgetControls = (
             type="text"
             value={w.data.videoUrl}
             onChange={e => updateData(w.i, { videoUrl: e.target.value })}
-            className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500 mb-2"
+            className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#7C3AED] mb-2"
           />
           <button
             onClick={() => {
@@ -736,13 +747,13 @@ const renderWidgetControls = (
             type="text"
             value={w.data.city}
             onChange={e => updateData(w.i, { city: e.target.value })}
-            className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500 mb-2"
+            className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#7C3AED] mb-2"
           />
           {w.type === WidgetType.FULL_INFO && (
             <>
               <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Modelo Visual</label>
               <select
-                className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500 mb-2"
+                className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#7C3AED] mb-2"
                 value={w.data.model || 'standard'}
                 onChange={(e) => updateData(w.i, { model: e.target.value })}
               >
@@ -757,7 +768,7 @@ const renderWidgetControls = (
                 type="text"
                 value={w.data.backgroundImage || ''}
                 onChange={e => updateData(w.i, { backgroundImage: e.target.value })}
-                className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500"
+                className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#7C3AED]"
                 placeholder="URL da imagem (ex: https://...)"
               />
 
@@ -791,7 +802,7 @@ const renderWidgetControls = (
             type="text"
             value={w.data.videoUrl}
             onChange={e => updateData(w.i, { videoUrl: e.target.value })}
-            className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500"
+            className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#7C3AED]"
           />
 
           <div className="mt-3">
@@ -799,7 +810,7 @@ const renderWidgetControls = (
             <select
               value={w.data.videoConfig?.youtubeQuality || 'highres'}
               onChange={(e) => updateData(w.i, { videoConfig: { ...w.data.videoConfig, youtubeQuality: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500"
+              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#7C3AED]"
             >
               <option value="highres">Máxima (Auto)</option>
               <option value="hd1080">1080p</option>
@@ -838,7 +849,7 @@ const renderWidgetControls = (
             type="text"
             value={w.data.rssUrl}
             onChange={e => updateData(w.i, { rssUrl: e.target.value })}
-            className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500"
+            className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#7C3AED]"
           />
           <div className="mt-4 pt-4 border-t border-slate-800 space-y-2">
             {!isFullscreen ? (
@@ -869,7 +880,7 @@ const renderWidgetControls = (
             <textarea
               value={w.data.content || ''}
               onChange={e => updateData(w.i, { content: e.target.value })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500 h-28"
+              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#7C3AED] h-28"
               placeholder="Digite o recado aqui..."
             />
           </div>
@@ -878,7 +889,7 @@ const renderWidgetControls = (
             <select
               value={w.data.notesConfig?.paperTheme || 'glass'}
               onChange={e => updateData(w.i, { notesConfig: { ...w.data.notesConfig, paperTheme: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500"
+              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#7C3AED]"
             >
               <option value="glass">Glassmorphism (Translúcido)</option>
               <option value="yellow-sticky">Post-it Amarelo</option>
@@ -891,7 +902,7 @@ const renderWidgetControls = (
             <select
               value={w.data.notesConfig?.fontFamily || 'sans'}
               onChange={e => updateData(w.i, { notesConfig: { ...w.data.notesConfig, fontFamily: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500"
+              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#7C3AED]"
             >
               <option value="sans">Sans-serif (Moderna)</option>
               <option value="serif">Serif (Clássica)</option>
@@ -917,7 +928,7 @@ const renderWidgetControls = (
               type="text"
               value={w.data.todoConfig?.title || 'Lista de Tarefas'}
               onChange={e => updateData(w.i, { todoConfig: { ...w.data.todoConfig, title: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500"
+              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#7C3AED]"
             />
           </div>
           <div>
@@ -938,7 +949,7 @@ const renderWidgetControls = (
                     }
                   }
                 }}
-                className="flex-1 bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500"
+                className="flex-1 bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#7C3AED]"
               />
               <button
                 onClick={() => {
@@ -995,7 +1006,7 @@ const renderWidgetControls = (
               type="text"
               value={w.data.countdownConfig?.title || ''}
               onChange={e => updateData(w.i, { countdownConfig: { ...w.data.countdownConfig, title: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500"
+              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#7C3AED]"
               placeholder="Ex: Lançamento"
             />
           </div>
@@ -1005,7 +1016,7 @@ const renderWidgetControls = (
               type="datetime-local"
               value={w.data.countdownConfig?.targetDate || ''}
               onChange={e => updateData(w.i, { countdownConfig: { ...w.data.countdownConfig, targetDate: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500"
+              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#7C3AED]"
             />
           </div>
           <div>
@@ -1014,7 +1025,7 @@ const renderWidgetControls = (
               type="text"
               value={w.data.countdownConfig?.expiredMessage || ''}
               onChange={e => updateData(w.i, { countdownConfig: { ...w.data.countdownConfig, expiredMessage: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500"
+              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#7C3AED]"
               placeholder="Ex: Chegou o momento!"
             />
           </div>
@@ -1023,7 +1034,7 @@ const renderWidgetControls = (
             <select
               value={w.data.countdownConfig?.theme || 'glass'}
               onChange={e => updateData(w.i, { countdownConfig: { ...w.data.countdownConfig, theme: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500"
+              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#7C3AED]"
             >
               <option value="glass">Glassmorphism</option>
               <option value="neon">Neon Vermelho</option>
@@ -1042,7 +1053,7 @@ const renderWidgetControls = (
               type="text"
               value={w.data.choresConfig?.title || ''}
               onChange={e => updateData(w.i, { choresConfig: { ...w.data.choresConfig, title: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500"
+              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#7C3AED]"
             />
           </div>
           
@@ -1052,18 +1063,18 @@ const renderWidgetControls = (
               type="text"
               id={`new-chore-text-${w.i}`}
               placeholder="Nome da atividade..."
-              className="w-full bg-slate-950 border border-slate-700 rounded p-1.5 text-xs text-white outline-none focus:border-cyan-500"
+              className="w-full bg-slate-950 border border-slate-700 rounded p-1.5 text-xs text-white outline-none focus:border-[#7C3AED]"
             />
             <div className="grid grid-cols-2 gap-2">
               <input
                 type="text"
                 id={`new-chore-assignee-${w.i}`}
                 placeholder="Responsável..."
-                className="bg-slate-950 border border-slate-700 rounded p-1.5 text-xs text-white outline-none focus:border-cyan-500"
+                className="bg-slate-950 border border-slate-700 rounded p-1.5 text-xs text-white outline-none focus:border-[#7C3AED]"
               />
               <select
                 id={`new-chore-day-${w.i}`}
-                className="bg-slate-950 border border-slate-700 rounded p-1.5 text-xs text-white outline-none focus:border-cyan-500"
+                className="bg-slate-950 border border-slate-700 rounded p-1.5 text-xs text-white outline-none focus:border-[#7C3AED]"
               >
                 <option value="Segunda">Segunda</option>
                 <option value="Terça">Terça</option>
@@ -1145,7 +1156,7 @@ const renderWidgetControls = (
               type="text"
               value={w.data.mealPlanConfig?.title || ''}
               onChange={e => updateData(w.i, { mealPlanConfig: { ...w.data.mealPlanConfig, title: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500"
+              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#7C3AED]"
             />
           </div>
           
@@ -1153,7 +1164,7 @@ const renderWidgetControls = (
             <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Dia para Editar</label>
             <select
               id={`meal-day-selector-${w.i}`}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500"
+              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#7C3AED]"
               defaultValue="Segunda"
               onChange={() => {
                 updateData(w.i, {}); 
@@ -1188,14 +1199,14 @@ const renderWidgetControls = (
 
             return (
               <div className="bg-slate-900/40 p-2.5 rounded border border-slate-800 space-y-2">
-                <span className="text-[9px] font-black text-cyan-400 uppercase block">Refeições de {currentDay}</span>
+                <span className="text-[9px] font-black text-[#7C3AED] uppercase block">Refeições de {currentDay}</span>
                 <div>
                   <label className="text-[8px] text-slate-400 block mb-0.5">Café da Manhã</label>
                   <input
                     type="text"
                     value={dayMeal.breakfast || ''}
                     onChange={e => updateMeal('breakfast', e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-700 rounded p-1 text-xs text-white outline-none focus:border-cyan-500"
+                    className="w-full bg-slate-950 border border-slate-700 rounded p-1 text-xs text-white outline-none focus:border-[#7C3AED]"
                     placeholder="Ex: Ovos, Pão e Café"
                   />
                 </div>
@@ -1205,7 +1216,7 @@ const renderWidgetControls = (
                     type="text"
                     value={dayMeal.lunch || ''}
                     onChange={e => updateMeal('lunch', e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-700 rounded p-1 text-xs text-white outline-none focus:border-cyan-500"
+                    className="w-full bg-slate-950 border border-slate-700 rounded p-1 text-xs text-white outline-none focus:border-[#7C3AED]"
                     placeholder="Ex: Frango com Salada e Arroz"
                   />
                 </div>
@@ -1215,7 +1226,7 @@ const renderWidgetControls = (
                     type="text"
                     value={dayMeal.dinner || ''}
                     onChange={e => updateMeal('dinner', e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-700 rounded p-1 text-xs text-white outline-none focus:border-cyan-500"
+                    className="w-full bg-slate-950 border border-slate-700 rounded p-1 text-xs text-white outline-none focus:border-[#7C3AED]"
                     placeholder="Ex: Sopa leve"
                   />
                 </div>
@@ -1225,7 +1236,7 @@ const renderWidgetControls = (
                     type="text"
                     value={dayMeal.snacks || ''}
                     onChange={e => updateMeal('snacks', e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-700 rounded p-1 text-xs text-white outline-none focus:border-cyan-500"
+                    className="w-full bg-slate-950 border border-slate-700 rounded p-1 text-xs text-white outline-none focus:border-[#7C3AED]"
                     placeholder="Ex: Frutas ou Mix de Castanhas"
                   />
                 </div>
@@ -1243,7 +1254,7 @@ const renderWidgetControls = (
               type="text"
               value={w.data.marketWatchConfig?.title || ''}
               onChange={e => updateData(w.i, { marketWatchConfig: { ...w.data.marketWatchConfig, title: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500"
+              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#7C3AED]"
             />
           </div>
           <div>
@@ -1251,7 +1262,7 @@ const renderWidgetControls = (
             <select
               value={w.data.marketWatchConfig?.layout || 'grid'}
               onChange={e => updateData(w.i, { marketWatchConfig: { ...w.data.marketWatchConfig, layout: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500"
+              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#7C3AED]"
             >
               <option value="grid">Grade (Cards)</option>
               <option value="list">Lista Vertical</option>
@@ -1265,7 +1276,7 @@ const renderWidgetControls = (
                 type="text"
                 id={`new-symbol-${w.i}`}
                 placeholder="Ex: AAPL, BTC-USD, EURUSD=X"
-                className="flex-1 bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500 uppercase"
+                className="flex-1 bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#7C3AED] uppercase"
                 onKeyDown={e => {
                   if (e.key === 'Enter') {
                     const input = e.currentTarget;
@@ -1325,7 +1336,7 @@ const renderWidgetControls = (
               type="text"
               value={w.data.browserSnapshotConfig?.url || ''}
               onChange={e => updateData(w.i, { browserSnapshotConfig: { ...w.data.browserSnapshotConfig, url: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500"
+              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#7C3AED]"
               placeholder="Ex: https://g1.globo.com"
             />
           </div>
@@ -1335,7 +1346,7 @@ const renderWidgetControls = (
               type="number"
               value={w.data.browserSnapshotConfig?.updateIntervalMinutes || 10}
               onChange={e => updateData(w.i, { browserSnapshotConfig: { ...w.data.browserSnapshotConfig, updateIntervalMinutes: parseInt(e.target.value) || 10 } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500"
+              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#7C3AED]"
             />
           </div>
         </div>
@@ -1348,7 +1359,7 @@ const renderWidgetControls = (
             <select
               value={w.data.googleDocsConfig?.docType || 'document'}
               onChange={e => updateData(w.i, { googleDocsConfig: { ...w.data.googleDocsConfig, docType: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500"
+              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#7C3AED]"
             >
               <option value="document">Google Documentos (Doc)</option>
               <option value="spreadsheet">Google Planilhas (Sheets)</option>
@@ -1362,7 +1373,7 @@ const renderWidgetControls = (
               type="text"
               value={w.data.googleDocsConfig?.url || ''}
               onChange={e => updateData(w.i, { googleDocsConfig: { ...w.data.googleDocsConfig, url: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500"
+              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#7C3AED]"
               placeholder="Cole o link completo do Google Docs..."
             />
           </div>
@@ -1379,7 +1390,7 @@ const renderWidgetControls = (
             <select
               value={w.data.officeDocsConfig?.docType || 'word'}
               onChange={e => updateData(w.i, { officeDocsConfig: { ...w.data.officeDocsConfig, docType: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500"
+              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#7C3AED]"
             >
               <option value="word">Microsoft Word</option>
               <option value="excel">Microsoft Excel</option>
@@ -1392,7 +1403,7 @@ const renderWidgetControls = (
               type="text"
               value={w.data.officeDocsConfig?.url || ''}
               onChange={e => updateData(w.i, { officeDocsConfig: { ...w.data.officeDocsConfig, url: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500"
+              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#7C3AED]"
               placeholder="Cole o link gerado pelo OneDrive embed..."
             />
           </div>
@@ -1407,7 +1418,7 @@ const renderWidgetControls = (
               type="text"
               value={w.data.powerBiConfig?.embedUrl || ''}
               onChange={e => updateData(w.i, { powerBiConfig: { ...w.data.powerBiConfig, embedUrl: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500"
+              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#7C3AED]"
               placeholder="Cole o link https://app.powerbi.com/reportEmbed..."
             />
           </div>
@@ -1421,7 +1432,7 @@ const renderWidgetControls = (
             <textarea
               value={w.data.embedHtmlConfig?.html || ''}
               onChange={e => updateData(w.i, { embedHtmlConfig: { html: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white font-mono outline-none focus:border-cyan-500 h-44"
+              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white font-mono outline-none focus:border-[#7C3AED] h-44"
               placeholder="<!-- Insira seu HTML, CSS ou Script aqui -->"
             />
           </div>
@@ -1436,7 +1447,7 @@ const renderWidgetControls = (
               type="text"
               value={w.data.airtableConfig?.shareUrl || ''}
               onChange={e => updateData(w.i, { airtableConfig: { shareUrl: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500"
+              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#7C3AED]"
               placeholder="https://airtable.com/embed/shr..."
             />
           </div>
@@ -1451,7 +1462,7 @@ const renderWidgetControls = (
               type="text"
               value={w.data.pdfDocumentConfig?.pdfUrl || ''}
               onChange={e => updateData(w.i, { pdfDocumentConfig: { pdfUrl: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500"
+              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#7C3AED]"
               placeholder="https://exemplo.com/documento.pdf"
             />
           </div>
@@ -1464,7 +1475,7 @@ const renderWidgetControls = (
         
         {/* Grid de Switches */}
         <div className="grid grid-cols-1 gap-2">
-          <label className={`flex items-center gap-3 text-[11px] text-slate-300 cursor-pointer p-2.5 rounded-lg border transition-all w-full select-none ${w.data.fillContainer ? 'bg-cyan-950/40 border-cyan-500/50 ring-1 ring-cyan-500/20' : 'bg-slate-950/60 border-slate-800/80 hover:border-cyan-500/30 hover:bg-slate-950'}`}>
+          <label className={`flex items-center gap-3 text-[11px] text-slate-300 cursor-pointer p-2.5 rounded-lg border transition-all w-full select-none ${w.data.fillContainer ? 'bg-[#7C3AED]/10 border-[#7C3AED]/50 ring-1 ring-[#7C3AED]/20' : 'bg-slate-950/60 border-slate-800/80 hover:border-[#7C3AED]/30 hover:bg-slate-950'}`}>
             <input 
               type="checkbox" 
               checked={w.data.fillContainer || false} 
@@ -1482,7 +1493,7 @@ const renderWidgetControls = (
                   setFullScreen(w.i);
                 }
               }}
-              className="rounded border-slate-700 bg-slate-900 text-cyan-500 focus:ring-0 w-4 h-4 cursor-pointer"
+              className="rounded border-slate-700 bg-slate-900 text-[#7C3AED] focus:ring-0 w-4 h-4 cursor-pointer"
             />
             <div className="flex flex-col">
               <span className="font-bold text-slate-200">Preencher Container</span>
@@ -1490,7 +1501,7 @@ const renderWidgetControls = (
             </div>
           </label>
 
-          <label className={`flex items-center gap-3 text-[11px] text-slate-300 cursor-pointer p-2.5 rounded-lg border transition-all w-full select-none ${w.data.fullScreenMode ? 'bg-indigo-950/40 border-indigo-500/50 ring-1 ring-indigo-500/20' : 'bg-slate-950/60 border-slate-800/80 hover:border-cyan-500/30 hover:bg-slate-950'}`}>
+          <label className={`flex items-center gap-3 text-[11px] text-slate-300 cursor-pointer p-2.5 rounded-lg border transition-all w-full select-none ${w.data.fullScreenMode ? 'bg-indigo-950/40 border-indigo-500/50 ring-1 ring-indigo-500/20' : 'bg-slate-950/60 border-slate-800/80 hover:border-[#7C3AED]/30 hover:bg-slate-950'}`}>
             <input 
               type="checkbox" 
               checked={w.data.fullScreenMode || false} 
@@ -1510,7 +1521,7 @@ const renderWidgetControls = (
                   setFullScreen(w.i);
                 }
               }}
-              className="rounded border-slate-700 bg-slate-900 text-cyan-500 focus:ring-0 w-4 h-4 cursor-pointer"
+              className="rounded border-slate-700 bg-slate-900 text-[#7C3AED] focus:ring-0 w-4 h-4 cursor-pointer"
             />
             <div className="flex flex-col">
               <span className="font-bold text-slate-200">Tela Cheia (100% da TV)</span>
@@ -1521,10 +1532,10 @@ const renderWidgetControls = (
 
         {/* Painel de Tela Cheia — aparece quando fillContainer está ativo */}
         {w.data.fillContainer && (
-          <div className="bg-gradient-to-b from-cyan-950/30 to-slate-950/80 p-3 rounded-xl border border-cyan-500/30 space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
+          <div className="bg-gradient-to-b from-[#7C3AED]/10 to-slate-950/80 p-3 rounded-xl border border-[#7C3AED]/30 space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
             <div className="flex items-center gap-2 mb-1">
-              <Maximize2 size={12} className="text-cyan-400" />
-              <span className="text-[9px] font-black text-cyan-400 uppercase tracking-wider">Modo Tela Cheia Ativo</span>
+              <Maximize2 size={12} className="text-[#7C3AED]" />
+              <span className="text-[9px] font-black text-[#7C3AED] uppercase tracking-wider">Modo Tela Cheia Ativo</span>
             </div>
             
             {/* Imagem de Fundo do Widget */}
@@ -1534,7 +1545,7 @@ const renderWidgetControls = (
                 type="text"
                 value={w.data.backgroundImage || ''}
                 onChange={e => updateData(w.i, { backgroundImage: e.target.value })}
-                className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500"
+                className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#7C3AED]"
                 placeholder="URL da imagem de fundo..."
               />
               <button
@@ -1609,7 +1620,7 @@ const renderWidgetControls = (
                   onClick={() => updateData(w.i, { contentAlignment: align.id as any })}
                   className={`py-1 text-[9px] rounded font-medium border transition-all ${
                     (w.data.contentAlignment || 'center') === align.id
-                      ? 'bg-cyan-500/20 text-cyan-400 border-cyan-500'
+                      ? 'bg-[#7C3AED]/20 text-[#7C3AED] border-[#7C3AED]'
                       : 'bg-slate-950 text-slate-400 border-slate-800 hover:border-slate-700'
                   }`}
                 >
@@ -1645,7 +1656,7 @@ const renderWidgetControls = (
             <select
               value={w.data.fitContainerMode || ''}
               onChange={(e) => updateData(w.i, { fitContainerMode: e.target.value as any })}
-              className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white outline-none focus:border-cyan-500"
+              className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white outline-none focus:border-[#7C3AED]"
             >
               <option value="">Padrão do Sistema</option>
               <option value="cover">Cortar e Preencher (Cover)</option>

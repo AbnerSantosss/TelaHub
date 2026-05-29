@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { getDisplays, saveDisplay, uploadMedia } from '../services/storage';
 import { Display, Page, WidgetType, LayoutItem } from '../types';
+import { LogoHub } from './Login';
 import { 
   LiveClock, WeatherWidget, RssFeed, FullInfoWidget,
   NotesWidget, TodoWidget, CountdownWidget, ChoresWidget, MealPlanWidget,
@@ -531,7 +532,7 @@ const Editor: React.FC = () => {
   const currentWidget = activePage.layout.find(w => w.i === selectedWidget);
 
   return (
-    <div className="h-screen flex flex-col bg-slate-950 overflow-hidden relative text-slate-200 font-sans">
+    <div className="h-screen flex flex-col bg-[#1C1D22] overflow-hidden relative text-slate-200 font-sans">
       
 
 
@@ -661,20 +662,16 @@ const Editor: React.FC = () => {
       )}
 
       {/* Header */}
-      <header className="h-auto md:h-16 bg-slate-900 border-b border-slate-800 px-4 md:px-6 py-3 md:py-0 flex flex-col md:flex-row items-center justify-between z-30 shadow-md gap-3 md:gap-0">
+      <header className="h-auto md:h-16 bg-[#2D3139] border-b border-[#9CA3AF]/10 px-4 md:px-6 py-3 md:py-0 flex flex-col md:flex-row items-center justify-between z-30 shadow-md gap-3 md:gap-0">
         <div className="flex items-center gap-4 w-full md:w-auto justify-start">
-          <button onClick={() => navigate('/')} className="p-2 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-cyan-400 transition-colors">
+          <button onClick={() => navigate('/')} className="p-2 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-[#7C3AED] transition-colors">
             <Home size={20} />
           </button>
           <div className="w-px h-6 bg-slate-800"></div>
           <div className="flex items-center gap-2">
-            <img 
-              src="/logo.png" 
-              alt="Logo" 
-              className="w-6 h-6 object-contain"
-            />
+            <LogoHub size={28} className="drop-shadow-[0_0_8px_rgba(124,58,237,0.35)]" />
             <h1 className="font-bold text-slate-100 tracking-tight uppercase text-sm">
-              Officecom<span className="text-cyan-400">Display</span> <span className="text-slate-600 mx-2">/</span> {display.name}
+              Tela<span className="text-[#7C3AED]">Hub</span> <span className="text-slate-600 mx-2">/</span> {display.name}
             </h1>
           </div>
         </div>
@@ -686,7 +683,7 @@ const Editor: React.FC = () => {
               key={p.id} 
               className={`flex items-center rounded-lg border transition-all flex-shrink-0 min-w-max ${
                 activePageIdx === idx 
-                ? 'bg-indigo-600 border-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.4)]' 
+                ? 'bg-[#7C3AED] border-[#7C3AED] shadow-[0_0_10px_rgba(124,58,237,0.4)]' 
                 : 'border-slate-800 hover:border-slate-700 bg-slate-900'
               }`}
             >
@@ -696,7 +693,7 @@ const Editor: React.FC = () => {
                   activePageIdx === idx ? 'text-white' : 'text-slate-500 hover:text-slate-300'
                 }`}
               >
-                {p.broadcast_id && <CalendarDays size={12} className="text-cyan-400" />}
+                {p.broadcast_id && <CalendarDays size={12} className="text-[#7C3AED]" />}
                 CENA {idx + 1}
               </button>
               
@@ -709,7 +706,7 @@ const Editor: React.FC = () => {
                   }}
                   className={`flex-shrink-0 w-8 h-8 flex items-center justify-center transition-colors border-l ${
                     activePageIdx === idx 
-                    ? 'border-indigo-500 text-indigo-200 hover:bg-indigo-700 hover:text-white' 
+                    ? 'border-[#6D28D9] text-purple-200 hover:bg-[#6D28D9] hover:text-white' 
                     : 'border-slate-800 text-slate-600 hover:bg-rose-500/10 hover:text-rose-500'
                   }`}
                   title="Excluir Cena"
@@ -723,7 +720,7 @@ const Editor: React.FC = () => {
             const newP: Page = { id: 'p'+Date.now(), order: display.pages.length+1, duration: 15, layout: [] };
             setDisplay({...display, pages: [...display.pages, newP]});
             setActivePageIdx(display.pages.length);
-          }} className="p-1.5 text-cyan-500 hover:bg-cyan-500/10 rounded-lg transition-colors mx-1">
+          }} className="p-1.5 text-[#7C3AED] hover:bg-[#7C3AED]/10 rounded-lg transition-colors mx-1">
             <Plus size={16} />
           </button>
         </div>
@@ -732,14 +729,14 @@ const Editor: React.FC = () => {
           <div className="flex items-center gap-2 md:hidden">
             <button 
               onClick={() => setShowLeftSidebar(!showLeftSidebar)}
-              className={`px-3 py-2 rounded-lg transition-all border ${showLeftSidebar ? 'bg-cyan-500/20 text-cyan-400 border-cyan-500/50' : 'bg-slate-900 border-slate-800 text-slate-500 hover:text-cyan-400'}`}
+              className={`px-3 py-2 rounded-lg transition-all border ${showLeftSidebar ? 'bg-[#7C3AED]/20 text-[#7C3AED] border-[#7C3AED]/50' : 'bg-slate-900 border-slate-800 text-slate-500 hover:text-[#7C3AED]'}`}
               title="Widgets"
             >
               <Layers size={16} />
             </button>
             <button 
               onClick={() => setShowRightSidebar(!showRightSidebar)}
-              className={`px-3 py-2 rounded-lg transition-all border ${showRightSidebar ? 'bg-cyan-500/20 text-cyan-400 border-cyan-500/50' : 'bg-slate-900 border-slate-800 text-slate-500 hover:text-cyan-400'}`}
+              className={`px-3 py-2 rounded-lg transition-all border ${showRightSidebar ? 'bg-[#7C3AED]/20 text-[#7C3AED] border-[#7C3AED]/50' : 'bg-slate-900 border-slate-800 text-slate-500 hover:text-[#7C3AED]'}`}
               title="Configurações"
             >
               <Settings size={16} />
@@ -750,7 +747,7 @@ const Editor: React.FC = () => {
 
             <button 
               onClick={() => window.open(`/#/player/${display.slug || display.id}`, '_blank')}
-              className="bg-slate-800 hover:bg-slate-700 text-cyan-400 border border-slate-700 hover:border-cyan-500/50 px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-all"
+              className="bg-[#2D3139] hover:bg-[#1C1D22] text-[#F3F4F6] border border-[#9CA3AF] hover:border-white px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-all"
               title="Abrir Player em nova aba"
             >
               <Maximize2 size={16} />
@@ -760,7 +757,7 @@ const Editor: React.FC = () => {
             <button 
               onClick={handleSave} 
               disabled={isSaving} 
-              className="bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 text-white px-6 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-all shadow-[0_0_15px_rgba(34,211,238,0.3)] border border-white/10 active:scale-95 whitespace-nowrap disabled:opacity-50"
+              className="bg-[#7C3AED] hover:bg-[#6D28D9] text-white px-6 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-all shadow-[0_0_15px_rgba(124,58,237,0.3)] border border-white/10 active:scale-95 whitespace-nowrap disabled:opacity-50"
             >
               {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />} 
               {isSaving ? 'SALVANDO...' : 'SALVAR'}
@@ -770,12 +767,25 @@ const Editor: React.FC = () => {
       </header>
 
       <div className="flex-1 flex overflow-hidden relative">
+        {/* Backdrop overlay for mobile sidebars */}
+        {(showLeftSidebar || showRightSidebar) && (
+          <div 
+            className="fixed inset-0 bg-black/60 z-50 md:hidden animate-in fade-in duration-200" 
+            onClick={() => { setShowLeftSidebar(false); setShowRightSidebar(false); }}
+          />
+        )}
+
         {/* Sidebar Left: Tools */}
-        <aside className={`absolute md:relative left-0 top-0 h-full w-72 bg-slate-900 border-r border-slate-800 overflow-y-auto z-[60] shadow-xl transition-transform duration-300 ease-in-out ${showLeftSidebar ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
+        <aside className={`absolute md:relative left-0 top-0 h-full w-72 bg-[#2D3139] border-r border-slate-800 overflow-y-auto z-[60] shadow-xl transition-transform duration-300 ease-in-out ${showLeftSidebar ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
           <div className="p-5 border-b border-slate-800">
-             <h3 className="text-[10px] font-black text-cyan-500 uppercase tracking-widest mb-4 flex items-center gap-2">
-               <Layers size={12} /> Biblioteca de Widgets
-             </h3>
+             <div className="flex justify-between items-center mb-4">
+               <h3 className="text-[10px] font-black text-[#7C3AED] uppercase tracking-widest flex items-center gap-2">
+                 <Layers size={12} /> Biblioteca de Widgets
+               </h3>
+               <button onClick={() => setShowLeftSidebar(false)} className="md:hidden text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors">
+                 <X size={16} />
+               </button>
+             </div>
              
              {/* Básicos */}
              <div className="mb-4">
@@ -921,10 +931,10 @@ const Editor: React.FC = () => {
                        onClick={() => setSelectedWidget(layer.i)}
                        className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-all border ${
                          isSelected 
-                           ? 'bg-cyan-500/10 border-cyan-500/50 text-cyan-400' 
+                           ? 'bg-[#7C3AED]/10 border-[#7C3AED]/50 text-[#7C3AED]' 
                            : 'bg-slate-900 border-transparent hover:bg-slate-800 text-slate-300'
                        } ${isDragging ? 'opacity-50' : 'opacity-100'} ${
-                         isDragOver ? 'border-t-2 border-t-cyan-500' : ''
+                         isDragOver ? 'border-t-2 border-t-[#7C3AED]' : ''
                        }`}
                      >
                        <div className="cursor-move text-slate-500 hover:text-slate-300">
@@ -934,7 +944,7 @@ const Editor: React.FC = () => {
                          {getIcon(layer.type)}
                        </div>
                        <span className="text-xs font-medium truncate flex-1">{getName(layer.type)}</span>
-                       {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-cyan-400"></div>}
+                       {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-[#7C3AED]"></div>}
                      </div>
                    );
                })}
@@ -1209,7 +1219,7 @@ const Editor: React.FC = () => {
         </aside>
 
         {/* Canvas Area */}
-        <main className="flex-1 bg-slate-950 relative overflow-hidden flex items-center justify-center p-8">
+        <main className="flex-1 bg-[#1C1D22] relative overflow-hidden flex items-center justify-center p-8">
           {/* Background Grid Pattern */}
           <div className="absolute inset-0 z-0 opacity-10 pointer-events-none" 
                style={{ 
@@ -1223,13 +1233,13 @@ const Editor: React.FC = () => {
               ? 'text-purple-400 border-purple-800'
               : 'text-slate-600 border-slate-800'
           }`}>
-            <Maximize2 size={12} className={display.orientation === 'vertical' ? 'text-purple-500' : 'text-cyan-500'} />
+            <Maximize2 size={12} className={display.orientation === 'vertical' ? 'text-purple-500' : 'text-[#F97316]'} />
             {display.orientation === 'vertical' ? 'Canvas Livre 9:16 — Vertical' : 'Canvas Livre 16:9 — Horizontal'}
           </div>
           
           <div 
             ref={containerRef}
-            className={`h-full bg-black shadow-2xl relative border border-slate-800 rounded-sm overflow-hidden ${
+            className={`h-full bg-black shadow-[0_0_40px_rgba(0,0,0,0.8)] relative border border-[#7C3AED] rounded-sm overflow-hidden shadow-[0_0_25px_rgba(124,58,237,0.15)] ${
               display.orientation === 'vertical'
                 ? 'aspect-[9/16] max-h-full w-auto'
                 : 'w-full max-w-[100%] aspect-video'
@@ -1291,7 +1301,7 @@ const Editor: React.FC = () => {
                   <div 
                     key={w.i} 
                     onClick={(e) => { e.stopPropagation(); setSelectedWidget(w.i); }}
-                    className={`group transition-all ${selectedWidget === w.i ? 'border border-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.3)]' : 'border border-transparent hover:border-white/20 hover:bg-white/5'} ${w.data.backgroundAnimation ? getBackgroundAnimationClass(w.data.backgroundAnimation) : (selectedWidget === w.i ? 'bg-slate-900/50 backdrop-blur-sm' : '')}`}
+                    className={`group transition-all ${selectedWidget === w.i ? 'border border-[#7C3AED] shadow-[0_0_15px_rgba(124,58,237,0.35)]' : 'border border-transparent hover:border-white/20 hover:bg-white/5'} ${w.data.backgroundAnimation ? getBackgroundAnimationClass(w.data.backgroundAnimation) : (selectedWidget === w.i ? 'bg-slate-900/50 backdrop-blur-sm' : '')}`}
                     style={{ zIndex: selectedWidget === w.i ? 999 : (w.data.zIndex !== undefined ? w.data.zIndex : 10) }}
                   >
                     <div 
@@ -1302,7 +1312,7 @@ const Editor: React.FC = () => {
                       }}
                     >
                       {w.data.fullScreenMode && (
-                        <div className="absolute top-2 right-2 z-30 bg-cyan-950/80 border border-cyan-500/50 backdrop-blur-sm text-cyan-400 text-[9px] font-black uppercase px-2 py-0.5 rounded-full shadow-[0_0_10px_rgba(6,182,212,0.3)] pointer-events-none animate-pulse flex items-center gap-1">
+                        <div className="absolute top-2 right-2 z-30 bg-indigo-950/80 border border-[#7C3AED]/50 backdrop-blur-sm text-[#7C3AED] text-[9px] font-black uppercase px-2 py-0.5 rounded-full shadow-[0_0_10px_rgba(124,58,237,0.3)] pointer-events-none animate-pulse flex items-center gap-1">
                           <span>📺 Tela Cheia (100% da TV)</span>
                         </div>
                       )}
@@ -1568,16 +1578,21 @@ const Editor: React.FC = () => {
         </main>
 
         {/* Sidebar Right: Properties */}
-        <aside className={`absolute md:relative right-0 top-0 h-full w-80 bg-slate-900 border-l border-slate-800 p-6 overflow-y-auto z-[60] shadow-xl transition-transform duration-300 ease-in-out ${showRightSidebar ? 'translate-x-0' : 'translate-x-full md:translate-x-0'}`}>
+        <aside className={`absolute md:relative right-0 top-0 h-full w-80 bg-[#2D3139] border-l border-slate-800 p-6 overflow-y-auto z-[60] shadow-xl transition-transform duration-300 ease-in-out ${showRightSidebar ? 'translate-x-0' : 'translate-x-full md:translate-x-0'}`}>
           {currentWidget ? (
             <div className="space-y-6 animate-in slide-in-from-right-4 duration-200">
               <div className="flex items-center justify-between border-b border-slate-800 pb-4">
                 <h3 className="font-bold text-slate-200 flex items-center gap-2 text-xs uppercase tracking-wider">
-                   <Settings size={14} className="text-cyan-500" /> Configuração
+                   <Settings size={14} className="text-[#7C3AED]" /> Configuração
                 </h3>
-                <button onClick={() => removeWidget(selectedWidget!)} className="text-rose-500 hover:bg-rose-500/10 p-2 rounded-lg transition-colors" title="Remover Widget">
-                  <Trash2 size={16} />
-                </button>
+                <div className="flex items-center gap-2">
+                  <button onClick={() => removeWidget(selectedWidget!)} className="text-rose-500 hover:bg-rose-500/10 p-2 rounded-lg transition-colors" title="Remover Widget">
+                    <Trash2 size={16} />
+                  </button>
+                  <button onClick={() => setShowRightSidebar(false)} className="md:hidden text-slate-400 hover:text-white p-2 rounded-lg hover:bg-slate-800 transition-colors" title="Fechar">
+                    <X size={16} />
+                  </button>
+                </div>
               </div>
 
               <div className="space-y-5">
@@ -3497,8 +3512,8 @@ const Editor: React.FC = () => {
 };
 
 const WidgetTool = ({ icon, label, onClick }: any) => (
-  <button onClick={onClick} className="flex flex-col items-center justify-center p-4 bg-slate-950 border border-slate-800 rounded-xl hover:border-cyan-500 hover:shadow-[0_0_15px_rgba(34,211,238,0.15)] transition-all group">
-    <div className="text-slate-500 group-hover:text-cyan-400 mb-2 transition-colors">{icon}</div>
+  <button onClick={onClick} className="flex flex-col items-center justify-center p-4 bg-slate-950 border border-slate-800 rounded-xl hover:border-[#7C3AED] hover:shadow-[0_0_15px_rgba(124,58,237,0.15)] transition-all group">
+    <div className="text-slate-500 group-hover:text-[#7C3AED] mb-2 transition-colors">{icon}</div>
     <span className="text-[9px] font-bold text-slate-500 group-hover:text-slate-200 uppercase tracking-wider transition-colors">{label}</span>
   </button>
 );

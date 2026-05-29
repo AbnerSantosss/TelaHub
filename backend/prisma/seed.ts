@@ -45,7 +45,7 @@ async function main() {
               y: 200,
               width: 900,
               height: 200,
-              content: 'Bem-vindo ao OfficeCom Display!',
+              content: 'Bem-vindo ao TelaHub!',
               style: {
                 fontSize: 48,
                 fontWeight: 'bold',

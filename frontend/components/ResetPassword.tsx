@@ -1,8 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Lock, KeyRound, Loader2, CheckCircle2, AlertTriangle, ArrowLeft } from 'lucide-react';
 import { resetPassword } from '../services/storage';
+import { LogoHub } from './Login';
 
 const ResetPassword: React.FC = () => {
   const [password, setPassword] = useState('');
@@ -52,35 +52,31 @@ const ResetPassword: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-slate-950">
-      {/* Background Effects */}
-      <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center opacity-10"></div>
-      <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/80 to-slate-900/50"></div>
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-[#1C1D22]">
+      {/* Background Mesh Grid */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none z-0"></div>
       
-      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-indigo-900/20 rounded-full blur-[120px] animate-pulse"></div>
-      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-cyan-900/20 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '2s' }}></div>
+      {/* Subtle Radial Glow */}
+      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-indigo-900/10 rounded-full blur-[120px] animate-pulse z-0"></div>
+      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-[#7C3AED]/5 rounded-full blur-[120px] animate-pulse z-0" style={{ animationDelay: '2s' }}></div>
 
-      <div className="w-full max-w-md p-8 relative z-10 flex flex-col gap-8">
+      <div className="w-full max-w-md p-8 relative z-10 flex flex-col gap-6">
         
         {/* Logo e Branding */}
         <div className="flex flex-col items-center animate-in fade-in slide-in-from-top-4 duration-700">
-          <div className="w-24 h-24 bg-gradient-to-br from-slate-900 to-slate-950 rounded-2xl flex items-center justify-center border border-slate-800 mb-6 shadow-[0_0_40px_rgba(34,211,238,0.15)] relative group p-4">
-             <div className="absolute inset-0 bg-cyan-500/10 rounded-2xl blur-xl group-hover:bg-cyan-500/20 transition-all duration-500"></div>
-             <img 
-               src="/logo.png" 
-               alt="Logo" 
-               className="w-full h-full object-contain relative z-10 drop-shadow-[0_0_10px_rgba(34,211,238,0.5)]"
-             />
+          <div className="w-24 h-24 bg-gradient-to-br from-[#2D3139] to-[#1C1D22] rounded-2xl flex items-center justify-center border border-[#9CA3AF]/10 mb-5 shadow-[0_0_40px_rgba(124,58,237,0.12)] relative group p-4">
+             <div className="absolute inset-0 bg-[#7C3AED]/5 rounded-2xl blur-xl group-hover:bg-[#7C3AED]/10 transition-all duration-500"></div>
+             <LogoHub size={52} />
           </div>
-          <h1 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-200 to-slate-400 tracking-tight mb-2 text-center">
-            Officecom<span className="text-cyan-400">Display</span>
+          <h1 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#F3F4F6] via-[#9CA3AF] to-[#9CA3AF] tracking-tight mb-1 text-center uppercase">
+            Tela<span className="text-[#7C3AED]">Hub</span>
           </h1>
-          <p className="text-slate-400 text-sm font-medium tracking-wide text-center max-w-[280px]">
+          <p className="text-[#9CA3AF] text-xs font-medium tracking-wide text-center max-w-[280px]">
             Redefinição de Senha
           </p>
         </div>
 
-        <div className="bg-slate-900/60 backdrop-blur-2xl border border-slate-800/50 rounded-3xl shadow-2xl p-8 transition-all duration-500">
+        <div className="bg-[#2D3139] border border-[#9CA3AF]/15 rounded-3xl shadow-2xl p-8 transition-all duration-500 hover:border-[#7C3AED]/30">
           
           {success ? (
             <div className="flex flex-col items-center gap-5 py-4">
@@ -88,12 +84,12 @@ const ResetPassword: React.FC = () => {
                 <CheckCircle2 size={32} className="text-emerald-400" />
               </div>
               <h2 className="text-lg font-bold text-emerald-400">Senha Redefinida!</h2>
-              <p className="text-slate-400 text-sm text-center">
+              <p className="text-[#F3F4F6] text-sm text-center">
                 Sua senha foi alterada com sucesso. Agora você pode fazer login com a nova senha.
               </p>
               <button 
                 onClick={() => navigate('/login')}
-                className="w-full bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 text-white font-bold py-4 rounded-xl shadow-[0_0_20px_rgba(34,211,238,0.3)] transition-all flex items-center justify-center gap-2 mt-2"
+                className="w-full liquid-metal-btn text-[#F3F4F6] font-bold py-4 rounded-xl transition-all flex items-center justify-center gap-2 mt-2"
               >
                 <Lock size={18} /> Ir para Login
               </button>
@@ -101,32 +97,32 @@ const ResetPassword: React.FC = () => {
           ) : (
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="flex items-center gap-3 mb-2">
-                <div className="w-10 h-10 bg-indigo-500/10 border border-indigo-500/20 rounded-xl flex items-center justify-center">
-                  <KeyRound size={18} className="text-indigo-400" />
+                <div className="w-10 h-10 bg-[#7C3AED]/10 border border-[#7C3AED]/20 rounded-xl flex items-center justify-center">
+                  <KeyRound size={18} className="text-[#7C3AED]" />
                 </div>
                 <div>
                   <h2 className="text-base font-bold text-slate-200">Nova Senha</h2>
-                  <p className="text-slate-500 text-xs">Crie uma nova senha para sua conta</p>
+                  <p className="text-[#9CA3AF] text-xs">Crie uma nova senha para sua conta</p>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider pl-1">Nova Senha</label>
+                <label className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-wider pl-1">Nova Senha</label>
                 <div className="relative group">
                   <input 
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-slate-950/50 border border-slate-700 rounded-xl py-3.5 pl-12 pr-10 text-slate-200 outline-none focus:border-cyan-500 focus:bg-slate-950 focus:shadow-[0_0_20px_rgba(34,211,238,0.1)] transition-all placeholder:text-slate-600"
+                    className="w-full bg-[#1C1D22]/60 border border-[#9CA3AF]/20 rounded-xl py-3.5 pl-12 pr-10 text-[#F3F4F6] outline-none focus:border-[#7C3AED] focus:bg-[#1C1D22] focus:shadow-[0_0_20px_rgba(124,58,237,0.15)] transition-all placeholder:text-[#9CA3AF]/40 text-sm"
                     placeholder="Mínimo 6 caracteres"
                     autoComplete="new-password"
                     minLength={6}
                   />
-                  <Lock size={18} className="absolute left-4 top-3.5 text-slate-600 group-focus-within:text-cyan-400 transition-colors" />
+                  <Lock size={18} className="absolute left-4 top-3.5 text-[#9CA3AF]/60 group-focus-within:text-[#7C3AED] transition-colors" />
                   <button 
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-3.5 text-slate-600 hover:text-cyan-400 transition-colors"
+                    className="absolute right-3 top-3.5 text-[#9CA3AF]/60 hover:text-[#7C3AED] transition-colors"
                   >
                     {showPassword ? (
                       <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></svg>
@@ -138,17 +134,17 @@ const ResetPassword: React.FC = () => {
               </div>
 
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider pl-1">Confirmar Nova Senha</label>
+                <label className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-wider pl-1">Confirmar Nova Senha</label>
                 <div className="relative group">
                   <input 
                     type={showPassword ? "text" : "password"}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full bg-slate-950/50 border border-slate-700 rounded-xl py-3.5 pl-12 text-slate-200 outline-none focus:border-cyan-500 focus:bg-slate-950 focus:shadow-[0_0_20px_rgba(34,211,238,0.1)] transition-all placeholder:text-slate-600"
+                    className="w-full bg-[#1C1D22]/60 border border-[#9CA3AF]/20 rounded-xl py-3.5 pl-12 text-[#F3F4F6] outline-none focus:border-[#7C3AED] focus:bg-[#1C1D22] focus:shadow-[0_0_20px_rgba(124,58,237,0.15)] transition-all placeholder:text-[#9CA3AF]/40 text-sm"
                     placeholder="Repita a nova senha"
                     autoComplete="new-password"
                   />
-                  <Lock size={18} className="absolute left-4 top-3.5 text-slate-600 group-focus-within:text-cyan-400 transition-colors" />
+                  <Lock size={18} className="absolute left-4 top-3.5 text-[#9CA3AF]/60 group-focus-within:text-[#7C3AED] transition-colors" />
                 </div>
               </div>
 
@@ -174,7 +170,7 @@ const ResetPassword: React.FC = () => {
               <button 
                 type="submit" 
                 disabled={loading || !token || !password || !confirmPassword}
-                className="w-full bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 text-white font-bold py-4 rounded-xl shadow-[0_0_20px_rgba(34,211,238,0.3)] hover:shadow-[0_0_30px_rgba(34,211,238,0.5)] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transform active:scale-[0.98]"
+                className="w-full liquid-metal-btn text-[#F3F4F6] font-bold py-4 rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transform active:scale-[0.98]"
               >
                 {loading ? <Loader2 size={20} className="animate-spin" /> : <KeyRound size={20} />} 
                 {loading ? 'PROCESSANDO...' : 'REDEFINIR SENHA'}
@@ -183,7 +179,7 @@ const ResetPassword: React.FC = () => {
               <button 
                 type="button"
                 onClick={() => navigate('/login')}
-                className="w-full text-slate-500 hover:text-cyan-400 text-xs font-medium py-2 flex items-center justify-center gap-1 transition-colors"
+                className="w-full text-[#9CA3AF]/80 hover:text-[#7C3AED] text-xs font-medium py-2 flex items-center justify-center gap-1 transition-colors"
               >
                 <ArrowLeft size={14} /> Voltar para o Login
               </button>
@@ -192,8 +188,8 @@ const ResetPassword: React.FC = () => {
         </div>
         
         <div className="text-center space-y-2">
-          <p className="text-slate-600 text-[10px] font-mono uppercase tracking-widest">
-            &copy; {new Date().getFullYear()} Officecom Display System v2.0
+          <p className="text-[#9CA3AF] text-[10px] font-mono uppercase tracking-widest">
+            &copy; {new Date().getFullYear()} TelaHub System v2.0
           </p>
         </div>
       </div>
