@@ -5,6 +5,7 @@ import { getDisplays, deleteDisplay, saveDisplay, getCurrentUser, logout, getUse
 import { Display, User, Device } from '../types';
 import { MediaLibrary } from './MediaLibrary';
 import { LogoHub } from './Login';
+import { motion } from 'motion/react';
 
 const Dashboard: React.FC = () => {
   const [displays, setDisplays] = useState<Display[]>([]);
@@ -1221,80 +1222,97 @@ const Dashboard: React.FC = () => {
       )}
 
       {/* HEADER (Transparent navigation bar with backdrop blur) */}
-      <header className="flex flex-col xl:flex-row justify-between items-start xl:items-center mb-12 relative z-10 gap-6 bg-[#2D3139]/85 backdrop-blur-md border border-white/10 p-6 rounded-2xl shadow-xl">
-        <div className="flex items-center gap-4">
-          <LogoHub size={48} className="drop-shadow-[0_0_15px_rgba(124,58,237,0.35)]" />
-          <div>
-            <h1 className="text-4xl font-black text-[#F3F4F6] tracking-tight uppercase">
-              Tela<span className="text-[#7C3AED]">Hub</span>
-            </h1>
-            <p className="text-[#9CA3AF] text-sm mt-1 font-medium flex items-center gap-2">
-              Bem-vindo, <span className="text-white font-bold">{currentUser?.username || '...'}</span>
-            </p>
+      <motion.header
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: 'easeOut' }}
+        className="flex flex-col mb-12 relative z-10 bg-[#2D3139]/85 backdrop-blur-md border border-white/10 rounded-2xl shadow-xl overflow-hidden"
+      >
+        {/* Top Bar: Brand Identity & Direct Actions */}
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center p-6 gap-5 border-b border-white/5">
+          <div className="flex items-center gap-4 flex-shrink-0">
+            <LogoHub size={44} className="drop-shadow-[0_0_12px_rgba(124,58,237,0.3)] flex-shrink-0" />
+            <div className="flex-shrink-0">
+              <h1 className="text-3xl font-black text-[#F3F4F6] tracking-tight uppercase leading-none">
+                Tela<span className="text-[#7C3AED]">Hub</span>
+              </h1>
+              <p className="text-[#9CA3AF] text-xs mt-1.5 font-medium flex items-center gap-1.5 whitespace-nowrap">
+                Bem-vindo, <span className="text-white font-bold">{currentUser?.username || '...'}</span>
+              </p>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-2.5 flex-wrap w-full lg:w-auto justify-start lg:justify-end">
+            <button
+              onClick={() => setIsLinkModalOpen(true)}
+              className="flex items-center gap-2 bg-[#1C1D22] border border-[#7C3AED]/30 text-[#7C3AED] hover:bg-[#7C3AED]/10 px-4 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all"
+            >
+              <Tv size={15} /> <span>Vincular TV</span>
+            </button>
+
+            <button
+              onClick={openCreateModal}
+              disabled={loading}
+              className="flex items-center gap-2 bg-[#7C3AED] hover:bg-[#6D28D9] text-white px-5 py-2.5 rounded-xl font-bold transition-all shadow-lg hover:shadow-xl disabled:opacity-50"
+            >
+              <Plus size={18} strokeWidth={3} className="text-white" /> <span>Nova Tela</span>
+            </button>
+
+            <div className="h-6 w-px bg-white/10 mx-1 hidden lg:block"></div>
+
+            <button
+              onClick={() => refreshData()}
+              className="flex items-center justify-center w-10 h-10 bg-[#1C1D22] hover:bg-slate-800 text-slate-300 border border-white/10 hover:border-slate-500 rounded-xl transition-all"
+              title="Atualizar lista"
+            >
+              <RefreshCw size={16} className={loading ? 'animate-spin text-[#7C3AED]' : ''} />
+            </button>
+
+            <button
+              onClick={handleLogout}
+              className="flex items-center justify-center w-10 h-10 bg-[#1C1D22] hover:bg-slate-800 border border-white/10 text-slate-400 hover:text-rose-400 hover:border-rose-500/30 rounded-xl transition-all"
+              title="Sair"
+            >
+              <LogOut size={16} />
+            </button>
           </div>
         </div>
-        <div className="flex gap-3 items-center flex-wrap w-full xl:w-auto justify-start xl:justify-end">
-          {currentUser?.role === 'admin' && (
-            <button
-              onClick={openSettingsModal}
-              className="flex items-center gap-2 bg-[#1C1D22] border border-[#7C3AED]/30 text-[#7C3AED] hover:bg-[#7C3AED]/10 px-4 py-3 rounded-xl font-bold text-xs uppercase tracking-wider transition-all"
-            >
-              <Settings size={16} /> <span className="hidden sm:inline">Config. E-mail</span>
-            </button>
-          )}
+
+        {/* Bottom Bar: System Navigation & Administrative Modules */}
+        <div className="bg-[#1C1D22]/40 px-6 py-3 flex gap-2 overflow-x-auto scrollbar-none items-center">
+          <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest mr-2.5 hidden md:inline">Módulos:</span>
+          
           <button
-            onClick={() => setIsUserModalOpen(true)}
-            className="flex items-center gap-2 bg-[#1C1D22] border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10 px-4 py-3 rounded-xl font-bold text-xs uppercase tracking-wider transition-all"
+            onClick={() => navigate('/scheduler')}
+            className="flex items-center gap-2 bg-[#1C1D22] border border-indigo-500/20 hover:border-indigo-500/50 text-indigo-300 hover:bg-indigo-500/10 px-3.5 py-2 rounded-xl font-bold text-xs uppercase tracking-wider transition-all whitespace-nowrap"
           >
-            <UsersIcon size={16} /> <span className="hidden sm:inline">Usuários</span>
+            <Calendar size={14} /> <span>Central de Programação</span>
           </button>
 
           <button
             onClick={() => setIsMediaLibraryOpen(true)}
-            className="flex items-center gap-2 bg-[#1C1D22] border border-fuchsia-500/30 text-fuchsia-400 hover:bg-fuchsia-500/10 px-4 py-3 rounded-xl font-bold text-xs uppercase tracking-wider transition-all"
+            className="flex items-center gap-2 bg-[#1C1D22] border border-fuchsia-500/20 hover:border-fuchsia-500/50 text-fuchsia-300 hover:bg-fuchsia-500/10 px-3.5 py-2 rounded-xl font-bold text-xs uppercase tracking-wider transition-all whitespace-nowrap"
           >
-            <FileImage size={16} /> <span className="hidden sm:inline">Mídia</span>
+            <FileImage size={14} /> <span>Mídia</span>
           </button>
 
           <button
-            onClick={() => navigate('/scheduler')}
-            className="flex items-center gap-2 bg-[#1C1D22] border border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/10 px-4 py-3 rounded-xl font-bold text-xs uppercase tracking-wider transition-all"
+            onClick={() => setIsUserModalOpen(true)}
+            className="flex items-center gap-2 bg-[#1C1D22] border border-emerald-500/20 hover:border-emerald-500/50 text-emerald-300 hover:bg-emerald-500/10 px-3.5 py-2 rounded-xl font-bold text-xs uppercase tracking-wider transition-all whitespace-nowrap"
           >
-            <Calendar size={16} /> <span className="hidden sm:inline">Central de Programação</span>
+            <UsersIcon size={14} /> <span>Usuários</span>
           </button>
 
-          <button
-            onClick={() => setIsLinkModalOpen(true)}
-            className="flex items-center gap-2 bg-[#1C1D22] border border-[#7C3AED]/30 text-[#7C3AED] hover:bg-[#7C3AED]/10 px-4 py-3 rounded-xl font-bold text-xs uppercase tracking-wider transition-all"
-          >
-            <Tv size={16} /> <span className="hidden sm:inline">Vincular TV</span>
-          </button>
-
-          <button
-            onClick={() => refreshData()}
-            className="flex items-center gap-2 bg-[#1C1D22] border border-white/10 hover:border-slate-500 text-slate-300 px-4 py-3 rounded-xl font-semibold transition-all"
-            title="Atualizar lista"
-          >
-            <RefreshCw size={18} className={loading ? 'animate-spin text-[#7C3AED]' : ''} />
-          </button>
-
-          <button
-            onClick={openCreateModal}
-            disabled={loading}
-            className="flex items-center gap-2 bg-[#7C3AED] hover:bg-[#6D28D9] text-white px-6 py-3 rounded-xl font-bold transition-all shadow-lg disabled:opacity-50"
-          >
-            <Plus size={20} strokeWidth={3} className="text-white" /> <span className="hidden sm:inline">Nova Tela</span>
-          </button>
-
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-2 bg-[#1C1D22] border border-slate-800 text-[#9CA3AF] hover:text-rose-400 hover:border-rose-500/50 px-4 py-3 rounded-xl font-bold transition-all ml-2"
-            title="Sair"
-          >
-            <LogOut size={18} />
-          </button>
+          {currentUser?.role === 'admin' && (
+            <button
+              onClick={openSettingsModal}
+              className="flex items-center gap-2 bg-[#1C1D22] border border-[#7C3AED]/20 hover:border-[#7C3AED]/50 text-[#7C3AED] hover:bg-[#7C3AED]/10 px-3.5 py-2 rounded-xl font-bold text-xs uppercase tracking-wider transition-all whitespace-nowrap"
+            >
+              <Settings size={14} /> <span>Config. E-mail</span>
+            </button>
+          )}
         </div>
-      </header>
+      </motion.header>
 
       {/* LISTA DE TELAS */}
       {loading && displays.length === 0 ? (
