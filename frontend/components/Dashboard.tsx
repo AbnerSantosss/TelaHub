@@ -803,6 +803,17 @@ const Dashboard: React.FC = () => {
                 </p>
               </div>
 
+              {/* Informação Custo Zero */}
+              <div className="bg-[#10B981]/5 border border-[#10B981]/25 rounded-xl p-3.5 flex items-start gap-3">
+                <CheckCircle className="text-emerald-400 shrink-0 mt-0.5" size={16} />
+                <div>
+                  <p className="text-emerald-400 text-xs font-black uppercase tracking-wider">Conexão Direta (Custo Zero)</p>
+                  <p className="text-slate-400 text-[11px] mt-1 leading-relaxed">
+                    Ao conectar seu próprio e-mail SMTP, você realiza disparos de convites e alertas de redefinição de forma <span className="text-[#10B981] font-bold">100% gratuita</span>, sem taxas de entrega ou custos mensais de e-mail marketing.
+                  </p>
+                </div>
+              </div>
+
               <div>
                 <label className="block text-[10px] font-black text-slate-500 mb-1 uppercase tracking-wider">E-mail de Envio</label>
                 <input
