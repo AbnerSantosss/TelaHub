@@ -61,7 +61,7 @@ services:
       PGADMIN_DEFAULT_EMAIL: abnersantos2025@admin.com
       PGADMIN_DEFAULT_PASSWORD: A@b.26%19abner
     ports:
-      - "5051:80"
+      - "5053:80"
     volumes:
       - pgadmin_data:/var/lib/pgadmin
     depends_on:
