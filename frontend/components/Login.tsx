@@ -151,79 +151,110 @@ const Login: React.FC = () => {
           </div>
         </div>
 
-        {/* Floating Mockup Widgets using motion for incredible premium vibe */}
-        <div className="absolute right-[-60px] xl:right-[-40px] top-[15%] w-[380px] h-[500px] pointer-events-none hidden xl:block select-none opacity-90">
-          {/* Floating Weather Widget */}
+        {/* Simulated TV Displays representing the app in action */}
+        <div className="absolute right-[-60px] xl:right-[-40px] top-[15%] w-[380px] h-[500px] pointer-events-none hidden xl:block select-none opacity-95">
+          {/* TV 1: Monitor de Clima (Horizontal 16:9) */}
           <motion.div 
             initial={{ x: 50, y: 0, opacity: 0 }}
-            animate={{ x: 0, y: [-15, 10, -15], opacity: 1 }}
+            animate={{ x: 0, y: [-10, 10, -10], opacity: 1 }}
             transition={{ 
               x: { duration: 1 }, 
               y: { duration: 6, repeat: Infinity, ease: "easeInOut" } 
             }}
-            className="absolute top-[10%] left-0 w-[240px] bg-[#2D3139] border border-[#9CA3AF]/15 rounded-xl p-5 shadow-lg"
+            className="absolute top-[5%] left-[20px] w-[250px] flex flex-col select-none filter drop-shadow-2xl"
           >
-            <div className="flex justify-between items-center mb-3">
-              <span className="text-[9px] font-bold text-[#7C3AED] uppercase tracking-widest">Tempo Real</span>
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-500 text-xl">☀️</div>
-              <div>
-                <h5 className="text-xs font-bold text-white">São Paulo, BR</h5>
-                <p className="text-[10px] text-slate-400 font-medium">Ensolarado • 26°C</p>
+            {/* TV Bezel */}
+            <div className="border-[5px] border-[#334155] bg-[#2D3139] rounded-xl relative overflow-hidden p-3.5 pt-4 border-b-[8px] border-b-[#475569] shadow-lg">
+              {/* Power LED Indicator */}
+              <div className="absolute bottom-[1.5px] left-1/2 -translate-x-1/2 w-1 h-1 bg-[#10B981] rounded-full"></div>
+              
+              <div className="flex justify-between items-center mb-3">
+                <span className="text-[8px] font-black text-[#7C3AED] uppercase tracking-widest">Display Copa #01</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-500 text-lg">☀️</div>
+                <div>
+                  <h5 className="text-[11px] font-black text-white leading-tight">São Paulo, BR</h5>
+                  <p className="text-[9px] text-[#9CA3AF] font-bold">Ensolarado • 26°C</p>
+                </div>
               </div>
             </div>
+            {/* TV Neck & Base */}
+            <div className="w-2.5 h-2 bg-[#1e293b] mx-auto"></div>
+            <div className="w-14 h-1 bg-[#334155] rounded-full mx-auto"></div>
           </motion.div>
 
-          {/* Floating Market Watch Widget */}
+          {/* TV 2: Totem de Indicadores (Vertical Totem Monitor 9:16) */}
           <motion.div 
             initial={{ x: 100, y: 0, opacity: 0 }}
-            animate={{ x: 0, y: [15, -15, 15], opacity: 1 }}
+            animate={{ x: 0, y: [10, -10, 10], opacity: 1 }}
             transition={{ 
               x: { duration: 1, delay: 0.2 }, 
               y: { duration: 7, repeat: Infinity, ease: "easeInOut" } 
             }}
-            className="absolute top-[42%] left-[40px] w-[260px] bg-[#2D3139] border border-[#9CA3AF]/15 rounded-xl p-5 shadow-lg"
+            className="absolute top-[34%] right-[20px] w-[170px] flex flex-col select-none filter drop-shadow-2xl"
           >
-            <div className="flex justify-between items-center mb-3">
-              <span className="text-[9px] font-bold text-[#7C3AED] uppercase tracking-widest">Painel Financeiro</span>
-              <span className="text-[10px] font-mono font-bold text-emerald-400">+2.47%</span>
-            </div>
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <span className="text-xs font-bold text-slate-200">PETR4.SA</span>
-                <span className="text-xs font-bold text-slate-100">R$ 38,42</span>
+            {/* TV Bezel (Vertical) */}
+            <div className="border-[5px] border-[#334155] bg-[#2D3139] rounded-xl relative overflow-hidden p-3.5 pb-5 border-b-[8px] border-b-[#475569] shadow-lg flex flex-col h-[210px]">
+              {/* Power LED Indicator */}
+              <div className="absolute bottom-[1.5px] left-1/2 -translate-x-1/2 w-1 h-1 bg-[#7C3AED] rounded-full"></div>
+              
+              <div className="flex justify-between items-center mb-3">
+                <span className="text-[7px] font-black text-[#7C3AED] uppercase tracking-widest">Totem Sul #02</span>
+                <span className="text-[8px] font-mono font-black text-emerald-400">+2.47%</span>
               </div>
-              <div className="h-6 w-full opacity-60">
-                <svg className="w-full h-full" viewBox="0 0 100 20">
-                  <path d="M0,15 L20,10 L40,12 L60,5 L80,8 L100,2" fill="none" stroke="#10B981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
+              <div className="flex-1 flex flex-col justify-between">
+                <div>
+                  <h6 className="text-[9px] font-black text-slate-400 block mb-0.5 leading-none">Métrica Financeira</h6>
+                  <span className="text-[11px] font-bold text-white">PETR4.SA</span>
+                  <span className="text-[11px] font-black text-[#F3F4F6] block mt-0.5">R$ 38,42</span>
+                </div>
+                <div className="h-10 w-full mt-2 bg-[#1C1D22]/60 rounded-lg p-1.5 flex items-center border border-white/5">
+                  <svg className="w-full h-full" viewBox="0 0 100 30">
+                    <path d="M0,25 L20,18 L40,22 L60,8 L80,14 L100,2" fill="none" stroke="#10B981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </div>
               </div>
             </div>
+            {/* TV Neck & Base */}
+            <div className="w-2.5 h-3 bg-[#1e293b] mx-auto"></div>
+            <div className="w-16 h-1.5 bg-[#334155] rounded-lg mx-auto"></div>
           </motion.div>
 
-          {/* Floating Chores/Todos Widget */}
+          {/* TV 3: Painel de Tarefas (Horizontal 16:9) */}
           <motion.div 
             initial={{ x: 120, y: 0, opacity: 0 }}
-            animate={{ x: 0, y: [-5, 12, -5], opacity: 0.8 }}
+            animate={{ x: 0, y: [-8, 8, -8], opacity: 0.95 }}
             transition={{ 
               x: { duration: 1, delay: 0.4 }, 
               y: { duration: 5, repeat: Infinity, ease: "easeInOut" } 
             }}
-            className="absolute top-[75%] left-[-20px] w-[220px] bg-[#2D3139] border border-[#9CA3AF]/10 rounded-xl p-4 shadow-lg"
+            className="absolute top-[68%] left-[0px] w-[240px] flex flex-col select-none filter drop-shadow-2xl"
           >
-            <span className="text-[8px] font-bold text-emerald-400 uppercase tracking-widest block mb-2">Produtividade</span>
-            <div className="space-y-1.5">
-              <div className="flex items-center gap-2">
-                <div className="w-3.5 h-3.5 rounded border border-emerald-500 bg-emerald-500/20 flex items-center justify-center"><CheckCircle2 size={10} className="text-emerald-400" /></div>
-                <span className="text-[10px] text-slate-300 line-through">Reunião Geral 10h</span>
+            {/* TV Bezel */}
+            <div className="border-[5px] border-[#334155] bg-[#2D3139] rounded-xl relative overflow-hidden p-3.5 pt-4 border-b-[8px] border-b-[#475569] shadow-lg">
+              {/* Power LED Indicator */}
+              <div className="absolute bottom-[1.5px] left-1/2 -translate-x-1/2 w-1 h-1 bg-[#10B981] rounded-full"></div>
+              
+              <div className="flex justify-between items-center mb-3">
+                <span className="text-[8px] font-black text-emerald-400 uppercase tracking-widest">Display Recepção</span>
+                <span className="text-[8px] font-mono text-slate-500 font-bold">100% OK</span>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3.5 h-3.5 rounded border border-[#9CA3AF]/30"></div>
-                <span className="text-[10px] text-slate-300">Atualizar Display Copa</span>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-3.5 h-3.5 rounded border border-emerald-500 bg-emerald-500/20 flex items-center justify-center"><CheckCircle2 size={8} className="text-emerald-400" /></div>
+                  <span className="text-[10px] text-slate-400 line-through">Reunião Geral 10h</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3.5 h-3.5 rounded border border-[#9CA3AF]/30"></div>
+                  <span className="text-[10px] text-slate-300">Atualizar Display Copa</span>
+                </div>
               </div>
             </div>
+            {/* TV Neck & Base */}
+            <div className="w-2.5 h-2 bg-[#1e293b] mx-auto"></div>
+            <div className="w-14 h-1 bg-[#334155] rounded-full mx-auto"></div>
           </motion.div>
         </div>
 
