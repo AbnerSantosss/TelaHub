@@ -91,10 +91,7 @@ const Login: React.FC = () => {
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none z-0"></div>
       
       {/* Lateral Marketing / Copywriting Panel (Desktop only: lg and above) */}
-      <div className="hidden lg:flex lg:w-[55%] xl:w-[60%] relative flex-col justify-between p-16 overflow-hidden border-r border-[#9CA3AF]/10 bg-gradient-to-br from-[#131418] via-[#1C1D22] to-[#252830] z-10">
-        {/* Decorative background blur glow elements */}
-        <div className="absolute top-[-20%] left-[-20%] w-[80%] h-[80%] bg-indigo-600/10 rounded-full blur-[150px] pointer-events-none"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-[#7C3AED]/10 rounded-full blur-[150px] pointer-events-none"></div>
+      <div className="hidden lg:flex lg:w-[55%] xl:w-[60%] relative flex-col justify-between p-16 overflow-hidden border-r border-[#9CA3AF]/10 bg-[#1C1D22] z-10">
         
         {/* Upper Header: Logo and Brand Name */}
         <div className="flex items-center gap-3 z-10">
@@ -113,7 +110,7 @@ const Login: React.FC = () => {
               Mídia Digital Corporativa Premium
             </span>
             <h2 className="text-4xl xl:text-5xl font-black text-white leading-tight tracking-tight">
-              Transforme qualquer tela em um canal de <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#7C3AED] to-[#A855F7]">comunicação inteligente</span>.
+              Transforme qualquer tela em um canal de <span className="text-[#7C3AED]">comunicação inteligente</span>.
             </h2>
             <p className="text-slate-400 text-sm xl:text-base leading-relaxed">
               O TelaHub é um sistema full-stack premium para gerenciar e transmitir programações, informativos, indicadores corporativos e mídias de forma dinâmica e totalmente remota em tempo real.
@@ -133,7 +130,7 @@ const Login: React.FC = () => {
             </div>
 
             <div className="flex gap-4 items-start">
-              <div className="w-10 h-10 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 shrink-0 mt-0.5">
+              <div className="w-10 h-10 rounded-lg bg-[#7C3AED]/10 border border-[#7C3AED]/20 flex items-center justify-center text-[#7C3AED] shrink-0 mt-0.5">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-layout-grid"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
               </div>
               <div>
@@ -164,10 +161,10 @@ const Login: React.FC = () => {
               x: { duration: 1 }, 
               y: { duration: 6, repeat: Infinity, ease: "easeInOut" } 
             }}
-            className="absolute top-[10%] left-0 w-[240px] bg-[#2D3139]/80 backdrop-blur-md border border-[#9CA3AF]/20 rounded-2xl p-5 shadow-2xl"
+            className="absolute top-[10%] left-0 w-[240px] bg-[#2D3139] border border-[#9CA3AF]/15 rounded-xl p-5 shadow-lg"
           >
             <div className="flex justify-between items-center mb-3">
-              <span className="text-[9px] font-bold text-indigo-400 uppercase tracking-widest">Tempo Real</span>
+              <span className="text-[9px] font-bold text-[#7C3AED] uppercase tracking-widest">Tempo Real</span>
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
             </div>
             <div className="flex items-center gap-3">
@@ -187,7 +184,7 @@ const Login: React.FC = () => {
               x: { duration: 1, delay: 0.2 }, 
               y: { duration: 7, repeat: Infinity, ease: "easeInOut" } 
             }}
-            className="absolute top-[42%] left-[40px] w-[260px] bg-[#2D3139]/90 backdrop-blur-md border border-[#9CA3AF]/20 rounded-2xl p-5 shadow-2xl"
+            className="absolute top-[42%] left-[40px] w-[260px] bg-[#2D3139] border border-[#9CA3AF]/15 rounded-xl p-5 shadow-lg"
           >
             <div className="flex justify-between items-center mb-3">
               <span className="text-[9px] font-bold text-[#7C3AED] uppercase tracking-widest">Painel Financeiro</span>
@@ -214,7 +211,7 @@ const Login: React.FC = () => {
               x: { duration: 1, delay: 0.4 }, 
               y: { duration: 5, repeat: Infinity, ease: "easeInOut" } 
             }}
-            className="absolute top-[75%] left-[-20px] w-[220px] bg-[#2D3139]/70 backdrop-blur-md border border-[#9CA3AF]/15 rounded-2xl p-4 shadow-2xl"
+            className="absolute top-[75%] left-[-20px] w-[220px] bg-[#2D3139] border border-[#9CA3AF]/10 rounded-xl p-4 shadow-lg"
           >
             <span className="text-[8px] font-bold text-emerald-400 uppercase tracking-widest block mb-2">Produtividade</span>
             <div className="space-y-1.5">
@@ -240,23 +237,19 @@ const Login: React.FC = () => {
 
       {/* Right Section: Login Form (Full width on mobile, centered; lg and above takes side portion) */}
       <div className="w-full lg:w-[45%] xl:w-[40%] flex items-center justify-center p-6 sm:p-12 relative z-10 bg-[#1C1D22]">
-        {/* Subtle Radial Glow in Violet/Indigo on right side */}
-        <div className="absolute top-[-10%] right-[-10%] w-[70%] h-[70%] bg-indigo-900/10 rounded-full blur-[120px] pointer-events-none z-0"></div>
-        <div className="absolute bottom-[-10%] left-[-10%] w-[70%] h-[70%] bg-[#7C3AED]/5 rounded-full blur-[120px] pointer-events-none z-0"></div>
 
         <div className="w-full max-w-md relative z-10 flex flex-col gap-6">
           
           {/* Logo e Branding */}
           <div className="flex flex-col items-center animate-in fade-in slide-in-from-top-4 duration-700">
             {/* Logo perfeitamente alinhado acima do H1 */}
-            <div className="w-20 h-20 bg-gradient-to-br from-[#2D3139] to-[#1C1D22] rounded-2xl flex items-center justify-center border border-[#9CA3AF]/10 mb-4 shadow-[0_0_30px_rgba(124,58,237,0.12)] relative group p-3">
-               <div className="absolute inset-0 bg-[#7C3AED]/5 rounded-2xl blur-xl group-hover:bg-[#7C3AED]/10 transition-all duration-500"></div>
+            <div className="w-20 h-20 bg-[#2D3139] rounded-2xl flex items-center justify-center border border-[#9CA3AF]/10 mb-4 shadow-lg relative group p-3">
                <LogoHub size={44} />
             </div>
             
             {/* Mobile Header (Hidden on lg since sidebar has it) */}
             <div className="lg:hidden text-center">
-              <h1 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#F3F4F6] via-[#9CA3AF] to-[#9CA3AF] tracking-tight mb-1 uppercase">
+              <h1 className="text-3xl font-black text-[#F3F4F6] tracking-tight mb-1 uppercase">
                 Tela<span className="text-[#7C3AED]">Hub</span>
               </h1>
               <p className="text-[#9CA3AF] text-xs font-medium tracking-wide max-w-[280px] mx-auto">
@@ -275,7 +268,7 @@ const Login: React.FC = () => {
             </div>
           </div>
 
-          <div className={`bg-[#2D3139] border border-[#9CA3AF]/15 rounded-3xl shadow-2xl p-6 sm:p-8 transition-all duration-500 hover:border-[#7C3AED]/30 hover:shadow-[0_0_60px_rgba(124,58,237,0.08)] ${!isConfigured ? 'opacity-50 pointer-events-none grayscale' : ''}`}>
+          <div className={`bg-[#2D3139] border border-[#9CA3AF]/15 rounded-2xl shadow-xl p-6 sm:p-8 transition-all duration-300 hover:border-[#7C3AED]/30 ${!isConfigured ? 'opacity-50 pointer-events-none grayscale' : ''}`}>
             
             <form onSubmit={handleLogin} className="space-y-5">
               <div className="space-y-1.5">
@@ -350,7 +343,7 @@ const Login: React.FC = () => {
               <button 
                 type="submit" 
                 disabled={loading}
-                className="w-full liquid-metal-btn text-[#F3F4F6] font-bold py-4 rounded-xl transition-all flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed transform active:scale-[0.98]"
+                className="w-full liquid-metal-btn text-[#F3F4F6] font-bold py-4 rounded-lg transition-all flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed transform active:scale-[0.98]"
               >
                 {loading ? <Loader2 size={20} className="animate-spin" /> : <LogIn size={20} className="group-hover:translate-x-1 transition-transform" />} 
                 {loading ? 'ENTRANDO...' : 'ACESSAR SISTEMA'}

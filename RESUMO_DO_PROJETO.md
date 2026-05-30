@@ -76,3 +76,24 @@ Eles estão divididos em 4 grandes categorias:
 * **Airtable (`AIRTABLE`):** Incorporação direta de bases de dados do Airtable.
 * **Documento PDF (`PDF_DOCUMENT`):** Renderiza documentos ou folhetos PDF hospedados remotamente.
 * **HTML Customizado (`EMBED_HTML`):** Campo aberto para injeção de HTML e CSS customizados para maior controle de layouts específicos.
+
+---
+
+## 🎨 5. Design System e Identidade Visual (Enterprise B2B)
+
+O **TelaHub** adota um sistema de design rigorosamente desenhado para o ecossistema corporativo senior, priorizando sobriedade, legibilidade máxima e alta densidade de dados, sem o uso de elementos visuais caricatos ou brilhos futuristas exagerados.
+
+### **Tokens de Cores Estruturais**
+- **Fundo Base:** Cinza Corporativo (`#1C1D22`) — Tom escuro fosco de altíssimo conforto visual.
+- **Superfícies de Componentes:** Cinza Mineral (`#2D3139`) — Utilizado em cards, caixas de diálogo, modais e formulários.
+- **Foco e Ação Primária:** Violeta Tecnológico (`#7C3AED`) — Tom corporativo vibrante para botões principais, seleções ativas, badges e destaques geométricos.
+- **Textos Principais:** Branco Suave (`#F3F4F6`) — Usado para títulos e métricas de grande importância.
+- **Textos Secundários:** Cinza Neutro (`#9CA3AF`) — Para descrições, metadados, labels e IDs.
+- **Telemetria de Status:** Verde Esmeralda (`#10B981`) para dispositivos **[Online]** e Cinza Sólido (`#64748B`) para dispositivos **[Offline]**.
+
+### **Diretrizes de Layout e Tipografia**
+- **Tipografia Premium:** O ecossistema utiliza a fonte geométrica **Outfit** com fallback em **Inter** para oferecer uma leitura limpa, séria e profissional em monitores e telas de qualquer tamanho.
+- **Geometria Limpa:** Bordas arredondadas são limitadas a `rounded-2xl` (ou `rounded-xl` em botões e widgets menores) para garantir coerência estrutural sem suavidade excessiva.
+- **Austeridade Visual:** Completa ausência de efeitos neon, gradientes chamativos e overlays brilhantes artificiais. Toda profundidade visual é criada a partir de bordas finas com contraste suave (`border-white/10`) e sombras projetadas elegantes (`shadow-2xl`).
+- **Adaptabilidade:** A interface é projetada com foco inicial em telas do tipo desktop/painel e otimizada dinamicamente para displays verticais e dispositivos mobile de controle.
+

@@ -36,20 +36,15 @@ const ForgotPassword: React.FC = () => {
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-[#1C1D22]">
       {/* Background Mesh Grid */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none z-0"></div>
-      
-      {/* Subtle Radial Glow */}
-      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-indigo-900/10 rounded-full blur-[120px] animate-pulse z-0"></div>
-      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-[#7C3AED]/5 rounded-full blur-[120px] animate-pulse z-0" style={{ animationDelay: '2s' }}></div>
 
       <div className="w-full max-w-md p-8 relative z-10 flex flex-col gap-6">
         
         {/* Logo e Branding */}
         <div className="flex flex-col items-center animate-in fade-in slide-in-from-top-4 duration-700">
-          <div className="w-24 h-24 bg-gradient-to-br from-[#2D3139] to-[#1C1D22] rounded-2xl flex items-center justify-center border border-[#9CA3AF]/10 mb-5 shadow-[0_0_40px_rgba(124,58,237,0.12)] relative group p-4">
-             <div className="absolute inset-0 bg-[#7C3AED]/5 rounded-2xl blur-xl group-hover:bg-[#7C3AED]/10 transition-all duration-500"></div>
+          <div className="w-24 h-24 bg-[#2D3139] rounded-2xl flex items-center justify-center border border-[#9CA3AF]/10 mb-5 shadow-lg relative group p-4">
              <LogoHub size={52} />
           </div>
-          <h1 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#F3F4F6] via-[#9CA3AF] to-[#9CA3AF] tracking-tight mb-1 text-center uppercase">
+          <h1 className="text-3xl font-black text-[#F3F4F6] tracking-tight mb-1 text-center uppercase">
             Tela<span className="text-[#7C3AED]">Hub</span>
           </h1>
           <p className="text-[#9CA3AF] text-xs font-medium tracking-wide text-center max-w-[280px]">
@@ -57,7 +52,7 @@ const ForgotPassword: React.FC = () => {
           </p>
         </div>
 
-        <div className="bg-[#2D3139] border border-[#9CA3AF]/15 rounded-3xl shadow-2xl p-8 transition-all duration-500 hover:border-[#7C3AED]/30">
+        <div className="bg-[#2D3139] border border-[#9CA3AF]/15 rounded-2xl shadow-xl p-8 transition-all duration-300 hover:border-[#7C3AED]/30">
           
           {success ? (
             <div className="flex flex-col items-center gap-5 py-4">

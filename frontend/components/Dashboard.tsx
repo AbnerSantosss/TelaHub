@@ -497,7 +497,7 @@ const Dashboard: React.FC = () => {
             <div className={`h-1 ${
               toast.type === 'success' ? 'bg-gradient-to-r from-emerald-600 via-emerald-400 to-cyan-400' :
               toast.type === 'error' ? 'bg-gradient-to-r from-rose-600 via-rose-400 to-amber-400' :
-              'bg-gradient-to-r from-indigo-600 via-[#7C3AED] to-purple-400'
+              'bg-[#7C3AED]'
             }`}></div>
             
             <div className="p-6 text-center">
@@ -534,14 +534,12 @@ const Dashboard: React.FC = () => {
         </div>
       )}
       <div className="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-900/10 rounded-full blur-[120px]"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-[#7C3AED]/5 rounded-full blur-[120px]"></div>
       </div>
 
       {/* MODAL CRIAR TELA */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <div className="bg-[#2D3139] border border-white/10 rounded-2xl shadow-[0_0_50px_rgba(124,58,237,0.25)] w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
+          <div className="bg-[#2D3139] border border-white/10 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
             <div className="p-6 border-b border-white/10 flex justify-between items-center bg-[#2D3139]/50">
               <h3 className="font-bold text-lg text-slate-100 flex items-center gap-2">
                 <Plus className="text-[#7C3AED]" size={20} /> Nova Tela
@@ -590,18 +588,18 @@ const Dashboard: React.FC = () => {
                   onClick={() => setNewDisplayOrientation('vertical')}
                   className={`flex flex-col items-center justify-center gap-2 p-4 rounded-xl border-2 transition-all ${
                     newDisplayOrientation === 'vertical'
-                      ? 'border-purple-500 bg-purple-500/10 shadow-[0_0_16px_rgba(168,85,247,0.2)]'
+                      ? 'border-[#7C3AED] bg-[#7C3AED]/10 shadow-lg'
                       : 'border-white/10 bg-[#1C1D22] hover:border-[#9CA3AF]/40'
                   }`}
                 >
                   {/* 9:16 preview */}
                   <div className={`w-9 h-16 rounded border-2 flex items-center justify-center transition-colors ${
-                    newDisplayOrientation === 'vertical' ? 'border-purple-400 bg-purple-500/10' : 'border-white/10 bg-[#2D3139]'
+                    newDisplayOrientation === 'vertical' ? 'border-[#7C3AED]/80 bg-[#7C3AED]/10' : 'border-white/10 bg-[#2D3139]'
                   }`}>
-                    <Tv size={14} className={newDisplayOrientation === 'vertical' ? 'text-purple-400' : 'text-slate-500'} />
+                    <Tv size={14} className={newDisplayOrientation === 'vertical' ? 'text-[#7C3AED]' : 'text-slate-500'} />
                   </div>
                   <div className="text-center">
-                    <p className={`text-xs font-bold ${ newDisplayOrientation === 'vertical' ? 'text-purple-400' : 'text-slate-400' }`}>Vertical</p>
+                    <p className={`text-xs font-bold ${ newDisplayOrientation === 'vertical' ? 'text-[#7C3AED]' : 'text-slate-400' }`}>Vertical</p>
                     <p className="text-[10px] text-slate-600 font-mono">9:16 — Totem / Kiosk</p>
                   </div>
                 </button>
@@ -617,7 +615,7 @@ const Dashboard: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2.5 rounded-lg bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-bold shadow-[0_0_20px_rgba(124,58,237,0.3)] transition-all flex items-center gap-2"
+                  className="px-6 py-2.5 rounded-lg bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-bold shadow-lg transition-all flex items-center gap-2"
                 >
                   <Zap size={18} className="fill-white" /> Criar Tela
                 </button>
@@ -630,7 +628,7 @@ const Dashboard: React.FC = () => {
       {/* MODAL GERENCIAR USUÁRIOS */}
       {isUserModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <div className="bg-[#2D3139] border border-white/10 rounded-2xl shadow-[0_0_50px_rgba(16,185,129,0.25)] w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
+          <div className="bg-[#2D3139] border border-white/10 rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
             <div className="p-6 border-b border-white/10 flex justify-between items-center bg-[#2D3139]/50">
               <h3 className="font-bold text-lg text-slate-100 flex items-center gap-2">
                 <UsersIcon className="text-emerald-400" size={20} /> Gestão de Usuários
@@ -754,7 +752,7 @@ const Dashboard: React.FC = () => {
       {/* MODAL CONFIGURAÇÕES SMTP (ADMIN ONLY) */}
       {isSettingsModalOpen && currentUser?.role === 'admin' && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <div className="bg-[#2D3139] border border-white/10 rounded-2xl shadow-[0_0_50px_rgba(124,58,237,0.25)] w-full max-w-md overflow-hidden">
+          <div className="bg-[#2D3139] border border-white/10 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
             <div className="p-6 border-b border-white/10 flex justify-between items-center bg-[#2D3139]/50">
               <h3 className="font-bold text-lg text-slate-100 flex items-center gap-2">
                 <Settings className="text-[#7C3AED]" size={20} /> Configurações de E-mail
@@ -818,7 +816,7 @@ const Dashboard: React.FC = () => {
                 <button
                   type="submit"
                   disabled={smtpLoading || !smtpUser || (!smtpPass && !smtpHasSavedPass)}
-                  className="px-6 py-2.5 rounded-lg bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-bold text-sm shadow-[0_0_20px_rgba(124,58,237,0.3)] transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-6 py-2.5 rounded-lg bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-bold text-sm shadow-lg transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Check size={14} /> Salvar
                 </button>
@@ -831,7 +829,7 @@ const Dashboard: React.FC = () => {
       {/* MODAL VINCULAR DISPOSITIVO */}
       {isLinkModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <div className="bg-[#2D3139] border border-white/10 rounded-2xl shadow-[0_0_50px_rgba(124,58,237,0.25)] w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
+          <div className="bg-[#2D3139] border border-white/10 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
             <div className="p-6 border-b border-white/10 flex justify-between items-center bg-[#2D3139]/50">
               <h3 className="font-bold text-lg text-slate-100 flex items-center gap-2">
                 <LinkIcon className="text-[#7C3AED]" size={20} /> Vincular TV
@@ -902,7 +900,7 @@ const Dashboard: React.FC = () => {
                 <button
                   type="submit"
                   disabled={!linkCode || !linkName || !selectedDisplayId}
-                  className="px-6 py-2.5 rounded-lg bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-bold shadow-[0_0_20px_rgba(124,58,237,0.3)] transition-all flex items-center gap-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-6 py-2.5 rounded-lg bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-bold shadow-lg transition-all flex items-center gap-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <LinkIcon size={16} /> Vincular
                 </button>
@@ -915,7 +913,7 @@ const Dashboard: React.FC = () => {
       {/* MODAL CONFIRMAÇÃO EXCLUSÃO DISPOSITIVO */}
       {isDeleteDeviceModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <div className="bg-[#2D3139] border border-white/10 rounded-2xl shadow-[0_0_50px_rgba(244,63,94,0.25)] w-full max-w-sm overflow-hidden animate-in fade-in zoom-in duration-200">
+          <div className="bg-[#2D3139] border border-white/10 rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in fade-in zoom-in duration-200">
             <div className="p-6 border-b border-white/10 flex justify-between items-center bg-[#2D3139]/50">
               <h3 className="font-bold text-lg text-slate-100 flex items-center gap-2">
                 <Trash2 className="text-rose-500" size={20} /> Excluir Dispositivo?
@@ -937,7 +935,7 @@ const Dashboard: React.FC = () => {
                 </button>
                 <button
                   onClick={executeDeleteDevice}
-                  className="px-6 py-2.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-bold shadow-[0_0_20px_rgba(244,63,94,0.3)] transition-all flex items-center gap-2 text-sm"
+                  className="px-6 py-2.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-bold shadow-lg transition-all flex items-center gap-2 text-sm"
                 >
                   <Trash2 size={16} /> Confirmar Exclusão
                 </button>
@@ -950,7 +948,7 @@ const Dashboard: React.FC = () => {
       {/* MODAL CONFIRMAÇÃO EXCLUSÃO USUÁRIO */}
       {isDeleteUserModalOpen && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <div className="bg-[#2D3139] border border-white/10 rounded-2xl shadow-[0_0_50px_rgba(244,63,94,0.25)] w-full max-w-sm overflow-hidden animate-in fade-in zoom-in duration-200">
+          <div className="bg-[#2D3139] border border-white/10 rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in fade-in zoom-in duration-200">
             <div className="p-6 border-b border-white/10 flex justify-between items-center bg-[#2D3139]/50">
               <h3 className="font-bold text-lg text-slate-100 flex items-center gap-2">
                 <Trash2 className="text-rose-500" size={20} /> Excluir Usuário?
@@ -976,7 +974,7 @@ const Dashboard: React.FC = () => {
                 <button
                   onClick={executeDeleteUser}
                   disabled={userActionLoading}
-                  className="px-6 py-2.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-bold shadow-[0_0_20px_rgba(244,63,94,0.3)] transition-all flex items-center gap-2 text-sm disabled:opacity-50"
+                  className="px-6 py-2.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-bold shadow-lg transition-all flex items-center gap-2 text-sm disabled:opacity-50"
                 >
                   {userActionLoading ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />} 
                   Confirmar Exclusão
@@ -990,7 +988,7 @@ const Dashboard: React.FC = () => {
       {/* MODAL CONFIRMAÇÃO EXCLUSÃO TELA (DISPLAY) */}
       {isDeleteDisplayModalOpen && displayToDelete && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-          <div className="bg-[#2D3139] border border-rose-500/30 rounded-2xl shadow-[0_0_60px_rgba(244,63,94,0.3)] w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-300">
+          <div className="bg-[#2D3139] border border-rose-500/20 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-300">
             {/* Top warning bar */}
             <div className="h-1.5 bg-gradient-to-r from-rose-600 via-red-500 to-amber-500"></div>
             
@@ -1036,7 +1034,7 @@ const Dashboard: React.FC = () => {
                 <button
                   onClick={executeDeleteDisplay}
                   disabled={isDeletingDisplay}
-                  className="px-6 py-3 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold shadow-[0_0_25px_rgba(244,63,94,0.4)] transition-all flex items-center gap-2 text-sm disabled:opacity-50 border border-rose-500"
+                  className="px-6 py-3 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold shadow-lg transition-all flex items-center gap-2 text-sm disabled:opacity-50 border border-rose-500"
                 >
                   {isDeletingDisplay ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
                   {isDeletingDisplay ? 'Excluindo...' : 'Sim, Excluir Tela'}
@@ -1050,7 +1048,7 @@ const Dashboard: React.FC = () => {
       {/* MODAL RENOMEAR TELA */}
       {isRenameModalOpen && displayToRename && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-          <div className="bg-[#2D3139] border border-white/10 rounded-2xl shadow-[0_0_50px_rgba(124,58,237,0.25)] w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
+          <div className="bg-[#2D3139] border border-white/10 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
             <div className="p-6 border-b border-white/10 flex justify-between items-center bg-[#2D3139]/50">
               <h3 className="font-bold text-lg text-slate-100 flex items-center gap-2">
                 <Pencil className="text-[#7C3AED]" size={20} /> Renomear Tela
@@ -1080,7 +1078,7 @@ const Dashboard: React.FC = () => {
                 <button
                   type="submit"
                   disabled={!renameValue.trim() || renameValue.trim() === displayToRename.name}
-                  className="px-6 py-2.5 rounded-lg bg-gradient-to-r from-indigo-600 to-[#7C3AED] hover:from-indigo-500 hover:to-[#6D28D9] text-white font-bold shadow-[0_0_20px_rgba(124,58,237,0.3)] transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-6 py-2.5 rounded-lg bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-bold shadow-lg transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Check size={16} /> Salvar Nome
                 </button>
@@ -1102,7 +1100,7 @@ const Dashboard: React.FC = () => {
       {/* MODAL CONFIGURAÇÕES DO DISPLAY */}
       {isDisplaySettingsOpen && settingsDisplay && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-          <div className="bg-[#2D3139] border border-white/10 rounded-2xl shadow-[0_0_50px_rgba(124,58,237,0.25)] w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-200 max-h-[90vh] flex flex-col">
+          <div className="bg-[#2D3139] border border-white/10 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-200 max-h-[90vh] flex flex-col">
             {/* Header */}
             <div className="p-6 border-b border-white/10 flex justify-between items-center bg-[#2D3139]/50">
               <h3 className="font-bold text-lg text-slate-100 flex items-center gap-2">
@@ -1116,7 +1114,7 @@ const Dashboard: React.FC = () => {
             <div className="p-6 space-y-6 overflow-y-auto">
               {/* Seção: Imagem de Capa */}
               <div>
-                <h4 className="text-[10px] font-black text-fuchsia-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                <h4 className="text-[10px] font-black text-[#7C3AED] uppercase tracking-widest mb-3 flex items-center gap-2">
                   <ImageIcon size={12} /> Imagem de Capa
                 </h4>
                 <div className="bg-[#1C1D22] border border-white/10 rounded-xl overflow-hidden">
@@ -1143,7 +1141,7 @@ const Dashboard: React.FC = () => {
                       <Monitor size={32} className="text-[#9CA3AF]/40" />
                       <button
                         onClick={() => { setIsDisplaySettingsOpen(false); openCoverModal(settingsDisplay); }}
-                        className="px-4 py-2 bg-fuchsia-500/10 hover:bg-fuchsia-500/20 text-fuchsia-400 rounded-lg text-xs font-bold flex items-center gap-2 transition-all border border-fuchsia-500/30"
+                        className="px-4 py-2 bg-[#7C3AED]/10 hover:bg-[#7C3AED]/20 text-[#7C3AED] rounded-lg text-xs font-bold flex items-center gap-2 transition-all border border-[#7C3AED]/30"
                       >
                         <ImageIcon size={14} /> Adicionar Capa
                       </button>
@@ -1203,12 +1201,12 @@ const Dashboard: React.FC = () => {
 
               {/* Seção: Renomear */}
               <div>
-                <h4 className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                <h4 className="text-[10px] font-black text-[#7C3AED] uppercase tracking-widest mb-3 flex items-center gap-2">
                   <Pencil size={12} /> Renomear
                 </h4>
                 <button
                   onClick={() => { setIsDisplaySettingsOpen(false); openRenameModal(settingsDisplay); }}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 bg-[#1C1D22] hover:bg-slate-800 text-slate-300 border border-white/10 hover:border-indigo-500/50 rounded-xl text-sm font-bold transition-all"
+                  className="w-full flex items-center justify-center gap-2 py-2.5 bg-[#1C1D22] hover:bg-slate-800 text-slate-300 border border-white/10 hover:border-[#7C3AED]/50 rounded-xl text-sm font-bold transition-all"
                 >
                   <Pencil size={14} /> Renomear Display
                 </button>
@@ -1283,7 +1281,7 @@ const Dashboard: React.FC = () => {
           <button
             onClick={openCreateModal}
             disabled={loading}
-            className="flex items-center gap-2 bg-[#7C3AED] hover:bg-[#6D28D9] text-white px-6 py-3 rounded-xl font-bold transition-all shadow-[0_0_20px_rgba(124,58,237,0.3)] disabled:opacity-50"
+            className="flex items-center gap-2 bg-[#7C3AED] hover:bg-[#6D28D9] text-white px-6 py-3 rounded-xl font-bold transition-all shadow-lg disabled:opacity-50"
           >
             <Plus size={20} strokeWidth={3} className="text-white" /> <span className="hidden sm:inline">Nova Tela</span>
           </button>
@@ -1312,8 +1310,8 @@ const Dashboard: React.FC = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10">
           {displays.map(display => (
-            <div key={display.id} className="bg-[#2D3139] border border-white/10 rounded-2xl overflow-hidden shadow-lg hover:shadow-[0_0_30px_rgba(124,58,237,0.12)] hover:border-[#7C3AED]/40 transition-all group relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-[#7C3AED]/5 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <div key={display.id} className="bg-[#2D3139] border border-white/10 rounded-2xl overflow-hidden shadow-lg hover:shadow-xl hover:border-[#7C3AED]/30 transition-all group relative">
+              <div className="absolute inset-0 bg-[#7C3AED]/5 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity"></div>
 
               {/* 3-dot menu (top-right) */}
               <div className="absolute top-3 right-3 z-20">
@@ -1365,20 +1363,20 @@ const Dashboard: React.FC = () => {
                 ) : (
                   <div className="flex items-center justify-center w-full h-full">
                     {display.orientation === 'vertical' ? (
-                      <div className="w-[84px] h-[130px] rounded-xl border-2 border-white/5 bg-[#1C1D22] group-hover:border-purple-500/50 group-hover:shadow-[0_0_20px_rgba(168,85,247,0.25)] transition-all flex flex-col items-center justify-between p-2">
+                      <div className="w-[84px] h-[130px] rounded-xl border-2 border-white/5 bg-[#1C1D22] group-hover:border-[#7C3AED]/50 group-hover:shadow-lg transition-all flex flex-col items-center justify-between p-2">
                         {/* Notch */}
-                        <div className="w-8 h-1 bg-slate-800 rounded-full group-hover:bg-purple-500/30 transition-all"></div>
+                        <div className="w-8 h-1 bg-slate-800 rounded-full group-hover:bg-[#7C3AED]/30 transition-all"></div>
                         {/* Content */}
-                        <div className="flex-1 w-full my-1.5 rounded-lg bg-[#2D3139]/60 border border-white/5 flex items-center justify-center group-hover:bg-purple-950/20 group-hover:border-purple-900/30 transition-all">
-                          <Tv size={28} className="text-[#9CA3AF]/40 group-hover:text-purple-400 transition-all" />
+                        <div className="flex-1 w-full my-1.5 rounded-lg bg-[#2D3139]/60 border border-white/5 flex items-center justify-center group-hover:bg-[#7C3AED]/5 group-hover:border-[#7C3AED]/20 transition-all">
+                          <Tv size={28} className="text-[#9CA3AF]/40 group-hover:text-[#7C3AED] transition-all" />
                         </div>
                         {/* Indicator */}
-                        <div className="w-2 h-2 rounded-full bg-slate-800 group-hover:bg-purple-500/40 transition-all"></div>
+                        <div className="w-2 h-2 rounded-full bg-slate-800 group-hover:bg-[#7C3AED]/40 transition-all"></div>
                       </div>
                     ) : (
-                      <div className="w-[130px] h-[84px] rounded-xl border-2 border-white/5 bg-[#1C1D22] group-hover:border-[#7C3AED]/50 group-hover:shadow-[0_0_20px_rgba(124,58,237,0.25)] transition-all flex flex-col items-center justify-between p-2">
+                      <div className="w-[130px] h-[84px] rounded-xl border-2 border-white/5 bg-[#1C1D22] group-hover:border-[#7C3AED]/50 group-hover:shadow-lg transition-all flex flex-col items-center justify-between p-2">
                         {/* Content */}
-                        <div className="flex-1 w-full mb-1.5 rounded-lg bg-[#2D3139]/60 border border-white/5 flex items-center justify-center group-hover:bg-cyan-950/20 group-hover:border-cyan-900/30 transition-all">
+                        <div className="flex-1 w-full mb-1.5 rounded-lg bg-[#2D3139]/60 border border-white/5 flex items-center justify-center group-hover:bg-[#7C3AED]/5 group-hover:border-[#7C3AED]/20 transition-all">
                           <Monitor size={32} className="text-[#9CA3AF]/40 group-hover:text-[#7C3AED] transition-all" />
                         </div>
                         {/* Stand Base */}
@@ -1414,7 +1412,7 @@ const Dashboard: React.FC = () => {
                 <div className="flex items-start justify-between gap-2 mb-1">
                   <h3 className="text-xl font-bold text-white tracking-tight group-hover:text-[#7C3AED] transition-colors">{display.name}</h3>
                   {display.orientation === 'vertical' ? (
-                    <span className="flex items-center gap-1 bg-purple-500/10 border border-purple-500/30 text-purple-400 text-[9px] font-black px-2 py-0.5 rounded-full flex-shrink-0 mt-1">
+                    <span className="flex items-center gap-1 bg-[#7C3AED]/10 border border-[#7C3AED]/30 text-[#7C3AED] text-[9px] font-black px-2 py-0.5 rounded-full flex-shrink-0 mt-1">
                       <Tv size={10} /> 9:16
                     </span>
                   ) : (
@@ -1428,7 +1426,7 @@ const Dashboard: React.FC = () => {
                 <div className="flex flex-col gap-3">
                   <button
                     onClick={() => navigate(`/edit/${display.id}`)}
-                    className="w-full flex items-center justify-center gap-2 bg-[#7C3AED] hover:bg-[#6D28D9] text-white py-3 rounded-xl text-sm font-bold transition-all shadow-lg hover:shadow-[0_0_15px_rgba(124,58,237,0.35)]"
+                    className="w-full flex items-center justify-center gap-2 bg-[#7C3AED] hover:bg-[#6D28D9] text-white py-3 rounded-xl text-sm font-bold transition-all shadow-lg hover:shadow-xl"
                   >
                     <Edit3 size={16} /> Abrir Designer
                   </button>
@@ -1437,7 +1435,7 @@ const Dashboard: React.FC = () => {
                       onClick={() => copyPlayerLink(display.slug, display.id)}
                       className={`flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold transition-all border ${copiedId === display.id
                           ? 'bg-[#10B981]/15 text-[#10B981] border-[#10B981]/30 shadow-[0_0_10px_rgba(16,185,129,0.1)]'
-                          : 'bg-transparent text-white border border-[#9CA3AF] hover:border-white hover:bg-white/5'
+                          : 'bg-transparent text-white border border-[#9CA3AF]/40 hover:border-white hover:bg-white/5'
                         }`}
                     >
                       {copiedId === display.id ? <Check size={14} /> : <Copy size={14} />}
@@ -1445,7 +1443,7 @@ const Dashboard: React.FC = () => {
                     </button>
                     <button
                       onClick={() => openPlayer(display.slug)}
-                      className="flex items-center justify-center gap-2 py-2.5 bg-transparent text-white border border-[#9CA3AF] hover:border-white hover:bg-white/5 rounded-xl text-xs font-bold transition-all"
+                      className="flex items-center justify-center gap-2 py-2.5 bg-transparent text-white border border-[#9CA3AF]/40 hover:border-white hover:bg-white/5 rounded-xl text-xs font-bold transition-all"
                     >
                       <ExternalLink size={14} /> Visualizar
                     </button>
