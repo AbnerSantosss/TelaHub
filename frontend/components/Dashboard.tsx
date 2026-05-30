@@ -642,16 +642,30 @@ const Dashboard: React.FC = () => {
             <div className="p-6 flex-1 overflow-y-auto">
               {/* Formulário Convidar Usuário */}
               {!smtpConfigured && (
-                <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 mb-6 flex items-start gap-3">
-                  <AlertTriangle className="text-amber-400 shrink-0 mt-0.5" size={18} />
-                  <div>
-                    <p className="text-amber-300 text-sm font-bold">Envio de e-mail não configurado</p>
-                    <p className="text-amber-400/70 text-xs mt-1">
-                      {currentUser?.role === 'admin'
-                        ? 'Configure as credenciais SMTP nas Configurações para habilitar convites.'
-                        : 'Peça a um administrador para configurar o provedor de e-mail.'}
-                    </p>
+                <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 mb-6 flex items-start justify-between gap-3 flex-wrap sm:flex-nowrap">
+                  <div className="flex items-start gap-3">
+                    <AlertTriangle className="text-amber-400 shrink-0 mt-0.5" size={18} />
+                    <div>
+                      <p className="text-amber-300 text-sm font-bold">Envio de e-mail não configurado</p>
+                      <p className="text-amber-400/70 text-xs mt-1 leading-relaxed">
+                        {currentUser?.role === 'admin'
+                          ? 'Configure as credenciais SMTP para habilitar o envio de convites automáticos aos novos usuários.'
+                          : 'Peça a um administrador para configurar o provedor de e-mail SMTP.'}
+                      </p>
+                    </div>
                   </div>
+                  {currentUser?.role === 'admin' && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsUserModalOpen(false);
+                        openSettingsModal();
+                      }}
+                      className="shrink-0 flex items-center gap-1.5 bg-[#7C3AED] hover:bg-[#6D28D9] text-white px-3.5 py-2 rounded-xl text-xs font-bold transition-all shadow-md mt-2 sm:mt-0"
+                    >
+                      <Settings size={14} /> Configurar SMTP
+                    </button>
+                  )}
                 </div>
               )}
               <form onSubmit={handleInviteUser} className="bg-[#1C1D22]/50 p-4 rounded-xl border border-white/10 mb-6">
@@ -763,12 +777,29 @@ const Dashboard: React.FC = () => {
               </button>
             </div>
             <form onSubmit={handleSaveSmtp} className="p-6 space-y-4">
-              <div className="bg-[#1C1D22]/50 border border-white/10 rounded-lg p-3 mb-2">
-                <p className="text-[10px] text-slate-400 font-bold uppercase mb-1 flex items-center gap-1">
-                  <Mail size={10} /> Provedor Gmail
+               {/* Guia Passo a Passo de Configuração */}
+              <div className="bg-[#1C1D22]/60 border border-white/5 rounded-xl p-4.5 space-y-3 mb-2">
+                <p className="text-[10px] text-[#7C3AED] font-black uppercase tracking-widest flex items-center gap-1.5">
+                  <Mail size={12} className="text-[#7C3AED]" /> Guia de Configuração (Gmail SMTP)
                 </p>
-                <p className="text-xs text-slate-500 leading-relaxed">
-                  Use uma <b className="text-slate-300">Senha de Aplicativo</b> do Google. Acesse <b className="text-[#7C3AED]">myaccount.google.com/apppasswords</b> para gerar uma.
+                
+                <ol className="space-y-2.5 text-[11px] text-slate-400 list-decimal list-inside pl-1 leading-relaxed">
+                  <li>
+                    Ative a <span className="text-slate-200 font-bold">Verificação em 2 Etapas</span> na sua Conta Google.
+                  </li>
+                  <li>
+                    Acesse <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener noreferrer" className="text-[#7C3AED] hover:underline font-semibold inline-flex items-center gap-0.5">myaccount.google.com/apppasswords <ExternalLink size={10} /></a>.
+                  </li>
+                  <li>
+                    Insira um nome identificador (ex: <code className="text-slate-300 bg-black/40 px-1 py-0.5 rounded font-mono text-[10px]">TelaHub</code>) e clique em <span className="text-slate-200 font-medium">Criar</span>.
+                  </li>
+                  <li>
+                    Copie a senha de <span className="text-emerald-400 font-bold">16 dígitos</span> gerada e insira no campo "Senha de Aplicativo" abaixo.
+                  </li>
+                </ol>
+
+                <p className="text-[9px] text-slate-500 italic mt-2 leading-relaxed">
+                  *O envio utiliza criptografia TLS na porta padrão 587.
                 </p>
               </div>
 
