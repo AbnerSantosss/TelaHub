@@ -18,28 +18,30 @@
     @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
 
     :root {
-      --bg-primary:    #FFFFFF; /* Branco Puro */
-      --bg-secondary:  #F9FAFB; /* Cinza Claro Superfície */
-      --bg-card:       #F9FAFB;
-      --bg-card-hover: #F3F4F6;
-      --border:        #E5E7EB; /* Cinza Borda Sutil */
-      --border-active: #2563EB; /* Azul Corporativo */
+      /* ── Backgrounds (Off-White System — reduz fadiga visual) ── */
+      --bg-primary:    #FAFAFA;
+      --bg-secondary:  #F3F4F6;
+      --bg-tertiary:   #E5E7EB;
+      --bg-card:       #FFFFFF;
+      --bg-card-hover: #F9FAFB;
+      --border:        #E5E7EB;
+      --border-active: #2563EB;
 
-      --cyan:          #2563EB; /* Azul Corporativo Sólido */
+      --cyan:          #2563EB;
       --cyan-dim:      rgba(37, 99, 235, 0.05);
       --cyan-glow:     none;
 
-      --emerald:       #10B981; /* Verde Esmeralda (Online) */
+      --emerald:       #10B981;
       --emerald-dim:   rgba(16, 185, 129, 0.08);
 
-      --slate:         #64748B; /* Cinza Status Offline */
+      --slate:         #64748B;
       --slate-dim:     rgba(100, 116, 139, 0.08);
 
-      --text-primary:  #111827; /* Grafite Escuro */
-      --text-secondary:#4B5563; /* Cinza Médio */
+      --text-primary:  #111827;
+      --text-secondary:#4B5563;
       --text-muted:    #9CA3AF;
 
-      --radius-sm:     0px; /* Bordas Nítidas/Sharp estilo Suíço */
+      --radius-sm:     0px;
       --radius-md:     2px;
       --radius-lg:     2px;
       --radius-xl:     2px;
@@ -806,46 +808,69 @@
       flex-direction: column;
       gap: 12px;
     }
-    .tv-screen-sim {
-      flex: 1;
-      background: #FFFFFF;
-      border-radius: 0px;
-      border: 1px solid var(--border);
+    .tv-simulation-container {
       display: flex;
-      align-items: center;
+      gap: 20px;
+      align-items: flex-end;
       justify-content: center;
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      text-align: center;
+      width: 100%;
+      margin: 8px 0;
+    }
+    .tv-bezel {
+      background: linear-gradient(180deg, #1F2937 0%, #111827 100%);
+      padding: 6px 6px 14px 6px;
+      border-radius: 4px;
+      box-shadow: 0 12px 28px -10px rgba(0,0,0,0.25), 0 4px 10px -2px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.08);
       position: relative;
-      overflow: hidden;
-      min-height: 200px;
+      border: 1px solid #374151;
+      transition: transform var(--transition), box-shadow var(--transition);
     }
-    .tv-screen-sim.sim-cond { background: url('./assets/images/aviso_condominio.png') center/cover no-repeat; }
-    .tv-screen-sim.sim-corp { background: url('./assets/images/recepcao_boas_vindas.png') center/cover no-repeat; }
-    .tv-screen-sim.sim-varejo { background: url('./assets/images/cardapio_digital.png') center/cover no-repeat; }
-    .tv-screen-sim.sim-rh { background: url('./assets/images/painel_rh.png') center/cover no-repeat; }
-    .tv-screen-content {
+    .tv-bezel:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 18px 36px -10px rgba(0,0,0,0.3), 0 6px 14px -2px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.08);
+    }
+    .tv-bezel::after {
+      content: '';
       position: absolute;
-      inset: 12px;
-      z-index: 1;
-      background: rgba(255, 255, 255, 0.9);
-      border: 1px solid var(--border);
-      border-radius: 0px;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      transition: opacity var(--transition);
+      bottom: 5px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 5px; height: 5px;
+      background: #10B981;
+      border-radius: 50%;
+      box-shadow: 0 0 6px rgba(16,185,129,0.8), 0 0 2px #10B981;
     }
-    .tv-screen-sim:hover .tv-screen-content {
-      opacity: 0.1;
+    .tv-bezel.tv-landscape { flex: 1.6; max-width: 60%; }
+    .tv-bezel.tv-vertical { flex: 0.7; max-width: 35%; }
+    .tv-screen {
+      width: 100%;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      border: 1px solid rgba(0,0,0,0.4);
+      background-color: #0a0a0a;
+      display: block;
     }
-    .tv-screen-content .screen-title {
-      font-size: 0.95rem;
-      font-weight: 700;
-      color: var(--text-primary);
-      margin-bottom: 4px;
+    .tv-screen.landscape-aspect { aspect-ratio: 16 / 9; }
+    .tv-screen.vertical-aspect { aspect-ratio: 9 / 16; }
+    .tv-ratio-badge {
+      position: absolute;
+      top: 12px; left: 12px;
+      background: rgba(17,24,39,0.75);
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: #F3F4F6;
+      font-size: 9px; font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 2px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      pointer-events: none;
+      z-index: 2;
+    }
+    @media (max-width: 640px) {
+      .tv-simulation-container { flex-direction: column; align-items: center; gap: 16px; }
+      .tv-bezel.tv-landscape, .tv-bezel.tv-vertical { width: 100%; max-width: 320px; flex: none; }
     }
 
     /* ═══════════════════════════════════════════
@@ -1979,20 +2004,22 @@
           </div>
         </div>
         <div class="tab-visual">
-          <div class="tv-screen-sim sim-cond">
-            <div class="tv-screen-content">
-              <div class="screen-title" style="color:var(--cyan);font-size:0.7rem;margin-bottom:8px;letter-spacing:0.1em;text-transform:uppercase;">Condomínio Alameda Verde</div>
-              <div class="screen-title">📋 Aviso de Manutenção</div>
-              <p style="margin-top:6px;font-size:0.8rem;color:var(--text-secondary);">Elevador B — Parada para revisão<br/>Quinta-feira, 08h–12h</p>
-              <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border);font-size:0.75rem;color:var(--text-muted)">Publicado há 2 min · Síndico responsável</div>
+          <div class="tv-simulation-container">
+            <div class="tv-bezel tv-landscape">
+              <span class="tv-ratio-badge">16:9 Horizontal</span>
+              <div class="tv-screen landscape-aspect" style="background-image:url('./assets/images/recepcao_boas_vindas.png')" role="img" aria-label="Tela horizontal condomínio"></div>
+            </div>
+            <div class="tv-bezel tv-vertical">
+              <span class="tv-ratio-badge">9:16 Vertical</span>
+              <div class="tv-screen vertical-aspect" style="background-image:url('./assets/images/aviso_condominio.png')" role="img" aria-label="Tela vertical condomínio"></div>
             </div>
           </div>
           <div style="display:flex;gap:8px">
-            <div style="flex:1;background:rgba(0,240,255,0.04);border:1px solid rgba(0,240,255,0.15);border-radius:8px;padding:12px;font-size:0.75rem;">
+            <div style="flex:1;background:rgba(37,99,235,0.04);border:1px solid rgba(37,99,235,0.15);border-radius:2px;padding:12px;font-size:0.75rem;">
               <div style="color:var(--text-muted);margin-bottom:4px">Telas ativas</div>
               <div style="font-weight:700;color:var(--text-primary)">4 / 4</div>
             </div>
-            <div style="flex:1;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:0.75rem;">
+            <div style="flex:1;background:var(--bg-card);border:1px solid var(--border);border-radius:2px;padding:12px;font-size:0.75rem;">
               <div style="color:var(--text-muted);margin-bottom:4px">Última publicação</div>
               <div style="font-weight:700;color:var(--text-primary)">Há 2 min</div>
             </div>
@@ -2023,20 +2050,22 @@
           </div>
         </div>
         <div class="tab-visual">
-          <div class="tv-screen-sim sim-corp">
-            <div class="tv-screen-content">
-              <div class="screen-title" style="color:var(--cyan);font-size:0.7rem;margin-bottom:8px;letter-spacing:0.1em;text-transform:uppercase;">HUB Inovação — Recepção</div>
-              <div class="screen-title">👋 Bem-vindo, Carlos Mendes</div>
-              <p style="margin-top:6px;font-size:0.8rem;color:var(--text-secondary);">Empresa: TechBridge Ltda.<br/>Sala 304 · 14h30</p>
-              <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border);font-size:0.75rem;color:var(--text-muted)">Recepcionista: Amanda Costa</div>
+          <div class="tv-simulation-container">
+            <div class="tv-bezel tv-landscape">
+              <span class="tv-ratio-badge">16:9 Horizontal</span>
+              <div class="tv-screen landscape-aspect" style="background-image:url('./assets/images/recepcao_boas_vindas.png')" role="img" aria-label="Tela horizontal corporativo"></div>
+            </div>
+            <div class="tv-bezel tv-vertical">
+              <span class="tv-ratio-badge">9:16 Vertical</span>
+              <div class="tv-screen vertical-aspect" style="background-image:url('./assets/images/aviso_condominio.png')" role="img" aria-label="Tela vertical corporativo"></div>
             </div>
           </div>
           <div style="display:flex;gap:8px">
-            <div style="flex:1;background:rgba(0,240,255,0.04);border:1px solid rgba(0,240,255,0.15);border-radius:8px;padding:12px;font-size:0.75rem;">
+            <div style="flex:1;background:rgba(37,99,235,0.04);border:1px solid rgba(37,99,235,0.15);border-radius:2px;padding:12px;font-size:0.75rem;">
               <div style="color:var(--text-muted);margin-bottom:4px">Displays</div>
               <div style="font-weight:700;color:var(--text-primary)">12 andares</div>
             </div>
-            <div style="flex:1;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:0.75rem;">
+            <div style="flex:1;background:var(--bg-card);border:1px solid var(--border);border-radius:2px;padding:12px;font-size:0.75rem;">
               <div style="color:var(--text-muted);margin-bottom:4px">Visitantes hoje</div>
               <div style="font-weight:700;color:var(--text-primary)">34</div>
             </div>
@@ -2067,20 +2096,22 @@
           </div>
         </div>
         <div class="tab-visual">
-          <div class="tv-screen-sim sim-varejo">
-            <div class="tv-screen-content">
-              <div class="screen-title" style="color:var(--cyan);font-size:0.7rem;margin-bottom:8px;letter-spacing:0.1em;text-transform:uppercase;">Restaurante Central — Menu Board</div>
-              <div class="screen-title">🍝 Prato do Dia</div>
-              <p style="margin-top:6px;font-size:0.8rem;color:var(--text-secondary);">Macarrão à Bolonhesa<br/><strong style="color:var(--cyan);font-size:1rem">R$ 28,90</strong></p>
-              <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border);font-size:0.75rem;color:var(--text-muted)">Atualizado há 1 min · Gerente João</div>
+          <div class="tv-simulation-container">
+            <div class="tv-bezel tv-landscape">
+              <span class="tv-ratio-badge">16:9 Horizontal</span>
+              <div class="tv-screen landscape-aspect" style="background-image:url('./assets/images/cardapio_digital.png')" role="img" aria-label="Tela horizontal varejo"></div>
+            </div>
+            <div class="tv-bezel tv-vertical">
+              <span class="tv-ratio-badge">9:16 Vertical</span>
+              <div class="tv-screen vertical-aspect" style="background-image:url('./assets/images/aviso_condominio.png')" role="img" aria-label="Tela vertical varejo"></div>
             </div>
           </div>
           <div style="display:flex;gap:8px">
-            <div style="flex:1;background:rgba(0,240,255,0.04);border:1px solid rgba(0,240,255,0.15);border-radius:8px;padding:12px;font-size:0.75rem;">
+            <div style="flex:1;background:rgba(37,99,235,0.04);border:1px solid rgba(37,99,235,0.15);border-radius:2px;padding:12px;font-size:0.75rem;">
               <div style="color:var(--text-muted);margin-bottom:4px">Economia mensal</div>
               <div style="font-weight:700;color:var(--cyan)">R$ 1.200+</div>
             </div>
-            <div style="flex:1;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:0.75rem;">
+            <div style="flex:1;background:var(--bg-card);border:1px solid var(--border);border-radius:2px;padding:12px;font-size:0.75rem;">
               <div style="color:var(--text-muted);margin-bottom:4px">Impressão eliminada</div>
               <div style="font-weight:700;color:var(--text-primary)">100%</div>
             </div>
@@ -2111,20 +2142,22 @@
           </div>
         </div>
         <div class="tab-visual">
-          <div class="tv-screen-sim sim-rh">
-            <div class="tv-screen-content">
-              <div class="screen-title" style="color:var(--cyan);font-size:0.7rem;margin-bottom:8px;letter-spacing:0.1em;text-transform:uppercase;">Setor Comercial — Meta Maio</div>
-              <div class="screen-title">📈 Vendas do Mês</div>
-              <p style="margin-top:6px;font-size:0.8rem;color:var(--text-secondary);">Realizado: <strong style="color:#4ade80">R$ 340.500</strong><br/>Meta: R$ 400.000 · <strong style="color:var(--cyan)">85% atingido</strong></p>
-              <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border);font-size:0.75rem;color:var(--text-muted)">Sincronizado via Power BI · ao vivo</div>
+          <div class="tv-simulation-container">
+            <div class="tv-bezel tv-landscape">
+              <span class="tv-ratio-badge">16:9 Horizontal</span>
+              <div class="tv-screen landscape-aspect" style="background-image:url('./assets/images/painel_rh.png')" role="img" aria-label="Tela horizontal endomarketing"></div>
+            </div>
+            <div class="tv-bezel tv-vertical">
+              <span class="tv-ratio-badge">9:16 Vertical</span>
+              <div class="tv-screen vertical-aspect" style="background-image:url('./assets/images/aviso_condominio.png')" role="img" aria-label="Tela vertical endomarketing"></div>
             </div>
           </div>
           <div style="display:flex;gap:8px">
-            <div style="flex:1;background:rgba(0,240,255,0.04);border:1px solid rgba(0,240,255,0.15);border-radius:8px;padding:12px;font-size:0.75rem;">
+            <div style="flex:1;background:rgba(37,99,235,0.04);border:1px solid rgba(37,99,235,0.15);border-radius:2px;padding:12px;font-size:0.75rem;">
               <div style="color:var(--text-muted);margin-bottom:4px">Setores ativos</div>
               <div style="font-weight:700;color:var(--text-primary)">8 TVs</div>
             </div>
-            <div style="flex:1;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:0.75rem;">
+            <div style="flex:1;background:var(--bg-card);border:1px solid var(--border);border-radius:2px;padding:12px;font-size:0.75rem;">
               <div style="color:var(--text-muted);margin-bottom:4px">Autonomia do RH</div>
               <div style="font-weight:700;color:var(--cyan)">100%</div>
             </div>

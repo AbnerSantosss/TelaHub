@@ -1,5 +1,52 @@
 import React from 'react';
 
+const TV_DATA = {
+  cond: {
+    landscape: { img: '/assets/images/recepcao_boas_vindas.png', label: '16:9 Horizontal' },
+    vertical:  { img: '/assets/images/aviso_condominio.png',      label: '9:16 Vertical' },
+  },
+  corp: {
+    landscape: { img: '/assets/images/recepcao_boas_vindas.png', label: '16:9 Horizontal' },
+    vertical:  { img: '/assets/images/aviso_condominio.png',      label: '9:16 Vertical' },
+  },
+  varejo: {
+    landscape: { img: '/assets/images/cardapio_digital.png',     label: '16:9 Horizontal' },
+    vertical:  { img: '/assets/images/aviso_condominio.png',      label: '9:16 Vertical' },
+  },
+  rh: {
+    landscape: { img: '/assets/images/painel_rh.png',            label: '16:9 Horizontal' },
+    vertical:  { img: '/assets/images/aviso_condominio.png',      label: '9:16 Vertical' },
+  },
+};
+
+const TvSimulation = ({ tabKey }) => {
+  const data = TV_DATA[tabKey];
+  return (
+    <div className="tv-simulation-container">
+      {/* TV Horizontal 16:9 */}
+      <div className="tv-bezel tv-landscape">
+        <span className="tv-ratio-badge">{data.landscape.label}</span>
+        <div
+          className="tv-screen landscape-aspect"
+          style={{ backgroundImage: `url('${data.landscape.img}')` }}
+          role="img"
+          aria-label={`Simulação de tela horizontal ${data.landscape.label}`}
+        />
+      </div>
+      {/* TV Vertical 9:16 */}
+      <div className="tv-bezel tv-vertical">
+        <span className="tv-ratio-badge">{data.vertical.label}</span>
+        <div
+          className="tv-screen vertical-aspect"
+          style={{ backgroundImage: `url('${data.vertical.img}')` }}
+          role="img"
+          aria-label={`Simulação de tela vertical ${data.vertical.label}`}
+        />
+      </div>
+    </div>
+  );
+};
+
 const UseCases = ({ activeTab, setActiveTab, telemetry }) => {
   return (
     <section id="casos" aria-labelledby="casos-heading">
@@ -85,24 +132,7 @@ const UseCases = ({ activeTab, setActiveTab, telemetry }) => {
               </div>
               
               <div className="tab-visual">
-                <div className="tv-screen-sim sim-cond">
-                  <div className="tv-screen-content">
-                    <div className="screen-title" style={{ color: 'var(--cyan)', fontSize: '0.72rem', marginBottom: 8, letterSpacing: '0.12em', textTransform: 'uppercase', fontWeight: 700 }}>
-                      Condomínio Alameda Verde
-                    </div>
-                    <div className="screen-title" style={{ fontSize: '1.05rem', fontWeight: 800 }}>
-                      📋 Aviso de Manutenção
-                    </div>
-                    <p style={{ marginTop: 8, fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-                      Elevador B — Parada para revisão<br />
-                      <strong>Quinta-feira, 08h–12h</strong>
-                    </p>
-                    <div style={{ marginTop: 20, paddingTop: 14, borderTop: '1px solid var(--border)', fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                      Publicado há 2 min · Síndico responsável
-                    </div>
-                  </div>
-                </div>
-                
+                <TvSimulation tabKey="cond" />
                 <div style={{ display: 'flex', gap: 10 }}>
                   <div style={{ flex: 1, background: 'rgba(37, 99, 235, 0.04)', border: '1px solid rgba(37, 99, 235, 0.15)', borderRadius: 2, padding: 14, fontSize: '0.78rem' }}>
                     <div style={{ color: 'var(--text-secondary)', marginBottom: 4 }}>Telas ativas</div>
@@ -110,7 +140,7 @@ const UseCases = ({ activeTab, setActiveTab, telemetry }) => {
                       {telemetry.onlineCount} / {telemetry.total}
                     </div>
                   </div>
-                  <div style={{ flex: 1, background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: 2, padding: 14, fontSize: '0.78rem' }}>
+                  <div style={{ flex: 1, background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 2, padding: 14, fontSize: '0.78rem' }}>
                     <div style={{ color: 'var(--text-secondary)', marginBottom: 4 }}>Última publicação</div>
                     <div style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: '0.9rem' }}>Há 2 min</div>
                   </div>
@@ -153,30 +183,13 @@ const UseCases = ({ activeTab, setActiveTab, telemetry }) => {
               </div>
               
               <div className="tab-visual">
-                <div className="tv-screen-sim sim-corp">
-                  <div className="tv-screen-content">
-                    <div className="screen-title" style={{ color: 'var(--cyan)', fontSize: '0.72rem', marginBottom: 8, letterSpacing: '0.12em', textTransform: 'uppercase', fontWeight: 700 }}>
-                      HUB Inovação — Recepção
-                    </div>
-                    <div className="screen-title" style={{ fontSize: '1.05rem', fontWeight: 800 }}>
-                      👋 Bem-vindo, Carlos Mendes
-                    </div>
-                    <p style={{ marginTop: 8, fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-                      Empresa: TechBridge Ltda.<br />
-                      <strong>Sala 304 · 14h30</strong>
-                    </p>
-                    <div style={{ marginTop: 20, paddingTop: 14, borderTop: '1px solid var(--border)', fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                      Recepcionista: Amanda Costa
-                    </div>
-                  </div>
-                </div>
-                
+                <TvSimulation tabKey="corp" />
                 <div style={{ display: 'flex', gap: 10 }}>
                   <div style={{ flex: 1, background: 'rgba(37, 99, 235, 0.04)', border: '1px solid rgba(37, 99, 235, 0.15)', borderRadius: 2, padding: 14, fontSize: '0.78rem' }}>
                     <div style={{ color: 'var(--text-secondary)', marginBottom: 4 }}>Displays</div>
                     <div style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: '0.9rem' }}>12 andares</div>
                   </div>
-                  <div style={{ flex: 1, background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: 2, padding: 14, fontSize: '0.78rem' }}>
+                  <div style={{ flex: 1, background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 2, padding: 14, fontSize: '0.78rem' }}>
                     <div style={{ color: 'var(--text-secondary)', marginBottom: 4 }}>Visitantes hoje</div>
                     <div style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: '0.9rem' }}>34</div>
                   </div>
@@ -219,30 +232,13 @@ const UseCases = ({ activeTab, setActiveTab, telemetry }) => {
               </div>
               
               <div className="tab-visual">
-                <div className="tv-screen-sim sim-varejo">
-                  <div className="tv-screen-content">
-                    <div className="screen-title" style={{ color: 'var(--cyan)', fontSize: '0.72rem', marginBottom: 8, letterSpacing: '0.12em', textTransform: 'uppercase', fontWeight: 700 }}>
-                      Restaurante Central — Menu Board
-                    </div>
-                    <div className="screen-title" style={{ fontSize: '1.05rem', fontWeight: 800 }}>
-                      🍝 Prato do Dia
-                    </div>
-                    <p style={{ marginTop: 8, fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-                      Macarrão à Bolonhesa<br />
-                      <strong style={{ color: 'var(--cyan)', fontSize: '1.1rem', display: 'block', marginTop: 4 }}>R$ 28,90</strong>
-                    </p>
-                    <div style={{ marginTop: 20, paddingTop: 14, borderTop: '1px solid var(--border)', fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                      Atualizado há 1 min · Gerente João
-                    </div>
-                  </div>
-                </div>
-                
+                <TvSimulation tabKey="varejo" />
                 <div style={{ display: 'flex', gap: 10 }}>
                   <div style={{ flex: 1, background: 'rgba(37, 99, 235, 0.04)', border: '1px solid rgba(37, 99, 235, 0.15)', borderRadius: 2, padding: 14, fontSize: '0.78rem' }}>
                     <div style={{ color: 'var(--text-secondary)', marginBottom: 4 }}>Economia mensal</div>
                     <div style={{ fontWeight: 700, color: 'var(--cyan)', fontSize: '0.9rem' }}>R$ 1.200+</div>
                   </div>
-                  <div style={{ flex: 1, background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: 2, padding: 14, fontSize: '0.78rem' }}>
+                  <div style={{ flex: 1, background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 2, padding: 14, fontSize: '0.78rem' }}>
                     <div style={{ color: 'var(--text-secondary)', marginBottom: 4 }}>Impressão eliminada</div>
                     <div style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: '0.9rem' }}>100%</div>
                   </div>
@@ -285,30 +281,13 @@ const UseCases = ({ activeTab, setActiveTab, telemetry }) => {
               </div>
               
               <div className="tab-visual">
-                <div className="tv-screen-sim sim-rh">
-                  <div className="tv-screen-content">
-                    <div className="screen-title" style={{ color: 'var(--cyan)', fontSize: '0.72rem', marginBottom: 8, letterSpacing: '0.12em', textTransform: 'uppercase', fontWeight: 700 }}>
-                      Setor Comercial — Meta Maio
-                    </div>
-                    <div className="screen-title" style={{ fontSize: '1.05rem', fontWeight: 800 }}>
-                      📈 Vendas do Mês
-                    </div>
-                    <p style={{ marginTop: 8, fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-                      Realizado: <strong style={{ color: '#10b981' }}>R$ 340.500</strong><br />
-                      Meta: R$ 400.000 · <strong style={{ color: 'var(--cyan)' }}>85% atingido</strong>
-                    </p>
-                    <div style={{ marginTop: 20, paddingTop: 14, borderTop: '1px solid var(--border)', fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                      Sincronizado via Power BI · ao vivo
-                    </div>
-                  </div>
-                </div>
-                
+                <TvSimulation tabKey="rh" />
                 <div style={{ display: 'flex', gap: 10 }}>
                   <div style={{ flex: 1, background: 'rgba(37, 99, 235, 0.04)', border: '1px solid rgba(37, 99, 235, 0.15)', borderRadius: 2, padding: 14, fontSize: '0.78rem' }}>
                     <div style={{ color: 'var(--text-secondary)', marginBottom: 4 }}>Setores ativos</div>
                     <div style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: '0.9rem' }}>8 TVs</div>
                   </div>
-                  <div style={{ flex: 1, background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: 2, padding: 14, fontSize: '0.78rem' }}>
+                  <div style={{ flex: 1, background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 2, padding: 14, fontSize: '0.78rem' }}>
                     <div style={{ color: 'var(--text-secondary)', marginBottom: 4 }}>Autonomia do RH</div>
                     <div style={{ fontWeight: 700, color: 'var(--cyan)', fontSize: '0.9rem' }}>100%</div>
                   </div>
@@ -335,7 +314,7 @@ const UseCases = ({ activeTab, setActiveTab, telemetry }) => {
             gap: '24px'
           }}>
             {/* Testimonial 1 */}
-            <div style={{ background: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: '2px', padding: '32px 28px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div style={{ background: 'var(--bg-card)', border: '1px solid #E5E7EB', borderRadius: '2px', padding: '32px 28px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div style={{ display: 'flex', gap: '4px', color: '#FBBF24', fontSize: '1.2rem' }}>★★★★★</div>
               <p style={{ fontSize: '0.95rem', color: '#4B5563', lineHeight: '1.6', fontStyle: 'italic', margin: 0 }}>
                 "Eu perdia horas toda semana gravando vídeos em pendrives para colocar na TV da recepção. Com o TelaHub, eu atualizo a grade de aulas e os avisos de feriado direto de casa, em dois minutos. A recepção da academia ficou com cara de rede gigante."
@@ -350,7 +329,7 @@ const UseCases = ({ activeTab, setActiveTab, telemetry }) => {
             </div>
 
             {/* Testimonial 2 */}
-            <div style={{ background: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: '2px', padding: '32px 28px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div style={{ background: 'var(--bg-card)', border: '1px solid #E5E7EB', borderRadius: '2px', padding: '32px 28px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div style={{ display: 'flex', gap: '4px', color: '#FBBF24', fontSize: '1.2rem' }}>★★★★★</div>
               <p style={{ fontSize: '0.95rem', color: '#4B5563', lineHeight: '1.6', fontStyle: 'italic', margin: 0 }}>
                 "As TVs da minha clínica ficavam desligadas ou passando canais abertos que não interessavam a ninguém. Hoje, nós exibimos os vídeos dos nossos procedimentos estéticos, dicas de saúde e comunicados em loop automático. Nossos clientes elogiam a modernidade."
