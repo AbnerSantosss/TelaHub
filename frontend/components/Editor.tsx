@@ -7,7 +7,7 @@ import {
   Image as ImageIcon, Type, CloudSun, Clock, Calendar, CalendarDays,
   Settings, Layers, Home, Move, Upload, Link as LinkIcon, CheckCircle2,
   Maximize2, Film, Info, Loader2, MonitorPlay, Rss, Globe, Gift, Search, Palette, Map, Layout, MoveHorizontal, GripVertical,
-  FileText, ListTodo, Timer, ClipboardList, Utensils, TrendingUp, Code2, Database, StickyNote, Camera, BookOpen
+  FileText, ListTodo, Timer, ClipboardList, Utensils, TrendingUp, Code2, Database, StickyNote, Camera, BookOpen, ChevronDown
 } from 'lucide-react';
 import { getDisplays, saveDisplay, uploadMedia } from '../services/storage';
 import { Display, Page, WidgetType, LayoutItem } from '../types';
@@ -788,53 +788,53 @@ const Editor: React.FC = () => {
              </div>
              
              {/* Básicos */}
-             <div className="mb-4">
-               <h4 className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-2">Básicos</h4>
+             <div className="mb-3">
+               <h4 className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-1.5 flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span>Básicos</h4>
                <div className="grid grid-cols-2 gap-2">
-                 <WidgetTool icon={<ImageIcon size={16} />} label="Imagem" onClick={() => addWidget(WidgetType.IMAGE)} />
-                 <WidgetTool icon={<Film size={16} />} label="Vídeo" onClick={() => addWidget(WidgetType.VIDEO)} />
-                 <WidgetTool icon={<Type size={16} />} label="Texto" onClick={() => addWidget(WidgetType.TEXT)} />
-                 <WidgetTool icon={<Gift size={16} />} label="GIF" onClick={() => addWidget(WidgetType.GIF)} />
-                 <WidgetTool icon={<Globe size={16} />} label="Web" onClick={() => addWidget(WidgetType.IFRAME)} />
+                 <WidgetTool icon="/icons3d/image.png" label="Imagem" onClick={() => addWidget(WidgetType.IMAGE)} />
+                 <WidgetTool icon="/icons3d/video.png" label="Vídeo" onClick={() => addWidget(WidgetType.VIDEO)} />
+                 <WidgetTool icon="/icons3d/text.png" label="Texto" onClick={() => addWidget(WidgetType.TEXT)} />
+                 <WidgetTool icon="/icons3d/gif.png" label="GIF" onClick={() => addWidget(WidgetType.GIF)} />
+                 <WidgetTool icon="/icons3d/web.png" label="Web" onClick={() => addWidget(WidgetType.IFRAME)} />
                </div>
              </div>
 
              {/* Utilitários */}
-             <div className="mb-4">
-               <h4 className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-2">Utilitários</h4>
+             <div className="mb-3">
+               <h4 className="text-[10px] font-black text-cyan-400 uppercase tracking-widest mb-1.5 flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-cyan-400 inline-block"></span>Utilitários</h4>
                <div className="grid grid-cols-2 gap-2">
-                 <WidgetTool icon={<Clock size={16} />} label="Relógio" onClick={() => addWidget(WidgetType.CLOCK)} />
-                 <WidgetTool icon={<CloudSun size={16} />} label="Clima" onClick={() => addWidget(WidgetType.WEATHER)} />
-                 <WidgetTool icon={<Layout size={16} />} label="Completo" onClick={() => addWidget(WidgetType.FULL_INFO)} />
-                 <WidgetTool icon={<Rss size={16} />} label="RSS" onClick={() => addWidget(WidgetType.RSS)} />
-                 <WidgetTool icon={<Calendar size={16} />} label="Agenda" onClick={() => addWidget(WidgetType.CALENDAR)} />
+                 <WidgetTool icon="/icons3d/clock.png" label="Relógio" onClick={() => addWidget(WidgetType.CLOCK)} />
+                 <WidgetTool icon="/icons3d/weather.png" label="Clima" onClick={() => addWidget(WidgetType.WEATHER)} />
+                 <WidgetTool icon="/icons3d/full-info.png" label="Completo" onClick={() => addWidget(WidgetType.FULL_INFO)} />
+                 <WidgetTool icon="/icons3d/rss.png" label="RSS" onClick={() => addWidget(WidgetType.RSS)} />
+                 <WidgetTool icon="/icons3d/calendar.png" label="Agenda" onClick={() => addWidget(WidgetType.CALENDAR)} />
                </div>
              </div>
 
              {/* Interativos */}
-             <div className="mb-4">
-               <h4 className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-2">Interativos</h4>
+             <div className="mb-3">
+               <h4 className="text-[10px] font-black text-amber-400 uppercase tracking-widest mb-1.5 flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block"></span>Interativos</h4>
                <div className="grid grid-cols-2 gap-2">
-                 <WidgetTool icon={<StickyNote size={16} className="text-yellow-400" />} label="Notas" onClick={() => addWidget(WidgetType.NOTES)} />
-                 <WidgetTool icon={<ListTodo size={16} className="text-emerald-400" />} label="Tarefas" onClick={() => addWidget(WidgetType.TODO)} />
-                 <WidgetTool icon={<Timer size={16} className="text-rose-400" />} label="Contador" onClick={() => addWidget(WidgetType.COUNTDOWN)} />
-                 <WidgetTool icon={<ClipboardList size={16} className="text-cyan-400" />} label="Deveres" onClick={() => addWidget(WidgetType.CHORES)} />
-                 <WidgetTool icon={<Utensils size={16} className="text-amber-400" />} label="Meal Plan" onClick={() => addWidget(WidgetType.MEAL_PLAN)} />
+                 <WidgetTool icon="/icons3d/notes.png" label="Notas" onClick={() => addWidget(WidgetType.NOTES)} />
+                 <WidgetTool icon="/icons3d/todo.png" label="Tarefas" onClick={() => addWidget(WidgetType.TODO)} />
+                 <WidgetTool icon="/icons3d/countdown.png" label="Contador" onClick={() => addWidget(WidgetType.COUNTDOWN)} />
+                 <WidgetTool icon="/icons3d/chores.png" label="Deveres" onClick={() => addWidget(WidgetType.CHORES)} />
+                 <WidgetTool icon="/icons3d/meal-plan.png" label="Meal Plan" onClick={() => addWidget(WidgetType.MEAL_PLAN)} />
                </div>
              </div>
 
              {/* Integrações */}
-             <div className="mb-4">
-               <h4 className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-2">Integrações</h4>
+             <div className="mb-3">
+               <h4 className="text-[10px] font-black text-rose-400 uppercase tracking-widest mb-1.5 flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-rose-400 inline-block"></span>Integrações</h4>
                <div className="grid grid-cols-2 gap-2">
-                 <WidgetTool icon={<TrendingUp size={16} className="text-green-400" />} label="Bolsa" onClick={() => addWidget(WidgetType.MARKET_WATCH)} />
-                 <WidgetTool icon={<Camera size={16} className="text-blue-400" />} label="Snapshot" onClick={() => addWidget(WidgetType.BROWSER_SNAPSHOT)} />
-                 <WidgetTool icon={<FileText size={16} className="text-cyan-500" />} label="G Docs" onClick={() => addWidget(WidgetType.GOOGLE_DOCS)} />
-                 <WidgetTool icon={<BookOpen size={16} className="text-blue-500" />} label="Office Docs" onClick={() => addWidget(WidgetType.OFFICE_DOCS)} />
-                 <WidgetTool icon={<Layout size={16} className="text-amber-500" />} label="Power BI" onClick={() => addWidget(WidgetType.POWER_BI)} />
-                 <WidgetTool icon={<Database size={16} className="text-rose-500" />} label="Airtable" onClick={() => addWidget(WidgetType.AIRTABLE)} />
-                 <WidgetTool icon={<FileText size={16} className="text-red-500" />} label="PDF" onClick={() => addWidget(WidgetType.PDF_DOCUMENT)} />
-                 <WidgetTool icon={<Code2 size={16} className="text-indigo-400" />} label="HTML" onClick={() => addWidget(WidgetType.EMBED_HTML)} />
+                 <WidgetTool icon="/icons3d/market.png" label="Bolsa" onClick={() => addWidget(WidgetType.MARKET_WATCH)} />
+                 <WidgetTool icon="/icons3d/snapshot.png" label="Snapshot" onClick={() => addWidget(WidgetType.BROWSER_SNAPSHOT)} />
+                 <WidgetTool icon="/icons3d/google-docs.png" label="G Docs" onClick={() => addWidget(WidgetType.GOOGLE_DOCS)} />
+                 <WidgetTool icon="/icons3d/office-docs.png" label="Office Docs" onClick={() => addWidget(WidgetType.OFFICE_DOCS)} />
+                 <WidgetTool icon="/icons3d/power-bi.png" label="Power BI" onClick={() => addWidget(WidgetType.POWER_BI)} />
+                 <WidgetTool icon="/icons3d/airtable.png" label="Airtable" onClick={() => addWidget(WidgetType.AIRTABLE)} />
+                 <WidgetTool icon="/icons3d/pdf.png" label="PDF" onClick={() => addWidget(WidgetType.PDF_DOCUMENT)} />
+                 <WidgetTool icon="/icons3d/html.png" label="HTML" onClick={() => addWidget(WidgetType.EMBED_HTML)} />
                </div>
              </div>
              
@@ -2326,14 +2326,66 @@ const Editor: React.FC = () => {
                     <input 
                       type="text" 
                       value={currentWidget.data.calendarId || ''} 
-                      onChange={(e) => updateWidgetData(selectedWidget!, { calendarId: e.target.value })} 
+                      onChange={(e) => {
+                        let raw = e.target.value.trim();
+                        // Smart extractor: detect Google Calendar URL or iframe embed and extract the src/calendarId
+                        const iframeSrcMatch = raw.match(/src=["']([^"']+)["']/i);
+                        if (iframeSrcMatch) raw = iframeSrcMatch[1];
+                        try {
+                          const url = new URL(raw);
+                          if (url.hostname.includes('calendar.google.com')) {
+                            const srcParam = url.searchParams.get('src');
+                            if (srcParam) { raw = srcParam; }
+                          }
+                        } catch {}
+                        updateWidgetData(selectedWidget!, { calendarId: raw });
+                      }} 
                       className="w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-xs text-slate-200 outline-none focus:border-cyan-500 transition-all font-mono" 
-                      placeholder="Ex: pt.brazilian#holiday@group.v.calendar.google.com"
+                      placeholder="Cole aqui o ID, URL ou iframe do Google Calendar"
                     />
-                    <p className="text-[9px] text-slate-600 leading-relaxed">
-                      Para obter o ID: Abra o Google Calendar {'>'} Configurações {'>'} Selecione a agenda {'>'} Integrar agenda {'>'} Copie o "ID da agenda".
-                      <br/><span className="text-yellow-600">Importante:</span> A agenda deve estar configurada como "Pública".
+                    <p className="text-[9px] text-emerald-500/80 leading-relaxed bg-emerald-500/5 p-2 rounded border border-emerald-500/10">
+                      💡 <strong>Dica:</strong> Você pode colar diretamente a URL do calendário, o código de incorporação (iframe), ou apenas o ID da agenda.
                     </p>
+
+                    {/* Accordion: Como conectar o Google Calendar */}
+                    <details className="group bg-slate-900/60 rounded-xl border border-slate-700/50 overflow-hidden transition-all">
+                      <summary className="flex items-center justify-between cursor-pointer p-3 hover:bg-slate-800/50 transition-colors select-none">
+                        <span className="text-[10px] font-black text-cyan-400 uppercase tracking-wider flex items-center gap-2">
+                          <BookOpen size={12} /> Como Conectar sua Agenda
+                        </span>
+                        <ChevronDown size={14} className="text-slate-500 transition-transform duration-200 group-open:rotate-180" />
+                      </summary>
+                      <div className="px-3 pb-3 space-y-3 border-t border-slate-800">
+                        <div className="mt-3 space-y-2.5">
+                          <div className="flex gap-2.5 items-start">
+                            <span className="flex-shrink-0 w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 text-[10px] font-black flex items-center justify-center">1</span>
+                            <p className="text-[10px] text-slate-300 leading-relaxed">Abra o <a href="https://calendar.google.com" target="_blank" rel="noopener noreferrer" className="text-cyan-400 underline hover:text-cyan-300">Google Calendar</a> no navegador.</p>
+                          </div>
+                          <div className="flex gap-2.5 items-start">
+                            <span className="flex-shrink-0 w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 text-[10px] font-black flex items-center justify-center">2</span>
+                            <p className="text-[10px] text-slate-300 leading-relaxed">Clique no ícone de <strong className="text-white">⚙️ Configurações</strong> (engrenagem) no canto superior direito.</p>
+                          </div>
+                          <div className="flex gap-2.5 items-start">
+                            <span className="flex-shrink-0 w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 text-[10px] font-black flex items-center justify-center">3</span>
+                            <p className="text-[10px] text-slate-300 leading-relaxed">No menu lateral, selecione a <strong className="text-white">agenda desejada</strong>.</p>
+                          </div>
+                          <div className="flex gap-2.5 items-start">
+                            <span className="flex-shrink-0 w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 text-[10px] font-black flex items-center justify-center">4</span>
+                            <p className="text-[10px] text-slate-300 leading-relaxed">Role até a seção <strong className="text-white">"Integrar agenda"</strong>.</p>
+                          </div>
+                          <div className="flex gap-2.5 items-start">
+                            <span className="flex-shrink-0 w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 text-[10px] font-black flex items-center justify-center">5</span>
+                            <p className="text-[10px] text-slate-300 leading-relaxed">Copie o <strong className="text-white">"ID da agenda"</strong> ou o <strong className="text-white">"Código de incorporação"</strong> e cole no campo acima.</p>
+                          </div>
+                        </div>
+                        <div className="mt-3 p-2.5 bg-amber-500/10 rounded-lg border border-amber-500/20">
+                          <p className="text-[9px] text-amber-400 leading-relaxed flex items-start gap-1.5">
+                            <span className="text-amber-500 font-bold flex-shrink-0">⚠️</span>
+                            <span><strong>Importante:</strong> A agenda deve estar com <strong>acesso público</strong> ativado. Vá em Configurações {'>'} Permissões de acesso {'>'} Marque "Tornar disponível publicamente".</span>
+                          </p>
+                        </div>
+                      </div>
+                    </details>
 
                     <div className="border-t border-slate-800 pt-4 mt-4 space-y-3">
                       <div className="flex items-center gap-2">
@@ -3512,10 +3564,17 @@ const Editor: React.FC = () => {
 };
 
 const WidgetTool = ({ icon, label, onClick }: any) => (
-  <button onClick={onClick} className="flex flex-col items-center justify-center p-4 bg-slate-950 border border-slate-800 rounded-xl hover:border-[#7C3AED] hover:shadow-[0_0_15px_rgba(124,58,237,0.15)] transition-all group">
-    <div className="text-slate-500 group-hover:text-[#7C3AED] mb-2 transition-colors">{icon}</div>
-    <span className="text-[9px] font-bold text-slate-500 group-hover:text-slate-200 uppercase tracking-wider transition-colors">{label}</span>
+  <button onClick={onClick} className="flex flex-col items-center justify-center py-2 px-1 bg-slate-900/85 border border-slate-800/80 rounded-lg hover:bg-[#7C3AED]/15 hover:border-[#7C3AED] hover:shadow-[0_0_15px_rgba(124,58,237,0.2)] active:scale-95 transition-all group w-full">
+    <div className="text-slate-300 group-hover:text-[#7C3AED] mb-1 transition-colors drop-shadow-sm flex items-center justify-center h-10 w-10">
+      {typeof icon === 'string' ? (
+        <img src={icon} alt={label} className="w-9 h-9 object-contain group-hover:scale-110 transition-transform duration-300 filter drop-shadow-[0_0_6px_rgba(124,58,237,0.15)]" />
+      ) : (
+        icon
+      )}
+    </div>
+    <span className="text-[9px] font-bold text-slate-300 group-hover:text-white uppercase tracking-wider transition-colors text-center truncate w-full">{label}</span>
   </button>
 );
+
 
 export default Editor;

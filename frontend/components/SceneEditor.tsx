@@ -6,7 +6,7 @@ import {
   Image as ImageIcon, Type, CloudSun, Clock, Calendar, CalendarDays,
   Settings, Layers, Move, Upload, Link as LinkIcon, CheckCircle2,
   Maximize2, Minimize2, Film, Info, Loader2, MonitorPlay, Rss, Globe, Gift, Search, Palette, Map, Layout, MoveHorizontal,
-  FileText, ListTodo, Timer, ClipboardList, Utensils, TrendingUp, Code2, Database, StickyNote, Camera, BookOpen
+  FileText, ListTodo, Timer, ClipboardList, Utensils, TrendingUp, Code2, Database, StickyNote, Camera, BookOpen, ChevronDown
 } from 'lucide-react';
 import { uploadMedia } from '../services/storage';
 import { Page, WidgetType, LayoutItem, WidgetData } from '../types';
@@ -296,41 +296,41 @@ const SceneEditor: React.FC<SceneEditorProps> = ({ page, onChange, orientation =
       <div className="bg-slate-900/80 backdrop-blur-md border-b border-slate-800 p-3 flex items-center justify-between z-30">
         <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 md:pb-0">
           {/* Básicos */}
-          <WidgetTool icon={<ImageIcon size={18} />} label="Imagem" onClick={() => addWidget(WidgetType.IMAGE)} />
-          <WidgetTool icon={<Film size={18} />} label="Vídeo" onClick={() => addWidget(WidgetType.VIDEO)} />
-          <WidgetTool icon={<Type size={18} />} label="Texto" onClick={() => addWidget(WidgetType.TEXT)} />
-          <WidgetTool icon={<Gift size={18} />} label="GIF" onClick={() => addWidget(WidgetType.GIF)} />
-          <WidgetTool icon={<Globe size={18} />} label="Web" onClick={() => addWidget(WidgetType.IFRAME)} />
+          <WidgetTool icon="/icons3d/image.png" label="Imagem" onClick={() => addWidget(WidgetType.IMAGE)} />
+          <WidgetTool icon="/icons3d/video.png" label="Vídeo" onClick={() => addWidget(WidgetType.VIDEO)} />
+          <WidgetTool icon="/icons3d/text.png" label="Texto" onClick={() => addWidget(WidgetType.TEXT)} />
+          <WidgetTool icon="/icons3d/gif.png" label="GIF" onClick={() => addWidget(WidgetType.GIF)} />
+          <WidgetTool icon="/icons3d/web.png" label="Web" onClick={() => addWidget(WidgetType.IFRAME)} />
 
           <div className="w-px h-6 bg-slate-800 mx-1 flex-shrink-0"></div>
 
           {/* Utilitários */}
-          <WidgetTool icon={<Clock size={18} />} label="Relógio" onClick={() => addWidget(WidgetType.CLOCK)} />
-          <WidgetTool icon={<CloudSun size={18} />} label="Clima" onClick={() => addWidget(WidgetType.WEATHER)} />
-          <WidgetTool icon={<Layout size={18} />} label="Completo" onClick={() => addWidget(WidgetType.FULL_INFO)} />
-          <WidgetTool icon={<Rss size={18} />} label="RSS" onClick={() => addWidget(WidgetType.RSS)} />
-          <WidgetTool icon={<Calendar size={18} />} label="Agenda" onClick={() => addWidget(WidgetType.CALENDAR)} />
+          <WidgetTool icon="/icons3d/clock.png" label="Relógio" onClick={() => addWidget(WidgetType.CLOCK)} />
+          <WidgetTool icon="/icons3d/weather.png" label="Clima" onClick={() => addWidget(WidgetType.WEATHER)} />
+          <WidgetTool icon="/icons3d/full-info.png" label="Completo" onClick={() => addWidget(WidgetType.FULL_INFO)} />
+          <WidgetTool icon="/icons3d/rss.png" label="RSS" onClick={() => addWidget(WidgetType.RSS)} />
+          <WidgetTool icon="/icons3d/calendar.png" label="Agenda" onClick={() => addWidget(WidgetType.CALENDAR)} />
 
           <div className="w-px h-6 bg-slate-800 mx-1 flex-shrink-0"></div>
 
           {/* Interativos */}
-          <WidgetTool icon={<StickyNote size={18} className="text-yellow-400" />} label="Notas" onClick={() => addWidget(WidgetType.NOTES)} />
-          <WidgetTool icon={<ListTodo size={18} className="text-emerald-400" />} label="Tarefas" onClick={() => addWidget(WidgetType.TODO)} />
-          <WidgetTool icon={<Timer size={18} className="text-rose-400" />} label="Contador" onClick={() => addWidget(WidgetType.COUNTDOWN)} />
-          <WidgetTool icon={<ClipboardList size={18} className="text-[#7C3AED]" />} label="Deveres" onClick={() => addWidget(WidgetType.CHORES)} />
-          <WidgetTool icon={<Utensils size={18} className="text-amber-400" />} label="Meal Plan" onClick={() => addWidget(WidgetType.MEAL_PLAN)} />
+          <WidgetTool icon="/icons3d/notes.png" label="Notas" onClick={() => addWidget(WidgetType.NOTES)} />
+          <WidgetTool icon="/icons3d/todo.png" label="Tarefas" onClick={() => addWidget(WidgetType.TODO)} />
+          <WidgetTool icon="/icons3d/countdown.png" label="Contador" onClick={() => addWidget(WidgetType.COUNTDOWN)} />
+          <WidgetTool icon="/icons3d/chores.png" label="Deveres" onClick={() => addWidget(WidgetType.CHORES)} />
+          <WidgetTool icon="/icons3d/meal-plan.png" label="Meal Plan" onClick={() => addWidget(WidgetType.MEAL_PLAN)} />
 
           <div className="w-px h-6 bg-slate-800 mx-1 flex-shrink-0"></div>
 
           {/* Integrações */}
-          <WidgetTool icon={<TrendingUp size={18} className="text-green-400" />} label="Bolsa" onClick={() => addWidget(WidgetType.MARKET_WATCH)} />
-          <WidgetTool icon={<Camera size={18} className="text-blue-400" />} label="Snapshot" onClick={() => addWidget(WidgetType.BROWSER_SNAPSHOT)} />
-          <WidgetTool icon={<FileText size={18} className="text-[#7C3AED]" />} label="G Docs" onClick={() => addWidget(WidgetType.GOOGLE_DOCS)} />
-          <WidgetTool icon={<BookOpen size={18} className="text-blue-500" />} label="Office Docs" onClick={() => addWidget(WidgetType.OFFICE_DOCS)} />
-          <WidgetTool icon={<Layout size={18} className="text-amber-500" />} label="Power BI" onClick={() => addWidget(WidgetType.POWER_BI)} />
-          <WidgetTool icon={<Database size={18} className="text-rose-500" />} label="Airtable" onClick={() => addWidget(WidgetType.AIRTABLE)} />
-          <WidgetTool icon={<FileText size={18} className="text-red-500" />} label="PDF" onClick={() => addWidget(WidgetType.PDF_DOCUMENT)} />
-          <WidgetTool icon={<Code2 size={18} className="text-indigo-400" />} label="HTML" onClick={() => addWidget(WidgetType.EMBED_HTML)} />
+          <WidgetTool icon="/icons3d/market.png" label="Bolsa" onClick={() => addWidget(WidgetType.MARKET_WATCH)} />
+          <WidgetTool icon="/icons3d/snapshot.png" label="Snapshot" onClick={() => addWidget(WidgetType.BROWSER_SNAPSHOT)} />
+          <WidgetTool icon="/icons3d/google-docs.png" label="G Docs" onClick={() => addWidget(WidgetType.GOOGLE_DOCS)} />
+          <WidgetTool icon="/icons3d/office-docs.png" label="Office Docs" onClick={() => addWidget(WidgetType.OFFICE_DOCS)} />
+          <WidgetTool icon="/icons3d/power-bi.png" label="Power BI" onClick={() => addWidget(WidgetType.POWER_BI)} />
+          <WidgetTool icon="/icons3d/airtable.png" label="Airtable" onClick={() => addWidget(WidgetType.AIRTABLE)} />
+          <WidgetTool icon="/icons3d/pdf.png" label="PDF" onClick={() => addWidget(WidgetType.PDF_DOCUMENT)} />
+          <WidgetTool icon="/icons3d/html.png" label="HTML" onClick={() => addWidget(WidgetType.EMBED_HTML)} />
         </div>
 
         <div className="flex items-center gap-2">
@@ -475,13 +475,19 @@ const SceneEditor: React.FC<SceneEditorProps> = ({ page, onChange, orientation =
 };
 
 // Helper Components
-const WidgetTool: React.FC<{ icon: React.ReactNode, label: string, onClick: () => void }> = ({ icon, label, onClick }) => (
+const WidgetTool: React.FC<{ icon: React.ReactNode | string, label: string, onClick: () => void }> = ({ icon, label, onClick }) => (
   <button
     onClick={onClick}
-    className="flex flex-col items-center justify-center gap-1 p-2 min-w-[60px] bg-slate-800/50 hover:bg-indigo-600 hover:text-white text-slate-400 rounded-xl transition-all border border-slate-800 hover:border-indigo-500 group"
+    className="flex flex-col items-center justify-center gap-0.5 p-1 min-w-[62px] h-[62px] bg-slate-800/80 hover:bg-[#7C3AED]/20 hover:text-white text-slate-300 rounded-lg transition-all border border-slate-700/60 hover:border-[#7C3AED] hover:shadow-[0_0_12px_rgba(124,58,237,0.15)] active:scale-95 group"
   >
-    <div className="group-hover:scale-110 transition-transform">{icon}</div>
-    <span className="text-[8px] font-black uppercase tracking-tighter">{label}</span>
+    <div className="flex items-center justify-center h-9 w-9">
+      {typeof icon === 'string' ? (
+        <img src={icon} alt={label} className="w-8 h-8 object-contain group-hover:scale-110 transition-transform duration-300 filter drop-shadow-[0_0_5px_rgba(124,58,237,0.1)]" />
+      ) : (
+        <div className="group-hover:scale-110 transition-transform">{icon}</div>
+      )}
+    </div>
+    <span className="text-[8px] font-black uppercase tracking-tight text-center truncate w-full">{label}</span>
   </button>
 );
 
@@ -625,6 +631,31 @@ const renderWidgetPreview = (w: LayoutItem) => {
       return <div className="w-full h-full overflow-hidden"><AirtableWidget data={w.data} /></div>;
     case WidgetType.PDF_DOCUMENT:
       return <div className="w-full h-full overflow-hidden"><PdfDocumentWidget data={w.data} /></div>;
+    case WidgetType.CALENDAR:
+      return (
+        <div 
+          className="w-full h-full relative overflow-hidden p-2 rounded-xl"
+          style={{ 
+            backgroundColor: w.data.calendarConfig?.transparent ? 'transparent' : (w.data.calendarConfig?.backgroundColor || 'rgba(15, 23, 42, 0.5)'),
+            backdropFilter: w.data.calendarConfig?.transparent ? 'none' : 'blur(12px)',
+            border: w.data.calendarConfig?.transparent ? 'none' : '1px solid rgba(255,255,255,0.1)'
+          }}
+        >
+          <div className="absolute inset-0 z-10 bg-transparent"></div>
+          {w.data.calendarId ? (
+            <iframe 
+              src={`https://calendar.google.com/calendar/embed?src=${encodeURIComponent(w.data.calendarId)}&showTitle=0&showPrint=0&showTabs=0&showCalendars=0&showTz=0&bgcolor=${encodeURIComponent(w.data.calendarConfig?.backgroundColor || '#ffffff')}`} 
+              className="w-full h-full border-none pointer-events-none" 
+              style={{
+                filter: w.data.calendarConfig?.theme === 'dark' ? 'invert(1) hue-rotate(180deg) contrast(1.2)' : 'none',
+                mixBlendMode: w.data.calendarConfig?.transparent ? (w.data.calendarConfig?.theme === 'dark' ? 'screen' : 'multiply') : 'normal'
+              }}
+            />
+          ) : (
+            <div className="flex flex-col items-center justify-center h-full text-slate-500"><CalendarDays size={32} className="mb-2" /><span className="text-[10px] font-bold">AGENDA</span></div>
+          )}
+        </div>
+      );
     default:
       return <div className="w-full h-full bg-slate-900 flex items-center justify-center text-[10px] text-slate-600 uppercase font-bold">{w.type}</div>;
   }
@@ -870,6 +901,74 @@ const renderWidgetControls = (
               </button>
             )}
           </div>
+        </div>
+      )}
+
+      {w.type === WidgetType.CALENDAR && (
+        <div className="space-y-3">
+          <label className="text-[9px] font-black text-slate-500 uppercase flex items-center gap-1"><Calendar size={10} /> ID do Google Calendar</label>
+          <input 
+            type="text" 
+            value={w.data.calendarId || ''} 
+            onChange={(e) => {
+              let raw = e.target.value.trim();
+              const iframeSrcMatch = raw.match(/src=["']([^"']+)["']/i);
+              if (iframeSrcMatch) raw = iframeSrcMatch[1];
+              try {
+                const url = new URL(raw);
+                if (url.hostname.includes('calendar.google.com')) {
+                  const srcParam = url.searchParams.get('src');
+                  if (srcParam) { raw = srcParam; }
+                }
+              } catch {}
+              updateData(w.i, { calendarId: raw });
+            }} 
+            className="w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-xs text-slate-200 outline-none focus:border-[#7C3AED] transition-all font-mono" 
+            placeholder="Cole aqui o ID, URL ou iframe do Google Calendar"
+          />
+          <p className="text-[9px] text-emerald-500/80 leading-relaxed bg-emerald-500/5 p-2 rounded border border-emerald-500/10">
+            💡 <strong>Dica:</strong> Você pode colar diretamente a URL do calendário, o código de incorporação (iframe), ou apenas o ID da agenda.
+          </p>
+
+          {/* Accordion: Como conectar o Google Calendar */}
+          <details className="group bg-slate-900/60 rounded-xl border border-slate-700/50 overflow-hidden transition-all">
+            <summary className="flex items-center justify-between cursor-pointer p-3 hover:bg-slate-800/50 transition-colors select-none">
+              <span className="text-[10px] font-black text-cyan-400 uppercase tracking-wider flex items-center gap-2">
+                <BookOpen size={12} /> Como Conectar sua Agenda
+              </span>
+              <ChevronDown size={14} className="text-slate-500 transition-transform duration-200 group-open:rotate-180" />
+            </summary>
+            <div className="px-3 pb-3 space-y-3 border-t border-slate-800">
+              <div className="mt-3 space-y-2.5">
+                <div className="flex gap-2.5 items-start">
+                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 text-[10px] font-black flex items-center justify-center">1</span>
+                  <p className="text-[10px] text-slate-300 leading-relaxed">Abra o <a href="https://calendar.google.com" target="_blank" rel="noopener noreferrer" className="text-cyan-400 underline hover:text-cyan-300">Google Calendar</a> no navegador.</p>
+                </div>
+                <div className="flex gap-2.5 items-start">
+                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 text-[10px] font-black flex items-center justify-center">2</span>
+                  <p className="text-[10px] text-slate-300 leading-relaxed">Clique no ícone de <strong className="text-white">⚙️ Configurações</strong> (engrenagem) no canto superior direito.</p>
+                </div>
+                <div className="flex gap-2.5 items-start">
+                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 text-[10px] font-black flex items-center justify-center">3</span>
+                  <p className="text-[10px] text-slate-300 leading-relaxed">No menu lateral, selecione a <strong className="text-white">agenda desejada</strong>.</p>
+                </div>
+                <div className="flex gap-2.5 items-start">
+                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 text-[10px] font-black flex items-center justify-center">4</span>
+                  <p className="text-[10px] text-slate-300 leading-relaxed">Role até a seção <strong className="text-white">"Integrar agenda"</strong>.</p>
+                </div>
+                <div className="flex gap-2.5 items-start">
+                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 text-[10px] font-black flex items-center justify-center">5</span>
+                  <p className="text-[10px] text-slate-300 leading-relaxed">Copie o <strong className="text-white">"ID da agenda"</strong> ou o <strong className="text-white">"Código de incorporação"</strong> e cole no campo acima.</p>
+                </div>
+              </div>
+              <div className="mt-3 p-2.5 bg-amber-500/10 rounded-lg border border-amber-500/20">
+                <p className="text-[9px] text-amber-400 leading-relaxed flex items-start gap-1.5">
+                  <span className="text-amber-500 font-bold flex-shrink-0">⚠️</span>
+                  <span><strong>Importante:</strong> A agenda deve estar com <strong>acesso público</strong> ativado. Vá em Configurações {'>'} Permissões de acesso {'>'} Marque "Tornar disponível publicamente".</span>
+                </p>
+              </div>
+            </div>
+          </details>
         </div>
       )}
 

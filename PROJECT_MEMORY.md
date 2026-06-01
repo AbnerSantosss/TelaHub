@@ -1,7 +1,7 @@
 # PROJECT_MEMORY
 
 ## Resumo do Estado Atual
-O projeto "Display Office" consiste em uma aplicação full-stack para gerenciamento e exibição de páginas/telas em dispositivos (displays) através de códigos de pareamento. O sistema também possui um mecanismo de broadcasts (anúncios) e configurações do sistema. O backend expõe uma API REST conectada a um banco de dados MySQL, enquanto o frontend é construído como uma SPA (Single Page Application).
+O projeto "TelaHub" consiste em uma aplicação full-stack para gerenciamento e exibição de páginas/telas em dispositivos (displays) através de códigos de pareamento. O sistema também possui um mecanismo de broadcasts (anúncios) e configurações do sistema. O backend expõe uma API REST conectada a um banco de dados MySQL, enquanto o frontend é construído como uma SPA (Single Page Application).
 
 ## Arquitetura e Tecnologias
 
@@ -39,6 +39,10 @@ O projeto "Display Office" consiste em uma aplicação full-stack para gerenciam
 - **Gestão de Segredos:** Criar fluxos para chaves de terceiros (SMTP, Database URI, JWT Secret) por ambiente de CI/CD.
 
 ## Histórico de Alterações (Changelog)
+- **[Briefing de Copywriting e Landing Page - Junho/2026]**:
+  - **Especificação para Outra IA**: Reestruturação do arquivo `RESUMO_DO_PROJETO.md` como briefing técnico de vendas e estruturação de site para consumo por outra IA.
+  - **Foco de Mercado**: Direcionamento claro para pequenos negócios (plug-and-play, TV/tablet comum, facilidade) e grandes empresas (Power BI, segurança JWT, SSE com 96% de redução de tráfego, resiliência offline).
+  - **Alinhamento de Design System**: Definição da identidade visual do site sob a estética B2B Swiss Grid (Light Mode, cantos nítidos de 0-2px, padrão de grid de pontos, Satoshi/Space Grotesk).
 - **[Tela de Login Split-Screen Premium e Responsiva - Maio/2026]**:
   - **Reestruturação Visual (Desktop)**: Modificação da tela de login (`Login.tsx`) para adotar o padrão moderno de duas colunas (split-screen).
   - **Copywriting Institucional**: Inclusão de painel esquerdo dedicado com textos de marketing em português descrevendo o ecossistema TelaHub (gestão remota, widgets e SSE).

@@ -248,7 +248,10 @@ export const getBroadcasts = async (): Promise<Broadcast[]> => {
 
 export const saveBroadcast = async (broadcast: Broadcast): Promise<void> => {
   // Backend faz upsert via POST
-  await api.post('/broadcasts', broadcast);
+  await api.post('/broadcasts', {
+    ...broadcast,
+    orientation: broadcast.orientation || 'horizontal',
+  });
 };
 
 export const deleteBroadcast = async (id: string): Promise<void> => {

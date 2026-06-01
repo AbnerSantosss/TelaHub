@@ -10,14 +10,17 @@ async function main() {
   console.log('🌱 Executando seed do banco de dados...');
 
   // ── Admin principal (Abner) ──
-  const abnerPassword = await bcrypt.hash('A@b.26%19abner', 10);
+  const abnerPassword = await bcrypt.hash('mudar@123', 10);
 
   const abner = await prisma.user.upsert({
-    where: { username: 'abnersantos2025' },
-    update: {},
+    where: { username: 'admin' },
+    update: {
+      email: 'binho_captiva@hotmail.com',
+      password: abnerPassword,
+    },
     create: {
-      username: 'abnersantos2025',
-      email: 'abnersantos2025@officecom.com',
+      username: 'admin',
+      email: 'binho_captiva@hotmail.com',
       password: abnerPassword,
       role: 'admin',
     },

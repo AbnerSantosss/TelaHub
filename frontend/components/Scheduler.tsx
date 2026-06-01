@@ -5,7 +5,8 @@ import {
   Plus, Calendar as CalendarIcon, Clock, Monitor, Trash2, Edit3, Check, X, 
   ChevronLeft, Loader2, Save, Zap, AlertCircle, Layout as LayoutIcon,
   CalendarDays, Filter, Search, MoreVertical, Play, Pause, Settings,
-  Image as ImageIcon, Type, CloudSun, Film, Rss, Globe, Gift, Layers, Maximize2
+  Image as ImageIcon, Type, CloudSun, Film, Rss, Globe, Gift, Layers, Maximize2,
+  Tv, Megaphone, Smartphone
 } from 'lucide-react';
 import { getBroadcasts, saveBroadcast, deleteBroadcast, getDisplays, getCurrentUser, saveDisplay } from '../services/storage';
 import { Broadcast, Display, Page, User, WidgetType, LayoutItem } from '../types';
@@ -19,6 +20,8 @@ const Scheduler: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [currentBroadcast, setCurrentBroadcast] = useState<Partial<Broadcast> | null>(null);
   const [showLeftSidebar, setShowLeftSidebar] = useState(false);
+  const [showOrientationModal, setShowOrientationModal] = useState(false);
+  const [pendingAllScreens, setPendingAllScreens] = useState(false);
   
   const navigate = useNavigate();
 
@@ -44,18 +47,29 @@ const Scheduler: React.FC = () => {
   }, []);
 
   const handleCreateNew = () => {
+    setPendingAllScreens(false);
+    setShowOrientationModal(true);
+  };
+
+  const handleCreateAllScreens = () => {
+    setPendingAllScreens(true);
+    setShowOrientationModal(true);
+  };
+
+  const confirmOrientation = (orientation: 'horizontal' | 'vertical') => {
     const now = new Date();
     const offset = now.getTimezoneOffset() * 60000;
     const localISOTime = new Date(now.getTime() - offset).toISOString().slice(0, 16);
     
     const newBroadcast: Partial<Broadcast> = {
       id: crypto.randomUUID(),
-      name: '',
+      name: pendingAllScreens ? '' : '',
       active: true,
-      display_ids: [],
+      display_ids: pendingAllScreens ? displays.map(d => d.id) : [],
       start_time: localISOTime,
-      end_time: new Date(Date.now() + 3600000 * 24 - offset).toISOString().slice(0, 16), // +24h local
+      end_time: new Date(Date.now() + 3600000 * 24 - offset).toISOString().slice(0, 16),
       is_permanent: false,
+      orientation,
       page: {
         id: 'p' + Date.now(),
         order: 1,
@@ -66,6 +80,8 @@ const Scheduler: React.FC = () => {
       created_by: currentUser?.id
     };
     setCurrentBroadcast(newBroadcast);
+    setShowOrientationModal(false);
+    setPendingAllScreens(false);
     setIsEditing(true);
   };
 
@@ -254,12 +270,21 @@ const Scheduler: React.FC = () => {
           </div>
           
           {!isEditing && (
-            <button 
-              onClick={handleCreateNew}
-              className="w-full md:w-auto justify-center flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-[#7C3AED] hover:from-indigo-500 hover:to-[#6D28D9] text-white px-6 py-3 rounded-xl font-bold transition-all shadow-[0_0_20px_rgba(124,58,237,0.4)]"
-            >
-              <Plus size={20} strokeWidth={3} /> Nova Programação
-            </button>
+            <div className="flex gap-3 w-full md:w-auto">
+              <button 
+                onClick={handleCreateAllScreens}
+                className="flex-1 md:flex-none justify-center flex items-center gap-2 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white px-5 py-3 rounded-xl font-bold transition-all shadow-[0_0_20px_rgba(245,158,11,0.3)] border border-white/10"
+                title="Exibir em todas as telas conectadas (avisos urgentes)"
+              >
+                <Megaphone size={18} strokeWidth={2.5} /> <span className="hidden sm:inline">Todas as Telas</span>
+              </button>
+              <button 
+                onClick={handleCreateNew}
+                className="flex-1 md:flex-none justify-center flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-[#7C3AED] hover:from-indigo-500 hover:to-[#6D28D9] text-white px-6 py-3 rounded-xl font-bold transition-all shadow-[0_0_20px_rgba(124,58,237,0.4)]"
+              >
+                <Plus size={20} strokeWidth={3} /> Nova Programação
+              </button>
+            </div>
           )}
         </header>
 
@@ -507,13 +532,24 @@ const Scheduler: React.FC = () => {
               {/* CANVAS AREA */}
               <main className="flex-1 bg-slate-950 relative overflow-hidden flex items-center justify-center p-4 md:p-8">
                 <div className="absolute inset-0 z-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(#4f46e5 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
-                <div className="absolute top-4 left-4 flex items-center gap-2 text-slate-600 text-[10px] font-black uppercase tracking-widest bg-slate-900/80 px-3 py-1.5 rounded-full border border-slate-800 backdrop-blur-sm z-20">
-                  <Maximize2 size={12} className="text-purple-500" /> Canvas Programação 16:9
+                <div className={`absolute top-4 left-4 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest bg-slate-900/80 px-3 py-1.5 rounded-full border backdrop-blur-sm z-20 ${
+                  currentBroadcast?.orientation === 'vertical'
+                    ? 'text-purple-400 border-purple-800'
+                    : 'text-slate-600 border-slate-800'
+                }`}>
+                   <Maximize2 size={12} className={currentBroadcast?.orientation === 'vertical' ? 'text-purple-500' : 'text-[#F97316]'} />
+                   {currentBroadcast?.orientation === 'vertical' ? 'Canvas Programação 9:16 — Vertical' : 'Canvas Programação 16:9 — Horizontal'}
                 </div>
+                {pendingAllScreens || (currentBroadcast?.display_ids?.length === displays.length && displays.length > 0) ? (
+                  <div className="absolute top-4 right-4 flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest bg-amber-500/20 text-amber-400 px-3 py-1.5 rounded-full border border-amber-500/30 backdrop-blur-sm z-20">
+                    <Megaphone size={12} /> Todas as Telas
+                  </div>
+                ) : null}
                 
                 <SceneEditor 
                   page={currentBroadcast?.page || { id: 'temp', order: 1, duration: 15, layout: [] }} 
                   onChange={(newPage) => setCurrentBroadcast({...currentBroadcast!, page: newPage})}
+                  orientation={currentBroadcast?.orientation || 'horizontal'}
                 />
               </main>
             </div>
@@ -575,11 +611,20 @@ const Scheduler: React.FC = () => {
                           </div>
                           
                           <div className="space-y-1">
-                            <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-3 flex-wrap">
                               <h3 className="text-xl font-bold text-slate-100 group-hover:text-indigo-400 transition-colors">{broadcast.name}</h3>
                               {isLive && <span className="bg-emerald-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full animate-pulse">AO VIVO</span>}
                               {isScheduled && <span className="bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 text-[9px] font-black px-2 py-0.5 rounded-full">AGENDADO</span>}
                               {isExpired && <span className="bg-slate-800 text-slate-500 text-[9px] font-black px-2 py-0.5 rounded-full">EXPIRADO</span>}
+                              {broadcast.orientation === 'vertical' ? (
+                                <span className="bg-purple-500/10 text-purple-400 border border-purple-500/20 text-[9px] font-black px-2 py-0.5 rounded-full flex items-center gap-1">
+                                  <Smartphone size={10} /> 9:16
+                                </span>
+                              ) : (
+                                <span className="bg-sky-500/10 text-sky-400 border border-sky-500/20 text-[9px] font-black px-2 py-0.5 rounded-full flex items-center gap-1">
+                                  <Monitor size={10} /> 16:9
+                                </span>
+                              )}
                             </div>
                             
                             <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-slate-400">
@@ -626,6 +671,74 @@ const Scheduler: React.FC = () => {
         )}
 
       </div>
+
+      {/* ORIENTATION SELECTION MODAL */}
+      {showOrientationModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-300">
+            <div className="p-6 border-b border-slate-800 flex justify-between items-center">
+              <div>
+                <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                  {pendingAllScreens ? (
+                    <><Megaphone className="text-amber-400" size={20} /> Aviso em Todas as Telas</>
+                  ) : (
+                    <><Tv className="text-[#7C3AED]" size={20} /> Modelo de Tela</>
+                  )}
+                </h3>
+                <p className="text-xs text-slate-500 mt-1">
+                  {pendingAllScreens 
+                    ? 'Escolha a orientação do conteúdo que será exibido em todas as telas.' 
+                    : 'Escolha a orientação da tela para esta programação.'}
+                </p>
+              </div>
+              <button 
+                onClick={() => { setShowOrientationModal(false); setPendingAllScreens(false); }}
+                className="text-slate-400 hover:text-rose-500 transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <div className="p-6">
+              <div className="grid grid-cols-2 gap-4">
+                <button
+                  onClick={() => confirmOrientation('horizontal')}
+                  className="flex flex-col items-center justify-center gap-3 p-6 rounded-2xl border-2 border-white/10 bg-slate-950 hover:border-[#7C3AED] hover:bg-[#7C3AED]/10 hover:shadow-[0_0_25px_rgba(124,58,237,0.2)] transition-all group"
+                >
+                  <div className="w-20 h-[45px] rounded-lg border-2 border-white/10 group-hover:border-[#7C3AED]/60 bg-slate-800 group-hover:bg-[#7C3AED]/10 flex items-center justify-center transition-all">
+                    <Monitor size={20} className="text-slate-500 group-hover:text-[#7C3AED] transition-colors" />
+                  </div>
+                  <div className="text-center">
+                    <p className="text-sm font-bold text-slate-300 group-hover:text-[#7C3AED] transition-colors">Horizontal</p>
+                    <p className="text-[10px] text-slate-600 font-mono mt-0.5">16:9 — TV / Monitor</p>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => confirmOrientation('vertical')}
+                  className="flex flex-col items-center justify-center gap-3 p-6 rounded-2xl border-2 border-white/10 bg-slate-950 hover:border-purple-500 hover:bg-purple-500/10 hover:shadow-[0_0_25px_rgba(168,85,247,0.2)] transition-all group"
+                >
+                  <div className="w-[45px] h-20 rounded-lg border-2 border-white/10 group-hover:border-purple-500/60 bg-slate-800 group-hover:bg-purple-500/10 flex items-center justify-center transition-all">
+                    <Smartphone size={20} className="text-slate-500 group-hover:text-purple-400 transition-colors" />
+                  </div>
+                  <div className="text-center">
+                    <p className="text-sm font-bold text-slate-300 group-hover:text-purple-400 transition-colors">Vertical</p>
+                    <p className="text-[10px] text-slate-600 font-mono mt-0.5">9:16 — Totem / Kiosk</p>
+                  </div>
+                </button>
+              </div>
+
+              {pendingAllScreens && (
+                <div className="mt-4 bg-amber-500/10 border border-amber-500/20 rounded-xl p-3 flex items-start gap-2">
+                  <AlertCircle size={14} className="text-amber-400 mt-0.5 shrink-0" />
+                  <p className="text-[11px] text-amber-400/80 leading-relaxed">
+                    O conteúdo será exibido em <strong>todas as {displays.length} telas</strong> conectadas. Ideal para avisos urgentes.
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
       {/* Delete Modal */}
       {showDeleteModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">

@@ -22,6 +22,7 @@ router.get('/', authMiddleware, async (req: Request, res: Response): Promise<voi
         active: b.active,
         created_at: b.createdAt instanceof Date ? b.createdAt.toISOString() : b.createdAt,
         created_by: b.createdBy,
+        orientation: b.page?.__orientation || undefined,
       }))
     );
   } catch (error: any) {
@@ -35,7 +36,7 @@ router.post('/', authMiddleware, async (req: Request, res: Response): Promise<vo
   try {
     const {
       id, name, page, start_time, end_time,
-      is_permanent, display_ids, active, created_at, created_by,
+      is_permanent, display_ids, active, created_at, created_by, orientation,
     } = req.body;
 
     if (!name) {
@@ -43,10 +44,15 @@ router.post('/', authMiddleware, async (req: Request, res: Response): Promise<vo
       return;
     }
 
+    // Embed orientation inside page JSON (same strategy as Display)
+    const pageWithOrientation = orientation 
+      ? { ...(page || {}), __orientation: orientation }
+      : (page || {});
+
     const broadcast = await broadcastService.save({
       id,
       name,
-      page: page || {},
+      page: pageWithOrientation,
       startTime: start_time || '',
       endTime: end_time || '',
       isPermanent: is_permanent || false,

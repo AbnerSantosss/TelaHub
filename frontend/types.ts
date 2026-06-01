@@ -251,4 +251,5 @@ export interface Broadcast {
   active: boolean;
   created_at: number;
   created_by?: string;
+  orientation?: 'horizontal' | 'vertical';
 }
