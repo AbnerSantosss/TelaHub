@@ -4,9 +4,9 @@ const CtaStrip = ({ triggerConversionModal }) => {
   return (
     <div className="cta-strip">
       <div className="container">
-        <div className="label" style={{ margin: '0 auto 20px', width: 'fit-content' }}>Última chamada</div>
+        <div className="label" style={{ margin: '0 auto 20px', width: 'fit-content', background: 'rgba(255,255,255,0.12)', borderColor: 'rgba(255,255,255,0.25)', color: '#FFFFFF' }}>Última chamada</div>
         <h2 className="reveal">
-          Daqui a 5 minutos, sua primeira tela pode estar no ar.<br /><span className="text-gradient">Ou você pode continuar procurando o pen-drive.</span>
+          Daqui a 5 minutos, sua primeira tela pode estar no ar.<br /><span style={{ color: 'rgba(255,255,255,0.75)' }}>Ou você pode continuar procurando o pen-drive.</span>
         </h2>
         <p className="reveal" style={{ marginTop: '16px', marginBottom: '32px' }}>
           Crie a conta. Monte o conteúdo. Gere o código. Conecte a TV. Sem instalador, sem técnico, sem enrolação.
@@ -16,7 +16,7 @@ const CtaStrip = ({ triggerConversionModal }) => {
           <button 
             onClick={() => triggerConversionModal('Starter')} 
             className="btn btn-primary" 
-            style={{ fontSize: '1rem', padding: '14px 32px' }}
+            style={{ fontSize: '1rem', padding: '14px 32px', background: '#FFFFFF', color: '#1E40AF' }}
           >
             Quero ativar minha tela agora
             <svg 
@@ -36,12 +36,12 @@ const CtaStrip = ({ triggerConversionModal }) => {
           <button 
             onClick={() => triggerConversionModal('Enterprise')} 
             className="btn btn-ghost" 
-            style={{ fontSize: '1rem', padding: '14px 32px' }}
+            style={{ fontSize: '1rem', padding: '14px 32px', borderColor: 'rgba(255,255,255,0.35)', color: '#FFFFFF' }}
           >
             Falar com especialista
           </button>
         </div>
-        <p style={{ marginTop: '20px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+        <p style={{ marginTop: '20px', fontSize: '0.8rem', color: 'rgba(255,255,255,0.55)' }}>
           Teste grátis por 14 dias · Pareamento em 2 min · Cancele quando quiser
         </p>
       </div>

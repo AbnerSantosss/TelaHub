@@ -135,9 +135,8 @@ body::before {
 }
 
 section {
-  padding: 80px 0;
+  padding: 96px 0;
   position: relative;
-  border-bottom: 1px solid var(--border);
 }
 
 .orb {
@@ -306,7 +305,7 @@ nav {
   min-height: auto;
   display: flex;
   align-items: center;
-  border-bottom: 1px solid var(--border);
+  background: var(--bg-primary);
 }
 .hero-inner {
   display: grid;
@@ -517,7 +516,12 @@ nav {
    SECTION 2 — ARGUMENTO TÉCNICO (Problema vs Solução)
    ═══════════════════════════════════════════ */
 #argumento {
-  background: var(--bg-secondary);
+  background: #EFF6FF;
+  border-top: 1px solid #DBEAFE;
+  border-bottom: 1px solid #DBEAFE;
+}
+#argumento .argumento-card {
+  background: #FFFFFF;
 }
 .argumento-header {
   text-align: center;
@@ -761,7 +765,42 @@ nav {
    SECTION 4 — TABS CASOS DE USO
    ═══════════════════════════════════════════ */
 #casos {
-  background: #FFFFFF;
+  background: #0F172A;
+  color: #F1F5F9;
+}
+#casos .casos-header h2,
+#casos .casos-header h2 .text-gradient {
+  color: #F8FAFC;
+  -webkit-text-fill-color: #F8FAFC;
+  background: none;
+}
+#casos .casos-header p {
+  color: #94A3B8;
+}
+#casos .label {
+  background: rgba(37, 99, 235, 0.15);
+  border-color: rgba(37, 99, 235, 0.3);
+  color: #60A5FA;
+}
+#casos .label::before {
+  background: #60A5FA;
+}
+#casos .tab-content h3 {
+  color: #F8FAFC;
+}
+#casos .tab-content p {
+  color: #94A3B8;
+}
+#casos .tab-feature-text strong {
+  color: #E2E8F0;
+}
+#casos .tab-feature {
+  color: #94A3B8;
+}
+#casos .tab-feature-icon {
+  background: rgba(37, 99, 235, 0.15);
+  border-color: rgba(37, 99, 235, 0.3);
+  color: #60A5FA;
 }
 .casos-header {
   text-align: center;
@@ -774,8 +813,8 @@ nav {
 .tabs-nav {
   display: flex;
   gap: 4px;
-  background: #F3F4F6;
-  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--radius-md);
   padding: 5px;
   margin-bottom: 24px;
@@ -789,7 +828,7 @@ nav {
   padding: 10px 20px;
   border: none;
   background: transparent;
-  color: var(--text-secondary);
+  color: #94A3B8;
   font-family: var(--font);
   font-size: 0.85rem;
   font-weight: 600;
@@ -802,12 +841,12 @@ nav {
   gap: 8px;
   white-space: nowrap;
 }
-.tab-btn:hover { color: var(--text-primary); }
+.tab-btn:hover { color: #E2E8F0; }
 .tab-btn.active {
-  background: #FFFFFF;
-  color: var(--cyan);
-  border: 1px solid var(--border);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  background: rgba(37, 99, 235, 0.2);
+  color: #60A5FA;
+  border: 1px solid rgba(37, 99, 235, 0.35);
+  box-shadow: 0 2px 12px rgba(37, 99, 235, 0.1);
 }
 .tab-icon { font-size: 1rem; }
 
@@ -853,8 +892,8 @@ nav {
 }
 
 .tab-visual {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--radius-lg);
   padding: 28px;
   min-height: 280px;
@@ -974,7 +1013,8 @@ nav {
    SECTION 5 — PREÇOS
    ═══════════════════════════════════════════ */
 #precos {
-  background: var(--bg-secondary);
+  background: #EFF6FF;
+  border-top: 1px solid #DBEAFE;
 }
 .precos-header {
   text-align: center;
@@ -1118,14 +1158,14 @@ nav {
    FOOTER CTA STRIP
    ═══════════════════════════════════════════ */
 .cta-strip {
-  padding: 80px 0;
-  border-top: 1px solid var(--border);
+  padding: 96px 0;
   text-align: center;
-  background: var(--bg-secondary);
+  background: linear-gradient(135deg, #1E40AF 0%, #2563EB 50%, #3B82F6 100%);
+  color: #FFFFFF;
 }
-.cta-strip h2 { max-width: 600px; margin: 0 auto 16px; }
+.cta-strip h2 { max-width: 600px; margin: 0 auto 16px; color: #FFFFFF; }
 .cta-strip p {
-  color: var(--text-secondary);
+  color: rgba(255, 255, 255, 0.8);
   max-width: 480px;
   margin: 0 auto 32px;
   font-size: 1rem;
@@ -1236,9 +1276,9 @@ nav {
    FOOTER
    ═══════════════════════════════════════════ */
 footer {
-  border-top: 1px solid var(--border);
-  padding: 48px 0 36px;
-  background: #FFFFFF;
+  padding: 56px 0 36px;
+  background: #111827;
+  color: #94A3B8;
 }
 .footer-inner {
   display: flex;
@@ -1248,10 +1288,13 @@ footer {
   flex-wrap: wrap;
 }
 .footer-brand { max-width: 220px; }
+.nav-logo-icon.footer-logo-icon {
+  background: #2563EB;
+}
 .footer-brand p {
   margin-top: 12px;
   font-size: 0.8rem;
-  color: var(--text-secondary);
+  color: #64748B;
   line-height: 1.6;
 }
 .footer-links { display: flex; gap: 48px; flex-wrap: wrap; }
@@ -1260,27 +1303,27 @@ footer {
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--text-primary);
+  color: #E2E8F0;
   margin-bottom: 14px;
 }
 .footer-col ul { display: flex; flex-direction: column; gap: 8px; }
 .footer-col ul li a {
   font-size: 0.85rem;
-  color: var(--text-secondary);
+  color: #64748B;
   transition: color var(--transition);
 }
-.footer-col ul li a:hover { color: var(--text-primary); }
+.footer-col ul li a:hover { color: #CBD5E1; }
 .footer-bottom {
   margin-top: 40px;
   padding-top: 24px;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid #1E293B;
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 12px;
 }
-.footer-bottom p { font-size: 0.78rem; color: var(--text-secondary); }
+.footer-bottom p { font-size: 0.78rem; color: #475569; }
 
 /* ═══════════════════════════════════════════
    MOBILE RESPONSIVENESS
