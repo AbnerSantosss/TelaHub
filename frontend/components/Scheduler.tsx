@@ -241,7 +241,7 @@ const Scheduler: React.FC = () => {
   if (loading && broadcasts.length === 0 && !isEditing) {
     return (
       <div className="h-screen w-screen bg-slate-950 flex flex-col items-center justify-center gap-4">
-        <Loader2 className="animate-spin text-[#7C3AED]" size={32} />
+        <Loader2 className="animate-spin text-[#ea580c]" size={32} />
         <p className="text-xs uppercase tracking-widest font-bold text-slate-500">Carregando Central...</p>
       </div>
     );
@@ -263,7 +263,7 @@ const Scheduler: React.FC = () => {
             <div>
               <h1 className="text-2xl md:text-3xl font-black tracking-tight flex items-center gap-2 md:gap-3">
                 <CalendarIcon className="text-indigo-500 shrink-0 w-6 h-6 md:w-8 md:h-8" />
-                <span>Central de <span className="text-[#7C3AED]">Programação</span></span>
+                <span>Central de <span className="text-[#ea580c]">Programação</span></span>
               </h1>
               <p className="text-slate-500 text-xs md:text-sm font-medium">Agendamento mestre e distribuição de conteúdo</p>
             </div>
@@ -280,7 +280,7 @@ const Scheduler: React.FC = () => {
               </button>
               <button 
                 onClick={handleCreateNew}
-                className="flex-1 md:flex-none justify-center flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-[#7C3AED] hover:from-indigo-500 hover:to-[#6D28D9] text-white px-6 py-3 rounded-xl font-bold transition-all shadow-[0_0_20px_rgba(124,58,237,0.4)]"
+                className="flex-1 md:flex-none justify-center flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-[#ea580c] hover:from-indigo-500 hover:to-[#d97706] text-white px-6 py-3 rounded-xl font-bold transition-all shadow-[0_0_20px_rgba(124,58,237,0.4)]"
               >
                 <Plus size={20} strokeWidth={3} /> Nova Programação
               </button>
@@ -293,14 +293,14 @@ const Scheduler: React.FC = () => {
             {/* HEADER BAR */}
             <header className="h-auto md:h-16 bg-slate-900 border-b border-slate-800 px-4 md:px-6 py-3 md:py-0 flex flex-col md:flex-row items-center justify-between z-30 shadow-md gap-3 md:gap-0">
               <div className="flex items-center gap-4 w-full md:w-auto">
-                <button onClick={() => setIsEditing(false)} className="p-2 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-[#7C3AED] transition-colors">
+                <button onClick={() => setIsEditing(false)} className="p-2 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-[#ea580c] transition-colors">
                   <ChevronLeft size={20} />
                 </button>
                 <div className="w-px h-6 bg-slate-800"></div>
                 <div className="flex items-center gap-2">
                   <img src="/logo.png" alt="Logo" className="w-6 h-6 object-contain" />
                   <h1 className="font-bold text-slate-100 tracking-tight uppercase text-sm">
-                    Tela<span className="text-[#7C3AED]">Hub</span> <span className="text-slate-600 mx-1">/</span> 
+                    Tela<span className="text-[#ea580c]">Hub</span> <span className="text-slate-600 mx-1">/</span> 
                     <span className="text-purple-400">Programação</span>
                   </h1>
                 </div>
@@ -351,7 +351,7 @@ const Scheduler: React.FC = () => {
                 {/* Widgets Section */}
                 <div className="p-5 border-b border-slate-800">
                   <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-[10px] font-black text-[#7C3AED] uppercase tracking-widest flex items-center gap-2">
+                    <h3 className="text-[10px] font-black text-[#ea580c] uppercase tracking-widest flex items-center gap-2">
                       <Layers size={12} /> Widgets
                     </h3>
                     <button onClick={() => setShowLeftSidebar(false)} className="md:hidden text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors">
@@ -418,7 +418,7 @@ const Scheduler: React.FC = () => {
                         value={currentBroadcast?.name || ''}
                         onChange={e => setCurrentBroadcast({...currentBroadcast!, name: e.target.value})}
                         placeholder="Ex: Aniversariantes..."
-                        className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-xs text-slate-100 placeholder:text-slate-700 focus:border-[#7C3AED] outline-none transition-all"
+                        className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-xs text-slate-100 placeholder:text-slate-700 focus:border-[#ea580c] outline-none transition-all"
                       />
                     </div>
                     <div>
@@ -429,7 +429,7 @@ const Scheduler: React.FC = () => {
                           type="datetime-local" 
                           value={currentBroadcast?.start_time || ''}
                           onChange={e => setCurrentBroadcast({...currentBroadcast!, start_time: e.target.value})}
-                          className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 pl-9 text-xs text-slate-100 focus:border-[#7C3AED] outline-none transition-all"
+                          className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 pl-9 text-xs text-slate-100 focus:border-[#ea580c] outline-none transition-all"
                         />
                       </div>
                     </div>
@@ -442,7 +442,7 @@ const Scheduler: React.FC = () => {
                           disabled={currentBroadcast?.is_permanent}
                           value={currentBroadcast?.is_permanent ? '' : (currentBroadcast?.end_time || '')}
                           onChange={e => setCurrentBroadcast({...currentBroadcast!, end_time: e.target.value})}
-                          className={`w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 pl-9 text-xs text-slate-100 focus:border-[#7C3AED] outline-none transition-all ${currentBroadcast?.is_permanent ? 'opacity-30 cursor-not-allowed' : ''}`}
+                          className={`w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 pl-9 text-xs text-slate-100 focus:border-[#ea580c] outline-none transition-all ${currentBroadcast?.is_permanent ? 'opacity-30 cursor-not-allowed' : ''}`}
                         />
                       </div>
                     </div>
@@ -480,7 +480,7 @@ const Scheduler: React.FC = () => {
                       <p className="text-[8px] text-slate-500 mt-1.5">Define em qual posição a cena aparecerá na rotação das telas</p>
                     </div>
                     <label className="flex items-center gap-3 cursor-pointer group pt-2">
-                      <div className={`w-9 h-5 rounded-full relative transition-all ${currentBroadcast?.is_permanent ? 'bg-[#7C3AED]' : 'bg-slate-700'}`}>
+                      <div className={`w-9 h-5 rounded-full relative transition-all ${currentBroadcast?.is_permanent ? 'bg-[#ea580c]' : 'bg-slate-700'}`}>
                         <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-all ${currentBroadcast?.is_permanent ? 'left-[18px]' : 'left-0.5'}`}></div>
                       </div>
                       <span className="text-[10px] font-bold text-slate-400 group-hover:text-white transition-colors uppercase">Permanente</span>
@@ -499,7 +499,7 @@ const Scheduler: React.FC = () => {
                 {/* Display Selection Section */}
                 <div className="p-5">
                   <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-[10px] font-black text-[#7C3AED] uppercase tracking-widest flex items-center gap-2">
+                    <h3 className="text-[10px] font-black text-[#ea580c] uppercase tracking-widest flex items-center gap-2">
                       <Monitor size={12} /> Selecionar Telas
                     </h3>
                     <div className="flex gap-2">
@@ -514,15 +514,15 @@ const Scheduler: React.FC = () => {
                         onClick={() => toggleDisplaySelection(display.id)}
                         className={`flex items-center justify-between p-2.5 rounded-lg border cursor-pointer transition-all ${
                           currentBroadcast?.display_ids?.includes(display.id)
-                          ? 'bg-[#7C3AED]/10 border-[#7C3AED]/50 text-purple-100'
+                          ? 'bg-[#ea580c]/10 border-[#ea580c]/50 text-purple-100'
                           : 'bg-slate-950/50 border-slate-800 text-slate-400 hover:border-slate-700'
                         }`}
                       >
                         <div className="flex items-center gap-2.5">
-                          <Monitor size={14} className={currentBroadcast?.display_ids?.includes(display.id) ? 'text-[#7C3AED]' : 'text-slate-600'} />
+                          <Monitor size={14} className={currentBroadcast?.display_ids?.includes(display.id) ? 'text-[#ea580c]' : 'text-slate-600'} />
                           <span className="text-xs font-medium">{display.name}</span>
                         </div>
-                        {currentBroadcast?.display_ids?.includes(display.id) && <Check size={14} className="text-[#7C3AED]" />}
+                        {currentBroadcast?.display_ids?.includes(display.id) && <Check size={14} className="text-[#ea580c]" />}
                       </div>
                     ))}
                   </div>
@@ -682,7 +682,7 @@ const Scheduler: React.FC = () => {
                   {pendingAllScreens ? (
                     <><Megaphone className="text-amber-400" size={20} /> Aviso em Todas as Telas</>
                   ) : (
-                    <><Tv className="text-[#7C3AED]" size={20} /> Modelo de Tela</>
+                    <><Tv className="text-[#ea580c]" size={20} /> Modelo de Tela</>
                   )}
                 </h3>
                 <p className="text-xs text-slate-500 mt-1">
@@ -702,13 +702,13 @@ const Scheduler: React.FC = () => {
               <div className="grid grid-cols-2 gap-4">
                 <button
                   onClick={() => confirmOrientation('horizontal')}
-                  className="flex flex-col items-center justify-center gap-3 p-6 rounded-2xl border-2 border-white/10 bg-slate-950 hover:border-[#7C3AED] hover:bg-[#7C3AED]/10 hover:shadow-[0_0_25px_rgba(124,58,237,0.2)] transition-all group"
+                  className="flex flex-col items-center justify-center gap-3 p-6 rounded-2xl border-2 border-white/10 bg-slate-950 hover:border-[#ea580c] hover:bg-[#ea580c]/10 hover:shadow-[0_0_25px_rgba(124,58,237,0.2)] transition-all group"
                 >
-                  <div className="w-20 h-[45px] rounded-lg border-2 border-white/10 group-hover:border-[#7C3AED]/60 bg-slate-800 group-hover:bg-[#7C3AED]/10 flex items-center justify-center transition-all">
-                    <Monitor size={20} className="text-slate-500 group-hover:text-[#7C3AED] transition-colors" />
+                  <div className="w-20 h-[45px] rounded-lg border-2 border-white/10 group-hover:border-[#ea580c]/60 bg-slate-800 group-hover:bg-[#ea580c]/10 flex items-center justify-center transition-all">
+                    <Monitor size={20} className="text-slate-500 group-hover:text-[#ea580c] transition-colors" />
                   </div>
                   <div className="text-center">
-                    <p className="text-sm font-bold text-slate-300 group-hover:text-[#7C3AED] transition-colors">Horizontal</p>
+                    <p className="text-sm font-bold text-slate-300 group-hover:text-[#ea580c] transition-colors">Horizontal</p>
                     <p className="text-[10px] text-slate-600 font-mono mt-0.5">16:9 — TV / Monitor</p>
                   </div>
                 </button>

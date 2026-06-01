@@ -55,7 +55,7 @@ const ProtectedRoute = ({ children }: { children?: React.ReactNode }) => {
 const App: React.FC = () => {
   return (
     <HashRouter>
-      <div className="min-h-screen bg-[#1C1D22] text-slate-100 selection:bg-[#7C3AED]/30 selection:text-purple-200">
+      <div className="min-h-screen bg-[#1C1D22] text-slate-100 selection:bg-[#ea580c]/30 selection:text-purple-200">
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />

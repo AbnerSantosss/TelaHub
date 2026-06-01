@@ -492,13 +492,13 @@ const Dashboard: React.FC = () => {
           <div className={`bg-[#2D3139] border rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in fade-in zoom-in duration-300 ${
             toast.type === 'success' ? 'border-emerald-500/40 shadow-[0_0_50px_rgba(16,185,129,0.2)]' :
             toast.type === 'error' ? 'border-rose-500/40 shadow-[0_0_50px_rgba(244,63,94,0.2)]' :
-            'border-[#7C3AED]/40 shadow-[0_0_50px_rgba(124,58,237,0.2)]'
+            'border-[#ea580c]/40 shadow-[0_0_50px_rgba(124,58,237,0.2)]'
           }`}>
             {/* Top violet/accent gradient bar */}
             <div className={`h-1 ${
               toast.type === 'success' ? 'bg-gradient-to-r from-emerald-600 via-emerald-400 to-cyan-400' :
               toast.type === 'error' ? 'bg-gradient-to-r from-rose-600 via-rose-400 to-amber-400' :
-              'bg-[#7C3AED]'
+              'bg-[#ea580c]'
             }`}></div>
             
             <div className="p-6 text-center">
@@ -506,7 +506,7 @@ const Dashboard: React.FC = () => {
               <div className={`w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4 ${
                 toast.type === 'success' ? 'bg-emerald-500/10 text-emerald-400' :
                 toast.type === 'error' ? 'bg-rose-500/10 text-rose-400' :
-                'bg-[#7C3AED]/10 text-[#7C3AED]'
+                'bg-[#ea580c]/10 text-[#ea580c]'
               }`}>
                 {toast.type === 'success' ? <CheckCircle size={28} /> :
                  toast.type === 'error' ? <XCircle size={28} /> :
@@ -525,7 +525,7 @@ const Dashboard: React.FC = () => {
                 className={`px-8 py-2.5 rounded-xl font-bold text-sm transition-all ${
                   toast.type === 'success' ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-[0_0_20px_rgba(16,185,129,0.3)]' :
                   toast.type === 'error' ? 'bg-rose-600 hover:bg-rose-500 text-white shadow-[0_0_20px_rgba(244,63,94,0.3)]' :
-                  'bg-[#7C3AED] hover:bg-[#6D28D9] text-white shadow-[0_0_20px_rgba(124,58,237,0.3)]'
+                  'bg-[#ea580c] hover:bg-[#d97706] text-white shadow-[0_0_20px_rgba(124,58,237,0.3)]'
                 }`}
               >
                 Entendido
@@ -543,7 +543,7 @@ const Dashboard: React.FC = () => {
           <div className="bg-[#2D3139] border border-white/10 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
             <div className="p-6 border-b border-white/10 flex justify-between items-center bg-[#2D3139]/50">
               <h3 className="font-bold text-lg text-slate-100 flex items-center gap-2">
-                <Plus className="text-[#7C3AED]" size={20} /> Nova Tela
+                <Plus className="text-[#ea580c]" size={20} /> Nova Tela
               </h3>
               <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-rose-500 transition-colors">
                 <X size={20} />
@@ -557,7 +557,7 @@ const Dashboard: React.FC = () => {
                 value={newDisplayName}
                 onChange={(e) => setNewDisplayName(e.target.value)}
                 placeholder="Ex: Recepção, Vitrine..."
-                className="w-full bg-[#1C1D22] border border-white/10 rounded-xl p-3 text-slate-100 placeholder:text-slate-600 focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED] outline-none transition-all font-medium"
+                className="w-full bg-[#1C1D22] border border-white/10 rounded-xl p-3 text-slate-100 placeholder:text-slate-600 focus:border-[#ea580c] focus:ring-1 focus:ring-[#ea580c] outline-none transition-all font-medium"
               />
 
               {/* Orientation Selector */}
@@ -568,18 +568,18 @@ const Dashboard: React.FC = () => {
                   onClick={() => setNewDisplayOrientation('horizontal')}
                   className={`flex flex-col items-center justify-center gap-2 p-4 rounded-xl border-2 transition-all ${
                     newDisplayOrientation === 'horizontal'
-                      ? 'border-[#7C3AED] bg-[#7C3AED]/10 shadow-[0_0_16px_rgba(124,58,237,0.2)]'
+                      ? 'border-[#ea580c] bg-[#ea580c]/10 shadow-[0_0_16px_rgba(124,58,237,0.2)]'
                       : 'border-white/10 bg-[#1C1D22] hover:border-[#9CA3AF]/40'
                   }`}
                 >
                   {/* 16:9 preview */}
                   <div className={`w-16 h-9 rounded border-2 flex items-center justify-center transition-colors ${
-                    newDisplayOrientation === 'horizontal' ? 'border-[#7C3AED]/80 bg-[#7C3AED]/10' : 'border-white/10 bg-[#2D3139]'
+                    newDisplayOrientation === 'horizontal' ? 'border-[#ea580c]/80 bg-[#ea580c]/10' : 'border-white/10 bg-[#2D3139]'
                   }`}>
-                    <Monitor size={14} className={newDisplayOrientation === 'horizontal' ? 'text-[#7C3AED]' : 'text-slate-500'} />
+                    <Monitor size={14} className={newDisplayOrientation === 'horizontal' ? 'text-[#ea580c]' : 'text-slate-500'} />
                   </div>
                   <div className="text-center">
-                    <p className={`text-xs font-bold ${ newDisplayOrientation === 'horizontal' ? 'text-[#7C3AED]' : 'text-slate-400' }`}>Horizontal</p>
+                    <p className={`text-xs font-bold ${ newDisplayOrientation === 'horizontal' ? 'text-[#ea580c]' : 'text-slate-400' }`}>Horizontal</p>
                     <p className="text-[10px] text-slate-600 font-mono">16:9 — TV / Monitor</p>
                   </div>
                 </button>
@@ -589,18 +589,18 @@ const Dashboard: React.FC = () => {
                   onClick={() => setNewDisplayOrientation('vertical')}
                   className={`flex flex-col items-center justify-center gap-2 p-4 rounded-xl border-2 transition-all ${
                     newDisplayOrientation === 'vertical'
-                      ? 'border-[#7C3AED] bg-[#7C3AED]/10 shadow-lg'
+                      ? 'border-[#ea580c] bg-[#ea580c]/10 shadow-lg'
                       : 'border-white/10 bg-[#1C1D22] hover:border-[#9CA3AF]/40'
                   }`}
                 >
                   {/* 9:16 preview */}
                   <div className={`w-9 h-16 rounded border-2 flex items-center justify-center transition-colors ${
-                    newDisplayOrientation === 'vertical' ? 'border-[#7C3AED]/80 bg-[#7C3AED]/10' : 'border-white/10 bg-[#2D3139]'
+                    newDisplayOrientation === 'vertical' ? 'border-[#ea580c]/80 bg-[#ea580c]/10' : 'border-white/10 bg-[#2D3139]'
                   }`}>
-                    <Tv size={14} className={newDisplayOrientation === 'vertical' ? 'text-[#7C3AED]' : 'text-slate-500'} />
+                    <Tv size={14} className={newDisplayOrientation === 'vertical' ? 'text-[#ea580c]' : 'text-slate-500'} />
                   </div>
                   <div className="text-center">
-                    <p className={`text-xs font-bold ${ newDisplayOrientation === 'vertical' ? 'text-[#7C3AED]' : 'text-slate-400' }`}>Vertical</p>
+                    <p className={`text-xs font-bold ${ newDisplayOrientation === 'vertical' ? 'text-[#ea580c]' : 'text-slate-400' }`}>Vertical</p>
                     <p className="text-[10px] text-slate-600 font-mono">9:16 — Totem / Kiosk</p>
                   </div>
                 </button>
@@ -616,7 +616,7 @@ const Dashboard: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2.5 rounded-lg bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-bold shadow-lg transition-all flex items-center gap-2"
+                  className="px-6 py-2.5 rounded-lg bg-[#ea580c] hover:bg-[#d97706] text-white font-bold shadow-lg transition-all flex items-center gap-2"
                 >
                   <Zap size={18} className="fill-white" /> Criar Tela
                 </button>
@@ -661,7 +661,7 @@ const Dashboard: React.FC = () => {
                         setIsUserModalOpen(false);
                         openSettingsModal();
                       }}
-                      className="shrink-0 flex items-center gap-1.5 bg-[#7C3AED] hover:bg-[#6D28D9] text-white px-3.5 py-2 rounded-xl text-xs font-bold transition-all shadow-md mt-2 sm:mt-0"
+                      className="shrink-0 flex items-center gap-1.5 bg-[#ea580c] hover:bg-[#d97706] text-white px-3.5 py-2 rounded-xl text-xs font-bold transition-all shadow-md mt-2 sm:mt-0"
                     >
                       <Settings size={14} /> Configurar SMTP
                     </button>
@@ -672,11 +672,11 @@ const Dashboard: React.FC = () => {
                 <div className="flex flex-col md:flex-row gap-4 items-end">
                   <div className="flex-1 w-full">
                     <label className="text-[10px] font-black text-slate-500 uppercase block mb-1">E-mail do Novo Usuário</label>
-                    <input type="email" placeholder="Ex: joao@empresa.com" value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} className="w-full bg-[#1C1D22] border border-white/10 rounded-lg p-2 text-sm text-white placeholder:text-slate-600 focus:border-[#7C3AED] outline-none" disabled={!smtpConfigured} />
+                    <input type="email" placeholder="Ex: joao@empresa.com" value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} className="w-full bg-[#1C1D22] border border-white/10 rounded-lg p-2 text-sm text-white placeholder:text-slate-600 focus:border-[#ea580c] outline-none" disabled={!smtpConfigured} />
                   </div>
                   <div className="w-full md:w-40">
                     <label className="text-[10px] font-black text-slate-500 uppercase block mb-1">Permissão</label>
-                    <select value={inviteRole} onChange={e => setInviteRole(e.target.value as 'user' | 'admin')} className="w-full bg-[#1C1D22] border border-white/10 rounded-lg p-2 text-sm text-white appearance-none cursor-pointer focus:border-[#7C3AED] outline-none" disabled={!smtpConfigured}>
+                    <select value={inviteRole} onChange={e => setInviteRole(e.target.value as 'user' | 'admin')} className="w-full bg-[#1C1D22] border border-white/10 rounded-lg p-2 text-sm text-white appearance-none cursor-pointer focus:border-[#ea580c] outline-none" disabled={!smtpConfigured}>
                       <option value="user">Usuário</option>
                       <option value="admin">Admin</option>
                     </select>
@@ -701,7 +701,7 @@ const Dashboard: React.FC = () => {
                       {/* Linha principal: avatar + info + badge */}
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3 min-w-0">
-                          <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs flex-shrink-0 ${u.role === 'admin' ? 'bg-[#7C3AED] text-white' : 'bg-slate-700 text-slate-300'}`}>
+                          <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs flex-shrink-0 ${u.role === 'admin' ? 'bg-[#ea580c] text-white' : 'bg-slate-700 text-slate-300'}`}>
                             {u.role === 'admin' ? 'A' : 'U'}
                           </div>
                           <div className="min-w-0">
@@ -723,7 +723,7 @@ const Dashboard: React.FC = () => {
                             </p>
                           </div>
                         </div>
-                        {isSelf && <span className="text-[9px] text-[#7C3AED] font-bold px-2 py-0.5 bg-[#7C3AED]/10 rounded-full border border-[#7C3AED]/20 flex-shrink-0">Você</span>}
+                        {isSelf && <span className="text-[9px] text-[#ea580c] font-bold px-2 py-0.5 bg-[#ea580c]/10 rounded-full border border-[#ea580c]/20 flex-shrink-0">Você</span>}
                       </div>
 
                       {/* Ações — visíveis para admin, exceto no próprio usuário */}
@@ -733,7 +733,7 @@ const Dashboard: React.FC = () => {
                             <button
                               onClick={async () => { try { await resendInvite(u.id); alert('Convite reenviado! Uma nova senha foi gerada e enviada por e-mail.'); } catch (e: any) { alert('Erro: ' + e.message); } }}
                               disabled={userActionLoading}
-                              className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-bold text-[#7C3AED] bg-[#7C3AED]/10 hover:bg-[#7C3AED]/20 rounded-lg border border-[#7C3AED]/20 transition-all disabled:opacity-50"
+                              className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-bold text-[#ea580c] bg-[#ea580c]/10 hover:bg-[#ea580c]/20 rounded-lg border border-[#ea580c]/20 transition-all disabled:opacity-50"
                             >
                               <RotateCcw size={12} /> Reenviar Convite
                             </button>
@@ -770,7 +770,7 @@ const Dashboard: React.FC = () => {
           <div className="bg-[#2D3139] border border-white/10 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
             <div className="p-6 border-b border-white/10 flex justify-between items-center bg-[#2D3139]/50">
               <h3 className="font-bold text-lg text-slate-100 flex items-center gap-2">
-                <Settings className="text-[#7C3AED]" size={20} /> Configurações de E-mail
+                <Settings className="text-[#ea580c]" size={20} /> Configurações de E-mail
               </h3>
               <button onClick={() => setIsSettingsModalOpen(false)} className="text-slate-400 hover:text-rose-500 transition-colors">
                 <X size={20} />
@@ -779,8 +779,8 @@ const Dashboard: React.FC = () => {
             <form onSubmit={handleSaveSmtp} className="p-6 space-y-4">
                {/* Guia Passo a Passo de Configuração */}
               <div className="bg-[#1C1D22]/60 border border-white/5 rounded-xl p-4.5 space-y-3 mb-2">
-                <p className="text-[10px] text-[#7C3AED] font-black uppercase tracking-widest flex items-center gap-1.5">
-                  <Mail size={12} className="text-[#7C3AED]" /> Guia de Configuração (Gmail SMTP)
+                <p className="text-[10px] text-[#ea580c] font-black uppercase tracking-widest flex items-center gap-1.5">
+                  <Mail size={12} className="text-[#ea580c]" /> Guia de Configuração (Gmail SMTP)
                 </p>
                 
                 <ol className="space-y-2.5 text-[11px] text-slate-400 list-decimal list-inside pl-1 leading-relaxed">
@@ -788,7 +788,7 @@ const Dashboard: React.FC = () => {
                     Ative a <span className="text-slate-200 font-bold">Verificação em 2 Etapas</span> na sua Conta Google.
                   </li>
                   <li>
-                    Acesse <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener noreferrer" className="text-[#7C3AED] hover:underline font-semibold inline-flex items-center gap-0.5">myaccount.google.com/apppasswords <ExternalLink size={10} /></a>.
+                    Acesse <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener noreferrer" className="text-[#ea580c] hover:underline font-semibold inline-flex items-center gap-0.5">myaccount.google.com/apppasswords <ExternalLink size={10} /></a>.
                   </li>
                   <li>
                     Insira um nome identificador (ex: <code className="text-slate-300 bg-black/40 px-1 py-0.5 rounded font-mono text-[10px]">TelaHub</code>) e clique em <span className="text-slate-200 font-medium">Criar</span>.
@@ -821,7 +821,7 @@ const Dashboard: React.FC = () => {
                   value={smtpUser}
                   onChange={(e) => setSmtpUser(e.target.value)}
                   placeholder="seuenvio@gmail.com"
-                  className="w-full bg-[#1C1D22] border border-white/10 rounded-xl p-3 text-slate-100 placeholder:text-slate-600 focus:border-[#7C3AED] outline-none transition-all text-sm"
+                  className="w-full bg-[#1C1D22] border border-white/10 rounded-xl p-3 text-slate-100 placeholder:text-slate-600 focus:border-[#ea580c] outline-none transition-all text-sm"
                 />
               </div>
 
@@ -832,7 +832,7 @@ const Dashboard: React.FC = () => {
                   value={smtpPass}
                   onChange={(e) => setSmtpPass(e.target.value)}
                   placeholder={smtpHasSavedPass ? '(senha salva — deixe vazio para manter)' : 'xxxx xxxx xxxx xxxx'}
-                  className="w-full bg-[#1C1D22] border border-white/10 rounded-xl p-3 text-slate-100 placeholder:text-slate-600 focus:border-[#7C3AED] outline-none transition-all text-sm font-mono tracking-wider"
+                  className="w-full bg-[#1C1D22] border border-white/10 rounded-xl p-3 text-slate-100 placeholder:text-slate-600 focus:border-[#ea580c] outline-none transition-all text-sm font-mono tracking-wider"
                 />
               </div>
 
@@ -859,7 +859,7 @@ const Dashboard: React.FC = () => {
                 <button
                   type="submit"
                   disabled={smtpLoading || !smtpUser || (!smtpPass && !smtpHasSavedPass)}
-                  className="px-6 py-2.5 rounded-lg bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-bold text-sm shadow-lg transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-6 py-2.5 rounded-lg bg-[#ea580c] hover:bg-[#d97706] text-white font-bold text-sm shadow-lg transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Check size={14} /> Salvar
                 </button>
@@ -875,7 +875,7 @@ const Dashboard: React.FC = () => {
           <div className="bg-[#2D3139] border border-white/10 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
             <div className="p-6 border-b border-white/10 flex justify-between items-center bg-[#2D3139]/50">
               <h3 className="font-bold text-lg text-slate-100 flex items-center gap-2">
-                <LinkIcon className="text-[#7C3AED]" size={20} /> Vincular TV
+                <LinkIcon className="text-[#ea580c]" size={20} /> Vincular TV
               </h3>
               <button onClick={() => setIsLinkModalOpen(false)} className="text-slate-400 hover:text-rose-500 transition-colors">
                 <X size={20} />
@@ -888,7 +888,7 @@ const Dashboard: React.FC = () => {
                   <Monitor size={10} /> Instrução
                 </p>
                 <p className="text-xs text-slate-300 mb-2">Abra este link no navegador da sua TV:</p>
-                <div className="bg-black/50 p-2 rounded border border-white/10 font-mono text-[10px] text-[#7C3AED] break-all select-all cursor-pointer hover:bg-black/70 transition-colors" onClick={() => navigator.clipboard.writeText(`${window.location.origin}${window.location.pathname}#/player`)}>
+                <div className="bg-black/50 p-2 rounded border border-white/10 font-mono text-[10px] text-[#ea580c] break-all select-all cursor-pointer hover:bg-black/70 transition-colors" onClick={() => navigator.clipboard.writeText(`${window.location.origin}${window.location.pathname}#/player`)}>
                   {window.location.origin}{window.location.pathname}#/player
                 </div>
               </div>
@@ -902,7 +902,7 @@ const Dashboard: React.FC = () => {
                   value={linkCode}
                   onChange={(e) => setLinkCode(e.target.value.replace(/\D/g, ''))}
                   placeholder="000000"
-                  className="w-full bg-[#1C1D22] border border-white/10 rounded-xl p-3 text-center text-2xl tracking-[0.5em] font-mono text-[#7C3AED] placeholder:text-slate-800 focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED] outline-none transition-all font-bold"
+                  className="w-full bg-[#1C1D22] border border-white/10 rounded-xl p-3 text-center text-2xl tracking-[0.5em] font-mono text-[#ea580c] placeholder:text-slate-800 focus:border-[#ea580c] focus:ring-1 focus:ring-[#ea580c] outline-none transition-all font-bold"
                 />
                 <p className="text-[10px] text-slate-500 mt-1 text-center">Digite o código exibido na TV</p>
               </div>
@@ -914,7 +914,7 @@ const Dashboard: React.FC = () => {
                   value={linkName}
                   onChange={(e) => setLinkName(e.target.value)}
                   placeholder="Ex: TV Recepção"
-                  className="w-full bg-[#1C1D22] border border-white/10 rounded-xl p-3 text-slate-100 placeholder:text-slate-600 focus:border-[#7C3AED] outline-none transition-all font-medium text-sm"
+                  className="w-full bg-[#1C1D22] border border-white/10 rounded-xl p-3 text-slate-100 placeholder:text-slate-600 focus:border-[#ea580c] outline-none transition-all font-medium text-sm"
                 />
               </div>
 
@@ -923,7 +923,7 @@ const Dashboard: React.FC = () => {
                 <select
                   value={selectedDisplayId}
                   onChange={(e) => setSelectedDisplayId(e.target.value)}
-                  className="w-full bg-[#1C1D22] border border-white/10 rounded-xl p-3 text-slate-100 focus:border-[#7C3AED] outline-none transition-all font-medium text-sm appearance-none cursor-pointer"
+                  className="w-full bg-[#1C1D22] border border-white/10 rounded-xl p-3 text-slate-100 focus:border-[#ea580c] outline-none transition-all font-medium text-sm appearance-none cursor-pointer"
                 >
                   <option value="" disabled>Selecione um conteúdo...</option>
                   {displays.map(d => (
@@ -943,7 +943,7 @@ const Dashboard: React.FC = () => {
                 <button
                   type="submit"
                   disabled={!linkCode || !linkName || !selectedDisplayId}
-                  className="px-6 py-2.5 rounded-lg bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-bold shadow-lg transition-all flex items-center gap-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-6 py-2.5 rounded-lg bg-[#ea580c] hover:bg-[#d97706] text-white font-bold shadow-lg transition-all flex items-center gap-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <LinkIcon size={16} /> Vincular
                 </button>
@@ -1047,7 +1047,7 @@ const Dashboard: React.FC = () => {
               {/* Display name badge */}
               <div className="bg-[#1C1D22] border border-white/10 rounded-xl px-4 py-3 mb-4 inline-block">
                 <div className="flex items-center gap-2 text-sm">
-                  <Monitor size={16} className="text-[#7C3AED]" />
+                  <Monitor size={16} className="text-[#ea580c]" />
                   <span className="font-bold text-white">{displayToDelete.name}</span>
                 </div>
               </div>
@@ -1094,7 +1094,7 @@ const Dashboard: React.FC = () => {
           <div className="bg-[#2D3139] border border-white/10 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
             <div className="p-6 border-b border-white/10 flex justify-between items-center bg-[#2D3139]/50">
               <h3 className="font-bold text-lg text-slate-100 flex items-center gap-2">
-                <Pencil className="text-[#7C3AED]" size={20} /> Renomear Tela
+                <Pencil className="text-[#ea580c]" size={20} /> Renomear Tela
               </h3>
               <button onClick={() => { setIsRenameModalOpen(false); setDisplayToRename(null); }} className="text-slate-400 hover:text-rose-500 transition-colors">
                 <X size={20} />
@@ -1108,7 +1108,7 @@ const Dashboard: React.FC = () => {
                 value={renameValue}
                 onChange={(e) => setRenameValue(e.target.value)}
                 placeholder="Ex: Recepção, Vitrine..."
-                className="w-full bg-[#1C1D22] border border-white/10 rounded-xl p-3 text-slate-100 placeholder:text-slate-600 focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED] outline-none transition-all font-medium"
+                className="w-full bg-[#1C1D22] border border-white/10 rounded-xl p-3 text-slate-100 placeholder:text-slate-600 focus:border-[#ea580c] focus:ring-1 focus:ring-[#ea580c] outline-none transition-all font-medium"
               />
               <div className="mt-8 flex gap-3 justify-end">
                 <button
@@ -1121,7 +1121,7 @@ const Dashboard: React.FC = () => {
                 <button
                   type="submit"
                   disabled={!renameValue.trim() || renameValue.trim() === displayToRename.name}
-                  className="px-6 py-2.5 rounded-lg bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-bold shadow-lg transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-6 py-2.5 rounded-lg bg-[#ea580c] hover:bg-[#d97706] text-white font-bold shadow-lg transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Check size={16} /> Salvar Nome
                 </button>
@@ -1147,7 +1147,7 @@ const Dashboard: React.FC = () => {
             {/* Header */}
             <div className="p-6 border-b border-white/10 flex justify-between items-center bg-[#2D3139]/50">
               <h3 className="font-bold text-lg text-slate-100 flex items-center gap-2">
-                <Settings className="text-[#7C3AED]" size={20} /> Configurações — {settingsDisplay.name}
+                <Settings className="text-[#ea580c]" size={20} /> Configurações — {settingsDisplay.name}
               </h3>
               <button onClick={() => { setIsDisplaySettingsOpen(false); setSettingsDisplay(null); }} className="text-slate-400 hover:text-rose-500 transition-colors">
                 <X size={20} />
@@ -1157,7 +1157,7 @@ const Dashboard: React.FC = () => {
             <div className="p-6 space-y-6 overflow-y-auto">
               {/* Seção: Imagem de Capa */}
               <div>
-                <h4 className="text-[10px] font-black text-[#7C3AED] uppercase tracking-widest mb-3 flex items-center gap-2">
+                <h4 className="text-[10px] font-black text-[#ea580c] uppercase tracking-widest mb-3 flex items-center gap-2">
                   <ImageIcon size={12} /> Imagem de Capa
                 </h4>
                 <div className="bg-[#1C1D22] border border-white/10 rounded-xl overflow-hidden">
@@ -1184,7 +1184,7 @@ const Dashboard: React.FC = () => {
                       <Monitor size={32} className="text-[#9CA3AF]/40" />
                       <button
                         onClick={() => { setIsDisplaySettingsOpen(false); openCoverModal(settingsDisplay); }}
-                        className="px-4 py-2 bg-[#7C3AED]/10 hover:bg-[#7C3AED]/20 text-[#7C3AED] rounded-lg text-xs font-bold flex items-center gap-2 transition-all border border-[#7C3AED]/30"
+                        className="px-4 py-2 bg-[#ea580c]/10 hover:bg-[#ea580c]/20 text-[#ea580c] rounded-lg text-xs font-bold flex items-center gap-2 transition-all border border-[#ea580c]/30"
                       >
                         <ImageIcon size={14} /> Adicionar Capa
                       </button>
@@ -1195,7 +1195,7 @@ const Dashboard: React.FC = () => {
 
               {/* Seção: TVs Vinculadas */}
               <div>
-                <h4 className="text-[10px] font-black text-[#7C3AED] uppercase tracking-widest mb-3 flex items-center gap-2">
+                <h4 className="text-[10px] font-black text-[#ea580c] uppercase tracking-widest mb-3 flex items-center gap-2">
                   <Tv size={12} /> TVs Vinculadas a este Display
                 </h4>
                 {(() => {
@@ -1227,7 +1227,7 @@ const Dashboard: React.FC = () => {
                               <select
                                 value={settingsDeviceDisplayMap[device.id] || device.display_id || ''}
                                 onChange={(e) => handleDeviceDisplayChange(device.id, e.target.value)}
-                                className="w-full bg-[#2D3139] border border-white/10 rounded-lg p-2.5 text-sm text-white appearance-none cursor-pointer focus:border-[#7C3AED] outline-none transition-all"
+                                className="w-full bg-[#2D3139] border border-white/10 rounded-lg p-2.5 text-sm text-white appearance-none cursor-pointer focus:border-[#ea580c] outline-none transition-all"
                               >
                                 {displays.map(d => (
                                   <option key={d.id} value={d.id}>{d.name}</option>
@@ -1244,12 +1244,12 @@ const Dashboard: React.FC = () => {
 
               {/* Seção: Renomear */}
               <div>
-                <h4 className="text-[10px] font-black text-[#7C3AED] uppercase tracking-widest mb-3 flex items-center gap-2">
+                <h4 className="text-[10px] font-black text-[#ea580c] uppercase tracking-widest mb-3 flex items-center gap-2">
                   <Pencil size={12} /> Renomear
                 </h4>
                 <button
                   onClick={() => { setIsDisplaySettingsOpen(false); openRenameModal(settingsDisplay); }}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 bg-[#1C1D22] hover:bg-slate-800 text-slate-300 border border-white/10 hover:border-[#7C3AED]/50 rounded-xl text-sm font-bold transition-all"
+                  className="w-full flex items-center justify-center gap-2 py-2.5 bg-[#1C1D22] hover:bg-slate-800 text-slate-300 border border-white/10 hover:border-[#ea580c]/50 rounded-xl text-sm font-bold transition-all"
                 >
                   <Pencil size={14} /> Renomear Display
                 </button>
@@ -1276,7 +1276,7 @@ const Dashboard: React.FC = () => {
             <LogoHub size={44} className="drop-shadow-[0_0_12px_rgba(124,58,237,0.3)] flex-shrink-0" />
             <div className="flex-shrink-0">
               <h1 className="text-3xl font-black text-[#F3F4F6] tracking-tight uppercase leading-none">
-                Tela<span className="text-[#7C3AED]">Hub</span>
+                Tela<span className="text-[#ea580c]">Hub</span>
               </h1>
               <p className="text-[#9CA3AF] text-xs mt-1.5 font-medium flex items-center gap-1.5 whitespace-nowrap">
                 Bem-vindo, <span className="text-white font-bold">{currentUser?.username || '...'}</span>
@@ -1287,7 +1287,7 @@ const Dashboard: React.FC = () => {
           <div className="flex items-center gap-2.5 flex-wrap w-full lg:w-auto justify-start lg:justify-end">
             <button
               onClick={() => setIsLinkModalOpen(true)}
-              className="flex items-center gap-2 bg-[#1C1D22] border border-[#7C3AED]/30 text-[#7C3AED] hover:bg-[#7C3AED]/10 px-4 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all"
+              className="flex items-center gap-2 bg-[#1C1D22] border border-[#ea580c]/30 text-[#ea580c] hover:bg-[#ea580c]/10 px-4 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all"
             >
               <Tv size={15} /> <span>Vincular TV</span>
             </button>
@@ -1295,7 +1295,7 @@ const Dashboard: React.FC = () => {
             <button
               onClick={openCreateModal}
               disabled={loading}
-              className="flex items-center gap-2 bg-[#7C3AED] hover:bg-[#6D28D9] text-white px-5 py-2.5 rounded-xl font-bold transition-all shadow-lg hover:shadow-xl disabled:opacity-50"
+              className="flex items-center gap-2 bg-[#ea580c] hover:bg-[#d97706] text-white px-5 py-2.5 rounded-xl font-bold transition-all shadow-lg hover:shadow-xl disabled:opacity-50"
             >
               <Plus size={18} strokeWidth={3} className="text-white" /> <span>Nova Tela</span>
             </button>
@@ -1307,7 +1307,7 @@ const Dashboard: React.FC = () => {
               className="flex items-center justify-center w-10 h-10 bg-[#1C1D22] hover:bg-slate-800 text-slate-300 border border-white/10 hover:border-slate-500 rounded-xl transition-all"
               title="Atualizar lista"
             >
-              <RefreshCw size={16} className={loading ? 'animate-spin text-[#7C3AED]' : ''} />
+              <RefreshCw size={16} className={loading ? 'animate-spin text-[#ea580c]' : ''} />
             </button>
 
             <button
@@ -1348,7 +1348,7 @@ const Dashboard: React.FC = () => {
           {currentUser?.role === 'admin' && (
             <button
               onClick={openSettingsModal}
-              className="flex items-center gap-2 bg-[#1C1D22] border border-[#7C3AED]/20 hover:border-[#7C3AED]/50 text-[#7C3AED] hover:bg-[#7C3AED]/10 px-3.5 py-2 rounded-xl font-bold text-xs uppercase tracking-wider transition-all whitespace-nowrap"
+              className="flex items-center gap-2 bg-[#1C1D22] border border-[#ea580c]/20 hover:border-[#ea580c]/50 text-[#ea580c] hover:bg-[#ea580c]/10 px-3.5 py-2 rounded-xl font-bold text-xs uppercase tracking-wider transition-all whitespace-nowrap"
             >
               <Settings size={14} /> <span>Config. E-mail</span>
             </button>
@@ -1360,18 +1360,18 @@ const Dashboard: React.FC = () => {
       {loading && displays.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-64 text-[#9CA3AF] relative z-10">
           <div className="flex items-center gap-1.5 mb-4">
-            <div className="w-2.5 h-2.5 rounded-full bg-[#7C3AED] dot-matrix-dot"></div>
-            <div className="w-2.5 h-2.5 rounded-full bg-[#7C3AED] dot-matrix-dot"></div>
-            <div className="w-2.5 h-2.5 rounded-full bg-[#7C3AED] dot-matrix-dot"></div>
-            <div className="w-2.5 h-2.5 rounded-full bg-[#7C3AED] dot-matrix-dot"></div>
+            <div className="w-2.5 h-2.5 rounded-full bg-[#ea580c] dot-matrix-dot"></div>
+            <div className="w-2.5 h-2.5 rounded-full bg-[#ea580c] dot-matrix-dot"></div>
+            <div className="w-2.5 h-2.5 rounded-full bg-[#ea580c] dot-matrix-dot"></div>
+            <div className="w-2.5 h-2.5 rounded-full bg-[#ea580c] dot-matrix-dot"></div>
           </div>
-          <p className="tracking-widest uppercase text-xs font-black text-[#7C3AED]">Sincronizando Dados...</p>
+          <p className="tracking-widest uppercase text-xs font-black text-[#ea580c]">Sincronizando Dados...</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10">
           {displays.map(display => (
-            <div key={display.id} className="bg-[#2D3139] border border-white/10 rounded-2xl overflow-hidden shadow-lg hover:shadow-xl hover:border-[#7C3AED]/30 transition-all group relative">
-              <div className="absolute inset-0 bg-[#7C3AED]/5 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <div key={display.id} className="bg-[#2D3139] border border-white/10 rounded-2xl overflow-hidden shadow-lg hover:shadow-xl hover:border-[#ea580c]/30 transition-all group relative">
+              <div className="absolute inset-0 bg-[#ea580c]/5 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity"></div>
 
               {/* 3-dot menu (top-right) */}
               <div className="absolute top-3 right-3 z-20">
@@ -1389,7 +1389,7 @@ const Dashboard: React.FC = () => {
                       onClick={(e) => { e.stopPropagation(); openRenameModal(display); }}
                       className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-slate-300 hover:bg-[#1C1D22] hover:text-white transition-colors text-left"
                     >
-                      <Pencil size={14} className="text-[#7C3AED]" /> Renomear
+                      <Pencil size={14} className="text-[#ea580c]" /> Renomear
                     </button>
                     <button
                       onClick={(e) => { e.stopPropagation(); openCoverModal(display); }}
@@ -1423,24 +1423,24 @@ const Dashboard: React.FC = () => {
                 ) : (
                   <div className="flex items-center justify-center w-full h-full">
                     {display.orientation === 'vertical' ? (
-                      <div className="w-[84px] h-[130px] rounded-xl border-2 border-white/5 bg-[#1C1D22] group-hover:border-[#7C3AED]/50 group-hover:shadow-lg transition-all flex flex-col items-center justify-between p-2">
+                      <div className="w-[84px] h-[130px] rounded-xl border-2 border-white/5 bg-[#1C1D22] group-hover:border-[#ea580c]/50 group-hover:shadow-lg transition-all flex flex-col items-center justify-between p-2">
                         {/* Notch */}
-                        <div className="w-8 h-1 bg-slate-800 rounded-full group-hover:bg-[#7C3AED]/30 transition-all"></div>
+                        <div className="w-8 h-1 bg-slate-800 rounded-full group-hover:bg-[#ea580c]/30 transition-all"></div>
                         {/* Content */}
-                        <div className="flex-1 w-full my-1.5 rounded-lg bg-[#2D3139]/60 border border-white/5 flex items-center justify-center group-hover:bg-[#7C3AED]/5 group-hover:border-[#7C3AED]/20 transition-all">
-                          <Tv size={28} className="text-[#9CA3AF]/40 group-hover:text-[#7C3AED] transition-all" />
+                        <div className="flex-1 w-full my-1.5 rounded-lg bg-[#2D3139]/60 border border-white/5 flex items-center justify-center group-hover:bg-[#ea580c]/5 group-hover:border-[#ea580c]/20 transition-all">
+                          <Tv size={28} className="text-[#9CA3AF]/40 group-hover:text-[#ea580c] transition-all" />
                         </div>
                         {/* Indicator */}
-                        <div className="w-2 h-2 rounded-full bg-slate-800 group-hover:bg-[#7C3AED]/40 transition-all"></div>
+                        <div className="w-2 h-2 rounded-full bg-slate-800 group-hover:bg-[#ea580c]/40 transition-all"></div>
                       </div>
                     ) : (
-                      <div className="w-[130px] h-[84px] rounded-xl border-2 border-white/5 bg-[#1C1D22] group-hover:border-[#7C3AED]/50 group-hover:shadow-lg transition-all flex flex-col items-center justify-between p-2">
+                      <div className="w-[130px] h-[84px] rounded-xl border-2 border-white/5 bg-[#1C1D22] group-hover:border-[#ea580c]/50 group-hover:shadow-lg transition-all flex flex-col items-center justify-between p-2">
                         {/* Content */}
-                        <div className="flex-1 w-full mb-1.5 rounded-lg bg-[#2D3139]/60 border border-white/5 flex items-center justify-center group-hover:bg-[#7C3AED]/5 group-hover:border-[#7C3AED]/20 transition-all">
-                          <Monitor size={32} className="text-[#9CA3AF]/40 group-hover:text-[#7C3AED] transition-all" />
+                        <div className="flex-1 w-full mb-1.5 rounded-lg bg-[#2D3139]/60 border border-white/5 flex items-center justify-center group-hover:bg-[#ea580c]/5 group-hover:border-[#ea580c]/20 transition-all">
+                          <Monitor size={32} className="text-[#9CA3AF]/40 group-hover:text-[#ea580c] transition-all" />
                         </div>
                         {/* Stand Base */}
-                        <div className="w-12 h-1 bg-slate-800 rounded-full group-hover:bg-[#7C3AED]/40 transition-all"></div>
+                        <div className="w-12 h-1 bg-slate-800 rounded-full group-hover:bg-[#ea580c]/40 transition-all"></div>
                       </div>
                     )}
                   </div>
@@ -1461,7 +1461,7 @@ const Dashboard: React.FC = () => {
                 {/* Gear settings icon (top-left, below status) */}
                 <button
                   onClick={(e) => { e.stopPropagation(); openDisplaySettings(display); }}
-                  className="absolute bottom-3 left-3 z-20 p-2 bg-[#1C1D22]/80 rounded-full text-[#9CA3AF] hover:text-[#7C3AED] hover:bg-[#2D3139] transition-all backdrop-blur-sm border border-white/10 hover:border-[#7C3AED]/50 shadow-lg opacity-0 group-hover:opacity-100"
+                  className="absolute bottom-3 left-3 z-20 p-2 bg-[#1C1D22]/80 rounded-full text-[#9CA3AF] hover:text-[#ea580c] hover:bg-[#2D3139] transition-all backdrop-blur-sm border border-white/10 hover:border-[#ea580c]/50 shadow-lg opacity-0 group-hover:opacity-100"
                   title="Configurações do Display"
                 >
                   <Settings size={16} />
@@ -1470,13 +1470,13 @@ const Dashboard: React.FC = () => {
 
               <div className="p-6 relative">
                 <div className="flex items-start justify-between gap-2 mb-1">
-                  <h3 className="text-xl font-bold text-white tracking-tight group-hover:text-[#7C3AED] transition-colors">{display.name}</h3>
+                  <h3 className="text-xl font-bold text-white tracking-tight group-hover:text-[#ea580c] transition-colors">{display.name}</h3>
                   {display.orientation === 'vertical' ? (
-                    <span className="flex items-center gap-1 bg-[#7C3AED]/10 border border-[#7C3AED]/30 text-[#7C3AED] text-[9px] font-black px-2 py-0.5 rounded-full flex-shrink-0 mt-1">
+                    <span className="flex items-center gap-1 bg-[#ea580c]/10 border border-[#ea580c]/30 text-[#ea580c] text-[9px] font-black px-2 py-0.5 rounded-full flex-shrink-0 mt-1">
                       <Tv size={10} /> 9:16
                     </span>
                   ) : (
-                    <span className="flex items-center gap-1 bg-[#7C3AED]/10 border border-[#7C3AED]/30 text-[#7C3AED] text-[9px] font-black px-2 py-0.5 rounded-full flex-shrink-0 mt-1">
+                    <span className="flex items-center gap-1 bg-[#ea580c]/10 border border-[#ea580c]/30 text-[#ea580c] text-[9px] font-black px-2 py-0.5 rounded-full flex-shrink-0 mt-1">
                       <Monitor size={10} /> 16:9
                     </span>
                   )}
@@ -1486,7 +1486,7 @@ const Dashboard: React.FC = () => {
                 <div className="flex flex-col gap-3">
                   <button
                     onClick={() => navigate(`/edit/${display.id}`)}
-                    className="w-full flex items-center justify-center gap-2 bg-[#7C3AED] hover:bg-[#6D28D9] text-white py-3 rounded-xl text-sm font-bold transition-all shadow-lg hover:shadow-xl"
+                    className="w-full flex items-center justify-center gap-2 bg-[#ea580c] hover:bg-[#d97706] text-white py-3 rounded-xl text-sm font-bold transition-all shadow-lg hover:shadow-xl"
                   >
                     <Edit3 size={16} /> Abrir Designer
                   </button>
@@ -1517,7 +1517,7 @@ const Dashboard: React.FC = () => {
             <div className="col-span-full py-16 text-center border border-dashed border-white/10 rounded-2xl bg-[#2D3139]/50 animate-in fade-in zoom-in-95 duration-200">
               <Monitor size={48} className="mx-auto text-[#9CA3AF]/40 mb-4" />
               <p className="text-[#9CA3AF] mb-6">Você ainda não tem telas configuradas.</p>
-              <button onClick={openCreateModal} className="text-[#7C3AED] font-bold hover:text-[#6D28D9] hover:underline">Criar primeira tela</button>
+              <button onClick={openCreateModal} className="text-[#ea580c] font-bold hover:text-[#d97706] hover:underline">Criar primeira tela</button>
             </div>
           )}
         </div>
@@ -1526,7 +1526,7 @@ const Dashboard: React.FC = () => {
       {devices.filter(d => d.status === 'linked').length > 0 && (
         <div className="mt-16 relative z-10 animate-in fade-in slide-in-from-bottom-8 duration-700">
           <h2 className="text-xl font-bold text-slate-300 mb-6 flex items-center gap-2">
-            <Tv className="text-[#7C3AED]" /> Dispositivos Vinculados
+            <Tv className="text-[#ea580c]" /> Dispositivos Vinculados
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {devices.filter(d => d.status === 'linked').map(device => {

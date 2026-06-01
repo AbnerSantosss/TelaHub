@@ -145,6 +145,7 @@ const Editor: React.FC = () => {
   // Drag and Drop States for Layers
   const [draggedLayerId, setDraggedLayerId] = useState<string | null>(null);
   const [dragOverLayerId, setDragOverLayerId] = useState<string | null>(null);
+  const [hoveredDescription, setHoveredDescription] = useState('');
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   const bgInputRef = useRef<HTMLInputElement>(null);
@@ -664,14 +665,14 @@ const Editor: React.FC = () => {
       {/* Header */}
       <header className="h-auto md:h-16 bg-[#2D3139] border-b border-[#9CA3AF]/10 px-4 md:px-6 py-3 md:py-0 flex flex-col md:flex-row items-center justify-between z-30 shadow-md gap-3 md:gap-0">
         <div className="flex items-center gap-4 w-full md:w-auto justify-start">
-          <button onClick={() => navigate('/')} className="p-2 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-[#7C3AED] transition-colors">
+          <button onClick={() => navigate('/')} className="p-2 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-[#ea580c] transition-colors">
             <Home size={20} />
           </button>
           <div className="w-px h-6 bg-slate-800"></div>
           <div className="flex items-center gap-2">
             <LogoHub size={28} className="drop-shadow-[0_0_8px_rgba(124,58,237,0.35)]" />
             <h1 className="font-bold text-slate-100 tracking-tight uppercase text-sm">
-              Tela<span className="text-[#7C3AED]">Hub</span> <span className="text-slate-600 mx-2">/</span> {display.name}
+              Tela<span className="text-[#ea580c]">Hub</span> <span className="text-slate-600 mx-2">/</span> {display.name}
             </h1>
           </div>
         </div>
@@ -683,7 +684,7 @@ const Editor: React.FC = () => {
               key={p.id} 
               className={`flex items-center rounded-lg border transition-all flex-shrink-0 min-w-max ${
                 activePageIdx === idx 
-                ? 'bg-[#7C3AED] border-[#7C3AED] shadow-[0_0_10px_rgba(124,58,237,0.4)]' 
+                ? 'bg-[#ea580c] border-[#ea580c] shadow-[0_0_10px_rgba(124,58,237,0.4)]' 
                 : 'border-slate-800 hover:border-slate-700 bg-slate-900'
               }`}
             >
@@ -693,7 +694,7 @@ const Editor: React.FC = () => {
                   activePageIdx === idx ? 'text-white' : 'text-slate-500 hover:text-slate-300'
                 }`}
               >
-                {p.broadcast_id && <CalendarDays size={12} className="text-[#7C3AED]" />}
+                {p.broadcast_id && <CalendarDays size={12} className="text-[#ea580c]" />}
                 CENA {idx + 1}
               </button>
               
@@ -706,7 +707,7 @@ const Editor: React.FC = () => {
                   }}
                   className={`flex-shrink-0 w-8 h-8 flex items-center justify-center transition-colors border-l ${
                     activePageIdx === idx 
-                    ? 'border-[#6D28D9] text-purple-200 hover:bg-[#6D28D9] hover:text-white' 
+                    ? 'border-[#d97706] text-purple-200 hover:bg-[#d97706] hover:text-white' 
                     : 'border-slate-800 text-slate-600 hover:bg-rose-500/10 hover:text-rose-500'
                   }`}
                   title="Excluir Cena"
@@ -720,7 +721,7 @@ const Editor: React.FC = () => {
             const newP: Page = { id: 'p'+Date.now(), order: display.pages.length+1, duration: 15, layout: [] };
             setDisplay({...display, pages: [...display.pages, newP]});
             setActivePageIdx(display.pages.length);
-          }} className="p-1.5 text-[#7C3AED] hover:bg-[#7C3AED]/10 rounded-lg transition-colors mx-1">
+          }} className="p-1.5 text-[#ea580c] hover:bg-[#ea580c]/10 rounded-lg transition-colors mx-1">
             <Plus size={16} />
           </button>
         </div>
@@ -729,14 +730,14 @@ const Editor: React.FC = () => {
           <div className="flex items-center gap-2 md:hidden">
             <button 
               onClick={() => setShowLeftSidebar(!showLeftSidebar)}
-              className={`px-3 py-2 rounded-lg transition-all border ${showLeftSidebar ? 'bg-[#7C3AED]/20 text-[#7C3AED] border-[#7C3AED]/50' : 'bg-slate-900 border-slate-800 text-slate-500 hover:text-[#7C3AED]'}`}
+              className={`px-3 py-2 rounded-lg transition-all border ${showLeftSidebar ? 'bg-[#ea580c]/20 text-[#ea580c] border-[#ea580c]/50' : 'bg-slate-900 border-slate-800 text-slate-500 hover:text-[#ea580c]'}`}
               title="Widgets"
             >
               <Layers size={16} />
             </button>
             <button 
               onClick={() => setShowRightSidebar(!showRightSidebar)}
-              className={`px-3 py-2 rounded-lg transition-all border ${showRightSidebar ? 'bg-[#7C3AED]/20 text-[#7C3AED] border-[#7C3AED]/50' : 'bg-slate-900 border-slate-800 text-slate-500 hover:text-[#7C3AED]'}`}
+              className={`px-3 py-2 rounded-lg transition-all border ${showRightSidebar ? 'bg-[#ea580c]/20 text-[#ea580c] border-[#ea580c]/50' : 'bg-slate-900 border-slate-800 text-slate-500 hover:text-[#ea580c]'}`}
               title="Configurações"
             >
               <Settings size={16} />
@@ -757,7 +758,7 @@ const Editor: React.FC = () => {
             <button 
               onClick={handleSave} 
               disabled={isSaving} 
-              className="bg-[#7C3AED] hover:bg-[#6D28D9] text-white px-6 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-all shadow-[0_0_15px_rgba(124,58,237,0.3)] border border-white/10 active:scale-95 whitespace-nowrap disabled:opacity-50"
+              className="bg-[#ea580c] hover:bg-[#d97706] text-white px-6 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-all shadow-[0_0_15px_rgba(124,58,237,0.3)] border border-white/10 active:scale-95 whitespace-nowrap disabled:opacity-50"
             >
               {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />} 
               {isSaving ? 'SALVANDO...' : 'SALVAR'}
@@ -779,7 +780,7 @@ const Editor: React.FC = () => {
         <aside className={`absolute md:relative left-0 top-0 h-full w-72 bg-[#2D3139] border-r border-slate-800 overflow-y-auto z-[60] shadow-xl transition-transform duration-300 ease-in-out ${showLeftSidebar ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
           <div className="p-5 border-b border-slate-800">
              <div className="flex justify-between items-center mb-4">
-               <h3 className="text-[10px] font-black text-[#7C3AED] uppercase tracking-widest flex items-center gap-2">
+               <h3 className="text-[10px] font-black text-[#ea580c] uppercase tracking-widest flex items-center gap-2">
                  <Layers size={12} /> Biblioteca de Widgets
                </h3>
                <button onClick={() => setShowLeftSidebar(false)} className="md:hidden text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors">
@@ -791,11 +792,11 @@ const Editor: React.FC = () => {
              <div className="mb-3">
                <h4 className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-1.5 flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span>Básicos</h4>
                <div className="grid grid-cols-2 gap-2">
-                 <WidgetTool icon="/icons3d/image.png" label="Imagem" onClick={() => addWidget(WidgetType.IMAGE)} />
-                 <WidgetTool icon="/icons3d/video.png" label="Vídeo" onClick={() => addWidget(WidgetType.VIDEO)} />
-                 <WidgetTool icon="/icons3d/text.png" label="Texto" onClick={() => addWidget(WidgetType.TEXT)} />
-                 <WidgetTool icon="/icons3d/gif.png" label="GIF" onClick={() => addWidget(WidgetType.GIF)} />
-                 <WidgetTool icon="/icons3d/web.png" label="Web" onClick={() => addWidget(WidgetType.IFRAME)} />
+                 <WidgetTool icon="/icons3d/image.png" label="Imagem" description="Exibe imagens de alta qualidade (PNG, JPG, SVG) com ajuste automático ao contêiner." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.IMAGE)} />
+                 <WidgetTool icon="/icons3d/video.png" label="Vídeo" description="Reproduz vídeos locais em looping ou links diretos do YouTube." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.VIDEO)} />
+                 <WidgetTool icon="/icons3d/text.png" label="Texto" description="Adiciona caixas de texto com fontes, cores e tamanhos personalizáveis." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.TEXT)} />
+                 <WidgetTool icon="/icons3d/gif.png" label="GIF" description="Exibe animações divertidas em formato GIF para atrair a atenção do público." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.GIF)} />
+                 <WidgetTool icon="/icons3d/web.png" label="Web" description="Incorpora qualquer site ou página web externa de forma interativa." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.IFRAME)} />
                </div>
              </div>
 
@@ -803,11 +804,11 @@ const Editor: React.FC = () => {
              <div className="mb-3">
                <h4 className="text-[10px] font-black text-cyan-400 uppercase tracking-widest mb-1.5 flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-cyan-400 inline-block"></span>Utilitários</h4>
                <div className="grid grid-cols-2 gap-2">
-                 <WidgetTool icon="/icons3d/clock.png" label="Relógio" onClick={() => addWidget(WidgetType.CLOCK)} />
-                 <WidgetTool icon="/icons3d/weather.png" label="Clima" onClick={() => addWidget(WidgetType.WEATHER)} />
-                 <WidgetTool icon="/icons3d/full-info.png" label="Completo" onClick={() => addWidget(WidgetType.FULL_INFO)} />
-                 <WidgetTool icon="/icons3d/rss.png" label="RSS" onClick={() => addWidget(WidgetType.RSS)} />
-                 <WidgetTool icon="/icons3d/calendar.png" label="Agenda" onClick={() => addWidget(WidgetType.CALENDAR)} />
+                 <WidgetTool icon="/icons3d/clock.png" label="Relógio" description="Mostra um relógio digital sincronizado em tempo real com a cidade escolhida." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.CLOCK)} />
+                 <WidgetTool icon="/icons3d/weather.png" label="Clima" description="Exibe a previsão do tempo e temperatura em tempo real para qualquer cidade." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.WEATHER)} />
+                 <WidgetTool icon="/icons3d/full-info.png" label="Completo" description="Painel integrado de relógio, clima e fundos de alta definição." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.FULL_INFO)} />
+                 <WidgetTool icon="/icons3d/rss.png" label="RSS" description="Exibe feeds de notícias em tempo real de portais de notícias como G1 e CNN." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.RSS)} />
+                 <WidgetTool icon="/icons3d/calendar.png" label="Agenda" description="Integração direta com Google Agenda para exibir eventos e programações." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.CALENDAR)} />
                </div>
              </div>
 
@@ -815,11 +816,11 @@ const Editor: React.FC = () => {
              <div className="mb-3">
                <h4 className="text-[10px] font-black text-amber-400 uppercase tracking-widest mb-1.5 flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block"></span>Interativos</h4>
                <div className="grid grid-cols-2 gap-2">
-                 <WidgetTool icon="/icons3d/notes.png" label="Notas" onClick={() => addWidget(WidgetType.NOTES)} />
-                 <WidgetTool icon="/icons3d/todo.png" label="Tarefas" onClick={() => addWidget(WidgetType.TODO)} />
-                 <WidgetTool icon="/icons3d/countdown.png" label="Contador" onClick={() => addWidget(WidgetType.COUNTDOWN)} />
-                 <WidgetTool icon="/icons3d/chores.png" label="Deveres" onClick={() => addWidget(WidgetType.CHORES)} />
-                 <WidgetTool icon="/icons3d/meal-plan.png" label="Meal Plan" onClick={() => addWidget(WidgetType.MEAL_PLAN)} />
+                 <WidgetTool icon="/icons3d/notes.png" label="Notas" description="Mural de notas adesivas com temas neon, glassmorphism e cores vibrantes." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.NOTES)} />
+                 <WidgetTool icon="/icons3d/todo.png" label="Tarefas" description="Lista de tarefas interativa com checkboxes e progresso de conclusão." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.TODO)} />
+                 <WidgetTool icon="/icons3d/countdown.png" label="Contador" description="Cronômetro regressivo para grandes eventos, metas ou datas especiais." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.COUNTDOWN)} />
+                 <WidgetTool icon="/icons3d/chores.png" label="Deveres" description="Quadro semanal de deveres domésticos ou corporativos com responsáveis." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.CHORES)} />
+                 <WidgetTool icon="/icons3d/meal-plan.png" label="Meal Plan" description="Planejador ou cardápio de refeições semanais com slide para os dias." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.MEAL_PLAN)} />
                </div>
              </div>
 
@@ -827,14 +828,14 @@ const Editor: React.FC = () => {
              <div className="mb-3">
                <h4 className="text-[10px] font-black text-rose-400 uppercase tracking-widest mb-1.5 flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-rose-400 inline-block"></span>Integrações</h4>
                <div className="grid grid-cols-2 gap-2">
-                 <WidgetTool icon="/icons3d/market.png" label="Bolsa" onClick={() => addWidget(WidgetType.MARKET_WATCH)} />
-                 <WidgetTool icon="/icons3d/snapshot.png" label="Snapshot" onClick={() => addWidget(WidgetType.BROWSER_SNAPSHOT)} />
-                 <WidgetTool icon="/icons3d/google-docs.png" label="G Docs" onClick={() => addWidget(WidgetType.GOOGLE_DOCS)} />
-                 <WidgetTool icon="/icons3d/office-docs.png" label="Office Docs" onClick={() => addWidget(WidgetType.OFFICE_DOCS)} />
-                 <WidgetTool icon="/icons3d/power-bi.png" label="Power BI" onClick={() => addWidget(WidgetType.POWER_BI)} />
-                 <WidgetTool icon="/icons3d/airtable.png" label="Airtable" onClick={() => addWidget(WidgetType.AIRTABLE)} />
-                 <WidgetTool icon="/icons3d/pdf.png" label="PDF" onClick={() => addWidget(WidgetType.PDF_DOCUMENT)} />
-                 <WidgetTool icon="/icons3d/html.png" label="HTML" onClick={() => addWidget(WidgetType.EMBED_HTML)} />
+                 <WidgetTool icon="/icons3d/market.png" label="Bolsa" description="Painel de cotações financeiras de ações e criptomoedas em tempo real." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.MARKET_WATCH)} />
+                 <WidgetTool icon="/icons3d/snapshot.png" label="Snapshot" description="Renderiza capturas estáticas e periódicas de páginas de forma segura." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.BROWSER_SNAPSHOT)} />
+                 <WidgetTool icon="/icons3d/google-docs.png" label="G Docs" description="Incorpora documentos, planilhas ou slides do Google Workspace." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.GOOGLE_DOCS)} />
+                 <WidgetTool icon="/icons3d/office-docs.png" label="Office Docs" description="Exibe planilhas Excel, documentos Word ou slides PowerPoint do Office 365." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.OFFICE_DOCS)} />
+                 <WidgetTool icon="/icons3d/power-bi.png" label="Power BI" description="Exibe painéis interativos e relatórios dinâmicos do Microsoft Power BI." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.POWER_BI)} />
+                 <WidgetTool icon="/icons3d/airtable.png" label="Airtable" description="Exibe visualizações, tabelas ou bases de dados completas do Airtable." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.AIRTABLE)} />
+                 <WidgetTool icon="/icons3d/pdf.png" label="PDF" description="Exibe documentos PDFs e apostilas corporativas página a página." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.PDF_DOCUMENT)} />
+                 <WidgetTool icon="/icons3d/html.png" label="HTML" description="Insira código HTML, CSS ou JS personalizado livremente." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.EMBED_HTML)} />
                </div>
              </div>
              
@@ -845,6 +846,14 @@ const Editor: React.FC = () => {
                 >
                   <Trash2 size={12} /> Limpar Todos os Widgets
                 </button>
+             </div>
+
+             {/* Dynamic Tooltip Explanation Box */}
+             <div className="mt-4 p-3 bg-slate-950/60 rounded-xl border border-slate-800/80 min-h-[56px] flex items-center gap-2">
+               <Info size={14} className="text-[#ea580c] shrink-0" />
+               <p className="text-[10px] text-slate-400 font-medium leading-relaxed">
+                 {hoveredDescription || "Passe o mouse sobre um widget para ver a descrição detalhada."}
+               </p>
              </div>
           </div>
 
@@ -931,10 +940,10 @@ const Editor: React.FC = () => {
                        onClick={() => setSelectedWidget(layer.i)}
                        className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-all border ${
                          isSelected 
-                           ? 'bg-[#7C3AED]/10 border-[#7C3AED]/50 text-[#7C3AED]' 
+                           ? 'bg-[#ea580c]/10 border-[#ea580c]/50 text-[#ea580c]' 
                            : 'bg-slate-900 border-transparent hover:bg-slate-800 text-slate-300'
                        } ${isDragging ? 'opacity-50' : 'opacity-100'} ${
-                         isDragOver ? 'border-t-2 border-t-[#7C3AED]' : ''
+                         isDragOver ? 'border-t-2 border-t-[#ea580c]' : ''
                        }`}
                      >
                        <div className="cursor-move text-slate-500 hover:text-slate-300">
@@ -944,7 +953,7 @@ const Editor: React.FC = () => {
                          {getIcon(layer.type)}
                        </div>
                        <span className="text-xs font-medium truncate flex-1">{getName(layer.type)}</span>
-                       {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-[#7C3AED]"></div>}
+                       {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-[#ea580c]"></div>}
                      </div>
                    );
                })}
@@ -1239,7 +1248,7 @@ const Editor: React.FC = () => {
           
           <div 
             ref={containerRef}
-            className={`h-full bg-black shadow-[0_0_40px_rgba(0,0,0,0.8)] relative border border-[#7C3AED] rounded-sm overflow-hidden shadow-[0_0_25px_rgba(124,58,237,0.15)] ${
+            className={`h-full bg-black shadow-[0_0_40px_rgba(0,0,0,0.8)] relative border border-[#ea580c] rounded-sm overflow-hidden shadow-[0_0_25px_rgba(124,58,237,0.15)] ${
               display.orientation === 'vertical'
                 ? 'aspect-[9/16] max-h-full w-auto'
                 : 'w-full max-w-[100%] aspect-video'
@@ -1301,7 +1310,7 @@ const Editor: React.FC = () => {
                   <div 
                     key={w.i} 
                     onClick={(e) => { e.stopPropagation(); setSelectedWidget(w.i); }}
-                    className={`group transition-all ${selectedWidget === w.i ? 'border border-[#7C3AED] shadow-[0_0_15px_rgba(124,58,237,0.35)]' : 'border border-transparent hover:border-white/20 hover:bg-white/5'} ${w.data.backgroundAnimation ? getBackgroundAnimationClass(w.data.backgroundAnimation) : (selectedWidget === w.i ? 'bg-slate-900/50 backdrop-blur-sm' : '')}`}
+                    className={`group transition-all ${selectedWidget === w.i ? 'border border-[#ea580c] shadow-[0_0_15px_rgba(124,58,237,0.35)]' : 'border border-transparent hover:border-white/20 hover:bg-white/5'} ${w.data.backgroundAnimation ? getBackgroundAnimationClass(w.data.backgroundAnimation) : (selectedWidget === w.i ? 'bg-slate-900/50 backdrop-blur-sm' : '')}`}
                     style={{ zIndex: selectedWidget === w.i ? 999 : (w.data.zIndex !== undefined ? w.data.zIndex : 10) }}
                   >
                     <div 
@@ -1312,7 +1321,7 @@ const Editor: React.FC = () => {
                       }}
                     >
                       {w.data.fullScreenMode && (
-                        <div className="absolute top-2 right-2 z-30 bg-indigo-950/80 border border-[#7C3AED]/50 backdrop-blur-sm text-[#7C3AED] text-[9px] font-black uppercase px-2 py-0.5 rounded-full shadow-[0_0_10px_rgba(124,58,237,0.3)] pointer-events-none animate-pulse flex items-center gap-1">
+                        <div className="absolute top-2 right-2 z-30 bg-indigo-950/80 border border-[#ea580c]/50 backdrop-blur-sm text-[#ea580c] text-[9px] font-black uppercase px-2 py-0.5 rounded-full shadow-[0_0_10px_rgba(124,58,237,0.3)] pointer-events-none animate-pulse flex items-center gap-1">
                           <span>📺 Tela Cheia (100% da TV)</span>
                         </div>
                       )}
@@ -1583,7 +1592,7 @@ const Editor: React.FC = () => {
             <div className="space-y-6 animate-in slide-in-from-right-4 duration-200">
               <div className="flex items-center justify-between border-b border-slate-800 pb-4">
                 <h3 className="font-bold text-slate-200 flex items-center gap-2 text-xs uppercase tracking-wider">
-                   <Settings size={14} className="text-[#7C3AED]" /> Configuração
+                   <Settings size={14} className="text-[#ea580c]" /> Configuração
                 </h3>
                 <div className="flex items-center gap-2">
                   <button onClick={() => removeWidget(selectedWidget!)} className="text-rose-500 hover:bg-rose-500/10 p-2 rounded-lg transition-colors" title="Remover Widget">
@@ -3563,16 +3572,41 @@ const Editor: React.FC = () => {
   );
 };
 
-const WidgetTool = ({ icon, label, onClick }: any) => (
-  <button onClick={onClick} className="flex flex-col items-center justify-center py-2 px-1 bg-slate-900/85 border border-slate-800/80 rounded-lg hover:bg-[#7C3AED]/15 hover:border-[#7C3AED] hover:shadow-[0_0_15px_rgba(124,58,237,0.2)] active:scale-95 transition-all group w-full">
-    <div className="text-slate-300 group-hover:text-[#7C3AED] mb-1 transition-colors drop-shadow-sm flex items-center justify-center h-10 w-10">
+const WidgetTool = ({ icon, label, description, onClick, onHover }: any) => (
+  <button 
+    onClick={onClick}
+    onMouseEnter={() => onHover && onHover(description)}
+    onMouseLeave={() => onHover && onHover('')}
+    className="relative flex flex-col items-center justify-center p-2 bg-[#1C1D22] border border-slate-800/60 rounded-xl hover:bg-[#ea580c]/10 hover:border-[#ea580c] hover:shadow-[0_0_15px_rgba(234,88,12,0.15)] active:scale-95 transition-all group w-full aspect-square cursor-pointer"
+  >
+    {/* Tiny Info Icon in Corner */}
+    <div className="absolute top-1.5 right-1.5 opacity-30 group-hover:opacity-100 transition-opacity text-slate-400 group-hover:text-[#ea580c]">
+      <Info size={10} />
+    </div>
+
+    {/* Elegant Pure CSS Tooltip */}
+    <div className="absolute bottom-full mb-2 hidden group-hover:flex flex-col items-center pointer-events-none z-50 animate-in fade-in zoom-in-95 duration-200">
+      <div className="bg-slate-950 border border-slate-800 text-slate-200 text-[9px] font-bold py-1.5 px-3 rounded-lg shadow-xl w-48 text-center leading-relaxed">
+        {description}
+      </div>
+      <div className="w-2 h-2 bg-slate-950 border-r border-b border-slate-800 rotate-45 -mt-1"></div>
+    </div>
+
+    {/* Larger Icon Container with LESS Spacing */}
+    <div className="text-slate-300 group-hover:text-[#ea580c] mb-1 transition-colors drop-shadow-sm flex items-center justify-center h-12 w-12">
       {typeof icon === 'string' ? (
-        <img src={icon} alt={label} className="w-9 h-9 object-contain group-hover:scale-110 transition-transform duration-300 filter drop-shadow-[0_0_6px_rgba(124,58,237,0.15)]" />
+        <img 
+          src={icon} 
+          alt={label} 
+          className="w-11 h-11 object-contain group-hover:scale-110 transition-transform duration-300 filter drop-shadow-[0_0_8px_rgba(234,88,12,0.15)]" 
+        />
       ) : (
         icon
       )}
     </div>
-    <span className="text-[9px] font-bold text-slate-300 group-hover:text-white uppercase tracking-wider transition-colors text-center truncate w-full">{label}</span>
+    <span className="text-[10px] font-bold text-slate-300 group-hover:text-white uppercase tracking-wider transition-colors text-center truncate w-full px-0.5">
+      {label}
+    </span>
   </button>
 );
 
