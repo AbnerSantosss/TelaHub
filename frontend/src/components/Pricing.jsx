@@ -93,10 +93,10 @@ const Pricing = ({ triggerConversionModal }) => {
           </div>
 
           {/* Business Plan (Featured) */}
-          <div className="preco-card preco-card-featured reveal" style={{ background: '#FFFFFF', border: '2px solid #2563EB', borderRadius: '2px', padding: '36px 28px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', position: 'relative', boxShadow: '0 12px 32px rgba(37, 99, 235, 0.04)' }}>
-            <span className="featured-tag" style={{ position: 'absolute', top: '16px', right: '16px', background: '#2563EB', color: '#FFFFFF', fontSize: '0.65rem', fontWeight: '700', padding: '4px 10px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Mais Escolhido</span>
+          <div className="preco-card preco-card-featured reveal" style={{ background: '#FFFFFF', border: '2px solid #ea580c', borderRadius: '2px', padding: '36px 28px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', position: 'relative', boxShadow: '0 12px 32px rgba(37, 99, 235, 0.04)' }}>
+            <span className="featured-tag" style={{ position: 'absolute', top: '16px', right: '16px', background: '#ea580c', color: '#FFFFFF', fontSize: '0.65rem', fontWeight: '700', padding: '4px 10px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Mais Escolhido</span>
             <div>
-              <p className="plan-name featured" style={{ fontSize: '0.8rem', fontWeight: '700', color: '#2563EB', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px' }}>Business</p>
+              <p className="plan-name featured" style={{ fontSize: '0.8rem', fontWeight: '700', color: '#ea580c', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px' }}>Business</p>
               <div className="plan-price" style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginBottom: '16px' }}>
                 <span className="plan-currency" style={{ fontSize: '1.2rem', fontWeight: '700', color: '#111827' }}>R$</span>
                 <span className="plan-amount" style={{ fontSize: '3rem', fontWeight: '800', color: '#111827', letterSpacing: '-0.04em', lineHeight: '1' }}>149</span>
@@ -126,7 +126,7 @@ const Pricing = ({ triggerConversionModal }) => {
                 </li>
               </ul>
             </div>
-            <button onClick={() => triggerConversionModal('Business')} className="btn btn-plan btn-plan-featured" style={{ width: '100%', padding: '12px 0', fontSize: '0.9rem', background: '#2563EB', color: '#FFFFFF', fontWeight: '700' }}>
+            <button onClick={() => triggerConversionModal('Business')} className="btn btn-plan btn-plan-featured" style={{ width: '100%', padding: '12px 0', fontSize: '0.9rem', background: '#ea580c', color: '#FFFFFF', fontWeight: '700' }}>
               Quero modernizar minhas telas
             </button>
           </div>
@@ -231,7 +231,7 @@ const Pricing = ({ triggerConversionModal }) => {
                     }}
                   >
                     <span>{faq.question}</span>
-                    <span style={{ fontSize: '1.2rem', color: '#2563EB', fontWeight: 'bold' }}>{isOpen ? '−' : '+'}</span>
+                    <span style={{ fontSize: '1.2rem', color: '#ea580c', fontWeight: 'bold' }}>{isOpen ? '−' : '+'}</span>
                   </button>
                   {isOpen && (
                     <div style={{

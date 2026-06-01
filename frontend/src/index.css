@@ -9,18 +9,18 @@
   --bg-card:       #FFFFFF; /* Cards em branco puro para se destacarem do fundo */
   --bg-card-hover: #F9FAFB;
   --border:        #E5E7EB; /* Cinza Borda Sutil */
-  --border-active: #2563EB; /* Azul Corporativo */
+  --border-active: #ea580c; /* Azul Corporativo */
 
   /* ── Cores de Ação ── */
-  --cyan:          #2563EB; /* Azul Corporativo Sólido */
+  --cyan:          #ea580c; /* Azul Corporativo Sólido */
   --cyan-dim:      rgba(37, 99, 235, 0.05);
   --cyan-glow:     none;
   
-  --indigo:        #2563EB;
+  --indigo:        #ea580c;
   --indigo-dim:    rgba(37, 99, 235, 0.05);
   --indigo-glow:   none;
   
-  --purple:        #2563EB;
+  --purple:        #ea580c;
   --purple-dim:    rgba(37, 99, 235, 0.05);
   --purple-glow:   none;
 
@@ -695,7 +695,7 @@ nav {
   border-radius: 0px;
   flex-shrink: 0;
 }
-.lt-img   { background: linear-gradient(90deg, #3B82F6, #60A5FA); }
+.lt-img   { background: linear-gradient(90deg, #f97316, #60A5FA); }
 .lt-text  { background: linear-gradient(90deg, #6366F1, #818CF8); }
 .lt-video { background: linear-gradient(90deg, #10B981, #34D399); }
 .layer-name { flex: 1; font-weight: 500; }
@@ -1160,7 +1160,7 @@ nav {
 .cta-strip {
   padding: 96px 0;
   text-align: center;
-  background: linear-gradient(135deg, #1E40AF 0%, #2563EB 50%, #3B82F6 100%);
+  background: linear-gradient(135deg, #d97706 0%, #ea580c 50%, #f97316 100%);
   color: #FFFFFF;
 }
 .cta-strip h2 { max-width: 600px; margin: 0 auto 16px; color: #FFFFFF; }
@@ -1289,7 +1289,7 @@ footer {
 }
 .footer-brand { max-width: 220px; }
 .nav-logo-icon.footer-logo-icon {
-  background: #2563EB;
+  background: #ea580c;
 }
 .footer-brand p {
   margin-top: 12px;

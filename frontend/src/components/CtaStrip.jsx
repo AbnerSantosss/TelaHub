@@ -16,7 +16,7 @@ const CtaStrip = ({ triggerConversionModal }) => {
           <button 
             onClick={() => triggerConversionModal('Starter')} 
             className="btn btn-primary" 
-            style={{ fontSize: '1rem', padding: '14px 32px', background: '#FFFFFF', color: '#1E40AF' }}
+            style={{ fontSize: '1rem', padding: '14px 32px', background: '#FFFFFF', color: '#d97706' }}
           >
             Quero ativar minha tela agora
             <svg 
