@@ -17,10 +17,10 @@ const Hero = ({
               Mais de 200 empresas já aboliram o pen-drive no Brasil
             </div>
             <h1 id="hero-heading" className="hero-headline animate-in">
-              Transforme a TV da sua loja em um vendedor silencioso que trabalha 24 horas por dia.
+              Diga adeus aos fios soltos, pen-drives e telas pretas. Exiba promoções, cardápios dinâmicos e vídeos institucionais em qualquer TV, atualizando tudo pelo celular ou computador em menos de 5 minutos.
             </h1>
             <p className="hero-subheadline animate-in">
-              Diga adeus aos fios soltos, pen-drives e telas pretas. Exiba promoções, cardápios dinâmicos e vídeos institucionais em qualquer TV, atualizando tudo pelo celular ou computador em menos de 5 minutos.
+              Transforme a TV da sua loja em um vendedor silencioso que trabalha 24 horas por dia.
             </p>
             <div className="hero-actions animate-in">
               <button onClick={() => triggerConversionModal('Starter')} className="btn btn-primary">

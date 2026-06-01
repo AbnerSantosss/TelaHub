@@ -24,9 +24,9 @@ A landing page utiliza um design moderno baseado em um tema escuro com estética
 ---
 
 ### Seção 2: Seção Hero (Apresentação Principal)
-*   **Copy de Vendas (Foco no Vendedor Silencioso)**:
-    *   *Título*: "Transforme a TV da sua loja em um vendedor silencioso que trabalha 24 horas por dia."
-    *   *Subtítulo*: Explicita a eliminação definitiva de pen-drives, fios soltos e telas pretas, promovendo exibição instantânea de promoções, cardápios e vídeos atualizados em 5 minutos.
+*   **Copy de Vendas (Foco no Fim da Dor de Cabeça com a TV)**:
+    *   *Título*: "Diga adeus aos fios soltos, pen-drives e telas pretas. Exiba promoções, cardápios dinâmicos e vídeos institucionais em qualquer TV, atualizando tudo pelo celular ou computador em menos de 5 minutos."
+    *   *Subtítulo*: "Transforme a TV da sua loja em um vendedor silencioso que trabalha 24 horas por dia."
     *   *Social Proof*: Marcador verde indicando "🟢 Mais de 200 empresas já aboliram o pen-drive no Brasil".
 *   **Dashboard Mockup Interativo**:
     *   Simula o painel de controle principal da plataforma (`app.telahub.com.br/displays`) rodando em um navegador web.
