@@ -317,6 +317,54 @@ const UseCases = ({ activeTab, setActiveTab, telemetry }) => {
             </div>
           )}
         </div>
+
+        {/* Testimonials Section - Prova Social */}
+        <div style={{ marginTop: '72px', borderTop: '1px solid var(--border)', paddingTop: '56px' }}>
+          <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+            <h2 style={{ fontSize: 'clamp(1.5rem, 2.5vw, 2.2rem)', fontWeight: '800', marginBottom: '12px' }}>
+              Quem já usa o TelaHub para modernizar suas telas...
+            </h2>
+            <p style={{ color: '#4B5563', fontSize: '1rem', maxWidth: '520px', marginLeft: 'auto', marginRight: 'auto' }}>
+              Veja como empresários reais aboliram o pen-drive e transformaram o visual das suas recepções em minutos.
+            </p>
+          </div>
+
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))',
+            gap: '24px'
+          }}>
+            {/* Testimonial 1 */}
+            <div style={{ background: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: '2px', padding: '32px 28px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ display: 'flex', gap: '4px', color: '#FBBF24', fontSize: '1.2rem' }}>★★★★★</div>
+              <p style={{ fontSize: '0.95rem', color: '#4B5563', lineHeight: '1.6', fontStyle: 'italic', margin: 0 }}>
+                "Eu perdia horas toda semana gravando vídeos em pendrives para colocar na TV da recepção. Com o TelaHub, eu atualizo a grade de aulas e os avisos de feriado direto de casa, em dois minutos. A recepção da academia ficou com cara de rede gigante."
+              </p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '8px' }}>
+                <div style={{ width: '36px', height: '36px', background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', color: '#2563EB', fontSize: '0.9rem' }}>RA</div>
+                <div>
+                  <h4 style={{ fontSize: '0.9rem', fontWeight: '700', color: '#111827', margin: 0 }}>Rodrigo Alencar</h4>
+                  <span style={{ fontSize: '0.78rem', color: '#9CA3AF' }}>Proprietário da FitLife Academia</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Testimonial 2 */}
+            <div style={{ background: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: '2px', padding: '32px 28px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ display: 'flex', gap: '4px', color: '#FBBF24', fontSize: '1.2rem' }}>★★★★★</div>
+              <p style={{ fontSize: '0.95rem', color: '#4B5563', lineHeight: '1.6', fontStyle: 'italic', margin: 0 }}>
+                "As TVs da minha clínica ficavam desligadas ou passando canais abertos que não interessavam a ninguém. Hoje, nós exibimos os vídeos dos nossos procedimentos estéticos, dicas de saúde e comunicados em loop automático. Nossos clientes elogiam a modernidade."
+              </p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '8px' }}>
+                <div style={{ width: '36px', height: '36px', background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', color: '#2563EB', fontSize: '0.9rem' }}>MC</div>
+                <div>
+                  <h4 style={{ fontSize: '0.9rem', fontWeight: '700', color: '#111827', margin: 0 }}>Dra. Mariana Costa</h4>
+                  <span style={{ fontSize: '0.78rem', color: '#9CA3AF' }}>Diretora da OdontoClean</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );

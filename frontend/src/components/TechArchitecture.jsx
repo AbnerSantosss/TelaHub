@@ -2,104 +2,117 @@ import React from 'react';
 
 const TechArchitecture = () => {
   return (
-    <section id="argumento" aria-labelledby="argumento-heading">
+    <section id="argumento" aria-labelledby="argumento-heading" style={{ background: '#FFFFFF' }}>
       <div className="container">
-        <div className="argumento-header">
-          <div className="label reveal">Tecnologia Failsafe</div>
-          <h2 id="argumento-heading" className="reveal">
-            Sua tela vende, informa ou só gasta energia?
+        <div className="argumento-header" style={{ textAlign: 'center', marginBottom: '56px' }}>
+          <div className="label reveal" style={{ background: '#ECFDF5', color: '#10B981', borderColor: '#A7F3D0', borderRadius: '99px' }}>
+            Simplicidade Extrema
+          </div>
+          <h2 id="argumento-heading" className="reveal" style={{ fontSize: 'clamp(1.8rem, 3vw, 2.5rem)', fontWeight: '800' }}>
+            Os Pilares do TelaHub: Como funciona na prática
           </h2>
-          <p className="reveal" style={{ marginTop: '16px' }}>
-            Esqueça visitas técnicas presenciais ou pen-drives desatualizados. A arquitetura do TelaHub foi desenhada para manter sua comunicação impecável, 24 horas por dia.
+          <p className="reveal" style={{ marginTop: '16px', color: '#4B5563', fontSize: '1.05rem', maxWidth: '580px', marginLeft: 'auto', marginRight: 'auto' }}>
+            Diga adeus à dor de cabeça de atualizar pen-drives nas TVs. Criamos um sistema intuitivo focado na agilidade do seu negócio local.
           </p>
         </div>
 
-        <div className="argumento-grid">
-          {/* Card 1: WebSocket Sync */}
-          <div className="argumento-card reveal">
-            <div className="argumento-icon">
+        <div className="argumento-grid" style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+          gap: '24px'
+        }}>
+          {/* Pillar 1: O Fim do Pendrive */}
+          <div className="argumento-card reveal" style={{ background: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: '2px', padding: '28px' }}>
+            <div className="argumento-icon" style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', width: '44px', height: '44px', borderRadius: '2px', display: 'flex', alignItems: 'center', justifyItems: 'center', marginBottom: '20px' }}>
               <svg 
                 xmlns="http://www.w3.org/2000/svg" 
                 viewBox="0 0 24 24" 
                 fill="none" 
-                stroke="currentColor" 
+                stroke="#2563EB" 
                 strokeWidth="2.2" 
                 strokeLinecap="round" 
                 strokeLinejoin="round" 
-                style={{ width: 22, height: 22, color: 'var(--cyan)' }}
-                className="animate-spin-slow"
+                style={{ width: 22, height: 22, margin: 'auto' }}
               >
-                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+                <path d="M18 10h-1.25M6 10H4.75M12 2v4M12 18v4M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h4M18 12h4M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
               </svg>
             </div>
-            <h3>Atualização em 3 Segundos</h3>
-            <p style={{ marginTop: '10px' }}>
-              Mude o preço ou o aviso no celular, e a tela física atualiza antes de você guardar o telefone no bolso. Sem recarregar a página.
+            <h3 style={{ fontSize: '1.15rem', fontWeight: '700', color: '#111827', marginBottom: '10px' }}>O fim do Pendrive</h3>
+            <p style={{ fontSize: '0.9rem', color: '#4B5563', lineHeight: '1.5' }}>
+              Pareamento simples por código. Basta digitar na plataforma o número exibido na sua TV e a conexão é feita em menos de 2 minutos, sem fios soltos.
             </p>
-            
-            <div className="proof-list" style={{ marginTop: '24px' }}>
-              <div className="proof-item">
-                <svg className="proof-check" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ width: 14, height: 14, marginRight: 8, marginTop: 4, flexShrink: 0 }}>
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-                <span>Publique e veja as mudanças na tela em menos de 3 segundos.</span>
-              </div>
-              <div className="proof-item">
-                <svg className="proof-check" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ width: 14, height: 14, marginRight: 8, marginTop: 4, flexShrink: 0 }}>
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-                <span>Atualize preços e promoções instantaneamente sem parar a transmissão.</span>
-              </div>
-              <div className="proof-item">
-                <svg className="proof-check" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ width: 14, height: 14, marginRight: 8, marginTop: 4, flexShrink: 0 }}>
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-                <span>Controle total via painel web, de qualquer dispositivo móvel ou computador.</span>
-              </div>
-            </div>
           </div>
 
-          {/* Card 2: Offline Resilience */}
-          <div className="argumento-card reveal">
-            <div className="argumento-icon">
+          {/* Pillar 2: Arraste, Solte e Exiba */}
+          <div className="argumento-card reveal" style={{ background: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: '2px', padding: '28px' }}>
+            <div className="argumento-icon" style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', width: '44px', height: '44px', borderRadius: '2px', display: 'flex', alignItems: 'center', justifyItems: 'center', marginBottom: '20px' }}>
               <svg 
                 xmlns="http://www.w3.org/2000/svg" 
                 viewBox="0 0 24 24" 
                 fill="none" 
-                stroke="currentColor" 
+                stroke="#2563EB" 
                 strokeWidth="2.2" 
                 strokeLinecap="round" 
                 strokeLinejoin="round" 
-                style={{ width: 22, height: 22, color: 'var(--cyan)' }}
+                style={{ width: 22, height: 22, margin: 'auto' }}
               >
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                <rect x="3" y="3" width="7" height="9" rx="1" />
+                <rect x="14" y="3" width="7" height="5" rx="1" />
+                <rect x="14" y="12" width="7" height="9" rx="1" />
+                <rect x="3" y="16" width="7" height="5" rx="1" />
               </svg>
             </div>
-            <h3>Internet caiu? A tela continua.</h3>
-            <p style={{ marginTop: '10px' }}>
-              Nosso cache inteligente salva as mídias na própria TV. Ninguém nunca verá uma mensagem de 'Sem Conexão'.
+            <h3 style={{ fontSize: '1.15rem', fontWeight: '700', color: '#111827', marginBottom: '10px' }}>Arraste, Solte e Exiba</h3>
+            <p style={{ fontSize: '0.9rem', color: '#4B5563', lineHeight: '1.5' }}>
+              Editor visual intuitivo. Adicione textos dinâmicos, GIFs, imagens e informativos arrastando elementos em uma tela totalmente interativa.
             </p>
-            
-            <div className="proof-list" style={{ marginTop: '24px' }}>
-              <div className="proof-item">
-                <svg className="proof-check" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ width: 14, height: 14, marginRight: 8, marginTop: 4, flexShrink: 0 }}>
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-                <span>Zero telas pretas. O público nunca verá mensagens de erro de rede.</span>
-              </div>
-              <div className="proof-item">
-                <svg className="proof-check" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ width: 14, height: 14, marginRight: 8, marginTop: 4, flexShrink: 0 }}>
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-                <span>Armazenamento local seguro das mídias na memória interna do display.</span>
-              </div>
-              <div className="proof-item">
-                <svg className="proof-check" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ width: 14, height: 14, marginRight: 8, marginTop: 4, flexShrink: 0 }}>
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-                <span>Sincronização automática em lote assim que a internet for restabelecida.</span>
-              </div>
+          </div>
+
+          {/* Pillar 3: Fotos e vídeos rodando no automático */}
+          <div className="argumento-card reveal" style={{ background: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: '2px', padding: '28px' }}>
+            <div className="argumento-icon" style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', width: '44px', height: '44px', borderRadius: '2px', display: 'flex', alignItems: 'center', justifyItems: 'center', marginBottom: '20px' }}>
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="#2563EB" 
+                strokeWidth="2.2" 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                style={{ width: 22, height: 22, margin: 'auto' }}
+              >
+                <polygon points="23 7 16 12 23 17 23 7" />
+                <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+              </svg>
             </div>
+            <h3 style={{ fontSize: '1.15rem', fontWeight: '700', color: '#111827', marginBottom: '10px' }}>Vídeos no automático</h3>
+            <p style={{ fontSize: '0.9rem', color: '#4B5563', lineHeight: '1.5' }}>
+              Widgets de mídia e loops. Seus vídeos institucionais, imagens promocionais ou links do YouTube rodam com autoplay e repetição contínua.
+            </p>
+          </div>
+
+          {/* Pillar 4: Avisos instantâneos */}
+          <div className="argumento-card reveal" style={{ background: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: '2px', padding: '28px' }}>
+            <div className="argumento-icon" style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', width: '44px', height: '44px', borderRadius: '2px', display: 'flex', alignItems: 'center', justifyItems: 'center', marginBottom: '20px' }}>
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="#2563EB" 
+                strokeWidth="2.2" 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                style={{ width: 22, height: 22, margin: 'auto' }}
+              >
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                <line x1="12" y1="9" x2="12" y2="13" />
+                <line x1="12" y1="17" x2="12.01" y2="17" />
+              </svg>
+            </div>
+            <h3 style={{ fontSize: '1.15rem', fontWeight: '700', color: '#111827', marginBottom: '10px' }}>Avisos instantâneos</h3>
+            <p style={{ fontSize: '0.9rem', color: '#4B5563', lineHeight: '1.5' }}>
+              Recurso de Broadcast. Publique alertas urgentes, informativos ou promoções relâmpago instantaneamente em tela cheia com um clique.
+            </p>
           </div>
         </div>
       </div>
