@@ -12,19 +12,19 @@ const Hero = ({
       <div className="container">
         <div className="hero-inner">
           <div className="hero-content">
-            <div className="label animate-in" style={{ background: '#ECFDF5', color: '#10B981', borderColor: '#A7F3D0' }}>
-              +200 operações ativas no Brasil
+            <div className="label animate-in" style={{ background: '#ECFDF5', color: '#10B981', borderColor: '#A7F3D0', borderRadius: '99px', fontSize: '12px' }}>
+              <span style={{ display: 'inline-block', marginRight: '6px' }}>🟢</span>
+              Mais de 200 empresas já aboliram o pen-drive no Brasil
             </div>
             <h1 id="hero-heading" className="hero-headline animate-in">
-              Cada TV parada é dinheiro que você está queimando.<br />
-              <span className="text-gradient">Ative todas. Agora.</span>
+              Transforme a TV da sua loja em um vendedor silencioso que trabalha 24 horas por dia.
             </h1>
             <p className="hero-subheadline animate-in">
-              Aposente os pen-drives e as telas pretas. Transforme qualquer monitor em uma central de comunicação inteligente, atualizada via celular, de qualquer lugar do mundo.
+              Diga adeus aos fios soltos, pen-drives e telas pretas. Exiba promoções, cardápios dinâmicos e vídeos institucionais em qualquer TV, atualizando tudo pelo celular ou computador em menos de 5 minutos.
             </p>
             <div className="hero-actions animate-in">
               <button onClick={() => triggerConversionModal('Starter')} className="btn btn-primary">
-                Começar Agora
+                Quero modernizar minhas telas agora
                 <svg 
                   xmlns="http://www.w3.org/2000/svg" 
                   viewBox="0 0 24 24" 
@@ -43,21 +43,21 @@ const Hero = ({
                 Ver recursos
               </button>
             </div>
-            <div className="hero-trust animate-in">
+            <div className="hero-trust animate-in" style={{ color: '#9CA3AF', fontSize: '0.875rem' }}>
               <svg 
                 xmlns="http://www.w3.org/2000/svg" 
                 viewBox="0 0 24 24" 
                 fill="none" 
                 stroke="currentColor" 
-                strokeWidth="2" 
+                strokeWidth="2.5" 
                 strokeLinecap="round" 
                 strokeLinejoin="round" 
-                style={{ color: 'var(--cyan)', width: 14, height: 14 }}
+                style={{ color: '#9CA3AF', width: 14, height: 14, marginRight: '6px', display: 'inline-block', verticalAlign: 'middle' }}
               >
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                <polyline points="22 4 12 14.01 9 11.01" />
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
               </svg>
-              Pareamento em 2 min · Sem cartão de crédito · 14 dias de teste completo
+              Teste gratuito de 7 dias. Não exige cartão de crédito.
             </div>
           </div>
 
