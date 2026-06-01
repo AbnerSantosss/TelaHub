@@ -3,15 +3,11 @@ import React from 'react';
 const TechArchitecture = () => {
   return (
     <section id="argumento" aria-labelledby="argumento-heading">
-      {/* Premium ambient glows */}
-      <div className="orb orb-purple" style={{ width: '500px', height: '500px', top: '0', right: '10%', opacity: 0.1 }}></div>
-      
       <div className="container">
         <div className="argumento-header">
           <div className="label reveal">Tecnologia Failsafe</div>
           <h2 id="argumento-heading" className="reveal">
-            Sua comunicação sempre ativa.<br />
-            <span className="text-gradient">Sem telas pretas ou dor de cabeça.</span>
+            Sua tela vende, informa ou só gasta energia?
           </h2>
           <p className="reveal" style={{ marginTop: '16px' }}>
             Esqueça visitas técnicas presenciais ou pen-drives desatualizados. A arquitetura do TelaHub foi desenhada para manter sua comunicação impecável, 24 horas por dia.
@@ -36,9 +32,9 @@ const TechArchitecture = () => {
                 <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
               </svg>
             </div>
-            <h3>Atualização Instantânea em 3 Segundos</h3>
+            <h3>Atualização em 3 Segundos</h3>
             <p style={{ marginTop: '10px' }}>
-              Publique comunicados ou altere preços remotamente sem precisar recarregar o navegador do display ou limpar o cache do aparelho. Tudo é atualizado ao vivo, via nuvem, com latência zero.
+              Mude o preço ou o aviso no celular, e a tela física atualiza antes de você guardar o telefone no bolso. Sem recarregar a página.
             </p>
             
             <div className="proof-list" style={{ marginTop: '24px' }}>
@@ -79,9 +75,9 @@ const TechArchitecture = () => {
                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
               </svg>
             </div>
-            <h3>Imunidade contra Quedas de Internet</h3>
+            <h3>Internet caiu? A tela continua.</h3>
             <p style={{ marginTop: '10px' }}>
-              O player faz o download automático e armazena todas as mídias no próprio aparelho. Se o sinal de Wi-Fi cair, sua grade continua rodando perfeitamente, sem mensagens de erro e sem telas pretas.
+              Nosso cache inteligente salva as mídias na própria TV. Ninguém nunca verá uma mensagem de 'Sem Conexão'.
             </p>
             
             <div className="proof-list" style={{ marginTop: '24px' }}>

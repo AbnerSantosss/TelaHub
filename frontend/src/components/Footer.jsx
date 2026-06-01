@@ -21,7 +21,7 @@ const Footer = ({ scrollToSection, activeTab, setActiveTab, activeDock, triggerC
                     strokeWidth="2.5" 
                     strokeLinecap="round" 
                     strokeLinejoin="round" 
-                    style={{ width: 16, height: 16, color: '#060813' }}
+                    style={{ width: 16, height: 16, color: '#FFFFFF' }}
                   >
                     <rect x="2" y="7" width="20" height="15" rx="2" ry="2" />
                     <polyline points="17 2 12 7 7 2" />

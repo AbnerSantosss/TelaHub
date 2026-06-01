@@ -3,9 +3,6 @@ import React from 'react';
 const BentoFeatures = ({ bentoCarouselRef, handleBentoScroll, activeBentoIndex }) => {
   return (
     <section id="recursos" aria-labelledby="recursos-heading">
-      {/* Ambient background glows */}
-      <div className="orb orb-cyan" style={{ width: '400px', height: '400px', bottom: '-50px', left: '-100px', opacity: 0.12 }}></div>
-
       <div className="container">
         <div className="section-header">
           <div className="label reveal">Recursos da Plataforma</div>
@@ -42,9 +39,9 @@ const BentoFeatures = ({ bentoCarouselRef, handleBentoScroll, activeBentoIndex }
                   <line x1="9" y1="21" x2="9" y2="9" />
                 </svg>
               </div>
-              <h3>Estúdio Canvas Livre: Crie Sem Limitações</h3>
+              <h3>Canvas Livre. Vertical ou Horizontal.</h3>
               <p>
-                Esqueça os layouts estáticos e sem vida. Posicione mídias, textos de notícias, letreiros dinâmicos e widgets em qualquer orientação (vertical 9:16 ou horizontal 16:9) arrastando e soltando. Crie transições fluidas que capturam a atenção de forma impecável.
+                Não somos presos a templates engessados. Posicione mídias, textos de notícias, letreiros dinâmicos e widgets em qualquer orientação (vertical 9:16 ou horizontal 16:9) arrastando e soltando.
               </p>
               <p style={{ marginTop: '12px', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
                 Suporta orientação horizontal 16:9 e vertical 9:16 no mesmo painel.
@@ -92,8 +89,8 @@ const BentoFeatures = ({ bentoCarouselRef, handleBentoScroll, activeBentoIndex }
                   <rect x="3" y="14" width="7" height="7" />
                 </svg>
               </div>
-              <h3>Widgets Prontos para Gerar Engajamento</h3>
-              <p>Mantenha o público de olhos colados na tela de forma natural. Integre previsão de tempo, relógio, feeds de notícias atualizados em tempo real e QR Codes para ações rápidas de venda.</p>
+              <h3>Automação Pronta</h3>
+              <p>Previsão do tempo, Relógio, Letreiro de Notícias e QR Code dinâmico.</p>
               <div className="widget-chips">
                 <div className="chip"><span className="chip-dot"></span>Previsão do Tempo</div>
                 <div className="chip"><span className="chip-dot"></span>Relógio & Data</div>
@@ -122,8 +119,8 @@ const BentoFeatures = ({ bentoCarouselRef, handleBentoScroll, activeBentoIndex }
                   <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
                 </svg>
               </div>
-              <h3>Dados ao Vivo Sem Digitar uma Linha</h3>
-              <p>Automatize relatórios, metas ou cardápios inteiros. Conecte com Power BI, Google Sheets ou Airtable de forma nativa e veja os dados mudarem na TV conforme sua equipe edita as planilhas.</p>
+              <h3>Dados Vivos</h3>
+              <p>Conexão direta com Power BI, Planilhas Google e Airtable.</p>
               <div className="integration-row">
                 <div className="integration-badge"><span className="int-icon">📊</span>Power BI</div>
                 <div className="integration-badge"><span className="int-icon">🗂️</span>Airtable</div>

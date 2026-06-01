@@ -9,24 +9,22 @@ const Hero = ({
 }) => {
   return (
     <section id="hero" aria-labelledby="hero-heading">
-      {/* Premium ambient glows */}
-      <div className="orb orb-cyan" style={{ width: '600px', height: '600px', top: '-250px', left: '-250px', opacity: 0.15 }}></div>
-      <div className="orb orb-blue" style={{ width: '500px', height: '500px', top: '50px', right: '-150px', opacity: 0.12 }}></div>
-
       <div className="container">
         <div className="hero-inner">
           <div className="hero-content">
-            <div className="label animate-in">+200 operações ativas no Brasil</div>
+            <div className="label animate-in" style={{ background: '#ECFDF5', color: '#10B981', borderColor: '#A7F3D0' }}>
+              +200 operações ativas no Brasil
+            </div>
             <h1 id="hero-heading" className="hero-headline animate-in">
-              Controle todas as suas telas.<br />
-              <span className="text-gradient">De qualquer lugar, em tempo real.</span>
+              Cada TV parada é dinheiro que você está queimando.<br />
+              <span className="text-gradient">Ative todas. Agora.</span>
             </h1>
             <p className="hero-subheadline animate-in">
-              O TelaHub transforma qualquer TV ou display comum em um canal de comunicação inteligente. Gerencie avisos em elevadores, menus digitais, murais corporativos e sinalização para shoppings ou varejo direto pelo celular, com resiliência offline failsafe garantida.
+              Aposente os pen-drives e as telas pretas. Transforme qualquer monitor em uma central de comunicação inteligente, atualizada via celular, de qualquer lugar do mundo.
             </p>
             <div className="hero-actions animate-in">
               <button onClick={() => triggerConversionModal('Starter')} className="btn btn-primary">
-                Quero ativar minha tela agora
+                Começar Agora
                 <svg 
                   xmlns="http://www.w3.org/2000/svg" 
                   viewBox="0 0 24 24" 
@@ -42,7 +40,7 @@ const Hero = ({
                 </svg>
               </button>
               <button onClick={() => scrollToSection('#recursos', 'recursos')} className="btn btn-ghost">
-                Ver funcionando em 60 segundos
+                Ver recursos
               </button>
             </div>
             <div className="hero-trust animate-in">

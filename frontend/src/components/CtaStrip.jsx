@@ -4,12 +4,12 @@ const CtaStrip = ({ triggerConversionModal }) => {
   return (
     <div className="cta-strip">
       <div className="container">
-        <div className="label" style={{ margin: '0 auto 20px', width: 'fit-content' }}>Comece Agora</div>
+        <div className="label" style={{ margin: '0 auto 20px', width: 'fit-content' }}>Última chamada</div>
         <h2 className="reveal">
-          Pronto para modernizar sua<br />comunicação e vender mais?
+          Daqui a 5 minutos, sua primeira tela pode estar no ar.<br /><span className="text-gradient">Ou você pode continuar procurando o pen-drive.</span>
         </h2>
         <p className="reveal" style={{ marginTop: '16px', marginBottom: '32px' }}>
-          Crie sua conta agora, faça o pareamento de sua primeira tela e veja a mágica acontecer em menos de 5 minutos. Sem complicação.
+          Crie a conta. Monte o conteúdo. Gere o código. Conecte a TV. Sem instalador, sem técnico, sem enrolação.
         </p>
         
         <div className="cta-strip-actions reveal">
@@ -18,7 +18,7 @@ const CtaStrip = ({ triggerConversionModal }) => {
             className="btn btn-primary" 
             style={{ fontSize: '1rem', padding: '14px 32px' }}
           >
-            Criar Minha Conta Grátis
+            Quero ativar minha tela agora
             <svg 
               xmlns="http://www.w3.org/2000/svg" 
               viewBox="0 0 24 24" 
@@ -38,7 +38,7 @@ const CtaStrip = ({ triggerConversionModal }) => {
             className="btn btn-ghost" 
             style={{ fontSize: '1rem', padding: '14px 32px' }}
           >
-            Agendar demonstração
+            Falar com especialista
           </button>
         </div>
         <p style={{ marginTop: '20px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>

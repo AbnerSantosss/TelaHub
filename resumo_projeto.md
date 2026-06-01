@@ -10,7 +10,7 @@ A landing page utiliza um design moderno baseado em um tema escuro com estética
 *   **Cores Principais**: Fundo azul escuro profundo (`#0B0F19`), detalhes e elementos interativos em ciano neon (`#00F0FF`) e roxo/índigo para transições e orbes de iluminação ambiente.
 *   **Efeitos Visuais**: Fundo interativo com partículas de constelação responsivas ao toque, texturas sutis de ruído digital, orbes de iluminação desfocados e layouts de cartões com efeito de vidro reflexivo (glassmorphism).
 *   **Tipografia**: Família de fontes *Inter* para excelente legibilidade corporativa.
-*   **Rolagem**: Rolagem nativa otimizada para alta performance, eliminando o atraso de scroll em desktops, combinada com transições de clique suaves via CSS e GSAP para revelações de elementos.
+*   **Rolagem**: Rolagem nativa otimiza3da para alta performance, eliminando o atraso de scroll em desktops, combinada com transições de clique suaves via CSS e GSAP para revelações de elementos.
 
 ---
 

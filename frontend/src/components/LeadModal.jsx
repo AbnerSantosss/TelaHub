@@ -101,7 +101,7 @@ const LeadModal = ({
               </div>
 
               {submitStatus.error && (
-                <p style={{ color: '#f87171', fontSize: '0.82rem', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <p style={{ color: '#DC2626', fontSize: '0.82rem', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 6 }}>
                   <span>⚠️</span> {submitStatus.error}
                 </p>
               )}

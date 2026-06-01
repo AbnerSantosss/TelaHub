@@ -3,9 +3,6 @@ import React from 'react';
 const Pricing = ({ triggerConversionModal }) => {
   return (
     <section id="precos" aria-labelledby="precos-heading">
-      {/* Atmosphere Glow */}
-      <div className="orb orb-cyan" style={{ width: '500px', height: '500px', bottom: '-100px', right: '-100px', opacity: 0.1 }}></div>
-      
       <div className="container">
         <div className="precos-header">
           <div className="label reveal">Planos e Preços</div>
@@ -27,7 +24,7 @@ const Pricing = ({ triggerConversionModal }) => {
               <span className="plan-amount">69</span>
               <span className="plan-period">/mês</span>
             </div>
-            <p className="plan-description">Perfeito para quem está começando: consultórios, lojas de bairro e condomínios pequenos. 2 telas já são suficientes para eliminar impressos e parar de perder clientes com comunicação desatualizada.</p>
+            <p className="plan-description">Para pequenos negócios. Consultórios, lojas de bairro e condomínios pequenos. 2 telas já eliminam impressos e comunicam com eficiência.</p>
             <div className="plan-divider"></div>
             
             <ul className="plan-features">
@@ -86,7 +83,7 @@ const Pricing = ({ triggerConversionModal }) => {
           </div>
 
           {/* Business Plan (Featured) */}
-          <div className="preco-card preco-card-featured reveal" style={{ marginTop: '-12px' }}>
+          <div className="preco-card preco-card-featured reveal" style={{ marginTop: '-12px', background: 'rgba(37, 99, 235, 0.02)', borderColor: '#2563EB' }}>
             <span className="featured-tag">Mais Escolhido</span>
             <p className="plan-name featured">Business</p>
             <div className="plan-price">
@@ -94,7 +91,7 @@ const Pricing = ({ triggerConversionModal }) => {
               <span className="plan-amount" style={{ color: 'var(--text-primary)' }}>149</span>
               <span className="plan-period">/mês</span>
             </div>
-            <p className="plan-description">O plano que a maioria escolhe. Múltiplos pontos de comunicação, zero tolerância a tela preta. 6 telas, agendamento avançado e integração com Power BI.</p>
+            <p className="plan-description">Para empresas e condomínios. Múltiplos pontos de comunicação, zero tolerância a tela preta. 6 telas, agendamento avançado e integração com Power BI.</p>
             <div className="plan-divider"></div>
             
             <ul className="plan-features">
@@ -173,7 +170,7 @@ const Pricing = ({ triggerConversionModal }) => {
           <div className="preco-card reveal">
             <p className="plan-name">Enterprise</p>
             <p className="plan-consult">Sob consulta</p>
-            <p className="plan-description">Para redes com mais de 10 telas que exigem o impossível: White Label com sua marca, API customizada e um gerente de conta que atende seu WhatsApp.</p>
+            <p className="plan-description">Para franquias com mais de 10 telas que exigem o impossível: White Label com sua marca, API customizada e um gerente de conta dedicado.</p>
             <div className="plan-divider"></div>
             
             <ul className="plan-features">

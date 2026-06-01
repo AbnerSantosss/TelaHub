@@ -44,7 +44,7 @@ const NetworkCanvas = () => {
       draw() {
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(99, 102, 241, 0.25)'; // Indigo particles
+        ctx.fillStyle = 'rgba(156, 163, 175, 0.25)'; // Light grey particles
         ctx.fill();
       }
     }
@@ -68,11 +68,11 @@ const NetworkCanvas = () => {
           const dist = Math.sqrt(dx * dx + dy * dy);
 
           if (dist < connectionDist) {
-            const alpha = (1 - dist / connectionDist) * 0.15;
+            const alpha = (1 - dist / connectionDist) * 0.4;
             ctx.beginPath();
             ctx.moveTo(p1.x, p1.y);
             ctx.lineTo(p2.x, p2.y);
-            ctx.strokeStyle = `rgba(99, 102, 241, ${alpha})`; // Indigo connection lines
+            ctx.strokeStyle = `rgba(229, 231, 235, ${alpha})`; // Subtle light grey connection lines
             ctx.lineWidth = 0.65;
             ctx.stroke();
           }
@@ -87,7 +87,7 @@ const NetworkCanvas = () => {
             ctx.beginPath();
             ctx.moveTo(p1.x, p1.y);
             ctx.lineTo(mouse.x, mouse.y);
-            ctx.strokeStyle = `rgba(6, 182, 212, ${alpha})`; // Cyan responsive connection on hover
+            ctx.strokeStyle = `rgba(37, 99, 235, ${alpha})`; // Corporate blue responsive connection on hover
             ctx.lineWidth = 0.85;
             ctx.stroke();
           }

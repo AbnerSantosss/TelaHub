@@ -3,9 +3,6 @@ import React from 'react';
 const UseCases = ({ activeTab, setActiveTab, telemetry }) => {
   return (
     <section id="casos" aria-labelledby="casos-heading">
-      {/* Background ambient glow */}
-      <div className="orb orb-blue" style={{ width: '600px', height: '400px', top: '0', right: '0', opacity: 0.08 }}></div>
-      
       <div className="container">
         <div className="casos-header">
           <div className="label reveal">Casos de Uso</div>
@@ -58,9 +55,9 @@ const UseCases = ({ activeTab, setActiveTab, telemetry }) => {
           {activeTab === 'cond' && (
             <div className="tab-panel active" role="tabpanel">
               <div className="tab-content">
-                <h3>Substitua o mural de papel por avisos digitais de alto impacto.</h3>
+                <h3>Comunicação que os moradores realmente leem.</h3>
                 <p>
-                  Avisos importantes nos elevadores com 100% de visualização dos moradores. Publique comunicados urgentes, regras de convivência ou assembleias diretamente do painel da administradora ou do síndico, eliminando impressões em papel e visitas físicas ao local.
+                  Substitua murais de papel por avisos digitais nos elevadores. Notifique manutenções e encomendas em tempo real.
                 </p>
                 <div className="tab-features">
                   <div className="tab-feature">
@@ -107,14 +104,14 @@ const UseCases = ({ activeTab, setActiveTab, telemetry }) => {
                 </div>
                 
                 <div style={{ display: 'flex', gap: 10 }}>
-                  <div style={{ flex: 1, background: 'rgba(99, 102, 241, 0.04)', border: '1px solid rgba(99, 102, 241, 0.15)', borderRadius: 10, padding: 14, fontSize: '0.78rem' }}>
-                    <div style={{ color: 'var(--text-muted)', marginBottom: 4 }}>Telas ativas</div>
+                  <div style={{ flex: 1, background: 'rgba(37, 99, 235, 0.04)', border: '1px solid rgba(37, 99, 235, 0.15)', borderRadius: 2, padding: 14, fontSize: '0.78rem' }}>
+                    <div style={{ color: 'var(--text-secondary)', marginBottom: 4 }}>Telas ativas</div>
                     <div style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: '0.9rem' }}>
                       {telemetry.onlineCount} / {telemetry.total}
                     </div>
                   </div>
-                  <div style={{ flex: 1, background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: 10, padding: 14, fontSize: '0.78rem' }}>
-                    <div style={{ color: 'var(--text-muted)', marginBottom: 4 }}>Última publicação</div>
+                  <div style={{ flex: 1, background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: 2, padding: 14, fontSize: '0.78rem' }}>
+                    <div style={{ color: 'var(--text-secondary)', marginBottom: 4 }}>Última publicação</div>
                     <div style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: '0.9rem' }}>Há 2 min</div>
                   </div>
                 </div>
@@ -126,9 +123,9 @@ const UseCases = ({ activeTab, setActiveTab, telemetry }) => {
           {activeTab === 'corp' && (
             <div className="tab-panel active" role="tabpanel">
               <div className="tab-content">
-                <h3>Recepções modernas que impressionam clientes e parceiros.</h3>
+                <h3>Recepções que impressionam.</h3>
                 <p>
-                  Eleve o nível visual do seu prédio comercial. Exiba diretórios digitais dinâmicos, painéis de boas-vindas personalizados para clientes importantes e comunicados internos centralizados para múltiplos andares operados por um único gestor.
+                  Exiba uma mensagem de boas-vindas para clientes importantes, diretórios de andares e agendas de salas de reunião integradas.
                 </p>
                 <div className="tab-features">
                   <div className="tab-feature">
@@ -158,7 +155,7 @@ const UseCases = ({ activeTab, setActiveTab, telemetry }) => {
               <div className="tab-visual">
                 <div className="tv-screen-sim sim-corp">
                   <div className="tv-screen-content">
-                    <div className="screen-title" style={{ color: 'var(--indigo)', fontSize: '0.72rem', marginBottom: 8, letterSpacing: '0.12em', textTransform: 'uppercase', fontWeight: 700 }}>
+                    <div className="screen-title" style={{ color: 'var(--cyan)', fontSize: '0.72rem', marginBottom: 8, letterSpacing: '0.12em', textTransform: 'uppercase', fontWeight: 700 }}>
                       HUB Inovação — Recepção
                     </div>
                     <div className="screen-title" style={{ fontSize: '1.05rem', fontWeight: 800 }}>
@@ -175,12 +172,12 @@ const UseCases = ({ activeTab, setActiveTab, telemetry }) => {
                 </div>
                 
                 <div style={{ display: 'flex', gap: 10 }}>
-                  <div style={{ flex: 1, background: 'rgba(99, 102, 241, 0.04)', border: '1px solid rgba(99, 102, 241, 0.15)', borderRadius: 10, padding: 14, fontSize: '0.78rem' }}>
-                    <div style={{ color: 'var(--text-muted)', marginBottom: 4 }}>Displays</div>
+                  <div style={{ flex: 1, background: 'rgba(37, 99, 235, 0.04)', border: '1px solid rgba(37, 99, 235, 0.15)', borderRadius: 2, padding: 14, fontSize: '0.78rem' }}>
+                    <div style={{ color: 'var(--text-secondary)', marginBottom: 4 }}>Displays</div>
                     <div style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: '0.9rem' }}>12 andares</div>
                   </div>
-                  <div style={{ flex: 1, background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: 10, padding: 14, fontSize: '0.78rem' }}>
-                    <div style={{ color: 'var(--text-muted)', marginBottom: 4 }}>Visitantes hoje</div>
+                  <div style={{ flex: 1, background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: 2, padding: 14, fontSize: '0.78rem' }}>
+                    <div style={{ color: 'var(--text-secondary)', marginBottom: 4 }}>Visitantes hoje</div>
                     <div style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: '0.9rem' }}>34</div>
                   </div>
                 </div>
@@ -192,9 +189,9 @@ const UseCases = ({ activeTab, setActiveTab, telemetry }) => {
           {activeTab === 'varejo' && (
             <div className="tab-panel active" role="tabpanel">
               <div className="tab-content">
-                <h3>Cardápios Digitais flexíveis que aumentam as vendas em até 22%.</h3>
+                <h3>O fim da impressão de cardápios.</h3>
                 <p>
-                  Elimine para sempre custos com gráficas. Ajuste preços de insumos em 30 segundos pelo celular, remova itens esgotados e ative promoções relâmpago dinâmicas de acordo com o horário do dia (ex: almoço e happy hour) de forma 100% automatizada.
+                  Destaque o prato do dia, altere preços instantaneamente e aumente o ticket médio em até 22% com vídeos que dão fome.
                 </p>
                 <div className="tab-features">
                   <div className="tab-feature">
@@ -224,7 +221,7 @@ const UseCases = ({ activeTab, setActiveTab, telemetry }) => {
               <div className="tab-visual">
                 <div className="tv-screen-sim sim-varejo">
                   <div className="tv-screen-content">
-                    <div className="screen-title" style={{ color: 'var(--purple)', fontSize: '0.72rem', marginBottom: 8, letterSpacing: '0.12em', textTransform: 'uppercase', fontWeight: 700 }}>
+                    <div className="screen-title" style={{ color: 'var(--cyan)', fontSize: '0.72rem', marginBottom: 8, letterSpacing: '0.12em', textTransform: 'uppercase', fontWeight: 700 }}>
                       Restaurante Central — Menu Board
                     </div>
                     <div className="screen-title" style={{ fontSize: '1.05rem', fontWeight: 800 }}>
@@ -241,12 +238,12 @@ const UseCases = ({ activeTab, setActiveTab, telemetry }) => {
                 </div>
                 
                 <div style={{ display: 'flex', gap: 10 }}>
-                  <div style={{ flex: 1, background: 'rgba(99, 102, 241, 0.04)', border: '1px solid rgba(99, 102, 241, 0.15)', borderRadius: 10, padding: 14, fontSize: '0.78rem' }}>
-                    <div style={{ color: 'var(--text-muted)', marginBottom: 4 }}>Economia mensal</div>
+                  <div style={{ flex: 1, background: 'rgba(37, 99, 235, 0.04)', border: '1px solid rgba(37, 99, 235, 0.15)', borderRadius: 2, padding: 14, fontSize: '0.78rem' }}>
+                    <div style={{ color: 'var(--text-secondary)', marginBottom: 4 }}>Economia mensal</div>
                     <div style={{ fontWeight: 700, color: 'var(--cyan)', fontSize: '0.9rem' }}>R$ 1.200+</div>
                   </div>
-                  <div style={{ flex: 1, background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: 10, padding: 14, fontSize: '0.78rem' }}>
-                    <div style={{ color: 'var(--text-muted)', marginBottom: 4 }}>Impressão eliminada</div>
+                  <div style={{ flex: 1, background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: 2, padding: 14, fontSize: '0.78rem' }}>
+                    <div style={{ color: 'var(--text-secondary)', marginBottom: 4 }}>Impressão eliminada</div>
                     <div style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: '0.9rem' }}>100%</div>
                   </div>
                 </div>
@@ -258,9 +255,9 @@ const UseCases = ({ activeTab, setActiveTab, telemetry }) => {
           {activeTab === 'rh' && (
             <div className="tab-panel active" role="tabpanel">
               <div className="tab-content">
-                <h3>Comunique metas onde o e-mail corporativo é ignorado.</h3>
+                <h3>Equipe alinhada e motivada.</h3>
                 <p>
-                  Mantenha a equipe focada, motivada e alinhada com as metas corporativas. Sincronize dashboards de performance operacional do Power BI, aniversariantes do mês e comunicados importantes em displays na área de café e convivência sem depender da TI.
+                  Projete dashboards do Power BI, metas batidas e aniversariantes do mês para todos verem, sem precisar enviar dezenas de e-mails.
                 </p>
                 <div className="tab-features">
                   <div className="tab-feature">
@@ -290,7 +287,7 @@ const UseCases = ({ activeTab, setActiveTab, telemetry }) => {
               <div className="tab-visual">
                 <div className="tv-screen-sim sim-rh">
                   <div className="tv-screen-content">
-                    <div className="screen-title" style={{ color: 'var(--indigo)', fontSize: '0.72rem', marginBottom: 8, letterSpacing: '0.12em', textTransform: 'uppercase', fontWeight: 700 }}>
+                    <div className="screen-title" style={{ color: 'var(--cyan)', fontSize: '0.72rem', marginBottom: 8, letterSpacing: '0.12em', textTransform: 'uppercase', fontWeight: 700 }}>
                       Setor Comercial — Meta Maio
                     </div>
                     <div className="screen-title" style={{ fontSize: '1.05rem', fontWeight: 800 }}>
@@ -307,12 +304,12 @@ const UseCases = ({ activeTab, setActiveTab, telemetry }) => {
                 </div>
                 
                 <div style={{ display: 'flex', gap: 10 }}>
-                  <div style={{ flex: 1, background: 'rgba(99, 102, 241, 0.04)', border: '1px solid rgba(99, 102, 241, 0.15)', borderRadius: 10, padding: 14, fontSize: '0.78rem' }}>
-                    <div style={{ color: 'var(--text-muted)', marginBottom: 4 }}>Setores ativos</div>
+                  <div style={{ flex: 1, background: 'rgba(37, 99, 235, 0.04)', border: '1px solid rgba(37, 99, 235, 0.15)', borderRadius: 2, padding: 14, fontSize: '0.78rem' }}>
+                    <div style={{ color: 'var(--text-secondary)', marginBottom: 4 }}>Setores ativos</div>
                     <div style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: '0.9rem' }}>8 TVs</div>
                   </div>
-                  <div style={{ flex: 1, background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: 10, padding: 14, fontSize: '0.78rem' }}>
-                    <div style={{ color: 'var(--text-muted)', marginBottom: 4 }}>Autonomia do RH</div>
+                  <div style={{ flex: 1, background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: 2, padding: 14, fontSize: '0.78rem' }}>
+                    <div style={{ color: 'var(--text-secondary)', marginBottom: 4 }}>Autonomia do RH</div>
                     <div style={{ fontWeight: 700, color: 'var(--cyan)', fontSize: '0.9rem' }}>100%</div>
                   </div>
                 </div>

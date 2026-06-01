@@ -19,7 +19,7 @@ const Navbar = ({ scrollToSection, triggerConversionModal }) => {
               strokeWidth="2.5" 
               strokeLinecap="round" 
               strokeLinejoin="round" 
-              style={{ width: 18, height: 18, color: '#060813' }}
+              style={{ width: 18, height: 18, color: '#FFFFFF' }}
             >
               <rect x="2" y="7" width="20" height="15" rx="2" ry="2" />
               <polyline points="17 2 12 7 7 2" />
