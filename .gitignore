@@ -6,6 +6,9 @@ node_modules/
 .env.*
 !.env.example
 
+# Docker local overrides (expõem portas internas - dev only)
+docker-compose.override.yml
+
 # IDE
 .vscode/
 .idea/
