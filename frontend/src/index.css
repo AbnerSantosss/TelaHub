@@ -297,6 +297,113 @@ nav {
 .nav-links button:hover, .nav-links a:hover { color: var(--text-primary); }
 .nav-cta { display: flex; align-items: center; gap: 12px; }
 
+/* Hamburger Toggle Button */
+.mobile-menu-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 20px;
+  height: 14px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 1001;
+}
+
+.hamburger-line {
+  width: 100%;
+  height: 2px;
+  background-color: var(--text-primary);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+  transform-origin: left center;
+}
+
+/* Transform to Close Icon */
+.mobile-menu-toggle.open .hamburger-line:nth-child(1) {
+  transform: rotate(45deg) translate(2px, -1px);
+}
+
+.mobile-menu-toggle.open .hamburger-line:nth-child(2) {
+  opacity: 0;
+}
+
+.mobile-menu-toggle.open .hamburger-line:nth-child(3) {
+  transform: rotate(-45deg) translate(2px, 1px);
+}
+
+/* Mobile Fullscreen Menu Overlay */
+.mobile-menu-overlay {
+  position: fixed;
+  top: 64px; /* Directly under the header border */
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  padding: 40px 24px;
+  animation: mobileMenuFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  overflow-y: auto;
+}
+
+@keyframes mobileMenuFadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.mobile-nav-links {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin-bottom: 40px;
+}
+
+.mobile-nav-links li button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  font-family: var(--font-title);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  padding: 8px 0;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border);
+  transition: color 0.2s ease;
+}
+
+.mobile-nav-links li a {
+  display: block;
+  width: 100%;
+  text-align: left;
+  font-family: var(--font-title);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  transition: color 0.2s ease;
+}
+
+.mobile-nav-links li button:hover,
+.mobile-nav-links li a:hover {
+  color: var(--cyan);
+}
+
+.mobile-nav-cta {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: auto;
+  padding-bottom: 40px;
+}
+
 /* ═══════════════════════════════════════════
    SECTION 1 — HERO
    ═══════════════════════════════════════════ */
@@ -1334,15 +1441,80 @@ footer {
 
 @media (max-width: 900px) {
   section { padding: 64px 0; }
-  .hero-inner { grid-template-columns: 1fr; gap: 40px; }
-  .hero-visual { order: -1; }
-  .hero-content { max-width: 100%; text-align: center; }
+
+  /* ── HERO MOBILE: Texto PRIMEIRO, destaque total ── */
+  #hero {
+    padding: 100px 0 48px;
+  }
+  .hero-inner {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+  .hero-content {
+    max-width: 100%;
+    text-align: center;
+    order: 1; /* Texto sempre primeiro */
+  }
+  .hero-visual {
+    order: 2; /* Mockup depois */
+    max-width: 480px;
+    margin: 0 auto;
+  }
+  .hero-content .label {
+    margin: 0 auto 16px;
+  }
+  .hero-subheadline {
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .hero-actions {
+    justify-content: center;
+  }
+  .hero-trust {
+    justify-content: center;
+  }
+  .hero-objection-banner {
+    margin-top: 40px !important;
+    flex-direction: column !important;
+    text-align: center !important;
+    gap: 16px !important;
+    padding: 20px !important;
+  }
+  .hero-objection-banner .objection-text {
+    flex: 1 1 100% !important;
+    max-width: 100% !important;
+  }
+  .hero-objection-banner .btn {
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+
+  /* ── Mockup compacto no mobile ── */
+  .mockup-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .mockup-body {
+    padding: 14px;
+  }
+  .mockup-stat-row {
+    flex-wrap: wrap;
+  }
+  .mockup-stat {
+    flex: 1 1 calc(50% - 4px);
+    min-width: 0;
+  }
+  .hero-float-badge {
+    display: none;
+  }
+
+  /* ── Seções gerais ── */
   .argumento-grid { grid-template-columns: 1fr; gap: 16px; }
   .tab-panel.active { grid-template-columns: 1fr; gap: 24px; }
   .precos-grid { grid-template-columns: 1fr; max-width: 420px; margin: 0 auto; gap: 24px; }
   .footer-links { gap: 24px; }
   .nav-links { display: none; }
   .nav-cta { display: none; }
+  .mobile-menu-toggle { display: flex; }
 
   /* Bento Grid mobile swiper snap */
   .bento-grid {
@@ -1386,6 +1558,9 @@ footer {
 }
 
 @media (max-width: 768px) {
+  footer {
+    padding-bottom: 110px;
+  }
   .mobile-dock {
     display: flex;
     position: fixed;
@@ -1457,10 +1632,98 @@ footer {
 }
 
 @media (max-width: 600px) {
-  h1 { font-size: 1.9rem; }
+  /* ── Hero extra-small ── */
+  #hero {
+    padding: 88px 0 40px;
+  }
+  .hero-inner {
+    gap: 24px;
+  }
+  h1 { font-size: 1.75rem; }
   h2 { font-size: 1.5rem; }
-  .hero-actions { flex-direction: column; align-items: stretch; width: 100%; gap: 12px; }
-  .btn { width: 100%; justify-content: center; }
+  .hero-headline {
+    font-size: 1.65rem !important;
+    margin-bottom: 14px !important;
+  }
+  .hero-subheadline {
+    font-size: 0.92rem !important;
+    margin-bottom: 24px !important;
+  }
+  .hero-content .label {
+    font-size: 10px;
+    padding: 5px 12px;
+  }
+  .hero-actions {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    gap: 10px;
+  }
+  .hero-actions .btn {
+    width: 100%;
+    justify-content: center;
+    padding: 14px 20px;
+  }
+
+  /* ── Mockup mais compacto em telas pequenas ── */
+  .hero-visual {
+    max-width: 100%;
+  }
+  .hero-mockup {
+    border-radius: 0;
+    margin: 0 -24px; /* full-bleed no container */
+    border-left: none;
+    border-right: none;
+  }
+  .mockup-body {
+    padding: 12px;
+  }
+  .mockup-display-card {
+    padding: 6px;
+  }
+  .mockup-screen {
+    margin-bottom: 6px;
+  }
+  .mockup-display-name {
+    font-size: 0.6rem;
+  }
+  .badge {
+    font-size: 0.5rem;
+    padding: 1px 4px;
+  }
+  .mockup-stat {
+    padding: 6px 8px;
+  }
+  .mockup-stat-label {
+    font-size: 0.52rem;
+  }
+  .mockup-stat-value {
+    font-size: 0.72rem;
+  }
+
+  /* ── Outras seções ── */
   .cta-strip-actions { flex-direction: column; }
-  .hero-float-badge { display: none; }
+  .btn { width: 100%; justify-content: center; }
 }
+
+@media (max-width: 400px) {
+  #hero {
+    padding: 80px 0 32px;
+  }
+  .hero-headline {
+    font-size: 1.45rem !important;
+  }
+  .hero-subheadline {
+    font-size: 0.85rem !important;
+  }
+  .container {
+    padding: 0 16px;
+  }
+  .hero-mockup {
+    margin: 0 -16px;
+  }
+  .mockup-grid {
+    gap: 6px;
+  }
+}
+
