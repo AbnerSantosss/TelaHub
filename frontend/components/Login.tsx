@@ -92,6 +92,27 @@ const Login: React.FC = () => {
       {/* Background Mesh Grid (Technical Dot-Grid) */}
       <div className="absolute inset-0 bg-[radial-gradient(rgba(234,88,12,0.04)_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none z-0"></div>
       
+      {/* Premium Animated Background Image and Glow (Mobile & Desktop) */}
+      <div className="absolute inset-0 z-0 select-none pointer-events-none overflow-hidden">
+        <motion.div
+          initial={{ scale: 1.1, opacity: 0 }}
+          animate={{ 
+            scale: [1.05, 1.12, 1.05],
+            rotate: [0, 0.5, -0.5, 0]
+          }}
+          transition={{ 
+            scale: { duration: 30, repeat: Infinity, ease: "easeInOut" },
+            rotate: { duration: 40, repeat: Infinity, ease: "easeInOut" },
+            opacity: { duration: 1.5, ease: "easeOut" }
+          }}
+          style={{ opacity: 0.12 }}
+          className="absolute inset-0 bg-[url('/login-bg.png')] bg-cover bg-center"
+        />
+        {/* Animated background ambient glows */}
+        <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] rounded-full bg-[#ea580c]/5 blur-[130px] pointer-events-none animate-pulse duration-[8s]"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-[#ea580c]/3 blur-[110px] pointer-events-none animate-pulse duration-[12s]"></div>
+      </div>
+      
       {/* Lateral Marketing / Copywriting Panel (Desktop only: lg and above) */}
       <div className="hidden lg:flex lg:w-[55%] xl:w-[60%] relative flex-col justify-between p-16 overflow-hidden border-r border-border bg-card z-10">
         
@@ -269,9 +290,14 @@ const Login: React.FC = () => {
       </div>
 
       {/* Right Section: Login Form (Full width on mobile, centered; lg and above takes side portion) */}
-      <div className="w-full lg:w-[45%] xl:w-[40%] flex items-center justify-center p-6 sm:p-12 relative z-10 bg-background border-l border-border/5">
+      <div className="w-full lg:w-[45%] xl:w-[40%] flex items-center justify-center p-6 sm:p-12 relative z-10 bg-background/80 lg:bg-background backdrop-blur-md lg:backdrop-blur-none border-l border-border/10 lg:border-border/5">
 
-        <div className="w-full max-w-md relative z-10 flex flex-col gap-6">
+        <motion.div 
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          className="w-full max-w-md relative z-10 flex flex-col gap-6"
+        >
           
           {/* Logo e Branding */}
           <div className="flex flex-col items-center animate-in fade-in slide-in-from-top-4 duration-500">
@@ -301,7 +327,7 @@ const Login: React.FC = () => {
             </div>
           </div>
 
-          <div className={`bg-card border border-border shadow-md p-6 sm:p-8 transition-all duration-300 hover:border-accent/30 ${!isConfigured ? 'opacity-50 pointer-events-none grayscale' : ''}`}>
+          <div className={`bg-card/90 sm:bg-card backdrop-blur-md sm:backdrop-blur-none border border-border/50 shadow-2xl p-6 sm:p-8 transition-all duration-300 hover:border-accent/40 rounded-xl ${!isConfigured ? 'opacity-50 pointer-events-none grayscale' : ''}`}>
             
             <form onSubmit={handleLogin} className="space-y-5">
               <div className="space-y-1.5">
@@ -394,7 +420,7 @@ const Login: React.FC = () => {
                <div className="h-1 w-1 bg-border rounded-full"></div>
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
     </div>
   );
