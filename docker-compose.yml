@@ -35,9 +35,9 @@ services:
       - uploads_data:/app/uploads
     networks:
       - display_network
-    # Cria/atualiza tabelas no banco + cria admin + inicia o servidor
+    # Cria/atualiza tabelas no banco + cria admin + inicia o servidor (com delay de 5s para o Postgres subir)
     command: >
-      sh -c "npx prisma db push --skip-generate && node prisma/seed-prod.js && npm start"
+      sh -c "sleep 5 && npx prisma db push --skip-generate && node prisma/seed-prod.js && npm start"
 
   # 3. Frontend (React + Vite servido pelo Nginx)
   frontend:
