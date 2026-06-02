@@ -49,7 +49,7 @@ services:
         - VITE_API_URL=/api
     restart: unless-stopped
     ports:
-      - "3025:3000"
+      - "3025:3025"
     networks:
       - display_network
 
