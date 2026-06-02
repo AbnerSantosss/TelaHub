@@ -28,7 +28,7 @@ services:
       - PORT=3001
       # Configure aqui a URL do seu frontend (ex: https://display.seudominio.com)
       - CORS_ORIGINS=*
-      - APP_URL=${APP_URL:-https://sitetelahub.proxserverabner.site}
+      - APP_URL=${APP_URL:-https://display.proxserverabner.site}
     depends_on:
       - db
     volumes:
@@ -49,7 +49,7 @@ services:
         - VITE_API_URL=/api
     restart: unless-stopped
     ports:
-      - "42938:80"
+      - "8095:80"
     networks:
       - display_network
 
