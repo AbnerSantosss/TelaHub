@@ -35,8 +35,16 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction):
 };
 
 export const adminMiddleware = (req: Request, res: Response, next: NextFunction): void => {
-  if (!req.user || req.user.role !== 'admin') {
+  if (!req.user || (req.user.role !== 'admin' && req.user.role !== 'master')) {
     res.status(403).json({ error: 'Acesso restrito a administradores.' });
+    return;
+  }
+  next();
+};
+
+export const masterMiddleware = (req: Request, res: Response, next: NextFunction): void => {
+  if (!req.user || req.user.role !== 'master') {
+    res.status(403).json({ error: 'Acesso restrito ao proprietário do sistema.' });
     return;
   }
   next();

@@ -33,6 +33,13 @@ export class UserRepository {
       data: { password: hashedPassword },
     });
   }
+
+  async updateEmail(id: string, email: string) {
+    return prisma.user.update({
+      where: { id },
+      data: { email },
+    });
+  }
 }
 
 export const userRepository = new UserRepository();

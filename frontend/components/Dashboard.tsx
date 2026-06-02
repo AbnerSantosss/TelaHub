@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Monitor, Edit3, Copy, Trash2, Check, RefreshCw, ExternalLink, Loader2, X, Zap, LogOut, Users as UsersIcon, Shield, Tv, Link as LinkIcon, Unplug, Calendar, FileImage, Settings, Mail, CheckCircle, XCircle, Send, AlertTriangle, KeyRound, RotateCcw, MoreVertical, Pencil, Image as ImageIcon } from 'lucide-react';
-import { getDisplays, deleteDisplay, saveDisplay, getCurrentUser, logout, getUsers, saveUser, deleteUser, resendInvite, adminSendPasswordReset, getDevices, linkDevice, unlinkDevice, updateDeviceDisplay, getSmtpSettings, saveSmtpSettings, testSmtpConnection, getSmtpStatus } from '../services/storage';
+import { getDisplays, deleteDisplay, saveDisplay, getCurrentUser, logout, getUsers, saveUser, deleteUser, resendInvite, adminSendPasswordReset, getDevices, linkDevice, unlinkDevice, updateDeviceDisplay, getSmtpSettings, saveSmtpSettings, testSmtpConnection, getSmtpStatus, updateMyEmail, changeMyPassword, forgotPassword } from '../services/storage';
 import { Display, User, Device } from '../types';
 import { MediaLibrary } from './MediaLibrary';
 import { LogoHub } from './Login';
@@ -75,6 +75,91 @@ const Dashboard: React.FC = () => {
 
   // Toast notification
   const [toast, setToast] = useState<{ type: 'success' | 'error' | 'info'; title: string; message: string } | null>(null);
+
+  // --- Account Settings States ---
+  const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
+  const [accountEmail, setAccountEmail] = useState('');
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [accountActionLoading, setAccountActionLoading] = useState(false);
+  const [accountError, setAccountError] = useState('');
+  const [accountSuccess, setAccountSuccess] = useState('');
+
+  // Sincronizar email quando o modal abrir
+  useEffect(() => {
+    if (isAccountModalOpen && currentUser) {
+      setAccountEmail(currentUser.email || '');
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+      setAccountError('');
+      setAccountSuccess('');
+    }
+  }, [isAccountModalOpen, currentUser]);
+
+  const handleUpdateEmail = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!currentUser) return;
+    setAccountActionLoading(true);
+    setAccountError('');
+    setAccountSuccess('');
+    try {
+      const res = await updateMyEmail(accountEmail.trim());
+      setAccountSuccess(res.message || 'E-mail atualizado com sucesso!');
+      if (currentUser) {
+        currentUser.email = accountEmail.trim();
+      }
+    } catch (err: any) {
+      setAccountError(err.message || 'Erro ao atualizar e-mail.');
+    } finally {
+      setAccountActionLoading(false);
+    }
+  };
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newPassword !== confirmPassword) {
+      setAccountError('A nova senha e a confirmação não coincidem.');
+      return;
+    }
+    if (newPassword.length < 6) {
+      setAccountError('A nova senha deve ter pelo menos 6 caracteres.');
+      return;
+    }
+    setAccountActionLoading(true);
+    setAccountError('');
+    setAccountSuccess('');
+    try {
+      const res = await changeMyPassword(currentPassword, newPassword);
+      setAccountSuccess(res.message || 'Senha alterada com sucesso!');
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch (err: any) {
+      setAccountError(err.message || 'Erro ao alterar senha.');
+    } finally {
+      setAccountActionLoading(false);
+    }
+  };
+
+  const handleSendResetEmail = async () => {
+    if (!currentUser || !currentUser.email) {
+      setAccountError('E-mail do usuário não encontrado.');
+      return;
+    }
+    setAccountActionLoading(true);
+    setAccountError('');
+    setAccountSuccess('');
+    try {
+      await forgotPassword(currentUser.email);
+      setAccountSuccess('E-mail de redefinição enviado com sucesso! Verifique sua caixa de entrada.');
+    } catch (err: any) {
+      setAccountError(err.message || 'Erro ao enviar e-mail de redefinição.');
+    } finally {
+      setAccountActionLoading(false);
+    }
+  };
 
   const navigate = useNavigate();
 
@@ -648,13 +733,13 @@ const Dashboard: React.FC = () => {
                     <div>
                       <p className="text-amber-300 text-sm font-bold">Envio de e-mail não configurado</p>
                       <p className="text-amber-400/70 text-xs mt-1 leading-relaxed">
-                        {currentUser?.role === 'admin'
+                        {currentUser?.role === 'admin' || currentUser?.role === 'master'
                           ? 'Configure as credenciais SMTP para habilitar o envio de convites automáticos aos novos usuários.'
                           : 'Peça a um administrador para configurar o provedor de e-mail SMTP.'}
                       </p>
                     </div>
                   </div>
-                  {currentUser?.role === 'admin' && (
+                  {(currentUser?.role === 'admin' || currentUser?.role === 'master') && (
                     <button
                       type="button"
                       onClick={() => {
@@ -695,14 +780,14 @@ const Dashboard: React.FC = () => {
                 {usersList.map(u => {
                   const hasLoggedIn = !!u.lastLogin;
                   const isSelf = u.id === currentUser?.id;
-                  const isAdmin = currentUser?.role === 'admin';
+                  const isAdminOrMaster = currentUser?.role === 'admin' || currentUser?.role === 'master';
                   return (
                     <div key={u.id} className="p-3 bg-[#1C1D22]/30 rounded-xl border border-white/10 hover:border-[#9CA3AF]/30 transition-all">
                       {/* Linha principal: avatar + info + badge */}
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3 min-w-0">
-                          <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs flex-shrink-0 ${u.role === 'admin' ? 'bg-[#ea580c] text-white' : 'bg-slate-700 text-slate-300'}`}>
-                            {u.role === 'admin' ? 'A' : 'U'}
+                          <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs flex-shrink-0 ${u.role === 'master' ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20' : u.role === 'admin' ? 'bg-[#ea580c] text-white' : 'bg-slate-700 text-slate-300'}`}>
+                            {u.role === 'master' ? 'M' : u.role === 'admin' ? 'A' : 'U'}
                           </div>
                           <div className="min-w-0">
                             <div className="flex items-center gap-1.5">
@@ -718,7 +803,7 @@ const Dashboard: React.FC = () => {
                               )}
                             </div>
                             <p className="text-[10px] text-slate-500 font-mono">
-                              {u.role === 'admin' ? 'Administrador' : 'Usuário'}
+                              {u.role === 'master' ? 'Master (Dono)' : u.role === 'admin' ? 'Administrador' : 'Usuário'}
                               {hasLoggedIn && u.lastLogin && <span className="ml-1 text-slate-600">· Último acesso: {new Date(u.lastLogin).toLocaleDateString('pt-BR')}</span>}
                             </p>
                           </div>
@@ -726,8 +811,8 @@ const Dashboard: React.FC = () => {
                         {isSelf && <span className="text-[9px] text-[#ea580c] font-bold px-2 py-0.5 bg-[#ea580c]/10 rounded-full border border-[#ea580c]/20 flex-shrink-0">Você</span>}
                       </div>
 
-                      {/* Ações — visíveis para admin, exceto no próprio usuário */}
-                      {isAdmin && !isSelf && (
+                      {/* Ações — visíveis para admin/master, exceto no próprio usuário, impedindo admin de gerenciar master */}
+                      {isAdminOrMaster && !isSelf && (u.role !== 'master' || currentUser?.role === 'master') && (
                         <div className="flex items-center gap-2 mt-2.5 pt-2.5 border-t border-white/5">
                           {!hasLoggedIn ? (
                             <button
@@ -764,8 +849,8 @@ const Dashboard: React.FC = () => {
         </div>
       )}
 
-      {/* MODAL CONFIGURAÇÕES SMTP (ADMIN ONLY) */}
-      {isSettingsModalOpen && currentUser?.role === 'admin' && (
+      {/* MODAL CONFIGURAÇÕES SMTP (ADMIN & MASTER ONLY) */}
+      {isSettingsModalOpen && (currentUser?.role === 'admin' || currentUser?.role === 'master') && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
           <div className="bg-[#2D3139] border border-white/10 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
             <div className="p-6 border-b border-white/10 flex justify-between items-center bg-[#2D3139]/50">
@@ -1345,7 +1430,7 @@ const Dashboard: React.FC = () => {
             <UsersIcon size={14} /> <span>Usuários</span>
           </button>
 
-          {currentUser?.role === 'admin' && (
+          {(currentUser?.role === 'admin' || currentUser?.role === 'master') && (
             <button
               onClick={openSettingsModal}
               className="flex items-center gap-2 bg-[#1C1D22] border border-[#ea580c]/20 hover:border-[#ea580c]/50 text-[#ea580c] hover:bg-[#ea580c]/10 px-3.5 py-2 rounded-xl font-bold text-xs uppercase tracking-wider transition-all whitespace-nowrap"
@@ -1558,6 +1643,176 @@ const Dashboard: React.FC = () => {
         </div>
       )}
       </div>
+
+      {/* Botão de Engrenagem Fixed no Canto Inferior Esquerdo */}
+      <button
+        onClick={() => setIsAccountModalOpen(true)}
+        className="fixed bottom-6 left-6 z-40 w-12 h-12 bg-[#2D3139] border border-white/10 hover:border-[#ea580c]/50 text-slate-300 hover:text-[#ea580c] rounded-full shadow-2xl flex items-center justify-center transition-all hover:scale-110 active:scale-95 group"
+        title="Minha Conta"
+        id="gear-account-settings"
+      >
+        <Settings size={20} className="transition-transform duration-500 group-hover:rotate-90" />
+      </button>
+
+      {/* MODAL MINHA CONTA */}
+      {isAccountModalOpen && currentUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-[#2D3139] border border-white/10 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-white/10 flex justify-between items-center bg-[#2D3139]/50">
+              <h3 className="font-bold text-lg text-slate-100 flex items-center gap-2">
+                <Settings className="text-[#ea580c]" size={20} /> Configurações de Conta
+              </h3>
+              <button 
+                onClick={() => setIsAccountModalOpen(false)} 
+                className="text-slate-400 hover:text-rose-500 transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
+              {/* Notificações de Sucesso ou Erro */}
+              {accountError && (
+                <div className="bg-rose-500/10 border border-rose-500/30 rounded-xl p-3 flex items-start gap-2.5">
+                  <XCircle className="text-rose-400 shrink-0 mt-0.5" size={16} />
+                  <p className="text-rose-300 text-xs leading-relaxed">{accountError}</p>
+                </div>
+              )}
+              {accountSuccess && (
+                <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-3 flex items-start gap-2.5">
+                  <CheckCircle className="text-emerald-400 shrink-0 mt-0.5" size={16} />
+                  <p className="text-emerald-300 text-xs leading-relaxed">{accountSuccess}</p>
+                </div>
+              )}
+
+              {/* Informações Básicas do Usuário */}
+              <div className="bg-[#1C1D22]/40 p-4 rounded-xl border border-white/5 space-y-2">
+                <p className="text-[10px] font-black text-slate-500 uppercase tracking-wider">Perfil</p>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-slate-400">Usuário:</span>
+                  <span className="font-bold text-slate-200">{currentUser.username}</span>
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-slate-400">Permissão:</span>
+                  <span className="font-mono text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-300 capitalize">
+                    {currentUser.role === 'master' ? 'Master (Dono)' : currentUser.role === 'admin' ? 'Administrador' : 'Usuário'}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-slate-400">E-mail Cadastrado:</span>
+                  <span className="font-bold text-slate-200 truncate">{currentUser.email || 'Nenhum'}</span>
+                </div>
+              </div>
+
+              {/* Seção Exclusiva Master: Alterar E-mail */}
+              {currentUser.role === 'master' && (
+                <form onSubmit={handleUpdateEmail} className="space-y-3 pt-4 border-t border-white/5">
+                  <h4 className="text-sm font-black text-[#ea580c] uppercase tracking-wider flex items-center gap-1.5">
+                    <Mail size={16} /> Configurar E-mail do Sistema
+                  </h4>
+                  <p className="text-[11px] text-slate-400 leading-relaxed">
+                    Como Master (Dono do Sistema), você pode alterar o e-mail de acesso e notificações da sua conta.
+                  </p>
+                  <div>
+                    <label className="text-[10px] font-black text-slate-500 uppercase block mb-1">Novo E-mail</label>
+                    <div className="flex gap-2">
+                      <input
+                        type="email"
+                        required
+                        value={accountEmail}
+                        onChange={(e) => setAccountEmail(e.target.value)}
+                        className="flex-1 bg-[#1C1D22] border border-white/10 rounded-xl p-2.5 text-sm text-white placeholder:text-slate-600 focus:border-[#ea580c] outline-none transition-all"
+                        placeholder="novo-email@exemplo.com"
+                      />
+                      <button
+                        type="submit"
+                        disabled={accountActionLoading}
+                        className="bg-[#ea580c] hover:bg-[#d97706] disabled:opacity-50 text-white font-bold py-2.5 px-4 rounded-xl text-xs uppercase tracking-wider whitespace-nowrap transition-all shadow-md"
+                      >
+                        {accountActionLoading ? 'Salvando...' : 'Atualizar'}
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              )}
+
+              {/* Seção Alterar Senha (Para Todos os Usuários) */}
+              <form onSubmit={handleChangePassword} className="space-y-4 pt-4 border-t border-white/5">
+                <h4 className="text-sm font-black text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                  <KeyRound size={16} /> Alterar Senha
+                </h4>
+                
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-[10px] font-black text-slate-500 uppercase block mb-1">Senha Atual</label>
+                    <input
+                      type="password"
+                      required
+                      value={currentPassword}
+                      onChange={(e) => setCurrentPassword(e.target.value)}
+                      className="w-full bg-[#1C1D22] border border-white/10 rounded-xl p-2.5 text-sm text-white placeholder:text-slate-600 focus:border-[#ea580c] outline-none transition-all"
+                      placeholder="••••••••"
+                    />
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-[10px] font-black text-slate-500 uppercase block mb-1">Nova Senha</label>
+                      <input
+                        type="password"
+                        required
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        className="w-full bg-[#1C1D22] border border-white/10 rounded-xl p-2.5 text-sm text-white placeholder:text-slate-600 focus:border-[#ea580c] outline-none transition-all"
+                        placeholder="Mín. 6 caracteres"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-black text-slate-500 uppercase block mb-1">Confirmar Nova Senha</label>
+                      <input
+                        type="password"
+                        required
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        className="w-full bg-[#1C1D22] border border-white/10 rounded-xl p-2.5 text-sm text-white placeholder:text-slate-600 focus:border-[#ea580c] outline-none transition-all"
+                        placeholder="••••••••"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row justify-between items-center gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={handleSendResetEmail}
+                    disabled={accountActionLoading || !smtpConfigured}
+                    className="w-full sm:w-auto text-slate-400 hover:text-white hover:underline text-xs flex items-center gap-1 bg-transparent border-0 outline-none p-0 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    title={!smtpConfigured ? 'Configure o SMTP para redefinir por e-mail' : ''}
+                  >
+                    <Mail size={12} /> Solicitar redefinição por e-mail
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={accountActionLoading}
+                    className="w-full sm:w-auto bg-[#ea580c] hover:bg-[#d97706] disabled:opacity-50 text-white font-bold py-2.5 px-6 rounded-xl text-xs uppercase tracking-wider transition-all shadow-md"
+                  >
+                    {accountActionLoading ? 'Salvando...' : 'Salvar Nova Senha'}
+                  </button>
+                </div>
+              </form>
+            </div>
+            
+            <div className="bg-[#2D3139]/40 p-4 border-t border-white/10 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setIsAccountModalOpen(false)}
+                className="bg-transparent text-slate-400 hover:text-white px-5 py-2 rounded-xl text-xs font-bold transition-all uppercase tracking-wider"
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

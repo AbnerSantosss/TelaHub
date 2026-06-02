@@ -226,6 +226,46 @@ export class UserService {
     };
   }
 
+  async updateEmail(userId: string, newEmail: string) {
+    if (!newEmail || !newEmail.includes('@')) {
+      throw new Error('E-mail inválido.');
+    }
+
+    const existingUser = await userRepository.findByEmail(newEmail);
+    if (existingUser && existingUser.id !== userId) {
+      throw new Error('Este e-mail já está em uso por outro usuário.');
+    }
+
+    const updatedUser = await userRepository.updateEmail(userId, newEmail);
+    return {
+      id: updatedUser.id,
+      username: updatedUser.username,
+      email: updatedUser.email,
+      role: updatedUser.role,
+    };
+  }
+
+  async changePassword(userId: string, currentPassword: string, newPassword: string) {
+    const user = await userRepository.findById(userId);
+    if (!user) {
+      throw new Error('Usuário não encontrado.');
+    }
+
+    const isValid = await comparePassword(currentPassword, user.password);
+    if (!isValid) {
+      throw new Error('Senha atual incorreta.');
+    }
+
+    if (!newPassword || newPassword.length < 6) {
+      throw new Error('A nova senha deve ter pelo menos 6 caracteres.');
+    }
+
+    const hashedPwd = await hashPassword(newPassword);
+    await userRepository.updatePassword(userId, hashedPwd);
+
+    return { message: 'Senha alterada com sucesso!' };
+  }
+
   async delete(id: string) {
     return userRepository.delete(id);
   }

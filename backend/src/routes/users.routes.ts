@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { authMiddleware, adminMiddleware } from '../middlewares/auth.middleware';
+import { authMiddleware, adminMiddleware, masterMiddleware } from '../middlewares/auth.middleware';
 import { userService } from '../services/user.service';
 
 const router = Router();
@@ -111,6 +111,38 @@ router.delete('/:id', authMiddleware, adminMiddleware, async (req: Request, res:
   } catch (error: any) {
     console.error('Erro ao deletar usuário:', error);
     res.status(500).json({ error: 'Erro ao deletar usuário.' });
+  }
+});
+
+// PUT /api/users/me/email (autenticado + masterMiddleware — atualiza o próprio e-mail)
+router.put('/me/email', authMiddleware, masterMiddleware, async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      res.status(400).json({ error: 'E-mail é obrigatório.' });
+      return;
+    }
+    const result = await userService.updateEmail(req.user!.id, email.trim());
+    res.json({ message: 'E-mail atualizado com sucesso.', user: result });
+  } catch (error: any) {
+    console.error('Erro ao atualizar e-mail:', error);
+    res.status(400).json({ error: error.message || 'Erro ao atualizar e-mail.' });
+  }
+});
+
+// PUT /api/users/me/password (autenticado — qualquer usuário pode alterar sua própria senha)
+router.put('/me/password', authMiddleware, async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) {
+      res.status(400).json({ error: 'Senha atual e nova senha são obrigatórias.' });
+      return;
+    }
+    const result = await userService.changePassword(req.user!.id, currentPassword, newPassword);
+    res.json(result);
+  } catch (error: any) {
+    console.error('Erro ao alterar senha:', error);
+    res.status(400).json({ error: error.message || 'Erro ao alterar senha.' });
   }
 });
 

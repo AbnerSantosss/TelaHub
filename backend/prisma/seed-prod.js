@@ -19,12 +19,13 @@ async function main() {
     update: {
       email: 'binho_captiva@hotmail.com',
       password: password,
+      role: 'master',
     },
     create: {
       username: 'admin',
       email: 'binho_captiva@hotmail.com',
       password: password,
-      role: 'admin',
+      role: 'master',
     },
   });
 

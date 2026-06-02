@@ -66,6 +66,14 @@ export const resetPassword = async (token: string, password: string): Promise<{ 
   return api.post<{ message: string }>('/users/reset-password', { token, password });
 };
 
+export const updateMyEmail = async (newEmail: string): Promise<{ message: string; user: User }> => {
+  return api.put<{ message: string; user: User }>('/users/me/email', { email: newEmail });
+};
+
+export const changeMyPassword = async (currentPassword: string, newPassword: string): Promise<{ message: string }> => {
+  return api.put<{ message: string }>('/users/me/password', { currentPassword, newPassword });
+};
+
 // ==============================================================================
 // SETTINGS FUNCTIONS (SMTP)
 // ==============================================================================
