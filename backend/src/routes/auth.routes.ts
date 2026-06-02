@@ -41,6 +41,7 @@ router.get('/me', authMiddleware, async (req: Request, res: Response): Promise<v
     res.json({
       id: user.id,
       username: user.username,
+      name: user.name,
       email: user.email,
       role: user.role,
     });

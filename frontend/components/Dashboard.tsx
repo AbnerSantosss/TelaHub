@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Monitor, Edit3, Copy, Trash2, Check, RefreshCw, ExternalLink, Loader2, X, Zap, LogOut, Users as UsersIcon, Shield, Tv, Link as LinkIcon, Unplug, Calendar, FileImage, Settings, Mail, CheckCircle, XCircle, Send, AlertTriangle, KeyRound, RotateCcw, MoreVertical, Pencil, Image as ImageIcon } from 'lucide-react';
-import { getDisplays, deleteDisplay, saveDisplay, getCurrentUser, logout, getUsers, saveUser, deleteUser, resendInvite, adminSendPasswordReset, getDevices, linkDevice, unlinkDevice, updateDeviceDisplay, getSmtpSettings, saveSmtpSettings, testSmtpConnection, getSmtpStatus, updateMyEmail, changeMyPassword, forgotPassword } from '../services/storage';
+import { getDisplays, deleteDisplay, saveDisplay, getCurrentUser, logout, getUsers, saveUser, deleteUser, resendInvite, adminSendPasswordReset, getDevices, linkDevice, unlinkDevice, updateDeviceDisplay, getSmtpSettings, saveSmtpSettings, testSmtpConnection, getSmtpStatus, updateMyEmail, changeMyPassword, updateMyName, forgotPassword } from '../services/storage';
 import { Display, User, Device } from '../types';
 import { MediaLibrary } from './MediaLibrary';
 import { LogoHub } from './Login';
@@ -84,12 +84,16 @@ const Dashboard: React.FC = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [accountActionLoading, setAccountActionLoading] = useState(false);
   const [accountError, setAccountError] = useState('');
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editName, setEditName] = useState('');
   const [accountSuccess, setAccountSuccess] = useState('');
 
   // Sincronizar email quando o modal abrir
   useEffect(() => {
     if (isAccountModalOpen && currentUser) {
       setAccountEmail(currentUser.email || '');
+      setEditName(currentUser.name || currentUser.username);
+      setIsEditingName(false);
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
@@ -112,6 +116,23 @@ const Dashboard: React.FC = () => {
       }
     } catch (err: any) {
       setAccountError(err.message || 'Erro ao atualizar e-mail.');
+    } finally {
+      setAccountActionLoading(false);
+    }
+  };
+
+  const handleUpdateName = async () => {
+    if (!currentUser || !editName.trim()) return;
+    setAccountActionLoading(true);
+    setAccountError('');
+    setAccountSuccess('');
+    try {
+      const res = await updateMyName(editName.trim());
+      setAccountSuccess(res.message || 'Nome atualizado com sucesso!');
+      currentUser.name = editName.trim();
+      setIsEditingName(false);
+    } catch (err: any) {
+      setAccountError(err.message || 'Erro ao atualizar nome.');
     } finally {
       setAccountActionLoading(false);
     }
@@ -791,7 +812,7 @@ const Dashboard: React.FC = () => {
                           </div>
                           <div className="min-w-0">
                             <div className="flex items-center gap-1.5">
-                              <p className="font-bold text-sm text-slate-200 truncate">{u.email || u.username}</p>
+                              <p className="font-bold text-sm text-slate-200 truncate">{u.name || u.username}</p>
                               {hasLoggedIn ? (
                                 <span title="Já acessou o sistema" className="flex items-center gap-0.5 bg-emerald-500/10 text-emerald-400 text-[9px] font-bold px-1.5 py-0.5 rounded-full border border-emerald-500/20 flex-shrink-0">
                                   <CheckCircle size={10} /> Verificado
@@ -803,8 +824,8 @@ const Dashboard: React.FC = () => {
                               )}
                             </div>
                             <p className="text-[10px] text-slate-500 font-mono">
-                              {u.role === 'master' ? 'Master (Dono)' : u.role === 'admin' ? 'Administrador' : 'Usuário'}
-                              {hasLoggedIn && u.lastLogin && <span className="ml-1 text-slate-600">· Último acesso: {new Date(u.lastLogin).toLocaleDateString('pt-BR')}</span>}
+                              {u.email || 'Sem e-mail'}
+                              {hasLoggedIn && u.lastLogin && <span className="ml-1 text-slate-600">· {new Date(u.lastLogin).toLocaleDateString('pt-BR')}</span>}
                             </p>
                           </div>
                         </div>
@@ -1689,8 +1710,45 @@ const Dashboard: React.FC = () => {
               <div className="bg-[#1C1D22]/40 p-4 rounded-xl border border-white/5 space-y-2">
                 <p className="text-[10px] font-black text-slate-500 uppercase tracking-wider">Perfil</p>
                 <div className="flex justify-between items-center text-sm">
-                  <span className="text-slate-400">Usuário:</span>
-                  <span className="font-bold text-slate-200">{currentUser.username}</span>
+                  <span className="text-slate-400">Nome:</span>
+                  {isEditingName ? (
+                    <div className="flex items-center gap-2">
+                      <input
+                        autoFocus
+                        type="text"
+                        value={editName}
+                        onChange={(e) => setEditName(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === 'Enter') handleUpdateName(); if (e.key === 'Escape') setIsEditingName(false); }}
+                        className="bg-[#1C1D22] border border-[#ea580c]/50 rounded-lg px-2 py-1 text-sm text-white outline-none w-36 focus:ring-1 focus:ring-[#ea580c] transition-all"
+                      />
+                      <button
+                        onClick={handleUpdateName}
+                        disabled={accountActionLoading}
+                        className="text-emerald-400 hover:text-emerald-300 transition-colors"
+                        title="Salvar"
+                      >
+                        <Check size={16} />
+                      </button>
+                      <button
+                        onClick={() => { setIsEditingName(false); setEditName(currentUser.name || currentUser.username); }}
+                        className="text-slate-500 hover:text-slate-300 transition-colors"
+                        title="Cancelar"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-slate-200">{currentUser.name || currentUser.username}</span>
+                      <button
+                        onClick={() => { setEditName(currentUser.name || currentUser.username); setIsEditingName(true); }}
+                        className="text-slate-500 hover:text-[#ea580c] transition-colors"
+                        title="Editar nome"
+                      >
+                        <Pencil size={13} />
+                      </button>
+                    </div>
+                  )}
                 </div>
                 <div className="flex justify-between items-center text-sm">
                   <span className="text-slate-400">Permissão:</span>

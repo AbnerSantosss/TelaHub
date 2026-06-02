@@ -234,6 +234,7 @@ export interface Display {
 export interface User {
   id: string;
   username: string;
+  name?: string;
   email?: string; // Novo campo para login robusto
   role: 'master' | 'admin' | 'user';
   lastLogin?: string | null; // null = nunca acessou

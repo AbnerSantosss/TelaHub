@@ -74,6 +74,10 @@ export const changeMyPassword = async (currentPassword: string, newPassword: str
   return api.put<{ message: string }>('/users/me/password', { currentPassword, newPassword });
 };
 
+export const updateMyName = async (name: string): Promise<{ message: string; user: User }> => {
+  return api.put<{ message: string; user: User }>('/users/me/name', { name });
+};
+
 // ==============================================================================
 // SETTINGS FUNCTIONS (SMTP)
 // ==============================================================================

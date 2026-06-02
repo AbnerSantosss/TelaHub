@@ -146,4 +146,20 @@ router.put('/me/password', authMiddleware, async (req: Request, res: Response): 
   }
 });
 
+// PUT /api/users/me/name (autenticado — qualquer usuário pode alterar seu nome)
+router.put('/me/name', authMiddleware, async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { name } = req.body;
+    if (!name) {
+      res.status(400).json({ error: 'Nome é obrigatório.' });
+      return;
+    }
+    const result = await userService.updateName(req.user!.id, name.trim());
+    res.json({ message: 'Nome atualizado com sucesso.', user: result });
+  } catch (error: any) {
+    console.error('Erro ao atualizar nome:', error);
+    res.status(400).json({ error: error.message || 'Erro ao atualizar nome.' });
+  }
+});
+
 export default router;

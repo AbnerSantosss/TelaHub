@@ -37,6 +37,7 @@ export class UserService {
       user: {
         id: user.id,
         username: user.username,
+        name: user.name,
         email: user.email,
         role: user.role,
       },
@@ -264,6 +265,21 @@ export class UserService {
     await userRepository.updatePassword(userId, hashedPwd);
 
     return { message: 'Senha alterada com sucesso!' };
+  }
+
+  async updateName(userId: string, name: string) {
+    if (!name || name.trim().length === 0) {
+      throw new Error('O nome não pode ser vazio.');
+    }
+
+    const updatedUser = await userRepository.updateName(userId, name.trim());
+    return {
+      id: updatedUser.id,
+      username: updatedUser.username,
+      name: updatedUser.name,
+      email: updatedUser.email,
+      role: updatedUser.role,
+    };
   }
 
   async delete(id: string) {
