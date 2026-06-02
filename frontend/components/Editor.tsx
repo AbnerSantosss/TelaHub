@@ -777,90 +777,274 @@ const Editor: React.FC = () => {
         )}
 
         {/* Sidebar Left: Tools */}
-        <aside className={`absolute md:relative left-0 top-0 h-full w-72 bg-[#2D3139] border-r border-slate-800 overflow-y-auto z-[60] shadow-xl transition-transform duration-300 ease-in-out ${showLeftSidebar ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
-          <div className="p-5 border-b border-slate-800">
+        <aside className={`absolute md:relative left-0 top-0 h-full w-64 bg-[#2D3139] border-r border-slate-800 overflow-y-auto z-[60] shadow-xl transition-transform duration-300 ease-in-out ${showLeftSidebar ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
+          
+          {/* Section 1: Fundo da Cena */}
+          <div className="p-3.5 border-b border-slate-800">
              <div className="flex justify-between items-center mb-4">
-               <h3 className="text-[10px] font-black text-[#ea580c] uppercase tracking-widest flex items-center gap-2">
-                 <Layers size={12} /> Biblioteca de Widgets
+               <h3 className="text-[10px] font-black text-indigo-500 uppercase tracking-widest flex items-center gap-2">
+                 <MonitorPlay size={12} /> Fundo da Cena
                </h3>
                <button onClick={() => setShowLeftSidebar(false)} className="md:hidden text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors">
                  <X size={16} />
                </button>
              </div>
              
-             {/* Básicos */}
-             <div className="mb-3">
-               <h4 className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-1.5 flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span>Básicos</h4>
-               <div className="grid grid-cols-2 gap-2">
-                 <WidgetTool icon="/icons3d/image.png" label="Imagem" description="Exibe imagens de alta qualidade (PNG, JPG, SVG) com ajuste automático ao contêiner." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.IMAGE)} />
-                 <WidgetTool icon="/icons3d/video.png" label="Vídeo" description="Reproduz vídeos locais em looping ou links diretos do YouTube." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.VIDEO)} />
-                 <WidgetTool icon="/icons3d/text.png" label="Texto" description="Adiciona caixas de texto com fontes, cores e tamanhos personalizáveis." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.TEXT)} />
-                 <WidgetTool icon="/icons3d/gif.png" label="GIF" description="Exibe animações divertidas em formato GIF para atrair a atenção do público." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.GIF)} />
-                 <WidgetTool icon="/icons3d/web.png" label="Web" description="Incorpora qualquer site ou página web externa de forma interativa." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.IFRAME)} />
-               </div>
-             </div>
+             <div className="space-y-4">
+                <div className="group">
+                  <label className="text-[9px] font-bold text-slate-500 uppercase block mb-1.5">Vídeo de Fundo (YouTube ou MP4)</label>
+                  <div className="relative">
+                    <input 
+                      type="text" 
+                      placeholder="https://youtube.com... ou https://.../video.mp4"
+                      value={activePage.backgroundVideoUrl || ''}
+                      onChange={(e) => {
+                        const updated = [...display.pages];
+                        updated[activePageIdx].backgroundVideoUrl = e.target.value;
+                        updated[activePageIdx].backgroundImage = ''; 
+                        setDisplay({...display, pages: updated});
+                      }}
+                      className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 pl-7 text-[10px] text-slate-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all"
+                    />
+                    <Film size={11} className="absolute left-2.5 top-2.5 text-slate-600" />
+                  </div>
+                  
+                  <div className="relative mt-2.5 mb-2.5">
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t border-slate-800"></div>
+                    </div>
+                    <div className="relative flex justify-center text-xs">
+                      <span className="bg-slate-900 px-2 text-slate-500 font-bold uppercase text-[8px]">ou</span>
+                    </div>
+                  </div>
 
-             {/* Utilitários */}
-             <div className="mb-3">
-               <h4 className="text-[10px] font-black text-cyan-400 uppercase tracking-widest mb-1.5 flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-cyan-400 inline-block"></span>Utilitários</h4>
-               <div className="grid grid-cols-2 gap-2">
-                 <WidgetTool icon="/icons3d/clock.png" label="Relógio" description="Mostra um relógio digital sincronizado em tempo real com a cidade escolhida." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.CLOCK)} />
-                 <WidgetTool icon="/icons3d/weather.png" label="Clima" description="Exibe a previsão do tempo e temperatura em tempo real para qualquer cidade." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.WEATHER)} />
-                 <WidgetTool icon="/icons3d/full-info.png" label="Completo" description="Painel integrado de relógio, clima e fundos de alta definição." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.FULL_INFO)} />
-                 <WidgetTool icon="/icons3d/rss.png" label="RSS" description="Exibe feeds de notícias em tempo real de portais de notícias como G1 e CNN." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.RSS)} />
-                 <WidgetTool icon="/icons3d/calendar.png" label="Agenda" description="Integração direta com Google Agenda para exibir eventos e programações." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.CALENDAR)} />
-               </div>
-             </div>
+                  <button 
+                    onClick={() => {
+                      setMediaLibraryConfig({
+                        isOpen: true,
+                        allowedTypes: 'video',
+                        onSelect: (url) => {
+                          const updated = [...display.pages];
+                          updated[activePageIdx].backgroundVideoUrl = url;
+                          updated[activePageIdx].backgroundImage = ''; 
+                          setDisplay({...display, pages: updated});
+                        }
+                      });
+                    }}
+                    className="flex items-center justify-center gap-1.5 w-full bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-2 rounded-lg font-bold text-[10px] uppercase tracking-wider cursor-pointer transition-all border border-slate-700 hover:border-slate-500 shadow-md"
+                  >
+                    <Upload size={12} />
+                    Selecionar Vídeo
+                  </button>
+                  
+                  {activePage.backgroundVideoUrl && (
+                    <div className="flex flex-col gap-1.5 mt-2 ml-1">
+                      <div className="flex items-center gap-1.5">
+                        <input 
+                          type="checkbox" 
+                          id="bg-video-mute"
+                          checked={activePage.backgroundVideoMuted !== false} // Default true
+                          onChange={(e) => {
+                            const updated = [...display.pages];
+                            updated[activePageIdx].backgroundVideoMuted = e.target.checked;
+                            setDisplay({...display, pages: updated});
+                          }}
+                          className="w-3 h-3 rounded border-slate-700 bg-slate-900 text-cyan-500 focus:ring-offset-0 focus:ring-1 focus:ring-cyan-500 cursor-pointer"
+                        />
+                        <label htmlFor="bg-video-mute" className="text-[9px] font-bold text-slate-400 uppercase cursor-pointer select-none hover:text-cyan-400 transition-colors">
+                          Vídeo Mudo (Sem Áudio)
+                        </label>
+                      </div>
+                      
+                      {isYouTubeUrl(activePage.backgroundVideoUrl) && (
+                        <div className="flex items-center justify-between bg-slate-950/50 p-1.5 rounded-lg border border-slate-800/50 mt-0.5">
+                          <label className="text-[9px] font-bold text-slate-400 uppercase">Qualidade YouTube</label>
+                          <select 
+                            value={activePage.backgroundVideoQuality || 'highres'}
+                            onChange={(e) => {
+                              const updated = [...display.pages];
+                              updated[activePageIdx].backgroundVideoQuality = e.target.value;
+                              setDisplay({...display, pages: updated});
+                            }}
+                            className="bg-slate-900 border border-slate-700 text-slate-300 text-[9px] rounded px-1.5 py-0.5 outline-none focus:border-cyan-500"
+                          >
+                            <option value="highres">Máxima (Auto)</option>
+                            <option value="hd1080">1080p</option>
+                            <option value="hd720">720p</option>
+                            <option value="large">480p</option>
+                            <option value="medium">360p</option>
+                            <option value="small">240p</option>
+                          </select>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
 
-             {/* Interativos */}
-             <div className="mb-3">
-               <h4 className="text-[10px] font-black text-amber-400 uppercase tracking-widest mb-1.5 flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block"></span>Interativos</h4>
-               <div className="grid grid-cols-2 gap-2">
-                 <WidgetTool icon="/icons3d/notes.png" label="Notas" description="Mural de notas adesivas com temas neon, glassmorphism e cores vibrantes." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.NOTES)} />
-                 <WidgetTool icon="/icons3d/todo.png" label="Tarefas" description="Lista de tarefas interativa com checkboxes e progresso de conclusão." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.TODO)} />
-                 <WidgetTool icon="/icons3d/countdown.png" label="Contador" description="Cronômetro regressivo para grandes eventos, metas ou datas especiais." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.COUNTDOWN)} />
-                 <WidgetTool icon="/icons3d/chores.png" label="Deveres" description="Quadro semanal de deveres domésticos ou corporativos com responsáveis." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.CHORES)} />
-                 <WidgetTool icon="/icons3d/meal-plan.png" label="Meal Plan" description="Planejador ou cardápio de refeições semanais com slide para os dias." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.MEAL_PLAN)} />
-               </div>
-             </div>
+                <div className="relative">
+                   <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <span className="bg-slate-900 px-2 text-[8px] text-slate-600 font-bold">OU</span>
+                   </div>
+                   <div className="border-t border-slate-800 w-full"></div>
+                </div>
 
-             {/* Integrações */}
-             <div className="mb-3">
-               <h4 className="text-[10px] font-black text-rose-400 uppercase tracking-widest mb-1.5 flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-rose-400 inline-block"></span>Integrações</h4>
-               <div className="grid grid-cols-2 gap-2">
-                 <WidgetTool icon="/icons3d/market.png" label="Bolsa" description="Painel de cotações financeiras de ações e criptomoedas em tempo real." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.MARKET_WATCH)} />
-                 <WidgetTool icon="/icons3d/snapshot.png" label="Snapshot" description="Renderiza capturas estáticas e periódicas de páginas de forma segura." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.BROWSER_SNAPSHOT)} />
-                 <WidgetTool icon="/icons3d/google-docs.png" label="G Docs" description="Incorpora documentos, planilhas ou slides do Google Workspace." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.GOOGLE_DOCS)} />
-                 <WidgetTool icon="/icons3d/office-docs.png" label="Office Docs" description="Exibe planilhas Excel, documentos Word ou slides PowerPoint do Office 365." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.OFFICE_DOCS)} />
-                 <WidgetTool icon="/icons3d/power-bi.png" label="Power BI" description="Exibe painéis interativos e relatórios dinâmicos do Microsoft Power BI." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.POWER_BI)} />
-                 <WidgetTool icon="/icons3d/airtable.png" label="Airtable" description="Exibe visualizações, tabelas ou bases de dados completas do Airtable." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.AIRTABLE)} />
-                 <WidgetTool icon="/icons3d/pdf.png" label="PDF" description="Exibe documentos PDFs e apostilas corporativas página a página." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.PDF_DOCUMENT)} />
-                 <WidgetTool icon="/icons3d/html.png" label="HTML" description="Insira código HTML, CSS ou JS personalizado livremente." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.EMBED_HTML)} />
-               </div>
+                <div className="group">
+                  <label className="text-[9px] font-bold text-slate-500 uppercase block mb-1.5">Imagem de Fundo</label>
+                  <div className="relative mb-2">
+                    <input 
+                      type="text" 
+                      placeholder="https://exemplo.com/imagem.jpg"
+                      value={activePage.backgroundImage || ''}
+                      onChange={(e) => {
+                        const updated = [...display.pages];
+                        updated[activePageIdx].backgroundImage = e.target.value;
+                        updated[activePageIdx].backgroundVideoUrl = ''; 
+                        setDisplay({...display, pages: updated});
+                      }}
+                      className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 pl-7 text-[10px] text-slate-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all"
+                    />
+                    <ImageIcon size={11} className="absolute left-2.5 top-2.5 text-slate-600" />
+                  </div>
+                  
+                  <button 
+                    onClick={() => {
+                      setMediaLibraryConfig({
+                        isOpen: true,
+                        allowedTypes: 'image',
+                        onSelect: (url) => {
+                          const updated = [...display.pages];
+                          updated[activePageIdx].backgroundImage = url;
+                          updated[activePageIdx].backgroundVideoUrl = ''; 
+                          setDisplay({...display, pages: updated});
+                        }
+                      });
+                    }}
+                    className="w-full flex items-center justify-center gap-1.5 py-1.5 bg-slate-900 border border-slate-800 hover:bg-slate-800 rounded-lg text-[9px] font-bold text-slate-400 hover:text-white transition-all"
+                  >
+                    <Upload size={11} /> 
+                    SELECIONAR IMAGEM
+                  </button>
+
+                  <div className="relative mt-3.5 mb-3.5">
+                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <span className="bg-slate-900 px-2 text-[8px] text-slate-600 font-bold">OU</span>
+                     </div>
+                     <div className="border-t border-slate-800 w-full"></div>
+                  </div>
+
+                  <div className="group">
+                    <label className="text-[9px] font-bold text-slate-500 uppercase block mb-1.5">Fundo Animado</label>
+                    <button
+                      onClick={() => {
+                        setSelectedWidget(null);
+                        setShowBgAnimModal(true);
+                      }}
+                      className="w-full flex items-center justify-between gap-1.5 py-2 px-2.5 bg-slate-950 border border-slate-700 hover:border-cyan-500 rounded-lg text-[10px] text-slate-300 hover:text-white transition-all group-hover:shadow-[0_0_12px_rgba(6,182,212,0.15)]"
+                    >
+                      <span className="flex items-center gap-1.5 truncate">
+                        <MonitorPlay size={13} className="text-cyan-500 shrink-0" />
+                        {activePage.backgroundAnimation ? 
+                          ['Automático (Clima)', 'Fluxo Gradiente', 'Céu e Nuvens', 'Chuva Digital', 'Neve Caindo', 'Chamas', 'Grid Tech', 'Alerta Vermelho', 'Pulso Azul', 'Pulso Verde', 'Aurora Boreal']
+                          [['auto-weather', 'gradient-flow', 'clouds', 'rain', 'snow', 'fire', 'tech-grid', 'pulse-red', 'pulse-blue', 'pulse-green', 'aurora'].indexOf(activePage.backgroundAnimation)]
+                          : 'Escolher Animação'}
+                      </span>
+                      <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${activePage.backgroundAnimation ? 'bg-cyan-500 shadow-[0_0_6px_rgba(6,182,212,0.8)]' : 'bg-slate-700'}`}></div>
+                    </button>
+                  </div>
+
+                  <div className="mt-4 pt-4 border-t border-slate-800">
+                    <h3 className="text-[10px] font-black text-amber-500 uppercase tracking-widest mb-3 flex items-center gap-1.5">
+                      <Move size={11} /> Transições
+                    </h3>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="text-[9px] font-bold text-slate-500 uppercase block mb-1">Tipo de Transição</label>
+                        <select 
+                          value={activePage.transitionType || 'none'}
+                          onChange={(e) => {
+                            const updated = [...display.pages];
+                            updated[activePageIdx].transitionType = e.target.value as any;
+                            setDisplay({...display, pages: updated});
+                          }}
+                          className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-[10px] text-slate-200 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition-all cursor-pointer"
+                        >
+                          <option value="none">Nenhuma</option>
+                          <option value="fade">Fade</option>
+                          <option value="slide-left">Slide Esquerda</option>
+                          <option value="slide-right">Slide Direita</option>
+                          <option value="slide-up">Slide Cima</option>
+                          <option value="slide-down">Slide Baixo</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="text-[9px] font-bold text-slate-500 uppercase block mb-1">Duração (ms)</label>
+                        <input 
+                          type="number"
+                          value={activePage.transitionDuration || 500}
+                          onChange={(e) => {
+                            const updated = [...display.pages];
+                            updated[activePageIdx].transitionDuration = parseInt(e.target.value);
+                            setDisplay({...display, pages: updated});
+                          }}
+                          className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-[10px] text-slate-200 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition-all"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-3">
+                    <label className="text-[9px] font-bold text-slate-500 uppercase block mb-1">Ajuste da Imagem</label>
+                    <select 
+                      className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-[10px] text-slate-200 outline-none focus:border-cyan-500 cursor-pointer"
+                      value={activePage.backgroundFit || 'cover'}
+                      onChange={(e) => {
+                        const updated = [...display.pages];
+                        updated[activePageIdx].backgroundFit = e.target.value as any;
+                        setDisplay({...display, pages: updated});
+                      }}
+                    >
+                      <option value="cover">Preencher (Corta)</option>
+                      <option value="fill">Esticar</option>
+                      <option value="contain">Ajustar (Bordas)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-[9px] font-bold text-slate-500 uppercase block mb-1">Duração (Segundos)</label>
+                  <div className="flex items-center gap-2 bg-slate-950 border border-slate-700 rounded-lg p-1">
+                    <Clock size={13} className="ml-1.5 text-slate-600" />
+                    <input 
+                      type="number" 
+                      value={activePage.duration} 
+                      onChange={(e) => {
+                        const updated = [...display.pages];
+                        updated[activePageIdx].duration = parseInt(e.target.value) || 5;
+                        setDisplay({...display, pages: updated});
+                      }}
+                      className="w-full bg-transparent border-none p-1 text-xs font-bold text-slate-200 focus:ring-0 outline-none"
+                    />
+                  </div>
+                </div>
              </div>
              
-             <div className="mt-4 pt-4 border-t border-slate-800">
-                <button 
-                  onClick={() => setIsClearingScene(true)}
-                  className="w-full flex items-center justify-center gap-2 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 rounded-lg text-[10px] font-bold transition-colors border border-rose-500/20 uppercase tracking-wider"
-                >
-                  <Trash2 size={12} /> Limpar Todos os Widgets
-                </button>
-             </div>
-
-             {/* Dynamic Tooltip Explanation Box */}
-             <div className="mt-4 p-3 bg-slate-950/60 rounded-xl border border-slate-800/80 min-h-[56px] flex items-center gap-2">
-               <Info size={14} className="text-[#ea580c] shrink-0" />
-               <p className="text-[10px] text-slate-400 font-medium leading-relaxed">
-                 {hoveredDescription || "Passe o mouse sobre um widget para ver a descrição detalhada."}
-               </p>
-             </div>
+             {activePage.broadcast_id && (
+               <div className="mt-3 p-2 bg-cyan-900/20 border border-cyan-800/30 rounded-xl flex items-start gap-2">
+                 <CalendarDays className="text-cyan-400 shrink-0 mt-0.5" size={14} />
+                 <div>
+                   <p className="text-[10px] font-bold text-cyan-400 mb-0.5">Cena Programada</p>
+                   <p className="text-[9px] text-cyan-200/60 leading-relaxed">
+                     Esta cena foi injetada pela Central. Alterações feitas aqui afetarão apenas esta tela.
+                   </p>
+                 </div>
+               </div>
+             )}
           </div>
 
-          {/* Layers Sidebar Section */}
-          <div className="p-5 border-b border-slate-800">
-             <h3 className="text-[10px] font-black text-purple-500 uppercase tracking-widest mb-4 flex items-center gap-2">
-               <Layers size={12} /> Camadas
+          {/* Section 2: Camadas */}
+          <div className="p-3.5 border-b border-slate-800">
+             <h3 className="text-[10px] font-black text-purple-500 uppercase tracking-widest mb-3 flex items-center gap-1.5">
+               <Layers size={11} /> Camadas
              </h3>
              <div className="space-y-1">
                {[...activePage.layout]
@@ -872,30 +1056,30 @@ const Editor: React.FC = () => {
 
                    const getIcon = (type: WidgetType) => {
                      switch (type) {
-                       case WidgetType.IMAGE: return <ImageIcon size={14} />;
-                       case WidgetType.VIDEO: return <Film size={14} />;
-                       case WidgetType.TEXT: return <Type size={14} />;
-                       case WidgetType.CLOCK: return <Clock size={14} />;
-                       case WidgetType.CALENDAR: return <Calendar size={14} />;
-                       case WidgetType.WEATHER: return <CloudSun size={14} />;
-                       case WidgetType.FULL_INFO: return <Layout size={14} />;
-                       case WidgetType.RSS: return <Rss size={14} />;
-                       case WidgetType.IFRAME: return <Globe size={14} />;
-                       case WidgetType.GIF: return <Gift size={14} />;
-                       case WidgetType.NOTES: return <StickyNote size={14} className="text-yellow-400" />;
-                       case WidgetType.TODO: return <ListTodo size={14} className="text-emerald-400" />;
-                       case WidgetType.COUNTDOWN: return <Timer size={14} className="text-rose-400" />;
-                       case WidgetType.CHORES: return <ClipboardList size={14} className="text-cyan-400" />;
-                       case WidgetType.MEAL_PLAN: return <Utensils size={14} className="text-amber-400" />;
-                       case WidgetType.MARKET_WATCH: return <TrendingUp size={14} className="text-green-400" />;
-                       case WidgetType.BROWSER_SNAPSHOT: return <Camera size={14} className="text-blue-400" />;
-                       case WidgetType.GOOGLE_DOCS: return <FileText size={14} className="text-cyan-500" />;
-                       case WidgetType.OFFICE_DOCS: return <BookOpen size={14} className="text-blue-500" />;
-                       case WidgetType.POWER_BI: return <Layout size={14} className="text-amber-500" />;
-                       case WidgetType.EMBED_HTML: return <Code2 size={14} className="text-indigo-400" />;
-                       case WidgetType.AIRTABLE: return <Database size={14} className="text-rose-500" />;
-                       case WidgetType.PDF_DOCUMENT: return <FileText size={14} className="text-red-500" />;
-                       default: return <Layers size={14} />;
+                       case WidgetType.IMAGE: return <ImageIcon size={12} />;
+                       case WidgetType.VIDEO: return <Film size={12} />;
+                       case WidgetType.TEXT: return <Type size={12} />;
+                       case WidgetType.CLOCK: return <Clock size={12} />;
+                       case WidgetType.CALENDAR: return <Calendar size={12} />;
+                       case WidgetType.WEATHER: return <CloudSun size={12} />;
+                       case WidgetType.FULL_INFO: return <Layout size={12} />;
+                       case WidgetType.RSS: return <Rss size={12} />;
+                       case WidgetType.IFRAME: return <Globe size={12} />;
+                       case WidgetType.GIF: return <Gift size={12} />;
+                       case WidgetType.NOTES: return <StickyNote size={12} className="text-yellow-400" />;
+                       case WidgetType.TODO: return <ListTodo size={12} className="text-emerald-400" />;
+                       case WidgetType.COUNTDOWN: return <Timer size={12} className="text-rose-400" />;
+                       case WidgetType.CHORES: return <ClipboardList size={12} className="text-cyan-400" />;
+                       case WidgetType.MEAL_PLAN: return <Utensils size={12} className="text-amber-400" />;
+                       case WidgetType.MARKET_WATCH: return <TrendingUp size={12} className="text-green-400" />;
+                       case WidgetType.BROWSER_SNAPSHOT: return <Camera size={12} className="text-blue-400" />;
+                       case WidgetType.GOOGLE_DOCS: return <FileText size={12} className="text-cyan-500" />;
+                       case WidgetType.OFFICE_DOCS: return <BookOpen size={12} className="text-blue-500" />;
+                       case WidgetType.POWER_BI: return <Layout size={12} className="text-amber-500" />;
+                       case WidgetType.EMBED_HTML: return <Code2 size={12} className="text-indigo-400" />;
+                       case WidgetType.AIRTABLE: return <Database size={12} className="text-rose-500" />;
+                       case WidgetType.PDF_DOCUMENT: return <FileText size={12} className="text-red-500" />;
+                       default: return <Layers size={12} />;
                      }
                    };
 
@@ -938,7 +1122,7 @@ const Editor: React.FC = () => {
                        onDrop={(e) => handleLayerDrop(e, layer.i)}
                        onDragEnd={handleLayerDragEnd}
                        onClick={() => setSelectedWidget(layer.i)}
-                       className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-all border ${
+                       className={`flex items-center gap-1.5 p-1.5 rounded-lg cursor-pointer transition-all border ${
                          isSelected 
                            ? 'bg-[#ea580c]/10 border-[#ea580c]/50 text-[#ea580c]' 
                            : 'bg-slate-900 border-transparent hover:bg-slate-800 text-slate-300'
@@ -947,283 +1131,100 @@ const Editor: React.FC = () => {
                        }`}
                      >
                        <div className="cursor-move text-slate-500 hover:text-slate-300">
-                         <GripVertical size={14} />
+                         <GripVertical size={12} />
                        </div>
-                       <div className="flex items-center justify-center w-6 h-6 rounded bg-slate-950/50 text-slate-400">
+                       <div className="flex items-center justify-center w-5.5 h-5.5 rounded bg-slate-950/50 text-slate-400">
                          {getIcon(layer.type)}
                        </div>
-                       <span className="text-xs font-medium truncate flex-1">{getName(layer.type)}</span>
+                       <span className="text-[10px] font-medium truncate flex-1">{getName(layer.type)}</span>
                        {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-[#ea580c]"></div>}
                      </div>
                    );
                })}
                {activePage.layout.length === 0 && (
-                 <div className="text-center p-4 border border-dashed border-slate-800 rounded-lg text-slate-500 text-[10px]">
+                 <div className="text-center p-3 border border-dashed border-slate-800 rounded-lg text-slate-500 text-[9px]">
                    Nenhuma camada nesta cena.
                  </div>
                )}
              </div>
-             <p className="text-[8px] text-slate-500 mt-3 text-center">Arraste para reordenar (z-index)</p>
+             <p className="text-[8px] text-slate-500 mt-2 text-center">Arraste para reordenar (z-index)</p>
           </div>
 
-          <div className="p-5">
-             <h3 className="text-[10px] font-black text-indigo-500 uppercase tracking-widest mb-4 flex items-center gap-2">
-               <MonitorPlay size={12} /> Fundo da Cena
-             </h3>
-             
-             <div className="space-y-4">
-                <div className="group">
-                  <label className="text-[9px] font-bold text-slate-500 uppercase block mb-1.5">Vídeo de Fundo (YouTube ou MP4)</label>
-                  <div className="relative">
-                    <input 
-                      type="text" 
-                      placeholder="https://youtube.com... ou https://.../video.mp4"
-                      value={activePage.backgroundVideoUrl || ''}
-                      onChange={(e) => {
-                        const updated = [...display.pages];
-                        updated[activePageIdx].backgroundVideoUrl = e.target.value;
-                        updated[activePageIdx].backgroundImage = ''; 
-                        setDisplay({...display, pages: updated});
-                      }}
-                      className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 pl-8 text-xs text-slate-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all"
-                    />
-                    <Film size={12} className="absolute left-2.5 top-3 text-slate-600" />
-                  </div>
-                  
-                  <div className="relative mt-3 mb-3">
-                    <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-slate-800"></div>
-                    </div>
-                    <div className="relative flex justify-center text-xs">
-                      <span className="bg-slate-900 px-2 text-slate-500 font-bold uppercase text-[9px]">ou</span>
-                    </div>
-                  </div>
-
-                  <button 
-                    onClick={() => {
-                      setMediaLibraryConfig({
-                        isOpen: true,
-                        allowedTypes: 'video',
-                        onSelect: (url) => {
-                          const updated = [...display.pages];
-                          updated[activePageIdx].backgroundVideoUrl = url;
-                          updated[activePageIdx].backgroundImage = ''; 
-                          setDisplay({...display, pages: updated});
-                        }
-                      });
-                    }}
-                    className="flex items-center justify-center gap-2 w-full bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2.5 rounded-lg font-bold text-xs uppercase tracking-wider cursor-pointer transition-all border border-slate-700 hover:border-slate-500 shadow-lg"
-                  >
-                    <Upload size={14} />
-                    Selecionar Vídeo
-                  </button>
-                  
-                  {activePage.backgroundVideoUrl && (
-                    <div className="flex flex-col gap-2 mt-2 ml-1">
-                      <div className="flex items-center gap-2">
-                        <input 
-                          type="checkbox" 
-                          id="bg-video-mute"
-                          checked={activePage.backgroundVideoMuted !== false} // Default true
-                          onChange={(e) => {
-                            const updated = [...display.pages];
-                            updated[activePageIdx].backgroundVideoMuted = e.target.checked;
-                            setDisplay({...display, pages: updated});
-                          }}
-                          className="w-3.5 h-3.5 rounded border-slate-700 bg-slate-900 text-cyan-500 focus:ring-offset-0 focus:ring-1 focus:ring-cyan-500 cursor-pointer"
-                        />
-                        <label htmlFor="bg-video-mute" className="text-[10px] font-bold text-slate-400 uppercase cursor-pointer select-none hover:text-cyan-400 transition-colors">
-                          Vídeo Mudo (Sem Áudio)
-                        </label>
-                      </div>
-                      
-                      {isYouTubeUrl(activePage.backgroundVideoUrl) && (
-                        <div className="flex items-center justify-between bg-slate-950/50 p-2 rounded-lg border border-slate-800/50 mt-1">
-                          <label className="text-[10px] font-bold text-slate-400 uppercase">Qualidade YouTube</label>
-                          <select 
-                            value={activePage.backgroundVideoQuality || 'highres'}
-                            onChange={(e) => {
-                              const updated = [...display.pages];
-                              updated[activePageIdx].backgroundVideoQuality = e.target.value;
-                              setDisplay({...display, pages: updated});
-                            }}
-                            className="bg-slate-900 border border-slate-700 text-slate-300 text-[10px] rounded px-2 py-1 outline-none focus:border-cyan-500"
-                          >
-                            <option value="highres">Máxima (Auto)</option>
-                            <option value="hd1080">1080p</option>
-                            <option value="hd720">720p</option>
-                            <option value="large">480p</option>
-                            <option value="medium">360p</option>
-                            <option value="small">240p</option>
-                          </select>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-
-                <div className="relative">
-                   <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                      <span className="bg-slate-900 px-2 text-[9px] text-slate-600 font-bold">OU</span>
-                   </div>
-                   <div className="border-t border-slate-800 w-full"></div>
-                </div>
-
-                <div className="group">
-                  <label className="text-[9px] font-bold text-slate-500 uppercase block mb-1.5">Imagem de Fundo</label>
-                  <div className="relative mb-2">
-                    <input 
-                      type="text" 
-                      placeholder="https://exemplo.com/imagem.jpg"
-                      value={activePage.backgroundImage || ''}
-                      onChange={(e) => {
-                        const updated = [...display.pages];
-                        updated[activePageIdx].backgroundImage = e.target.value;
-                        updated[activePageIdx].backgroundVideoUrl = ''; 
-                        setDisplay({...display, pages: updated});
-                      }}
-                      className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 pl-8 text-xs text-slate-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all"
-                    />
-                    <ImageIcon size={12} className="absolute left-2.5 top-3 text-slate-600" />
-                  </div>
-                  
-                  <button 
-                    onClick={() => {
-                      setMediaLibraryConfig({
-                        isOpen: true,
-                        allowedTypes: 'image',
-                        onSelect: (url) => {
-                          const updated = [...display.pages];
-                          updated[activePageIdx].backgroundImage = url;
-                          updated[activePageIdx].backgroundVideoUrl = ''; 
-                          setDisplay({...display, pages: updated});
-                        }
-                      });
-                    }}
-                    className="w-full flex items-center justify-center gap-2 py-2 bg-slate-900 border border-slate-800 hover:bg-slate-800 rounded-lg text-[10px] font-bold text-slate-400 hover:text-white transition-all"
-                  >
-                    <Upload size={12} /> 
-                    SELECIONAR IMAGEM
-                  </button>
-
-                  <p className="text-[9px] text-slate-600 mt-3 leading-relaxed border-t border-slate-800/50 pt-2">
-                    Sugestão: Encontre imagens 4K incríveis em <a href="https://unsplash.com/wallpapers/desktop/4k" target="_blank" rel="noopener noreferrer" className="text-cyan-500 hover:underline">Unsplash</a>, <a href="https://www.pexels.com/search/4k%20wallpaper/" target="_blank" rel="noopener noreferrer" className="text-cyan-500 hover:underline">Pexels</a> ou <a href="https://pixabay.com/images/search/4k%20wallpaper/" target="_blank" rel="noopener noreferrer" className="text-cyan-500 hover:underline">Pixabay</a>.
-                  </p>
-
-                  <div className="relative mt-4 mb-4">
-                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <span className="bg-slate-900 px-2 text-[9px] text-slate-600 font-bold">OU</span>
-                     </div>
-                     <div className="border-t border-slate-800 w-full"></div>
-                  </div>
-
-                  <div className="group">
-                    <label className="text-[9px] font-bold text-slate-500 uppercase block mb-1.5">Fundo Animado</label>
-                    <button
-                      onClick={() => {
-                        setSelectedWidget(null);
-                        setShowBgAnimModal(true);
-                      }}
-                      className="w-full flex items-center justify-between gap-2 py-2.5 px-3 bg-slate-950 border border-slate-700 hover:border-cyan-500 rounded-lg text-xs text-slate-300 hover:text-white transition-all group-hover:shadow-[0_0_15px_rgba(6,182,212,0.15)]"
-                    >
-                      <span className="flex items-center gap-2">
-                        <MonitorPlay size={14} className="text-cyan-500" />
-                        {activePage.backgroundAnimation ? 
-                          ['Automático (Clima)', 'Fluxo Gradiente', 'Céu e Nuvens', 'Chuva Digital', 'Neve Caindo', 'Chamas', 'Grid Tech', 'Alerta Vermelho', 'Pulso Azul', 'Pulso Verde', 'Aurora Boreal']
-                          [['auto-weather', 'gradient-flow', 'clouds', 'rain', 'snow', 'fire', 'tech-grid', 'pulse-red', 'pulse-blue', 'pulse-green', 'aurora'].indexOf(activePage.backgroundAnimation)]
-                          : 'Escolher Animação'}
-                      </span>
-                      <div className={`w-2 h-2 rounded-full ${activePage.backgroundAnimation ? 'bg-cyan-500 shadow-[0_0_8px_rgba(6,182,212,0.8)]' : 'bg-slate-700'}`}></div>
-                    </button>
-                  </div>
-
-                  <div className="mt-6 pt-6 border-t border-slate-800">
-                    <h3 className="text-[10px] font-black text-amber-500 uppercase tracking-widest mb-4 flex items-center gap-2">
-                      <Move size={12} /> Transições
-                    </h3>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="text-[9px] font-bold text-slate-500 uppercase block mb-1.5">Tipo de Transição</label>
-                        <select 
-                          value={activePage.transitionType || 'none'}
-                          onChange={(e) => {
-                            const updated = [...display.pages];
-                            updated[activePageIdx].transitionType = e.target.value as any;
-                            setDisplay({...display, pages: updated});
-                          }}
-                          className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-xs text-slate-200 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition-all"
-                        >
-                          <option value="none">Nenhuma</option>
-                          <option value="fade">Fade</option>
-                          <option value="slide-left">Slide Esquerda</option>
-                          <option value="slide-right">Slide Direita</option>
-                          <option value="slide-up">Slide Cima</option>
-                          <option value="slide-down">Slide Baixo</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="text-[9px] font-bold text-slate-500 uppercase block mb-1.5">Duração (ms)</label>
-                        <input 
-                          type="number"
-                          value={activePage.transitionDuration || 500}
-                          onChange={(e) => {
-                            const updated = [...display.pages];
-                            updated[activePageIdx].transitionDuration = parseInt(e.target.value);
-                            setDisplay({...display, pages: updated});
-                          }}
-                          className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-xs text-slate-200 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition-all"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="mt-3">
-                    <label className="text-[9px] font-bold text-slate-500 uppercase block mb-1.5">Ajuste da Imagem</label>
-                    <select 
-                      className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-[10px] text-slate-200 outline-none focus:border-cyan-500 cursor-pointer"
-                      value={activePage.backgroundFit || 'cover'}
-                      onChange={(e) => {
-                        const updated = [...display.pages];
-                        updated[activePageIdx].backgroundFit = e.target.value as any;
-                        setDisplay({...display, pages: updated});
-                      }}
-                    >
-                      <option value="cover">Preencher (Corta bordas se necessário)</option>
-                      <option value="fill">Esticar (Preenche 100% ignorando proporção)</option>
-                      <option value="contain">Ajustar (Mostra imagem inteira com bordas)</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="text-[9px] font-bold text-slate-500 uppercase block mb-1.5">Duração (Segundos)</label>
-                  <div className="flex items-center gap-2 bg-slate-950 border border-slate-700 rounded-lg p-1">
-                    <Clock size={14} className="ml-2 text-slate-600" />
-                    <input 
-                      type="number" 
-                      value={activePage.duration} 
-                      onChange={(e) => {
-                        const updated = [...display.pages];
-                        updated[activePageIdx].duration = parseInt(e.target.value) || 5;
-                        setDisplay({...display, pages: updated});
-                      }}
-                      className="w-full bg-transparent border-none p-1.5 text-sm font-bold text-slate-200 focus:ring-0 outline-none"
-                    />
-                  </div>
-                </div>
+          {/* Section 3: Biblioteca de Widgets */}
+          <div className="p-3.5">
+             <div className="flex justify-between items-center mb-3">
+               <h3 className="text-[10px] font-black text-[#ea580c] uppercase tracking-widest flex items-center gap-1.5">
+                 <Layers size={11} /> Biblioteca de Widgets
+               </h3>
              </div>
              
-             {activePage.broadcast_id && (
-               <div className="mt-4 p-3 bg-cyan-900/30 border border-cyan-800/50 rounded-xl flex items-start gap-3">
-                 <CalendarDays className="text-cyan-400 shrink-0 mt-0.5" size={16} />
-                 <div>
-                   <p className="text-xs font-bold text-cyan-400 mb-1">Cena Programada</p>
-                   <p className="text-[10px] text-cyan-200/70 leading-relaxed">
-                     Esta cena foi injetada pela Central de Programação. Alterações feitas aqui afetarão apenas esta tela e poderão ser sobrescritas se a programação for atualizada.
-                   </p>
-                 </div>
+             {/* Básicos */}
+             <div className="mb-2.5">
+               <h4 className="text-[9px] font-black text-emerald-400 uppercase tracking-widest mb-1 flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-emerald-400 inline-block"></span>Básicos</h4>
+               <div className="grid grid-cols-3 gap-1.5">
+                 <WidgetTool icon="/icons3d/image.png" label="Imagem" description="Exibe imagens de alta qualidade (PNG, JPG, SVG) com ajuste automático ao contêiner." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.IMAGE)} />
+                 <WidgetTool icon="/icons3d/video.png" label="Vídeo" description="Reproduz vídeos locais em looping ou links diretos do YouTube." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.VIDEO)} />
+                 <WidgetTool icon="/icons3d/text.png" label="Texto" description="Adiciona caixas de texto com fontes, cores e tamanhos personalizáveis." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.TEXT)} />
+                 <WidgetTool icon="/icons3d/gif.png" label="GIF" description="Exibe animações divertidas em formato GIF para atrair a atenção do público." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.GIF)} />
+                 <WidgetTool icon="/icons3d/web.png" label="Web" description="Incorpora qualquer site ou página web externa de forma interativa." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.IFRAME)} />
                </div>
-             )}
+             </div>
+
+             {/* Utilitários */}
+             <div className="mb-2.5">
+               <h4 className="text-[9px] font-black text-cyan-400 uppercase tracking-widest mb-1 flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-cyan-400 inline-block"></span>Utilitários</h4>
+               <div className="grid grid-cols-3 gap-1.5">
+                 <WidgetTool icon="/icons3d/clock.png" label="Relógio" description="Mostra um relógio digital sincronizado em tempo real com a cidade escolhida." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.CLOCK)} />
+                 <WidgetTool icon="/icons3d/weather.png" label="Clima" description="Exibe a previsão do tempo e temperatura em tempo real para qualquer cidade." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.WEATHER)} />
+                 <WidgetTool icon="/icons3d/full-info.png" label="Completo" description="Painel integrado de relógio, clima e fundos de alta definição." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.FULL_INFO)} />
+                 <WidgetTool icon="/icons3d/rss.png" label="RSS" description="Exibe feeds de notícias em tempo real de portais de notícias como G1 e CNN." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.RSS)} />
+                 <WidgetTool icon="/icons3d/calendar.png" label="Agenda" description="Integração direta com Google Agenda para exibir eventos e programações." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.CALENDAR)} />
+               </div>
+             </div>
+
+             {/* Interativos */}
+             <div className="mb-2.5">
+               <h4 className="text-[9px] font-black text-amber-400 uppercase tracking-widest mb-1 flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-amber-400 inline-block"></span>Interativos</h4>
+               <div className="grid grid-cols-3 gap-1.5">
+                 <WidgetTool icon="/icons3d/notes.png" label="Notas" description="Mural de notas adesivas com temas neon, glassmorphism e cores vibrantes." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.NOTES)} />
+                 <WidgetTool icon="/icons3d/todo.png" label="Tarefas" description="Lista de tarefas interativa com checkboxes e progresso de conclusão." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.TODO)} />
+                 <WidgetTool icon="/icons3d/countdown.png" label="Contador" description="Cronômetro regressivo para grandes eventos, metas ou datas especiais." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.COUNTDOWN)} />
+                 <WidgetTool icon="/icons3d/chores.png" label="Deveres" description="Quadro semanal de deveres domésticos ou corporativos com responsáveis." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.CHORES)} />
+                 <WidgetTool icon="/icons3d/meal-plan.png" label="Meal Plan" description="Planejador ou cardápio de refeições semanais com slide para os dias." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.MEAL_PLAN)} />
+               </div>
+             </div>
+
+             {/* Integrações */}
+             <div className="mb-2.5">
+               <h4 className="text-[9px] font-black text-rose-400 uppercase tracking-widest mb-1 flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-rose-400 inline-block"></span>Integrações</h4>
+               <div className="grid grid-cols-3 gap-1.5">
+                 <WidgetTool icon="/icons3d/market.png" label="Bolsa" description="Painel de cotações financeiras de ações e criptomoedas em tempo real." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.MARKET_WATCH)} />
+                 <WidgetTool icon="/icons3d/snapshot.png" label="Snapshot" description="Renderiza capturas estáticas e periódicas de páginas de forma segura." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.BROWSER_SNAPSHOT)} />
+                 <WidgetTool icon="/icons3d/google-docs.png" label="G Docs" description="Incorpora documentos, planilhas ou slides do Google Workspace." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.GOOGLE_DOCS)} />
+                 <WidgetTool icon="/icons3d/office-docs.png" label="Office Docs" description="Exibe planilhas Excel, documentos Word ou slides PowerPoint do Office 365." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.OFFICE_DOCS)} />
+                 <WidgetTool icon="/icons3d/power-bi.png" label="Power BI" description="Exibe painéis interativos e relatórios dinâmicos do Microsoft Power BI." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.POWER_BI)} />
+                 <WidgetTool icon="/icons3d/airtable.png" label="Airtable" description="Exibe visualizações, tabelas ou bases de dados completas do Airtable." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.AIRTABLE)} />
+                 <WidgetTool icon="/icons3d/pdf.png" label="PDF" description="Exibe documentos PDFs e apostilas corporativas página a página." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.PDF_DOCUMENT)} />
+                 <WidgetTool icon="/icons3d/html.png" label="HTML" description="Insira código HTML, CSS ou JS personalizado livremente." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.EMBED_HTML)} />
+               </div>
+             </div>
+             
+             <div className="mt-3 pt-3 border-t border-slate-800">
+                <button 
+                  onClick={() => setIsClearingScene(true)}
+                  className="w-full flex items-center justify-center gap-2 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 rounded-lg text-[9px] font-bold transition-colors border border-rose-500/20 uppercase tracking-wider"
+                >
+                  <Trash2 size={11} /> Limpar Todos os Widgets
+                </button>
+             </div>
+
+             {/* Dynamic Tooltip Explanation Box */}
+             <div className="mt-3 p-2.5 bg-slate-950/60 rounded-xl border border-slate-800/80 min-h-[48px] flex items-center gap-2">
+               <Info size={12} className="text-[#ea580c] shrink-0" />
+               <p className="text-[9px] text-slate-400 font-medium leading-relaxed">
+                 {hoveredDescription || "Passe o mouse sobre um widget para ver a descrição detalhada."}
+               </p>
+             </div>
           </div>
         </aside>
 
@@ -3577,11 +3578,11 @@ const WidgetTool = ({ icon, label, description, onClick, onHover }: any) => (
     onClick={onClick}
     onMouseEnter={() => onHover && onHover(description)}
     onMouseLeave={() => onHover && onHover('')}
-    className="relative flex flex-col items-center justify-center p-2 bg-[#1C1D22] border border-slate-800/60 rounded-xl hover:bg-[#ea580c]/10 hover:border-[#ea580c] hover:shadow-[0_0_15px_rgba(234,88,12,0.15)] active:scale-95 transition-all group w-full aspect-square cursor-pointer"
+    className="relative flex flex-col items-center justify-center p-1 bg-[#1C1D22] border border-slate-800/60 rounded-lg hover:bg-[#ea580c]/10 hover:border-[#ea580c] hover:shadow-[0_0_12px_rgba(234,88,12,0.15)] active:scale-95 transition-all group w-full cursor-pointer py-1.5"
   >
     {/* Tiny Info Icon in Corner */}
-    <div className="absolute top-1.5 right-1.5 opacity-30 group-hover:opacity-100 transition-opacity text-slate-400 group-hover:text-[#ea580c]">
-      <Info size={10} />
+    <div className="absolute top-1 right-1 opacity-20 group-hover:opacity-100 transition-opacity text-slate-400 group-hover:text-[#ea580c]">
+      <Info size={8} />
     </div>
 
     {/* Elegant Pure CSS Tooltip */}
@@ -3592,19 +3593,19 @@ const WidgetTool = ({ icon, label, description, onClick, onHover }: any) => (
       <div className="w-2 h-2 bg-slate-950 border-r border-b border-slate-800 rotate-45 -mt-1"></div>
     </div>
 
-    {/* Larger Icon Container with LESS Spacing */}
-    <div className="text-slate-300 group-hover:text-[#ea580c] mb-1 transition-colors drop-shadow-sm flex items-center justify-center h-12 w-12">
+    {/* Smaller Icon Container with LESS Spacing */}
+    <div className="text-slate-300 group-hover:text-[#ea580c] mb-0.5 transition-colors drop-shadow-sm flex items-center justify-center h-8 w-8">
       {typeof icon === 'string' ? (
         <img 
           src={icon} 
           alt={label} 
-          className="w-11 h-11 object-contain group-hover:scale-110 transition-transform duration-300 filter drop-shadow-[0_0_8px_rgba(234,88,12,0.15)]" 
+          className="w-7 h-7 object-contain group-hover:scale-110 transition-transform duration-300 filter drop-shadow-[0_0_6px_rgba(234,88,12,0.15)]" 
         />
       ) : (
         icon
       )}
     </div>
-    <span className="text-[10px] font-bold text-slate-300 group-hover:text-white uppercase tracking-wider transition-colors text-center truncate w-full px-0.5">
+    <span className="text-[8px] font-bold text-slate-400 group-hover:text-white uppercase tracking-wider transition-colors text-center truncate w-full px-0.5">
       {label}
     </span>
   </button>
