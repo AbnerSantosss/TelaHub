@@ -9,18 +9,20 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Executando seed do banco de dados...');
 
-  // ── Admin principal (Abner) ──
-  const abnerPassword = await bcrypt.hash('mudar@123', 10);
+  // ── Admin principal ──
+  const adminEmail = process.env.ADMIN_EMAIL || 'admin@example.com';
+  const adminRawPassword = process.env.ADMIN_PASSWORD || 'Mudar@123';
+  const abnerPassword = await bcrypt.hash(adminRawPassword, 10);
 
   const abner = await prisma.user.upsert({
     where: { username: 'admin' },
     update: {
-      email: 'binho_captiva@hotmail.com',
+      email: adminEmail,
       password: abnerPassword,
     },
     create: {
       username: 'admin',
-      email: 'binho_captiva@hotmail.com',
+      email: adminEmail,
       password: abnerPassword,
       role: 'admin',
     },

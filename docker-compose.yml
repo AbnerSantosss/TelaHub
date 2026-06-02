@@ -28,6 +28,8 @@ services:
       - PORT=3001
       - CORS_ORIGINS=${CORS_ORIGINS:-*}
       - APP_URL=${APP_URL:-https://telahub.proxserverabner.site}
+      - ADMIN_EMAIL=${ADMIN_EMAIL:-admin@example.com}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-Mudar@123}
     depends_on:
       - db
     volumes:

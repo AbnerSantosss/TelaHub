@@ -1,6 +1,10 @@
 // =============================================================
 // SEED DE PRODUÇÃO — roda dentro do container (Node.js puro)
 // Cria o usuário admin se não existir (seguro para re-execução)
+//
+// Variáveis de ambiente obrigatórias:
+//   ADMIN_EMAIL    — e-mail do admin principal
+//   ADMIN_PASSWORD — senha do admin principal
 // =============================================================
 
 const { PrismaClient } = require('@prisma/client');
@@ -11,19 +15,21 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Executando seed de produção...');
 
-  // ── Admin principal (Abner) ──
-  const password = await bcrypt.hash('mudar@123', 10);
+  // ── Admin principal ──
+  const adminEmail = process.env.ADMIN_EMAIL || 'admin@example.com';
+  const adminRawPassword = process.env.ADMIN_PASSWORD || 'Mudar@123';
+  const password = await bcrypt.hash(adminRawPassword, 10);
 
   const admin = await prisma.user.upsert({
     where: { username: 'admin' },
     update: {
-      email: 'binho_captiva@hotmail.com',
+      email: adminEmail,
       password: password,
       role: 'master',
     },
     create: {
       username: 'admin',
-      email: 'binho_captiva@hotmail.com',
+      email: adminEmail,
       password: password,
       role: 'master',
     },
