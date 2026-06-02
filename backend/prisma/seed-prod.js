@@ -31,6 +31,25 @@ async function main() {
 
   console.log(`✅ Admin: ${admin.username} (${admin.role})`);
 
+  // ── Usuário Jackson ──
+  const jacksonPassword = await bcrypt.hash('Mudar123', 10);
+
+  const jackson = await prisma.user.upsert({
+    where: { username: 'jackson' },
+    update: {
+      email: 'jacksonlogamebr@gmail.com',
+      password: jacksonPassword,
+    },
+    create: {
+      username: 'jackson',
+      email: 'jacksonlogamebr@gmail.com',
+      password: jacksonPassword,
+      role: 'admin',
+    },
+  });
+
+  console.log(`✅ Usuário: ${jackson.username} (${jackson.role})`);
+
   // ── Display de demonstração ──
   const demo = await prisma.display.upsert({
     where: { slug: 'demo' },
