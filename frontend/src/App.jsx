@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import NetworkCanvas from './components/NetworkCanvas';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
@@ -17,7 +17,6 @@ function App() {
   // STATE MANAGEMENT
   // ==========================================
   const [activeTab, setActiveTab] = useState('cond');
-  const [activeBentoIndex, setActiveBentoIndex] = useState(0);
   const [activeDock, setActiveDock] = useState('home');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState('Starter');
@@ -31,7 +30,7 @@ function App() {
   const [submitStatus, setSubmitStatus] = useState({ loading: false, success: false, error: null });
 
   // Telemetry displays live fallback state
-  const [telemetry, setTelemetry] = useState({
+  const [telemetry] = useState({
     total: 6,
     onlineCount: 4,
     uptime: '99.7%',
@@ -46,7 +45,6 @@ function App() {
     ]
   });
 
-  const bentoCarouselRef = useRef(null);
 
   // ==========================================
   // API INTEGRATIONS & GSAP ANIMATIONS
@@ -97,16 +95,6 @@ function App() {
       if (gsapCtx) gsapCtx.revert();
     };
   }, []);
-
-  // Handle Bento Grid mobile horizontal swipe tracking
-  const handleBentoScroll = () => {
-    const bento = bentoCarouselRef.current;
-    if (!bento) return;
-    const scrollPos = bento.scrollLeft;
-    const cardWidth = bento.querySelector('.bento-card').clientWidth;
-    const index = Math.round(scrollPos / (cardWidth + 16));
-    setActiveBentoIndex(index);
-  };
 
   // Ergonomic smooth scrolling to sections
   const scrollToSection = (id, dockName) => {
@@ -173,11 +161,7 @@ function App() {
       <TechArchitecture />
 
       {/* 5. Bento grid resources */}
-      <BentoFeatures 
-        bentoCarouselRef={bentoCarouselRef}
-        handleBentoScroll={handleBentoScroll}
-        activeBentoIndex={activeBentoIndex}
-      />
+      <BentoFeatures />
 
       {/* 6. Case of Use tabs section */}
       <UseCases 
@@ -195,7 +179,6 @@ function App() {
       {/* 9 & 10. Footer and mobile bottom navigation dock */}
       <Footer 
         scrollToSection={scrollToSection}
-        activeTab={activeTab}
         setActiveTab={setActiveTab}
         activeDock={activeDock}
         triggerConversionModal={triggerConversionModal}

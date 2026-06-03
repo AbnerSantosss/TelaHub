@@ -1,5 +1,3 @@
-import React from 'react';
-
 const TV_DATA = {
   cond: {
     landscape: { img: '/assets/images/recepcao_boas_vindas.png', label: '16:9 Horizontal' },
@@ -134,7 +132,7 @@ const UseCases = ({ activeTab, setActiveTab, telemetry }) => {
               <div className="tab-visual">
                 <TvSimulation tabKey="cond" />
                 <div style={{ display: 'flex', gap: 10 }}>
-                  <div style={{ flex: 1, background: 'rgba(37, 99, 235, 0.04)', border: '1px solid rgba(37, 99, 235, 0.15)', borderRadius: 2, padding: 14, fontSize: '0.78rem' }}>
+                  <div style={{ flex: 1, background: 'rgba(14, 165, 233, 0.08)', border: '1px solid rgba(14, 165, 233, 0.2)', borderRadius: 8, padding: 14, fontSize: '0.78rem' }}>
                     <div style={{ color: 'var(--text-secondary)', marginBottom: 4 }}>Telas ativas</div>
                     <div style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: '0.9rem' }}>
                       {telemetry.onlineCount} / {telemetry.total}
@@ -185,7 +183,7 @@ const UseCases = ({ activeTab, setActiveTab, telemetry }) => {
               <div className="tab-visual">
                 <TvSimulation tabKey="corp" />
                 <div style={{ display: 'flex', gap: 10 }}>
-                  <div style={{ flex: 1, background: 'rgba(37, 99, 235, 0.04)', border: '1px solid rgba(37, 99, 235, 0.15)', borderRadius: 2, padding: 14, fontSize: '0.78rem' }}>
+                  <div style={{ flex: 1, background: 'rgba(14, 165, 233, 0.08)', border: '1px solid rgba(14, 165, 233, 0.2)', borderRadius: 8, padding: 14, fontSize: '0.78rem' }}>
                     <div style={{ color: 'var(--text-secondary)', marginBottom: 4 }}>Displays</div>
                     <div style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: '0.9rem' }}>12 andares</div>
                   </div>
@@ -234,7 +232,7 @@ const UseCases = ({ activeTab, setActiveTab, telemetry }) => {
               <div className="tab-visual">
                 <TvSimulation tabKey="varejo" />
                 <div style={{ display: 'flex', gap: 10 }}>
-                  <div style={{ flex: 1, background: 'rgba(37, 99, 235, 0.04)', border: '1px solid rgba(37, 99, 235, 0.15)', borderRadius: 2, padding: 14, fontSize: '0.78rem' }}>
+                  <div style={{ flex: 1, background: 'rgba(14, 165, 233, 0.08)', border: '1px solid rgba(14, 165, 233, 0.2)', borderRadius: 8, padding: 14, fontSize: '0.78rem' }}>
                     <div style={{ color: 'var(--text-secondary)', marginBottom: 4 }}>Economia mensal</div>
                     <div style={{ fontWeight: 700, color: 'var(--cyan)', fontSize: '0.9rem' }}>R$ 1.200+</div>
                   </div>
@@ -283,7 +281,7 @@ const UseCases = ({ activeTab, setActiveTab, telemetry }) => {
               <div className="tab-visual">
                 <TvSimulation tabKey="rh" />
                 <div style={{ display: 'flex', gap: 10 }}>
-                  <div style={{ flex: 1, background: 'rgba(37, 99, 235, 0.04)', border: '1px solid rgba(37, 99, 235, 0.15)', borderRadius: 2, padding: 14, fontSize: '0.78rem' }}>
+                  <div style={{ flex: 1, background: 'rgba(14, 165, 233, 0.08)', border: '1px solid rgba(14, 165, 233, 0.2)', borderRadius: 8, padding: 14, fontSize: '0.78rem' }}>
                     <div style={{ color: 'var(--text-secondary)', marginBottom: 4 }}>Setores ativos</div>
                     <div style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: '0.9rem' }}>8 TVs</div>
                   </div>
@@ -314,13 +312,13 @@ const UseCases = ({ activeTab, setActiveTab, telemetry }) => {
             gap: '24px'
           }}>
             {/* Testimonial 1 */}
-            <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '2px', padding: '32px 28px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', padding: '32px 28px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div style={{ display: 'flex', gap: '4px', color: '#FBBF24', fontSize: '1.2rem' }}>★★★★★</div>
               <p style={{ fontSize: '0.95rem', color: '#CBD5E1', lineHeight: '1.6', fontStyle: 'italic', margin: 0 }}>
                 "Eu perdia horas toda semana gravando vídeos em pendrives para colocar na TV da recepção. Com o TelaHub, eu atualizo a grade de aulas e os avisos de feriado direto de casa, em dois minutos. A recepção da academia ficou com cara de rede gigante."
               </p>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '8px' }}>
-                <div style={{ width: '36px', height: '36px', background: 'rgba(37,99,235,0.2)', border: '1px solid rgba(37,99,235,0.35)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', color: '#60A5FA', fontSize: '0.9rem' }}>RA</div>
+                <div style={{ width: '36px', height: '36px', background: 'rgba(14,165,233,0.2)', border: '1px solid rgba(14,165,233,0.35)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', color: '#38bdf8', fontSize: '0.9rem' }}>RA</div>
                 <div>
                   <h4 style={{ fontSize: '0.9rem', fontWeight: '700', color: '#E2E8F0', margin: 0 }}>Rodrigo Alencar</h4>
                   <span style={{ fontSize: '0.78rem', color: '#64748B' }}>Proprietário da FitLife Academia</span>
@@ -335,7 +333,7 @@ const UseCases = ({ activeTab, setActiveTab, telemetry }) => {
                 "As TVs da minha clínica ficavam desligadas ou passando canais abertos que não interessavam a ninguém. Hoje, nós exibimos os vídeos dos nossos procedimentos estéticos, dicas de saúde e comunicados em loop automático. Nossos clientes elogiam a modernidade."
               </p>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '8px' }}>
-                <div style={{ width: '36px', height: '36px', background: 'rgba(37,99,235,0.2)', border: '1px solid rgba(37,99,235,0.35)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', color: '#60A5FA', fontSize: '0.9rem' }}>MC</div>
+                <div style={{ width: '36px', height: '36px', background: 'rgba(14,165,233,0.2)', border: '1px solid rgba(14,165,233,0.35)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', color: '#38bdf8', fontSize: '0.9rem' }}>MC</div>
                 <div>
                   <h4 style={{ fontSize: '0.9rem', fontWeight: '700', color: '#E2E8F0', margin: 0 }}>Dra. Mariana Costa</h4>
                   <span style={{ fontSize: '0.78rem', color: '#64748B' }}>Diretora da OdontoClean</span>

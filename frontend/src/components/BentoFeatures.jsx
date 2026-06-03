@@ -1,5 +1,3 @@
-import React from 'react';
-
 const BentoFeatures = () => {
   const desires = [
     {
@@ -29,16 +27,16 @@ const BentoFeatures = () => {
   ];
 
   return (
-    <section id="recursos" aria-labelledby="recursos-heading" style={{ background: '#F9FAFB' }}>
+    <section id="recursos" aria-labelledby="recursos-heading">
       <div className="container">
         <div className="section-header" style={{ textAlign: 'center', marginBottom: '56px' }}>
-          <div className="label reveal" style={{ background: '#ECFDF5', color: '#10B981', borderColor: '#A7F3D0', borderRadius: '99px' }}>
+          <div className="label reveal" style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10B981', borderColor: 'rgba(16, 185, 129, 0.25)', borderRadius: '99px' }}>
             Foco no Dono do Negócio
           </div>
           <h2 id="recursos-heading" className="reveal" style={{ fontSize: 'clamp(1.8rem, 3vw, 2.5rem)', fontWeight: '800' }}>
             O TelaHub é para você que quer...
           </h2>
-          <p className="reveal" style={{ marginTop: '16px', color: '#4B5563', fontSize: '1.05rem', maxWidth: '580px', marginLeft: 'auto', marginRight: 'auto' }}>
+          <p className="reveal" style={{ marginTop: '16px', color: 'var(--text-secondary)', fontSize: '1.05rem', maxWidth: '580px', marginLeft: 'auto', marginRight: 'auto' }}>
             Seja você dono de academia, clínica, restaurante, supermercado ou loja física, o TelaHub é a ponte para uma comunicação de nível de grandes redes.
           </p>
         </div>
@@ -50,20 +48,21 @@ const BentoFeatures = () => {
         }}>
           {desires.map((item) => (
             <div key={item.id} className="reveal" style={{
-              background: '#FFFFFF',
-              border: '1px solid #E5E7EB',
-              borderRadius: '2px',
+              background: 'var(--bg-card)',
+              border: '1px solid var(--border)',
+              borderRadius: '16px',
               padding: '32px 28px',
               display: 'flex',
               flexDirection: 'column',
               gap: '16px',
-              position: 'relative'
+              position: 'relative',
+              transition: 'all 0.3s ease-out'
             }}>
               <div style={{
                 width: '36px',
                 height: '36px',
-                background: '#ECFDF5',
-                border: '1px solid #A7F3D0',
+                background: 'rgba(16, 185, 129, 0.1)',
+                border: '1px solid rgba(16, 185, 129, 0.25)',
                 borderRadius: '50%',
                 display: 'flex',
                 alignItems: 'center',
@@ -74,10 +73,10 @@ const BentoFeatures = () => {
               }}>
                 ✓
               </div>
-              <h3 style={{ fontSize: '1.2rem', fontWeight: '700', color: '#111827', margin: 0 }}>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: '700', color: 'var(--text-primary)', margin: 0 }}>
                 {item.title}
               </h3>
-              <p style={{ fontSize: '0.9rem', color: '#4B5563', lineHeight: '1.6', margin: 0 }}>
+              <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: '1.6', margin: 0 }}>
                 {item.description}
               </p>
               <span style={{

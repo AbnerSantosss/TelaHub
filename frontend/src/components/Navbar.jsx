@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 const Navbar = ({ scrollToSection, triggerConversionModal }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);

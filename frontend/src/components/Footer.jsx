@@ -1,6 +1,4 @@
-import React from 'react';
-
-const Footer = ({ scrollToSection, activeTab, setActiveTab, activeDock, triggerConversionModal }) => {
+const Footer = ({ scrollToSection, setActiveTab, activeDock, triggerConversionModal }) => {
   return (
     <>
       <footer>

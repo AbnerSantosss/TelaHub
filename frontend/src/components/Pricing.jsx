@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 const Pricing = ({ triggerConversionModal }) => {
   const [openFaq, setOpenFaq] = useState(null);
@@ -31,17 +31,17 @@ const Pricing = ({ triggerConversionModal }) => {
   };
 
   return (
-    <section id="precos" aria-labelledby="precos-heading" style={{ background: '#FFFFFF', borderBottom: '1px solid #E5E7EB' }}>
+    <section id="precos" aria-labelledby="precos-heading" style={{ borderBottom: '1px solid var(--border)' }}>
       <div className="container">
         {/* Price Anchor Header */}
         <div className="precos-header" style={{ textAlign: 'center', marginBottom: '56px' }}>
-          <div className="label reveal" style={{ background: '#ECFDF5', color: '#10B981', borderColor: '#A7F3D0', borderRadius: '99px' }}>
+          <div className="label reveal" style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10B981', borderColor: 'rgba(16, 185, 129, 0.25)', borderRadius: '99px' }}>
             Investimento Inteligente
           </div>
           <h2 id="precos-heading" className="reveal" style={{ fontSize: 'clamp(1.8rem, 3vw, 2.5rem)', fontWeight: '800', lineHeight: '1.2', maxWidth: '780px', marginLeft: 'auto', marginRight: 'auto', marginBottom: '20px' }}>
             Quanto custa manter a TV do seu negócio desligada enquanto seu cliente já está dentro da sua loja?
           </h2>
-          <p className="reveal" style={{ marginTop: '16px', color: '#4B5563', fontSize: '1.05rem', maxWidth: '680px', marginLeft: 'auto', marginRight: 'auto', lineHeight: '1.6' }}>
+          <p className="reveal" style={{ marginTop: '16px', color: 'var(--text-secondary)', fontSize: '1.05rem', maxWidth: '680px', marginLeft: 'auto', marginRight: 'auto', lineHeight: '1.6' }}>
             Divulgue suas ofertas de alto valor, pratos do dia e informativos diretamente para quem já está pronto para comprar de você. O TelaHub se paga no primeiro dia, custando uma fração de panfletos ou cartazes impressos.
           </p>
         </div>
@@ -55,34 +55,34 @@ const Pricing = ({ triggerConversionModal }) => {
           marginBottom: '56px'
         }}>
           {/* Starter Plan */}
-          <div className="preco-card reveal" style={{ background: '#FFFFFF', border: '1px solid #E5E7EB', borderRadius: '2px', padding: '36px 28px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          <div className="preco-card reveal" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', padding: '36px 28px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
             <div>
-              <p className="plan-name" style={{ fontSize: '0.8rem', fontWeight: '700', color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px' }}>Starter</p>
+              <p className="plan-name" style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px' }}>Starter</p>
               <div className="plan-price" style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginBottom: '16px' }}>
-                <span className="plan-currency" style={{ fontSize: '1.2rem', fontWeight: '700', color: '#111827' }}>R$</span>
-                <span className="plan-amount" style={{ fontSize: '3rem', fontWeight: '800', color: '#111827', letterSpacing: '-0.04em', lineHeight: '1' }}>69</span>
-                <span className="plan-period" style={{ fontSize: '0.85rem', color: '#6B7280' }}>/mês</span>
+                <span className="plan-currency" style={{ fontSize: '1.2rem', fontWeight: '700', color: 'var(--text-primary)' }}>R$</span>
+                <span className="plan-amount" style={{ fontSize: '3rem', fontWeight: '800', color: 'var(--text-primary)', letterSpacing: '-0.04em', lineHeight: '1' }}>69</span>
+                <span className="plan-period" style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>/mês</span>
               </div>
-              <p className="plan-description" style={{ fontSize: '0.88rem', color: '#4B5563', lineHeight: '1.5', marginBottom: '24px' }}>
+              <p className="plan-description" style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: '1.5', marginBottom: '24px' }}>
                 Para pequenos negócios. Consultórios, lojas de bairro e condomínios. 2 telas já eliminam impressos e comunicam com máxima eficiência.
               </p>
-              <div className="plan-divider" style={{ height: '1px', background: '#E5E7EB', marginBottom: '24px' }}></div>
+              <div className="plan-divider" style={{ height: '1px', background: 'var(--border)', marginBottom: '24px' }}></div>
               
               <ul className="plan-features" style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '32px', padding: 0, listStyle: 'none' }}>
-                <li className="plan-feature" style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.88rem', color: '#4B5563' }}>
-                  <span className="plan-check" style={{ width: '18px', height: '18px', background: '#ECFDF5', border: '1px solid #A7F3D0', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981', fontSize: '0.65rem', fontWeight: 'bold' }}>✓</span>
+                <li className="plan-feature" style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.88rem', color: 'var(--text-secondary)' }}>
+                  <span className="plan-check" style={{ width: '18px', height: '18px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.25)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981', fontSize: '0.65rem', fontWeight: 'bold' }}>✓</span>
                   <span>Até 2 telas conectadas</span>
                 </li>
-                <li className="plan-feature" style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.88rem', color: '#4B5563' }}>
-                  <span className="plan-check" style={{ width: '18px', height: '18px', background: '#ECFDF5', border: '1px solid #A7F3D0', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981', fontSize: '0.65rem', fontWeight: 'bold' }}>✓</span>
+                <li className="plan-feature" style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.88rem', color: 'var(--text-secondary)' }}>
+                  <span className="plan-check" style={{ width: '18px', height: '18px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.25)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981', fontSize: '0.65rem', fontWeight: 'bold' }}>✓</span>
                   <span>Editor visual de arrastar e soltar</span>
                 </li>
-                <li className="plan-feature" style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.88rem', color: '#4B5563' }}>
-                  <span className="plan-check" style={{ width: '18px', height: '18px', background: '#ECFDF5', border: '1px solid #A7F3D0', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981', fontSize: '0.65rem', fontWeight: 'bold' }}>✓</span>
+                <li className="plan-feature" style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.88rem', color: 'var(--text-secondary)' }}>
+                  <span className="plan-check" style={{ width: '18px', height: '18px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.25)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981', fontSize: '0.65rem', fontWeight: 'bold' }}>✓</span>
                   <span>Fotos, GIFs e vídeos em loop</span>
                 </li>
-                <li className="plan-feature" style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.88rem', color: '#4B5563' }}>
-                  <span className="plan-check" style={{ width: '18px', height: '18px', background: '#ECFDF5', border: '1px solid #A7F3D0', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981', fontSize: '0.65rem', fontWeight: 'bold' }}>✓</span>
+                <li className="plan-feature" style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.88rem', color: 'var(--text-secondary)' }}>
+                  <span className="plan-check" style={{ width: '18px', height: '18px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.25)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981', fontSize: '0.65rem', fontWeight: 'bold' }}>✓</span>
                   <span>Cache offline failsafe inteligente</span>
                 </li>
               </ul>
@@ -93,71 +93,71 @@ const Pricing = ({ triggerConversionModal }) => {
           </div>
 
           {/* Business Plan (Featured) */}
-          <div className="preco-card preco-card-featured reveal" style={{ background: '#FFFFFF', border: '2px solid #ea580c', borderRadius: '2px', padding: '36px 28px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', position: 'relative', boxShadow: '0 12px 32px rgba(37, 99, 235, 0.04)' }}>
-            <span className="featured-tag" style={{ position: 'absolute', top: '16px', right: '16px', background: '#ea580c', color: '#FFFFFF', fontSize: '0.65rem', fontWeight: '700', padding: '4px 10px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Mais Escolhido</span>
+          <div className="preco-card preco-card-featured reveal" style={{ background: 'rgba(14, 165, 233, 0.05)', border: '2px solid #0ea5e9', borderRadius: '16px', padding: '36px 28px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', position: 'relative', boxShadow: '0 12px 32px rgba(14, 165, 233, 0.1)' }}>
+            <span className="featured-tag" style={{ position: 'absolute', top: '16px', right: '16px', background: '#0ea5e9', color: '#FFFFFF', fontSize: '0.65rem', fontWeight: '700', padding: '4px 10px', borderRadius: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Mais Escolhido</span>
             <div>
-              <p className="plan-name featured" style={{ fontSize: '0.8rem', fontWeight: '700', color: '#ea580c', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px' }}>Business</p>
+              <p className="plan-name featured" style={{ fontSize: '0.8rem', fontWeight: '700', color: '#38bdf8', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px' }}>Business</p>
               <div className="plan-price" style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginBottom: '16px' }}>
-                <span className="plan-currency" style={{ fontSize: '1.2rem', fontWeight: '700', color: '#111827' }}>R$</span>
-                <span className="plan-amount" style={{ fontSize: '3rem', fontWeight: '800', color: '#111827', letterSpacing: '-0.04em', lineHeight: '1' }}>149</span>
-                <span className="plan-period" style={{ fontSize: '0.85rem', color: '#6B7280' }}>/mês</span>
+                <span className="plan-currency" style={{ fontSize: '1.2rem', fontWeight: '700', color: 'var(--text-primary)' }}>R$</span>
+                <span className="plan-amount" style={{ fontSize: '3rem', fontWeight: '800', color: 'var(--text-primary)', letterSpacing: '-0.04em', lineHeight: '1' }}>149</span>
+                <span className="plan-period" style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>/mês</span>
               </div>
-              <p className="plan-description" style={{ fontSize: '0.88rem', color: '#4B5563', lineHeight: '1.5', marginBottom: '24px' }}>
+              <p className="plan-description" style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: '1.5', marginBottom: '24px' }}>
                 Para empresas em crescimento e condomínios. Múltiplos pontos de comunicação, suporte prioritário e integrações em tempo real.
               </p>
-              <div className="plan-divider" style={{ height: '1px', background: '#E5E7EB', marginBottom: '24px' }}></div>
+              <div className="plan-divider" style={{ height: '1px', background: 'var(--border)', marginBottom: '24px' }}></div>
               
               <ul className="plan-features" style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '32px', padding: 0, listStyle: 'none' }}>
-                <li className="plan-feature" style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.88rem', color: '#111827', fontWeight: '600' }}>
-                  <span className="plan-check" style={{ width: '18px', height: '18px', background: '#ECFDF5', border: '1px solid #A7F3D0', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981', fontSize: '0.65rem', fontWeight: 'bold' }}>✓</span>
+                <li className="plan-feature" style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.88rem', color: '#E2E8F0', fontWeight: '600' }}>
+                  <span className="plan-check" style={{ width: '18px', height: '18px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.25)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981', fontSize: '0.65rem', fontWeight: 'bold' }}>✓</span>
                   <span>Até 6 telas conectadas</span>
                 </li>
-                <li className="plan-feature" style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.88rem', color: '#4B5563' }}>
-                  <span className="plan-check" style={{ width: '18px', height: '18px', background: '#ECFDF5', border: '1px solid #A7F3D0', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981', fontSize: '0.65rem', fontWeight: 'bold' }}>✓</span>
+                <li className="plan-feature" style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.88rem', color: 'var(--text-secondary)' }}>
+                  <span className="plan-check" style={{ width: '18px', height: '18px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.25)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981', fontSize: '0.65rem', fontWeight: 'bold' }}>✓</span>
                   <span>Tudo do plano Starter</span>
                 </li>
-                <li className="plan-feature" style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.88rem', color: '#4B5563' }}>
-                  <span className="plan-check" style={{ width: '18px', height: '18px', background: '#ECFDF5', border: '1px solid #A7F3D0', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981', fontSize: '0.65rem', fontWeight: 'bold' }}>✓</span>
+                <li className="plan-feature" style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.88rem', color: 'var(--text-secondary)' }}>
+                  <span className="plan-check" style={{ width: '18px', height: '18px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.25)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981', fontSize: '0.65rem', fontWeight: 'bold' }}>✓</span>
                   <span>Recurso de avisos rápidos (Broadcast)</span>
                 </li>
-                <li className="plan-feature" style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.88rem', color: '#4B5563' }}>
-                  <span className="plan-check" style={{ width: '18px', height: '18px', background: '#ECFDF5', border: '1px solid #A7F3D0', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981', fontSize: '0.65rem', fontWeight: 'bold' }}>✓</span>
+                <li className="plan-feature" style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.88rem', color: 'var(--text-secondary)' }}>
+                  <span className="plan-check" style={{ width: '18px', height: '18px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.25)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981', fontSize: '0.65rem', fontWeight: 'bold' }}>✓</span>
                   <span>Suporte Prioritário por WhatsApp com SLA</span>
                 </li>
               </ul>
             </div>
-            <button onClick={() => triggerConversionModal('Business')} className="btn btn-plan btn-plan-featured" style={{ width: '100%', padding: '12px 0', fontSize: '0.9rem', background: '#ea580c', color: '#FFFFFF', fontWeight: '700' }}>
+            <button onClick={() => triggerConversionModal('Business')} className="btn btn-plan btn-plan-featured" style={{ width: '100%', padding: '12px 0', fontSize: '0.9rem', background: '#0ea5e9', color: '#FFFFFF', fontWeight: '700' }}>
               Quero modernizar minhas telas
             </button>
           </div>
 
           {/* Enterprise Plan */}
-          <div className="preco-card reveal" style={{ background: '#FFFFFF', border: '1px solid #E5E7EB', borderRadius: '2px', padding: '36px 28px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          <div className="preco-card reveal" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', padding: '36px 28px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
             <div>
-              <p className="plan-name" style={{ fontSize: '0.8rem', fontWeight: '700', color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px' }}>Enterprise</p>
+              <p className="plan-name" style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px' }}>Enterprise</p>
               <div className="plan-price" style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginBottom: '16px' }}>
-                <span className="plan-consult" style={{ fontSize: '1.8rem', fontWeight: '800', color: '#111827', letterSpacing: '-0.02em', lineHeight: '1' }}>Sob consulta</span>
+                <span className="plan-consult" style={{ fontSize: '1.8rem', fontWeight: '800', color: 'var(--text-primary)', letterSpacing: '-0.02em', lineHeight: '1' }}>Sob consulta</span>
               </div>
-              <p className="plan-description" style={{ fontSize: '0.88rem', color: '#4B5563', lineHeight: '1.5', marginBottom: '24px' }}>
+              <p className="plan-description" style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: '1.5', marginBottom: '24px' }}>
                 Para grandes redes e franquias com mais de 10 telas. White Label completo com sua marca, APIs dedicadas e SLA personalizado.
               </p>
-              <div className="plan-divider" style={{ height: '1px', background: '#E5E7EB', marginBottom: '24px' }}></div>
+              <div className="plan-divider" style={{ height: '1px', background: 'var(--border)', marginBottom: '24px' }}></div>
               
               <ul className="plan-features" style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '32px', padding: 0, listStyle: 'none' }}>
-                <li className="plan-feature" style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.88rem', color: '#4B5563' }}>
-                  <span className="plan-check" style={{ width: '18px', height: '18px', background: '#ECFDF5', border: '1px solid #A7F3D0', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981', fontSize: '0.65rem', fontWeight: 'bold' }}>✓</span>
+                <li className="plan-feature" style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.88rem', color: 'var(--text-secondary)' }}>
+                  <span className="plan-check" style={{ width: '18px', height: '18px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.25)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981', fontSize: '0.65rem', fontWeight: 'bold' }}>✓</span>
                   <span>Mais de 10 telas conectadas</span>
                 </li>
-                <li className="plan-feature" style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.88rem', color: '#4B5563' }}>
-                  <span className="plan-check" style={{ width: '18px', height: '18px', background: '#ECFDF5', border: '1px solid #A7F3D0', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981', fontSize: '0.65rem', fontWeight: 'bold' }}>✓</span>
+                <li className="plan-feature" style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.88rem', color: 'var(--text-secondary)' }}>
+                  <span className="plan-check" style={{ width: '18px', height: '18px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.25)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981', fontSize: '0.65rem', fontWeight: 'bold' }}>✓</span>
                   <span>White Label completo (Sua marca no painel)</span>
                 </li>
-                <li className="plan-feature" style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.88rem', color: '#4B5563' }}>
-                  <span className="plan-check" style={{ width: '18px', height: '18px', background: '#ECFDF5', border: '1px solid #A7F3D0', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981', fontSize: '0.65rem', fontWeight: 'bold' }}>✓</span>
+                <li className="plan-feature" style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.88rem', color: 'var(--text-secondary)' }}>
+                  <span className="plan-check" style={{ width: '18px', height: '18px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.25)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981', fontSize: '0.65rem', fontWeight: 'bold' }}>✓</span>
                   <span>Gerente de contas dedicado por WhatsApp</span>
                 </li>
-                <li className="plan-feature" style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.88rem', color: '#4B5563' }}>
-                  <span className="plan-check" style={{ width: '18px', height: '18px', background: '#ECFDF5', border: '1px solid #A7F3D0', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981', fontSize: '0.65rem', fontWeight: 'bold' }}>✓</span>
+                <li className="plan-feature" style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.88rem', color: 'var(--text-secondary)' }}>
+                  <span className="plan-check" style={{ width: '18px', height: '18px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.25)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981', fontSize: '0.65rem', fontWeight: 'bold' }}>✓</span>
                   <span>SLA contratual robusto</span>
                 </li>
               </ul>
@@ -170,13 +170,12 @@ const Pricing = ({ triggerConversionModal }) => {
 
         {/* 7-Day Guarantee Banner */}
         <div className="reveal" style={{
-          background: '#F9FAFB',
-          border: '1px solid #E5E7EB',
-          borderRadius: '2px',
+          background: 'var(--bg-card)',
+          border: '1px solid var(--border)',
+          borderRadius: '16px',
           padding: '36px',
           display: 'flex',
           flexDirection: 'column',
-          mdDirection: 'row',
           gap: '24px',
           alignItems: 'center',
           justifyContent: 'center',
@@ -188,17 +187,17 @@ const Pricing = ({ triggerConversionModal }) => {
         }}>
           <div style={{ fontSize: '3rem', margin: 0, opacity: 0.9 }}>🛡️</div>
           <div>
-            <h3 style={{ fontSize: '1.2rem', fontWeight: '800', color: '#111827', marginBottom: '8px' }}>Garantia de Risco Zero e Teste Sem Compromisso</h3>
-            <p style={{ fontSize: '0.9rem', color: '#4B5563', lineHeight: '1.6', margin: 0, maxWidth: '600px' }}>
+            <h3 style={{ fontSize: '1.2rem', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '8px' }}>Garantia de Risco Zero e Teste Sem Compromisso</h3>
+            <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: '1.6', margin: 0, maxWidth: '600px' }}>
               Oferecemos <strong>7 dias de garantia incondicional</strong>. Faça o pareamento do TelaHub nas Smart TVs do seu estabelecimento hoje. Se você não achar a plataforma extremamente simples e profissional, nós devolvemos cada centavo do seu investimento, sem perguntas.
             </p>
           </div>
         </div>
 
         {/* FAQ Accordion Section */}
-        <div style={{ borderTop: '1px solid #E5E7EB', paddingTop: '72px', maxWidth: '820px', marginLeft: 'auto', marginRight: 'auto' }}>
+        <div style={{ borderTop: '1px solid var(--border)', paddingTop: '72px', maxWidth: '820px', marginLeft: 'auto', marginRight: 'auto' }}>
           <div style={{ textAlign: 'center', marginBottom: '48px' }}>
-            <div className="label reveal" style={{ background: '#ECFDF5', color: '#10B981', borderColor: '#A7F3D0', borderRadius: '99px' }}>Perguntas Frequentes</div>
+            <div className="label reveal" style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10B981', borderColor: 'rgba(16, 185, 129, 0.25)', borderRadius: '99px' }}>Perguntas Frequentes</div>
             <h2 style={{ fontSize: 'clamp(1.5rem, 2.5vw, 2.2rem)', fontWeight: '800', marginTop: '12px' }}>Dúvidas frequentes de empresários</h2>
           </div>
 
@@ -207,9 +206,9 @@ const Pricing = ({ triggerConversionModal }) => {
               const isOpen = openFaq === faq.id;
               return (
                 <div key={faq.id} style={{
-                  border: '1px solid #E5E7EB',
-                  borderRadius: '2px',
-                  background: isOpen ? '#F9FAFB' : '#FFFFFF',
+                  border: '1px solid var(--border)',
+                  borderRadius: '12px',
+                  background: isOpen ? 'var(--bg-secondary)' : 'var(--bg-card)',
                   transition: 'background 0.2s ease'
                 }}>
                   <button 
@@ -227,17 +226,17 @@ const Pricing = ({ triggerConversionModal }) => {
                       fontFamily: 'var(--font)',
                       fontWeight: '700',
                       fontSize: '1rem',
-                      color: '#111827'
+                      color: 'var(--text-primary)'
                     }}
                   >
                     <span>{faq.question}</span>
-                    <span style={{ fontSize: '1.2rem', color: '#ea580c', fontWeight: 'bold' }}>{isOpen ? '−' : '+'}</span>
+                    <span style={{ fontSize: '1.2rem', color: '#0ea5e9', fontWeight: 'bold' }}>{isOpen ? '−' : '+'}</span>
                   </button>
                   {isOpen && (
                     <div style={{
                       padding: '0 24px 20px 24px',
                       fontSize: '0.92rem',
-                      color: '#4B5563',
+                      color: 'var(--text-secondary)',
                       lineHeight: '1.6'
                     }}>
                       {faq.answer}
@@ -250,7 +249,7 @@ const Pricing = ({ triggerConversionModal }) => {
 
           {/* WhatsApp Support CTA Button */}
           <div style={{ textAlign: 'center', marginTop: '48px' }}>
-            <p style={{ fontSize: '0.9rem', color: '#6B7280', marginBottom: '16px' }}>Ainda ficou com alguma dúvida sobre o pareamento ou planos?</p>
+            <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '16px' }}>Ainda ficou com alguma dúvida sobre o pareamento ou planos?</p>
             <a 
               href="https://wa.me/5500000000000?text=Ol%C3%A1%2C+gostaria+de+saber+mais+sobre+o+TelaHub" 
               target="_blank" 
@@ -265,7 +264,7 @@ const Pricing = ({ triggerConversionModal }) => {
                 border: '1px solid #10B981',
                 color: '#10B981',
                 fontWeight: '700',
-                background: '#FFFFFF'
+                background: 'transparent'
               }}
             >
               <svg viewBox="0 0 24 24" fill="currentColor" style={{ width: '18px', height: '18px' }}>

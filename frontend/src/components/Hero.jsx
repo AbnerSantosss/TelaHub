@@ -1,4 +1,3 @@
-import React from 'react';
 import DashboardMockup from './DashboardMockup';
 
 const Hero = ({ 
@@ -12,14 +11,14 @@ const Hero = ({
       <div className="container">
         <div className="hero-inner">
           <div className="hero-content">
-            <div className="label animate-in" style={{ background: '#ECFDF5', color: '#10B981', borderColor: '#A7F3D0', borderRadius: '99px', fontSize: '12px' }}>
+            <div className="label animate-in" style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10B981', borderColor: 'rgba(16, 185, 129, 0.25)', borderRadius: '99px', fontSize: '12px' }}>
               <span style={{ display: 'inline-block', marginRight: '6px' }}>🟢</span>
               Mais de 200 empresas já aboliram o pen-drive no Brasil
             </div>
-            <h1 id="hero-heading" className="hero-headline animate-in" style={{ fontSize: 'clamp(1.9rem, 3.5vw, 2.75rem)', fontWeight: '900', lineHeight: '1.2', letterSpacing: '-0.02em', color: '#111827', marginBottom: '20px' }}>
+            <h1 id="hero-heading" className="hero-headline animate-in" style={{ fontSize: 'clamp(1.9rem, 3.5vw, 2.75rem)', fontWeight: '900', lineHeight: '1.2', letterSpacing: '-0.02em', color: '#ffffff', marginBottom: '20px' }}>
               Diga adeus aos fios soltos, pen-drives e telas pretas.
             </h1>
-            <p className="hero-subheadline animate-in" style={{ fontSize: 'clamp(0.95rem, 1.25vw, 1.1rem)', color: '#4B5563', lineHeight: '1.65', marginBottom: '32px', maxWidth: '540px' }}>
+            <p className="hero-subheadline animate-in" style={{ fontSize: 'clamp(0.95rem, 1.25vw, 1.1rem)', color: '#94a3b8', lineHeight: '1.65', marginBottom: '32px', maxWidth: '540px' }}>
               Exiba promoções, cardápios dinâmicos e vídeos institucionais em qualquer TV, atualizando tudo pelo celular ou computador em menos de 5 minutos.
             </p>
             <div className="hero-actions animate-in">
@@ -43,7 +42,7 @@ const Hero = ({
                 Ver recursos
               </button>
             </div>
-            <div className="hero-trust animate-in" style={{ color: '#6B7280', fontSize: '0.85rem', marginTop: '24px' }}>
+            <div className="hero-trust animate-in" style={{ color: '#64748b', fontSize: '0.85rem', marginTop: '24px' }}>
               <svg 
                 xmlns="http://www.w3.org/2000/svg" 
                 viewBox="0 0 24 24" 
@@ -70,9 +69,9 @@ const Hero = ({
         <div className="hero-objection-banner animate-in" style={{
           marginTop: '56px',
           padding: '24px 32px',
-          background: '#F9FAFB',
-          border: '1px solid #E5E7EB',
-          borderRadius: '2px',
+          background: 'var(--bg-card)',
+          border: '1px solid var(--border)',
+          borderRadius: '12px',
           display: 'flex',
           flexDirection: 'row',
           flexWrap: 'wrap',
@@ -81,7 +80,7 @@ const Hero = ({
           justifyContent: 'space-between',
           textAlign: 'left'
         }}>
-          <p className="objection-text" style={{ fontSize: 'clamp(0.9rem, 1.1vw, 1rem)', color: '#111827', margin: 0, lineHeight: '1.5', maxWidth: '640px', flex: '1 1 450px' }}>
+          <p className="objection-text" style={{ fontSize: 'clamp(0.9rem, 1.1vw, 1rem)', color: 'var(--text-primary)', margin: 0, lineHeight: '1.5', maxWidth: '640px', flex: '1 1 450px' }}>
             <strong>O passo a passo para modernizar sua loja e anunciar suas ofertas</strong> mesmo que você não entenda nada de tecnologia ou design.
           </p>
           <button onClick={() => triggerConversionModal('Business')} className="btn btn-primary" style={{

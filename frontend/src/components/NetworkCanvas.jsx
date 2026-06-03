@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 const NetworkCanvas = () => {
   const canvasRef = useRef(null);
@@ -8,13 +8,13 @@ const NetworkCanvas = () => {
     if (!canvas) return;
 
     const ctx = canvas.getContext('2d');
-    let width = (canvas.width = window.innerWidth);
-    let height = (canvas.height = window.innerHeight);
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
 
     const resizeCanvas = () => {
       const dpr = window.devicePixelRatio || 1;
-      width = canvas.width = window.innerWidth * dpr;
-      height = canvas.height = window.innerHeight * dpr;
+      canvas.width = window.innerWidth * dpr;
+      canvas.height = window.innerHeight * dpr;
       ctx.scale(dpr, dpr);
       canvas.style.width = `${window.innerWidth}px`;
       canvas.style.height = `${window.innerHeight}px`;
@@ -44,7 +44,7 @@ const NetworkCanvas = () => {
       draw() {
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(156, 163, 175, 0.25)'; // Light grey particles
+        ctx.fillStyle = 'rgba(148, 163, 184, 0.15)'; // Subtle slate particles on dark bg
         ctx.fill();
       }
     }
@@ -72,7 +72,7 @@ const NetworkCanvas = () => {
             ctx.beginPath();
             ctx.moveTo(p1.x, p1.y);
             ctx.lineTo(p2.x, p2.y);
-            ctx.strokeStyle = `rgba(229, 231, 235, ${alpha})`; // Subtle light grey connection lines
+            ctx.strokeStyle = `rgba(51, 65, 85, ${alpha})`; // Slate dark connection lines
             ctx.lineWidth = 0.65;
             ctx.stroke();
           }
@@ -87,7 +87,7 @@ const NetworkCanvas = () => {
             ctx.beginPath();
             ctx.moveTo(p1.x, p1.y);
             ctx.lineTo(mouse.x, mouse.y);
-            ctx.strokeStyle = `rgba(37, 99, 235, ${alpha})`; // Corporate blue responsive connection on hover
+            ctx.strokeStyle = `rgba(14, 165, 233, ${alpha})`; // Sky Blue responsive connection on hover
             ctx.lineWidth = 0.85;
             ctx.stroke();
           }

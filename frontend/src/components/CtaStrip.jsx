@@ -1,5 +1,3 @@
-import React from 'react';
-
 const CtaStrip = ({ triggerConversionModal }) => {
   return (
     <div className="cta-strip">
@@ -16,7 +14,7 @@ const CtaStrip = ({ triggerConversionModal }) => {
           <button 
             onClick={() => triggerConversionModal('Starter')} 
             className="btn btn-primary" 
-            style={{ fontSize: '1rem', padding: '14px 32px', background: '#FFFFFF', color: '#d97706' }}
+            style={{ fontSize: '1rem', padding: '14px 32px', background: '#FFFFFF', color: '#0ea5e9' }}
           >
             Quero ativar minha tela agora
             <svg 
