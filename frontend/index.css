@@ -60,8 +60,8 @@
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
 .react-grid-item.react-grid-placeholder {
-  background: rgba(124, 58, 237, 0.1) !important;
-  border: 1px dashed rgba(124, 58, 237, 0.5) !important;
+  background: rgba(14, 165, 233, 0.1) !important;
+  border: 1px dashed rgba(14, 165, 233, 0.5) !important;
   border-radius: 8px !important;
   opacity: 0.8 !important;
   z-index: 2 !important;
@@ -275,33 +275,33 @@
 
 /* --- Shadcn UI core CSS variables --- */
 :root {
-  --background: 240 10% 3.9%;
-  --foreground: 0 0% 98%;
-  --card: 240 10% 5.9%;
-  --card-foreground: 0 0% 98%;
-  --popover: 240 10% 3.9%;
-  --popover-foreground: 0 0% 98%;
-  --primary: 0 0% 98%;
-  --primary-foreground: 240 5.9% 10%;
-  --secondary: 240 3.7% 15.9%;
-  --secondary-foreground: 0 0% 98%;
-  --muted: 240 3.7% 15.9%;
-  --muted-foreground: 240 5% 64.9%;
-  --accent: 20.5 90.2% 48.2%; /* Laranja Sinalizador */
-  --accent-foreground: 0 0% 98%;
+  --background: 222.2 47.4% 11.2%; /* Deep Navy (#111827) */
+  --foreground: 210 40% 98%;
+  --card: 215.4 25% 17.1%;         /* Slate Suave (#1f2937) */
+  --card-foreground: 210 40% 98%;
+  --popover: 222.2 47.4% 11.2%;
+  --popover-foreground: 210 40% 98%;
+  --primary: 198.6 92.8% 48.4%;    /* Sky Blue (#0ea5e9) */
+  --primary-foreground: 222.2 47.4% 11.2%;
+  --secondary: 217.2 32.6% 17.5%;
+  --secondary-foreground: 210 40% 98%;
+  --muted: 217.2 32.6% 17.5%;
+  --muted-foreground: 215 20.2% 65.1%;
+  --accent: 198.6 92.8% 48.4%;     /* Sky Blue */
+  --accent-foreground: 210 40% 98%;
   --destructive: 0 62.8% 30.6%;
-  --destructive-foreground: 0 0% 98%;
-  --border: 240 3.7% 15.9%;
-  --input: 240 3.7% 15.9%;
-  --ring: 20.5 90.2% 48.2%;
-  --radius: 2px; /* Geometria Nítida (0px-2px) */
+  --destructive-foreground: 210 40% 98%;
+  --border: 217.2 32.6% 17.5%;
+  --input: 217.2 32.6% 17.5%;
+  --ring: 198.6 92.8% 48.4%;       /* Sky Blue */
+  --radius: 8px;                    /* Suavizado (rounded-lg) */
 
   /* Mapeamento de compatibilidade para código legante anterior */
-  --brand-bg: #09090b;       /* Zinc-950 (Shadcn Dark Fundo) */
-  --brand-surface: #18181b;  /* Zinc-900 (Shadcn Dark Cards) */
-  --brand-accent: #ea580c;   /* Laranja Sinalizador Premium */
-  --brand-text-high: #fafafa;/* Branco Técnico Estrito */
-  --brand-text-sec: #a1a1aa; /* Cinza Muted */
+  --brand-bg: #111827;       /* Deep Navy bg-gray-900 */
+  --brand-surface: #1f2937;  /* Slate/Navy bg-gray-800 */
+  --brand-accent: #0ea5e9;   /* Sky Blue */
+  --brand-text-high: #ffffff;/* Branco Puro */
+  --brand-text-sec: #94a3b8; /* Cool Gray (slate-400) */
 }
 
 /* Custom utility overrides */
@@ -346,12 +346,13 @@
   background-color: var(--brand-accent) !important;
   color: var(--brand-text-high) !important;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 0 15px rgba(234, 88, 12, 0.15);
+  box-shadow: 0 0 15px rgba(14, 165, 233, 0.15);
+  border-radius: 8px !important;
 }
 
 .btn-brand-primary:hover:not(:disabled) {
-  background-color: #ea580c !important;
-  box-shadow: 0 0 25px rgba(234, 88, 12, 0.35);
+  background-color: #0284c7 !important;
+  box-shadow: 0 0 25px rgba(14, 165, 233, 0.35);
   transform: translateY(-1px);
 }
 
@@ -364,24 +365,26 @@
   border: 1px solid var(--brand-text-sec) !important;
   color: var(--brand-text-high) !important;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 8px !important;
 }
 
 .btn-brand-secondary:hover:not(:disabled) {
   border-color: var(--brand-text-high) !important;
-  background-color: rgba(161, 161, 170, 0.08) !important;
+  background-color: rgba(148, 163, 184, 0.08) !important;
 }
 
 /* Corporate Solid Button — Clean Geometric Premium */
 .liquid-metal-btn {
-  background-color: #ea580c;
+  background-color: #0ea5e9;
   transition: background-color 0.2s ease-out, transform 0.15s ease-out, box-shadow 0.2s ease-out;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  border-radius: 8px !important;
 }
 
 .liquid-metal-btn:hover:not(:disabled) {
-  background-color: #d97706;
+  background-color: #0284c7;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(234, 88, 12, 0.25);
+  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.25);
 }
 
 .liquid-metal-btn:active:not(:disabled) {

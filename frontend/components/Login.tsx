@@ -18,10 +18,10 @@ export const LogoHub: React.FC<{ className?: string; size?: number }> = ({ class
       className={`${className} relative z-10`}
     >
       {/* 2x2 grid representing interconnected displays */}
-      <rect x="15" y="15" width="30" height="24" rx="2" stroke="var(--brand-accent)" strokeWidth="3.5" fill="rgba(234, 88, 12, 0.05)" />
-      <rect x="55" y="15" width="30" height="24" rx="2" stroke="var(--brand-accent)" strokeWidth="3.5" fill="rgba(234, 88, 12, 0.05)" />
-      <rect x="15" y="53" width="30" height="24" rx="2" stroke="var(--brand-accent)" strokeWidth="3.5" fill="rgba(234, 88, 12, 0.05)" />
-      <rect x="55" y="53" width="30" height="32" rx="2" stroke="var(--brand-accent)" strokeWidth="3.5" fill="rgba(234, 88, 12, 0.05)" />
+      <rect x="15" y="15" width="30" height="24" rx="2" stroke="var(--brand-accent)" strokeWidth="3.5" fill="rgba(14, 165, 233, 0.05)" />
+      <rect x="55" y="15" width="30" height="24" rx="2" stroke="var(--brand-accent)" strokeWidth="3.5" fill="rgba(14, 165, 233, 0.05)" />
+      <rect x="15" y="53" width="30" height="24" rx="2" stroke="var(--brand-accent)" strokeWidth="3.5" fill="rgba(14, 165, 233, 0.05)" />
+      <rect x="55" y="53" width="30" height="32" rx="2" stroke="var(--brand-accent)" strokeWidth="3.5" fill="rgba(14, 165, 233, 0.05)" />
       
       {/* Interconnections (lines representing data flow) */}
       <path d="M45 27H55" stroke="var(--brand-accent)" strokeWidth="2.5" strokeDasharray="3 3" opacity="0.75" />
@@ -90,27 +90,28 @@ const Login: React.FC = () => {
   return (
     <div className="min-h-screen flex bg-background text-foreground overflow-hidden font-sans relative">
       {/* Background Mesh Grid (Technical Dot-Grid) */}
-      <div className="absolute inset-0 bg-[radial-gradient(rgba(234,88,12,0.04)_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none z-0"></div>
+      <div className="absolute inset-0 bg-[radial-gradient(rgba(14,165,233,0.04)_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none z-0"></div>
       
-      {/* Premium Animated Background Image and Glow (Mobile & Desktop) */}
-      <div className="absolute inset-0 z-0 select-none pointer-events-none overflow-hidden">
-        <motion.div
-          initial={{ scale: 1.1, opacity: 0 }}
-          animate={{ 
-            scale: [1.05, 1.12, 1.05],
-            rotate: [0, 0.5, -0.5, 0]
+      {/* Premium Video Background — Login Only (ABOVE panels, blended) */}
+      <div className="absolute inset-0 z-[15] pointer-events-none overflow-hidden">
+        <video
+          key={typeof window !== 'undefined' && window.innerWidth >= 1024 ? 'desktop' : 'mobile'}
+          src={typeof window !== 'undefined' && window.innerWidth >= 1024 ? '/backgrounds/bg_desktop.mp4' : '/backgrounds/BG-mobile.mp4'}
+          autoPlay
+          muted
+          loop
+          playsInline
+          disablePictureInPicture
+          style={{ 
+            position: 'absolute', 
+            inset: 0, 
+            width: '100%', 
+            height: '100%', 
+            objectFit: 'cover', 
+            opacity: 0.15,
+            mixBlendMode: 'screen'
           }}
-          transition={{ 
-            scale: { duration: 30, repeat: Infinity, ease: "easeInOut" },
-            rotate: { duration: 40, repeat: Infinity, ease: "easeInOut" },
-            opacity: { duration: 1.5, ease: "easeOut" }
-          }}
-          style={{ opacity: 0.12 }}
-          className="absolute inset-0 bg-[url('/login-bg.png')] bg-cover bg-center"
         />
-        {/* Animated background ambient glows */}
-        <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] rounded-full bg-[#ea580c]/5 blur-[130px] pointer-events-none animate-pulse duration-[8s]"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-[#ea580c]/3 blur-[110px] pointer-events-none animate-pulse duration-[12s]"></div>
       </div>
       
       {/* Lateral Marketing / Copywriting Panel (Desktop only: lg and above) */}
@@ -129,13 +130,13 @@ const Login: React.FC = () => {
         {/* Core Marketing Copy & Feature List */}
         <div className="my-auto z-10 max-w-xl space-y-8 pr-8 animate-in fade-in slide-in-from-left-4 duration-500">
           <div className="space-y-4">
-            <span className="text-[10px] font-bold text-accent uppercase tracking-widest bg-accent/10 px-3.5 py-1.5 border border-accent/20 inline-block">
+            <span className="text-[10px] font-semibold text-sky-400 uppercase tracking-widest bg-sky-500/10 px-3.5 py-1.5 border border-sky-500/20 rounded-full inline-block">
               Mídia Digital Corporativa Premium
             </span>
-            <h2 className="text-4xl xl:text-5xl font-black text-foreground leading-tight tracking-tight font-sans">
-              Transforme qualquer tela em um canal de <span className="text-accent">comunicação inteligente</span>.
+            <h2 className="text-4xl xl:text-5xl font-extrabold leading-tight tracking-tight font-sans bg-clip-text text-transparent bg-gradient-to-r from-sky-400 to-white pb-1">
+              Transforme qualquer tela em um canal de comunicação inteligente.
             </h2>
-            <p className="text-muted-foreground text-sm xl:text-base leading-relaxed">
+            <p className="text-slate-400 text-sm xl:text-base leading-relaxed">
               O TelaHub é um sistema full-stack premium para gerenciar e transmitir programações, informativos, indicadores corporativos e mídias de forma dinâmica e totalmente remota em tempo real.
             </p>
           </div>
@@ -175,109 +176,85 @@ const Login: React.FC = () => {
         </div>
 
         {/* Simulated TV Displays representing the app in action */}
-        <div className="absolute right-[-60px] xl:right-[-40px] top-[15%] w-[380px] h-[500px] pointer-events-none hidden xl:block select-none opacity-95">
-          {/* TV 1: Monitor de Clima (Horizontal 16:9) */}
+        <div className="absolute right-[-50px] xl:right-[-30px] top-[15%] w-[380px] h-[500px] pointer-events-none hidden xl:block select-none opacity-95">
+          {/* Card 1: Monitor de Clima (Horizontal 16:9 Glassmorphism) */}
           <motion.div 
             initial={{ x: 50, y: 0, opacity: 0 }}
-            animate={{ x: 0, y: [-10, 10, -10], opacity: 1 }}
+            animate={{ x: 0, y: [-6, 6, -6], opacity: 1 }}
             transition={{ 
               x: { duration: 1 }, 
-              y: { duration: 6, repeat: Infinity, ease: "easeInOut" } 
+              y: { duration: 5, repeat: Infinity, ease: "easeInOut" } 
             }}
-            className="absolute top-[5%] left-[20px] w-[250px] flex flex-col select-none filter drop-shadow-2xl"
+            className="absolute top-[5%] left-[20px] w-[260px] flex flex-col select-none bg-gray-800/40 border border-white/10 backdrop-blur-md shadow-2xl rounded-xl p-4 transition-all duration-300 ease-out hover:border-sky-500/50 hover:shadow-sky-500/5"
           >
-            {/* TV Bezel */}
-            <div className="border-[4px] border-border bg-[#18181b] relative overflow-hidden p-3.5 pt-4 border-b-[6px] border-b-border shadow-lg">
-              {/* Power LED Indicator */}
-              <div className="absolute bottom-[1.5px] left-1/2 -translate-x-1/2 w-1 h-1 bg-[#10B981] rounded-full"></div>
-              
-              <div className="flex justify-between items-center mb-3">
-                <span className="text-[8px] font-black text-accent uppercase tracking-widest">Display Copa #01</span>
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded bg-amber-500/10 flex items-center justify-center text-amber-500 text-lg">☀️</div>
-                <div>
-                  <h5 className="text-[11px] font-black text-white leading-tight">São Paulo, BR</h5>
-                  <p className="text-[9px] text-[#9CA3AF] font-bold">Ensolarado • 26°C</p>
-                </div>
+            <div className="flex justify-between items-center mb-3">
+              <span className="text-[9px] font-bold text-sky-400 uppercase tracking-widest">Display Copa #01</span>
+              <span className="flex h-2 w-2 relative">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              </span>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-500 text-xl">☀️</div>
+              <div>
+                <h5 className="text-xs font-semibold text-white leading-tight">São Paulo, BR</h5>
+                <p className="text-[10px] text-slate-400 font-medium">Ensolarado • 26°C</p>
               </div>
             </div>
-            {/* TV Neck & Base */}
-            <div className="w-2.5 h-2 bg-border mx-auto"></div>
-            <div className="w-14 h-0.5 bg-border rounded mx-auto"></div>
           </motion.div>
 
-          {/* TV 2: Totem de Indicadores (Vertical Totem Monitor 9:16) */}
+          {/* Card 2: Totem de Indicadores (Vertical Totem Glassmorphism) */}
           <motion.div 
             initial={{ x: 100, y: 0, opacity: 0 }}
-            animate={{ x: 0, y: [10, -10, 10], opacity: 1 }}
+            animate={{ x: 0, y: [6, -6, 6], opacity: 1 }}
             transition={{ 
               x: { duration: 1, delay: 0.2 }, 
-              y: { duration: 7, repeat: Infinity, ease: "easeInOut" } 
+              y: { duration: 6, repeat: Infinity, ease: "easeInOut" } 
             }}
-            className="absolute top-[34%] right-[20px] w-[170px] flex flex-col select-none filter drop-shadow-2xl"
+            className="absolute top-[34%] right-[20px] w-[180px] flex flex-col select-none bg-gray-800/40 border border-white/10 backdrop-blur-md shadow-2xl rounded-xl p-4 transition-all duration-300 ease-out hover:border-sky-500/50 hover:shadow-sky-500/5 h-[220px]"
           >
-            {/* TV Bezel (Vertical) */}
-            <div className="border-[4px] border-border bg-[#18181b] relative overflow-hidden p-3.5 pb-5 border-b-[6px] border-b-border shadow-lg flex flex-col h-[210px]">
-              {/* Power LED Indicator */}
-              <div className="absolute bottom-[1.5px] left-1/2 -translate-x-1/2 w-1 h-1 bg-accent rounded-full"></div>
-              
-              <div className="flex justify-between items-center mb-3">
-                <span className="text-[7px] font-black text-accent uppercase tracking-widest">Totem Sul #02</span>
-                <span className="text-[8px] font-mono font-black text-emerald-400">+2.47%</span>
+            <div className="flex justify-between items-center mb-3">
+              <span className="text-[8px] font-bold text-sky-400 uppercase tracking-widest">Totem Sul #02</span>
+              <span className="text-[10px] font-mono font-bold text-emerald-400">+2.47%</span>
+            </div>
+            <div className="flex-1 flex flex-col justify-between">
+              <div>
+                <h6 className="text-[10px] font-medium text-slate-400 block mb-0.5 leading-none">Métrica Financeira</h6>
+                <span className="text-xs font-bold text-white">PETR4.SA</span>
+                <span className="text-xs font-semibold text-slate-300 block mt-1">R$ 38,42</span>
               </div>
-              <div className="flex-1 flex flex-col justify-between">
-                <div>
-                  <h6 className="text-[9px] font-black text-slate-400 block mb-0.5 leading-none">Métrica Financeira</h6>
-                  <span className="text-[11px] font-bold text-white">PETR4.SA</span>
-                  <span className="text-[11px] font-black text-[#F3F4F6] block mt-0.5">R$ 38,42</span>
-                </div>
-                <div className="h-10 w-full mt-2 bg-[#09090b]/60 rounded p-1.5 flex items-center border border-white/5">
-                  <svg className="w-full h-full" viewBox="0 0 100 30">
-                    <path d="M0,25 L20,18 L40,22 L60,8 L80,14 L100,2" fill="none" stroke="#10B981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </div>
+              <div className="h-12 w-full mt-3 bg-gray-900/60 rounded-lg p-1.5 flex items-center border border-white/5">
+                <svg className="w-full h-full" viewBox="0 0 100 30">
+                  <path d="M0,25 L20,18 L40,22 L60,8 L80,14 L100,2" fill="none" stroke="#10B981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
               </div>
             </div>
-            {/* TV Neck & Base */}
-            <div className="w-2.5 h-3 bg-border mx-auto"></div>
-            <div className="w-16 h-1 bg-border rounded mx-auto"></div>
           </motion.div>
 
-          {/* TV 3: Painel de Tarefas (Horizontal 16:9) */}
+          {/* Card 3: Painel de Tarefas (Horizontal Glassmorphism) */}
           <motion.div 
             initial={{ x: 120, y: 0, opacity: 0 }}
             animate={{ x: 0, y: [-8, 8, -8], opacity: 0.95 }}
             transition={{ 
               x: { duration: 1, delay: 0.4 }, 
-              y: { duration: 5, repeat: Infinity, ease: "easeInOut" } 
+              y: { duration: 7, repeat: Infinity, ease: "easeInOut" } 
             }}
-            className="absolute top-[68%] left-[0px] w-[240px] flex flex-col select-none filter drop-shadow-2xl"
+            className="absolute top-[68%] left-[0px] w-[250px] flex flex-col select-none bg-gray-800/40 border border-white/10 backdrop-blur-md shadow-2xl rounded-xl p-4 transition-all duration-300 ease-out hover:border-sky-500/50 hover:shadow-sky-500/5"
           >
-            {/* TV Bezel */}
-            <div className="border-[4px] border-border bg-[#18181b] relative overflow-hidden p-3.5 pt-4 border-b-[6px] border-b-border shadow-lg">
-              {/* Power LED Indicator */}
-              <div className="absolute bottom-[1.5px] left-1/2 -translate-x-1/2 w-1 h-1 bg-[#10B981] rounded-full"></div>
-              
-              <div className="flex justify-between items-center mb-3">
-                <span className="text-[8px] font-black text-emerald-400 uppercase tracking-widest">Display Recepção</span>
-                <span className="text-[8px] font-mono text-slate-500 font-bold">100% OK</span>
+            <div className="flex justify-between items-center mb-3">
+              <span className="text-[9px] font-bold text-sky-400 uppercase tracking-widest">Display Recepção</span>
+              <span className="text-[9px] font-mono text-emerald-400 font-bold">100% OK</span>
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 rounded bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center"><CheckCircle2 size={10} className="text-emerald-400" /></div>
+                <span className="text-xs text-slate-400 line-through">Reunião Geral 10h</span>
               </div>
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <div className="w-3.5 h-3.5 rounded-sm border border-emerald-500 bg-emerald-500/20 flex items-center justify-center"><CheckCircle2 size={8} className="text-emerald-400" /></div>
-                  <span className="text-[10px] text-slate-400 line-through">Reunião Geral 10h</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3.5 h-3.5 rounded-sm border border-border"></div>
-                  <span className="text-[10px] text-slate-300">Atualizar Display Copa</span>
-                </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 rounded border border-white/10 bg-gray-900/60"></div>
+                <span className="text-xs text-slate-300">Atualizar Display Copa</span>
               </div>
             </div>
-            {/* TV Neck & Base */}
-            <div className="w-2.5 h-2 bg-border mx-auto"></div>
-            <div className="w-14 h-0.5 bg-border rounded mx-auto"></div>
           </motion.div>
         </div>
 
@@ -290,7 +267,7 @@ const Login: React.FC = () => {
       </div>
 
       {/* Right Section: Login Form (Full width on mobile, centered; lg and above takes side portion) */}
-      <div className="w-full lg:w-[45%] xl:w-[40%] flex items-center justify-center p-6 sm:p-12 relative z-10 bg-background/80 lg:bg-background backdrop-blur-md lg:backdrop-blur-none border-l border-border/10 lg:border-border/5">
+      <div className="w-full lg:w-[45%] xl:w-[40%] flex items-center justify-center p-6 sm:p-12 relative z-10 bg-background border-l border-border/10 lg:border-border/5">
 
         <motion.div 
           initial={{ opacity: 0, y: 15 }}
@@ -327,7 +304,7 @@ const Login: React.FC = () => {
             </div>
           </div>
 
-          <div className={`bg-card/90 sm:bg-card backdrop-blur-md sm:backdrop-blur-none border border-border/50 shadow-2xl p-6 sm:p-8 transition-all duration-300 hover:border-accent/40 rounded-xl ${!isConfigured ? 'opacity-50 pointer-events-none grayscale' : ''}`}>
+          <div className={`bg-gray-800/50 border border-slate-700/50 shadow-2xl p-6 sm:p-8 rounded-2xl transition-all duration-300 ease-out hover:border-sky-500/30 ${!isConfigured ? 'opacity-50 pointer-events-none grayscale' : ''}`}>
             
             <form onSubmit={handleLogin} className="space-y-5">
               <div className="space-y-1.5">
@@ -337,11 +314,11 @@ const Login: React.FC = () => {
                     type="text" 
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    className="pl-10 text-foreground border-border bg-background focus-visible:ring-ring h-11"
+                    className="pl-10 text-foreground border-slate-700 bg-gray-900/60 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none h-11 rounded-lg transition-all duration-300 ease-out"
                     placeholder="Ex: seu.email@exemplo.com"
                     autoComplete="username"
                   />
-                  <User size={16} className="absolute left-3.5 top-3.5 text-muted-foreground group-focus-within:text-accent transition-colors" />
+                  <User size={16} className="absolute left-3.5 top-3.5 text-muted-foreground group-focus-within:text-sky-400 transition-colors" />
                 </div>
               </div>
 
@@ -352,15 +329,15 @@ const Login: React.FC = () => {
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="pl-10 pr-10 text-foreground border-border bg-background focus-visible:ring-ring h-11"
+                    className="pl-10 pr-10 text-foreground border-slate-700 bg-gray-900/60 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none h-11 rounded-lg transition-all duration-300 ease-out"
                     placeholder="Digite sua senha"
                     autoComplete="current-password"
                   />
-                  <Lock size={16} className="absolute left-3.5 top-3.5 text-muted-foreground group-focus-within:text-accent transition-colors" />
+                  <Lock size={16} className="absolute left-3.5 top-3.5 text-muted-foreground group-focus-within:text-sky-400 transition-colors" />
                   <button 
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3.5 top-3.5 text-muted-foreground hover:text-accent transition-colors"
+                    className="absolute right-3.5 top-3.5 text-muted-foreground hover:text-sky-400 transition-colors"
                   >
                     {showPassword ? (
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></svg>
@@ -373,7 +350,7 @@ const Login: React.FC = () => {
 
               <div className="flex items-center justify-between pt-1">
                 <label className="flex items-center gap-2 cursor-pointer group select-none">
-                  <div className={`w-4 h-4 rounded-sm border flex items-center justify-center transition-all ${rememberMe ? 'bg-accent border-accent' : 'border-input bg-background group-hover:border-muted-foreground'}`}>
+                  <div className={`w-4 h-4 rounded-md border flex items-center justify-center transition-all duration-300 ease-out ${rememberMe ? 'bg-sky-500 border-sky-500' : 'border-slate-700 bg-gray-900/60 group-hover:border-sky-400'}`}>
                     {rememberMe && <CheckCircle2 size={10} className="text-white stroke-[4]" />}
                   </div>
                   <input 
@@ -382,14 +359,14 @@ const Login: React.FC = () => {
                     onChange={(e) => setRememberMe(e.target.checked)}
                     className="hidden"
                   />
-                  <span className={`text-xs font-semibold transition-colors ${rememberMe ? 'text-accent' : 'text-muted-foreground group-hover:text-foreground'}`}>Lembrar meu usuário</span>
+                  <span className={`text-xs font-semibold transition-colors duration-300 ease-out ${rememberMe ? 'text-sky-400' : 'text-slate-400 group-hover:text-slate-200'}`}>Lembrar meu usuário</span>
                 </label>
                 
-                <button type="button" onClick={() => navigate('/forgot-password')} className="text-xs font-semibold text-muted-foreground hover:text-accent transition-colors">Esqueceu a senha?</button>
+                <button type="button" onClick={() => navigate('/forgot-password')} className="text-xs font-semibold text-slate-400 hover:text-sky-400 transition-colors duration-300 ease-out">Esqueceu a senha?</button>
               </div>
 
               {error && (
-                <div className="bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs p-3 rounded-sm font-bold text-center animate-in fade-in slide-in-from-top-2 flex flex-col gap-1">
+                <div className="bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs p-3 rounded-lg font-bold text-center animate-in fade-in slide-in-from-top-2 flex flex-col gap-1">
                   <span>{error}</span>
                   {error.includes('incorretos') && (
                     <span className="text-[10px] font-normal opacity-80 block mt-1">
@@ -402,7 +379,7 @@ const Login: React.FC = () => {
               <Button 
                 type="submit" 
                 disabled={loading}
-                className="w-full bg-[#ea580c] hover:bg-[#d97706] text-white font-black py-6 rounded-lg shadow-[0_4px_20px_rgba(234,88,12,0.3)] hover:shadow-[0_6px_24px_rgba(234,88,12,0.45)] transition-all flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed text-xs tracking-wider active:scale-[0.98] border border-white/10 uppercase"
+                className="w-full bg-sky-500 hover:bg-sky-600 text-white font-black py-6 rounded-lg shadow-md hover:shadow-[0_0_20px_rgba(56,189,248,0.4)] transition-all duration-300 ease-out flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed text-xs tracking-wider active:scale-[0.98] border border-white/10 uppercase"
               >
                 {loading ? <Loader2 size={18} className="animate-spin" /> : <LogIn size={18} className="group-hover:translate-x-0.5 transition-transform" />} 
                 {loading ? 'ENTRANDO...' : 'ACESSAR SISTEMA'}

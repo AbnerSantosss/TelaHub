@@ -83,7 +83,7 @@ export const TelemetryWidget: React.FC<TelemetryWidgetProps> = ({
       case 'system':
         return <Server className="w-4 h-4 text-cyan-400" />;
       case 'sync':
-        return <Activity className="w-4 h-4 text-purple-400" />;
+        return <Activity className="w-4 h-4 text-sky-400" />;
       case 'media':
         return <ShieldCheck className="w-4 h-4 text-emerald-400" />;
       case 'alert':
@@ -95,13 +95,13 @@ export const TelemetryWidget: React.FC<TelemetryWidgetProps> = ({
 
   return (
     <div className={cn(
-      "w-full h-full bg-[#2D3139]/40 border border-white/5 rounded-2xl backdrop-blur-xl p-5 flex flex-col justify-between overflow-hidden shadow-2xl relative select-none",
+      "w-full h-full bg-gray-800/40 border border-white/5 rounded-2xl backdrop-blur-xl p-5 flex flex-col justify-between overflow-hidden shadow-2xl relative select-none",
       className
     )}>
       {/* Top Header Section */}
       <div className="flex items-center justify-between border-b border-white/5 pb-4 mb-4">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-[#ea580c]/10 border border-[#ea580c]/20 flex items-center justify-center text-[#ea580c] shadow-inner">
+          <div className="w-8 h-8 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400 shadow-inner">
             <Activity className="w-4.5 h-4.5 animate-pulse" />
           </div>
           <div>
@@ -153,7 +153,7 @@ export const TelemetryWidget: React.FC<TelemetryWidgetProps> = ({
                   <span className={cn(
                     "text-[8px] font-black uppercase tracking-wider",
                     item.category === 'system' && 'text-cyan-400',
-                    item.category === 'sync' && 'text-purple-400',
+                    item.category === 'sync' && 'text-sky-400',
                     item.category === 'media' && 'text-emerald-400',
                     item.category === 'alert' && 'text-rose-400'
                   )}>

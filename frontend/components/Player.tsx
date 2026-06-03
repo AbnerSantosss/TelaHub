@@ -1473,8 +1473,8 @@ export const RssFeed: React.FC<{url: string, config?: any, widgetData?: any}> = 
                 )}
                 
                 <p className="mt-auto text-[10px] text-slate-500 pt-2 font-mono border-t border-slate-800/50 w-full truncate flex items-center gap-2 shrink-0 z-10 bg-slate-900">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#ea580c]"></span>
-                  <span className="uppercase tracking-wider font-bold text-[#ea580c]">{currentItem.author || 'Fonte Externa'}</span> 
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#0ea5e9]"></span>
+                  <span className="uppercase tracking-wider font-bold text-[#0ea5e9]">{currentItem.author || 'Fonte Externa'}</span> 
                   <span className="opacity-50">•</span> 
                   {new Date(currentItem.pubDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                 </p>
@@ -1580,8 +1580,8 @@ export const RssFeed: React.FC<{url: string, config?: any, widgetData?: any}> = 
             />
             
             <p className="text-[10px] text-slate-400 font-mono flex items-center gap-2 border-t border-white/10 pt-3 w-full">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#ea580c] shadow-[0_0_5px_rgba(124,58,237,0.8)]"></span>
-              <span className="uppercase tracking-wider font-bold text-[#ea580c]">{currentItem.author || 'Fonte Externa'}</span> 
+              <span className="w-1.5 h-1.5 rounded-full bg-[#0ea5e9] shadow-[0_0_5px_rgba(124,58,237,0.8)]"></span>
+              <span className="uppercase tracking-wider font-bold text-[#0ea5e9]">{currentItem.author || 'Fonte Externa'}</span> 
               <span className="opacity-50">•</span> 
               <span className="opacity-80">{new Date(currentItem.pubDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
             </p>
@@ -2550,7 +2550,7 @@ export const NotesWidget: React.FC<{ data: any }> = ({ data }) => {
       case 'purple-haze':
         return 'bg-gradient-to-br from-purple-950/70 via-indigo-900/60 to-purple-900/70 text-purple-100 border border-purple-500/30 backdrop-blur-md shadow-2xl';
       case 'neon-glow':
-        return 'bg-slate-950 text-[#ea580c] border border-[#ea580c]/70 shadow-[0_0_20px_rgba(124,58,237,0.4)] font-mono';
+        return 'bg-slate-950 text-[#0ea5e9] border border-[#0ea5e9]/70 shadow-[0_0_20px_rgba(124,58,237,0.4)] font-mono';
       case 'glass':
       default:
         return 'bg-white/10 backdrop-blur-xl border border-white/20 text-white shadow-2xl';
@@ -2602,10 +2602,10 @@ export const TodoWidget: React.FC<{ data: any }> = ({ data }) => {
       <div className="shrink-0">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
-            <ListTodo size={20} className="text-[#ea580c]" />
+            <ListTodo size={20} className="text-[#0ea5e9]" />
             <h3 className="font-extrabold tracking-tight text-lg">{title}</h3>
           </div>
-          <span className="text-xs font-mono bg-[#ea580c]/20 text-[#ea580c] px-2 py-0.5 rounded-full font-bold">
+          <span className="text-xs font-mono bg-[#0ea5e9]/20 text-[#0ea5e9] px-2 py-0.5 rounded-full font-bold">
             {doneCount}/{total}
           </span>
         </div>
@@ -2613,7 +2613,7 @@ export const TodoWidget: React.FC<{ data: any }> = ({ data }) => {
         {/* Progress Bar */}
         <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden mb-4 relative">
           <motion.div 
-            className="h-full bg-gradient-to-r from-[#ea580c] to-[#A855F7] rounded-full"
+            className="h-full bg-gradient-to-r from-[#0ea5e9] to-[#A855F7] rounded-full"
             initial={{ width: 0 }}
             animate={{ width: `${progressPercent}%` }}
             transition={{ duration: 0.8, ease: "easeOut" }}
@@ -2638,7 +2638,7 @@ export const TodoWidget: React.FC<{ data: any }> = ({ data }) => {
             >
               <div className={`w-5 h-5 rounded flex items-center justify-center shrink-0 border transition-all duration-300 ${
                 item.done 
-                  ? 'bg-[#ea580c]/20 border-[#ea580c]/50 text-[#ea580c]' 
+                  ? 'bg-[#0ea5e9]/20 border-[#0ea5e9]/50 text-[#0ea5e9]' 
                   : 'border-slate-500'
               }`}>
                 {item.done && <CheckSquare size={14} className="stroke-[3]" />}
@@ -2703,7 +2703,7 @@ export const CountdownWidget: React.FC<{ data: any }> = ({ data }) => {
   if (timeLeft.expired) {
     return (
       <div className={`w-full h-full flex flex-col items-center justify-center p-6 rounded-2xl text-center ${getThemeClass()}`}>
-        <Hourglass size={36} className="text-[#ea580c] mb-3 animate-spin" />
+        <Hourglass size={36} className="text-[#0ea5e9] mb-3 animate-spin" />
         <h4 className="text-2xl font-black uppercase tracking-wider animate-pulse">{expiredMsg}</h4>
       </div>
     );
@@ -2719,7 +2719,7 @@ export const CountdownWidget: React.FC<{ data: any }> = ({ data }) => {
   return (
     <div className={`w-full h-full p-6 rounded-2xl flex flex-col justify-between ${getThemeClass()}`}>
       <div className="flex items-center gap-2 mb-2 shrink-0">
-        <Hourglass size={18} className="text-[#ea580c] animate-pulse" />
+        <Hourglass size={18} className="text-[#0ea5e9] animate-pulse" />
         <h3 className="text-sm font-black uppercase tracking-widest">{title}</h3>
       </div>
       <div className="flex justify-around items-center gap-2 flex-1 my-2">
@@ -2756,7 +2756,7 @@ export const ChoresWidget: React.FC<{ data: any }> = ({ data }) => {
   return (
     <div className="w-full h-full p-6 bg-slate-950/60 backdrop-blur-xl border border-white/10 rounded-2xl flex flex-col justify-between text-white overflow-hidden shadow-2xl">
       <div className="flex items-center gap-2 mb-3 shrink-0">
-        <ClipboardList size={20} className="text-[#ea580c]" />
+        <ClipboardList size={20} className="text-[#0ea5e9]" />
         <h3 className="font-extrabold tracking-tight text-lg">{title}</h3>
       </div>
 
@@ -2776,7 +2776,7 @@ export const ChoresWidget: React.FC<{ data: any }> = ({ data }) => {
                   {item.chore}
                 </span>
                 {item.day && (
-                  <span className="text-[10px] font-mono text-[#ea580c] mt-0.5 uppercase tracking-wider">{item.day}</span>
+                  <span className="text-[10px] font-mono text-[#0ea5e9] mt-0.5 uppercase tracking-wider">{item.day}</span>
                 )}
               </div>
               <div className="flex items-center gap-2 shrink-0">

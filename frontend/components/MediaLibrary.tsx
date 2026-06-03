@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { listMedia, deleteMedia, uploadMedia, MediaFile } from '../services/storage';
 import { Trash2, Upload, FileImage, FileVideo, File, Loader2, X, ExternalLink, Copy, CheckSquare, Square, CheckCircle2 } from 'lucide-react';
+import { useAutoAnimate } from '@formkit/auto-animate/react';
 
 export const MediaLibrary: React.FC<{ 
   onClose: () => void;
   onSelect?: (url: string) => void;
   allowedTypes?: 'image' | 'video' | 'all';
 }> = ({ onClose, onSelect, allowedTypes = 'all' }) => {
+  const [mediaParent] = useAutoAnimate<HTMLDivElement>();
   const [media, setMedia] = useState<MediaFile[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
@@ -208,7 +210,7 @@ export const MediaLibrary: React.FC<{
               <p className="text-sm">Nenhum arquivo encontrado na biblioteca.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div ref={mediaParent} className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {filteredMedia.map((file) => {
                 const isSelected = selectedFiles.has(file.name);
                 return (

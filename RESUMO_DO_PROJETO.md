@@ -19,9 +19,14 @@ O **TelaHub** é um ecossistema SaaS full-stack premium para gerenciamento, orga
 
 ---
 
-## 🎨 2. Identidade Visual da Landing Page (Estética Brutalista B2B / Swiss Grid)
+## 🎨 2. Identidade Visual e Linguagem de Design (Dupla Identidade)
 
-*Nota para a IA de Design/Copywriting: O site de vendas deve ser projetado sob uma estética de Grade Suíça (Swiss Grid) em Light Mode. Isso cria um contraste sofisticado, estruturado e técnico com o software em si.*
+Para maximizar a conversão de vendas e oferecer uma experiência premium de uso, o ecossistema **TelaHub** adota uma **dupla identidade de design** perfeitamente calculada. O site de vendas funciona em Light Mode técnico para passar transparência e seriedade comercial, enquanto o painel e os players rodam em Dark Mode imersivo.
+
+---
+
+### 🌐 A. Site de Vendas / Landing Page (Estética Brutalista B2B / Swiss Grid)
+*Projetado sob uma estética de Grade Suíça (Swiss Grid) em Light Mode. Isso cria um contraste sofisticado, estruturado e técnico, preparando o cliente para a robustez do software.*
 
 *   **Paleta de Cores (Light Mode Técnico):**
     *   *Fundo Base:* Branco Puro (`#FFFFFF`).
@@ -38,6 +43,26 @@ O **TelaHub** é um ecossistema SaaS full-stack premium para gerenciamento, orga
 *   **Tipografia Unificada:**
     *   *Títulos:* **Satoshi** (fonte geométrica limpa, técnica e moderna).
     *   *Textos de Dados & Leitura:* **Space Grotesk** (excelente legibilidade e aspecto de dados precisos).
+
+---
+
+### 💜 B. O Software / Dashboard e Player (Estética Corporate Amethyst & Dark-Glassmorphism)
+*O painel operacional e a tela de exibição das Smart TVs rodam em um ambiente de alto contraste e sofisticação visual para garantir conforto visual e foco no conteúdo.*
+
+*   **Paleta de Cores (Dark Mode Premium):**
+    *   *Fundo Base:* Cinza Corporativo Escuro (`#1C1D22`).
+    *   *Superfícies, Cards & Modais:* Cinza Mineral (`#2D3139`) com efeito Dark-Glassmorphism sutil.
+    *   *Ação, Focos & Elementos Ativos:* Violeta Tecnológico / Amethyst (`#7C3AED`) com efeitos de glow e sombras sutis de cor.
+    *   *Textos:* Branco Puro (`#FFFFFF`) para destaque e Cinza Claro (`#9CA3AF`) para informações secundárias.
+*   **Geometria e Cantos (Conforto e Modernidade):**
+    *   *Cantos Suaves Modulares:* Uso estratégico de cantos ligeiramente arredondados (variando de `4px` a `8px`) nos widgets e painéis internos, permitindo que a interface flua organicamente nas Smart TVs e tablets sem parecer agressiva no dia a dia.
+*   **Biblioteca de Animação Avançada (Eldora UI + Framer Motion):**
+    *   O software é enriquecido com micro-interações fluidas a 60fps para criar uma experiência reativa de produto de alta tecnologia:
+        *   *Photon Beam (`SmartCanvasBackground.tsx`):* Efeito de feixes de luz neon dinâmicos e fluidos que se movem de forma suave no plano de fundo do editor de telas, aumentando a sensação de profundidade sem comprometer a legibilidade.
+        *   *Word Pull Up Text (`RealtimeBroadcastBanner.tsx`):* Animação com efeito de letras subindo sequencialmente com física de mola (*spring*), utilizada para destacar comunicados críticos de RH e emergências.
+        *   *Animated List & Badge (`TelemetryWidget.tsx`):* Listas reativas alimentadas via Server-Sent Events (SSE) onde novos logs ou alterações de dispositivos empurram suavemente os itens antigos para baixo, encabeçadas por um badge de telemetria pulsante em Verde Esmeralda.
+*   **Tipografia Unificada no App:**
+    *   *Títulos e Elementos de Interface:* **Space Grotesk** para manter a coesão técnica de dados precisos e telemetria em tempo real.
 
 ---
 

@@ -136,6 +136,7 @@ const Editor: React.FC = () => {
   const [activeMealDay, setActiveMealDay] = useState<string>('Segunda');
 
   const [showBgAnimModal, setShowBgAnimModal] = useState(false);
+  const [showLayersModal, setShowLayersModal] = useState(false);
   const [mediaLibraryConfig, setMediaLibraryConfig] = useState<{ isOpen: boolean, onSelect: (url: string) => void, allowedTypes: 'image' | 'video' | 'all' } | null>(null);
   
   // Mobile sidebar states
@@ -533,7 +534,7 @@ const Editor: React.FC = () => {
   const currentWidget = activePage.layout.find(w => w.i === selectedWidget);
 
   return (
-    <div className="h-screen flex flex-col bg-[#1C1D22] overflow-hidden relative text-slate-200 font-sans">
+    <div className="h-screen flex flex-col bg-[#111827] overflow-hidden relative text-slate-200 font-sans">
       
 
 
@@ -629,6 +630,146 @@ const Editor: React.FC = () => {
         </div>
       )}
 
+      {/* Modal de Camadas */}
+      {showLayersModal && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-slate-900 border border-slate-700 p-6 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[85vh]">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-4 mb-4">
+              <h3 className="text-sm font-bold text-white flex items-center gap-2 uppercase tracking-wider">
+                <Layers className="text-sky-500" size={16} /> Camadas da Cena ({activePage.layout.length})
+              </h3>
+              <button onClick={() => setShowLayersModal(false)} className="text-slate-400 hover:text-rose-500 transition-colors">
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto pr-1 space-y-1.5 custom-scrollbar min-h-0">
+              {[...activePage.layout]
+                .sort((a, b) => (b.data.zIndex ?? 10) - (a.data.zIndex ?? 10))
+                .map((layer) => {
+                  const isSelected = selectedWidget === layer.i;
+                  const isDragging = draggedLayerId === layer.i;
+                  const isDragOver = dragOverLayerId === layer.i;
+
+                  const getIcon = (type: WidgetType) => {
+                    switch (type) {
+                      case WidgetType.IMAGE: return <ImageIcon size={14} />;
+                      case WidgetType.VIDEO: return <Film size={14} />;
+                      case WidgetType.TEXT: return <Type size={14} />;
+                      case WidgetType.CLOCK: return <Clock size={14} />;
+                      case WidgetType.CALENDAR: return <Calendar size={14} />;
+                      case WidgetType.WEATHER: return <CloudSun size={14} />;
+                      case WidgetType.FULL_INFO: return <Layout size={14} />;
+                      case WidgetType.RSS: return <Rss size={14} />;
+                      case WidgetType.IFRAME: return <Globe size={14} />;
+                      case WidgetType.GIF: return <Gift size={14} />;
+                      case WidgetType.NOTES: return <StickyNote size={14} className="text-yellow-400" />;
+                      case WidgetType.TODO: return <ListTodo size={14} className="text-emerald-400" />;
+                      case WidgetType.COUNTDOWN: return <Timer size={14} className="text-rose-400" />;
+                      case WidgetType.CHORES: return <ClipboardList size={14} className="text-cyan-400" />;
+                      case WidgetType.MEAL_PLAN: return <Utensils size={14} className="text-amber-400" />;
+                      case WidgetType.MARKET_WATCH: return <TrendingUp size={14} className="text-green-400" />;
+                      case WidgetType.BROWSER_SNAPSHOT: return <Camera size={14} className="text-blue-400" />;
+                      case WidgetType.GOOGLE_DOCS: return <FileText size={14} className="text-cyan-500" />;
+                      case WidgetType.OFFICE_DOCS: return <BookOpen size={14} className="text-blue-500" />;
+                      case WidgetType.POWER_BI: return <Layout size={14} className="text-amber-500" />;
+                      case WidgetType.EMBED_HTML: return <Code2 size={14} className="text-indigo-400" />;
+                      case WidgetType.AIRTABLE: return <Database size={14} className="text-rose-500" />;
+                      case WidgetType.PDF_DOCUMENT: return <FileText size={14} className="text-red-500" />;
+                      default: return <Layers size={14} />;
+                    }
+                  };
+
+                  const getName = (type: WidgetType) => {
+                    switch (type) {
+                      case WidgetType.IMAGE: return 'Imagem';
+                      case WidgetType.VIDEO: return 'Vídeo';
+                      case WidgetType.TEXT: return 'Texto';
+                      case WidgetType.CLOCK: return 'Relógio';
+                      case WidgetType.CALENDAR: return 'Agenda';
+                      case WidgetType.WEATHER: return 'Clima';
+                      case WidgetType.FULL_INFO: return 'Completo';
+                      case WidgetType.RSS: return 'Notícias';
+                      case WidgetType.IFRAME: return 'Website';
+                      case WidgetType.GIF: return 'GIF';
+                      case WidgetType.NOTES: return 'Notas';
+                      case WidgetType.TODO: return 'Tarefas';
+                      case WidgetType.COUNTDOWN: return 'Contador';
+                      case WidgetType.CHORES: return 'Deveres';
+                      case WidgetType.MEAL_PLAN: return 'Meal Plan';
+                      case WidgetType.MARKET_WATCH: return 'Bolsa';
+                      case WidgetType.BROWSER_SNAPSHOT: return 'Snapshot';
+                      case WidgetType.GOOGLE_DOCS: return 'G Docs';
+                      case WidgetType.OFFICE_DOCS: return 'Office Docs';
+                      case WidgetType.POWER_BI: return 'Power BI';
+                      case WidgetType.EMBED_HTML: return 'HTML';
+                      case WidgetType.AIRTABLE: return 'Airtable';
+                      case WidgetType.PDF_DOCUMENT: return 'PDF';
+                      default: return 'Widget';
+                    }
+                  };
+
+                  return (
+                    <div
+                      key={layer.i}
+                      draggable
+                      onDragStart={(e) => handleLayerDragStart(e, layer.i)}
+                      onDragOver={(e) => handleLayerDragOver(e, layer.i)}
+                      onDragLeave={handleLayerDragLeave}
+                      onDrop={(e) => handleLayerDrop(e, layer.i)}
+                      onDragEnd={handleLayerDragEnd}
+                      onClick={() => {
+                        setSelectedWidget(layer.i);
+                        setShowLayersModal(false);
+                      }}
+                      className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all border ${
+                        isSelected 
+                          ? 'bg-sky-500/10 border-sky-500/50 text-sky-400 shadow-md shadow-sky-500/5' 
+                          : 'bg-slate-900/60 border-slate-800 hover:border-slate-700 text-slate-300 hover:bg-slate-900'
+                      } ${isDragging ? 'opacity-50' : 'opacity-100'} ${
+                        isDragOver ? 'border-t-2 border-t-sky-500' : ''
+                      }`}
+                    >
+                      <div className="cursor-move text-slate-500 hover:text-slate-300 p-1">
+                        <GripVertical size={14} />
+                      </div>
+                      <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-slate-950/80 border border-slate-800 text-slate-400">
+                        {getIcon(layer.type)}
+                      </div>
+                      <span className="text-xs font-bold truncate flex-1">{getName(layer.type)}</span>
+                      
+                      <div className="flex items-center gap-1">
+                        <button 
+                          onClick={(e) => { 
+                            e.stopPropagation(); 
+                            removeWidget(layer.i); 
+                          }}
+                          className="p-1.5 hover:bg-rose-500/10 text-slate-500 hover:text-rose-500 rounded-lg transition-colors"
+                          title="Excluir Camada"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                        {isSelected && <div className="w-2 h-2 rounded-full bg-sky-500 animate-pulse"></div>}
+                      </div>
+                    </div>
+                  );
+                })}
+              {activePage.layout.length === 0 && (
+                <div className="text-center p-6 border border-dashed border-slate-800 rounded-xl text-slate-500 text-xs">
+                  Nenhuma camada nesta cena.
+                </div>
+              )}
+            </div>
+            
+            {activePage.layout.length > 0 && (
+              <p className="text-[10px] text-slate-500 mt-4 text-center border-t border-slate-800 pt-3">
+                💡 Arraste as camadas usando o indicador de arrastar para alterar a ordem de sobreposição (z-index).
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+
       {pageToDelete !== null && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-slate-900 border border-slate-700 p-6 rounded-xl shadow-2xl max-w-sm w-full mx-4 animate-in zoom-in-95 duration-200">
@@ -663,16 +804,16 @@ const Editor: React.FC = () => {
       )}
 
       {/* Header */}
-      <header className="h-auto md:h-16 bg-[#2D3139] border-b border-[#9CA3AF]/10 px-4 md:px-6 py-3 md:py-0 flex flex-col md:flex-row items-center justify-between z-30 shadow-md gap-3 md:gap-0">
+      <header className="h-auto md:h-16 bg-[#1f2937] border-b border-[#9CA3AF]/10 px-4 md:px-6 py-3 md:py-0 flex flex-col md:flex-row items-center justify-between z-30 shadow-md gap-3 md:gap-0">
         <div className="flex items-center gap-4 w-full md:w-auto justify-start">
-          <button onClick={() => navigate('/')} className="p-2 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-[#ea580c] transition-colors">
+          <button onClick={() => navigate('/')} className="p-2 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-[#0ea5e9] transition-colors">
             <Home size={20} />
           </button>
           <div className="w-px h-6 bg-slate-800"></div>
           <div className="flex items-center gap-2">
             <LogoHub size={28} className="drop-shadow-[0_0_8px_rgba(124,58,237,0.35)]" />
             <h1 className="font-bold text-slate-100 tracking-tight uppercase text-sm">
-              Tela<span className="text-[#ea580c]">Hub</span> <span className="text-slate-600 mx-2">/</span> {display.name}
+              Tela<span className="text-[#0ea5e9]">Hub</span> <span className="text-slate-600 mx-2">/</span> {display.name}
             </h1>
           </div>
         </div>
@@ -684,7 +825,7 @@ const Editor: React.FC = () => {
               key={p.id} 
               className={`flex items-center rounded-lg border transition-all flex-shrink-0 min-w-max ${
                 activePageIdx === idx 
-                ? 'bg-[#ea580c] border-[#ea580c] shadow-[0_0_10px_rgba(124,58,237,0.4)]' 
+                ? 'bg-[#0ea5e9] border-[#0ea5e9] shadow-[0_0_10px_rgba(124,58,237,0.4)]' 
                 : 'border-slate-800 hover:border-slate-700 bg-slate-900'
               }`}
             >
@@ -694,7 +835,7 @@ const Editor: React.FC = () => {
                   activePageIdx === idx ? 'text-white' : 'text-slate-500 hover:text-slate-300'
                 }`}
               >
-                {p.broadcast_id && <CalendarDays size={12} className="text-[#ea580c]" />}
+                {p.broadcast_id && <CalendarDays size={12} className="text-[#0ea5e9]" />}
                 CENA {idx + 1}
               </button>
               
@@ -707,7 +848,7 @@ const Editor: React.FC = () => {
                   }}
                   className={`flex-shrink-0 w-8 h-8 flex items-center justify-center transition-colors border-l ${
                     activePageIdx === idx 
-                    ? 'border-[#d97706] text-purple-200 hover:bg-[#d97706] hover:text-white' 
+                    ? 'border-[#0284c7] text-purple-200 hover:bg-[#0284c7] hover:text-white' 
                     : 'border-slate-800 text-slate-600 hover:bg-rose-500/10 hover:text-rose-500'
                   }`}
                   title="Excluir Cena"
@@ -721,7 +862,7 @@ const Editor: React.FC = () => {
             const newP: Page = { id: 'p'+Date.now(), order: display.pages.length+1, duration: 15, layout: [] };
             setDisplay({...display, pages: [...display.pages, newP]});
             setActivePageIdx(display.pages.length);
-          }} className="p-1.5 text-[#ea580c] hover:bg-[#ea580c]/10 rounded-lg transition-colors mx-1">
+          }} className="p-1.5 text-[#0ea5e9] hover:bg-[#0ea5e9]/10 rounded-lg transition-colors mx-1">
             <Plus size={16} />
           </button>
         </div>
@@ -730,14 +871,14 @@ const Editor: React.FC = () => {
           <div className="flex items-center gap-2 md:hidden">
             <button 
               onClick={() => setShowLeftSidebar(!showLeftSidebar)}
-              className={`px-3 py-2 rounded-lg transition-all border ${showLeftSidebar ? 'bg-[#ea580c]/20 text-[#ea580c] border-[#ea580c]/50' : 'bg-slate-900 border-slate-800 text-slate-500 hover:text-[#ea580c]'}`}
+              className={`px-3 py-2 rounded-lg transition-all border ${showLeftSidebar ? 'bg-[#0ea5e9]/20 text-[#0ea5e9] border-[#0ea5e9]/50' : 'bg-slate-900 border-slate-800 text-slate-500 hover:text-[#0ea5e9]'}`}
               title="Widgets"
             >
               <Layers size={16} />
             </button>
             <button 
               onClick={() => setShowRightSidebar(!showRightSidebar)}
-              className={`px-3 py-2 rounded-lg transition-all border ${showRightSidebar ? 'bg-[#ea580c]/20 text-[#ea580c] border-[#ea580c]/50' : 'bg-slate-900 border-slate-800 text-slate-500 hover:text-[#ea580c]'}`}
+              className={`px-3 py-2 rounded-lg transition-all border ${showRightSidebar ? 'bg-[#0ea5e9]/20 text-[#0ea5e9] border-[#0ea5e9]/50' : 'bg-slate-900 border-slate-800 text-slate-500 hover:text-[#0ea5e9]'}`}
               title="Configurações"
             >
               <Settings size={16} />
@@ -747,8 +888,17 @@ const Editor: React.FC = () => {
           <div className="flex items-center gap-2">
 
             <button 
+              onClick={() => setShowLayersModal(true)}
+              className="bg-[#1f2937] hover:bg-[#111827] text-slate-300 hover:text-white border border-[#9CA3AF]/20 hover:border-sky-500/50 px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-all shadow-md"
+              title="Visualizar Camadas"
+            >
+              <Layers size={16} className="text-sky-400" />
+              <span className="hidden sm:inline">Camadas ({activePage.layout.length})</span>
+            </button>
+
+            <button 
               onClick={() => window.open(`/#/player/${display.slug || display.id}`, '_blank')}
-              className="bg-[#2D3139] hover:bg-[#1C1D22] text-[#F3F4F6] border border-[#9CA3AF] hover:border-white px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-all"
+              className="bg-[#1f2937] hover:bg-[#111827] text-[#F3F4F6] border border-[#9CA3AF] hover:border-white px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-all"
               title="Abrir Player em nova aba"
             >
               <Maximize2 size={16} />
@@ -758,7 +908,7 @@ const Editor: React.FC = () => {
             <button 
               onClick={handleSave} 
               disabled={isSaving} 
-              className="bg-[#ea580c] hover:bg-[#d97706] text-white px-6 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-all shadow-[0_0_15px_rgba(124,58,237,0.3)] border border-white/10 active:scale-95 whitespace-nowrap disabled:opacity-50"
+              className="bg-[#0ea5e9] hover:bg-[#0284c7] text-white px-6 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-all shadow-[0_0_15px_rgba(124,58,237,0.3)] border border-white/10 active:scale-95 whitespace-nowrap disabled:opacity-50"
             >
               {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />} 
               {isSaving ? 'SALVANDO...' : 'SALVAR'}
@@ -777,17 +927,95 @@ const Editor: React.FC = () => {
         )}
 
         {/* Sidebar Left: Tools */}
-        <aside className={`absolute md:relative left-0 top-0 h-full w-64 bg-[#2D3139] border-r border-slate-800 overflow-y-auto z-[60] shadow-xl transition-transform duration-300 ease-in-out ${showLeftSidebar ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
+        <aside className={`absolute md:relative left-0 top-0 h-full w-64 bg-[#1f2937] border-r border-slate-800 overflow-y-auto z-[60] shadow-xl transition-transform duration-300 ease-in-out ${showLeftSidebar ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
           
-          {/* Section 1: Fundo da Cena */}
+          {/* Section 1: Biblioteca de Widgets */}
           <div className="p-3.5 border-b border-slate-800">
-             <div className="flex justify-between items-center mb-4">
-               <h3 className="text-[10px] font-black text-indigo-500 uppercase tracking-widest flex items-center gap-2">
-                 <MonitorPlay size={12} /> Fundo da Cena
+             <div className="flex justify-between items-center mb-3">
+               <h3 className="text-[10px] font-black text-[#0ea5e9] uppercase tracking-widest flex items-center gap-1.5">
+                 <Layers size={11} /> Biblioteca de Widgets
                </h3>
                <button onClick={() => setShowLeftSidebar(false)} className="md:hidden text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors">
                  <X size={16} />
                </button>
+             </div>
+             
+             {/* Básicos */}
+             <div className="mb-2.5">
+               <h4 className="text-[9px] font-black text-emerald-400 uppercase tracking-widest mb-1 flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-emerald-400 inline-block"></span>Básicos</h4>
+               <div className="grid grid-cols-3 gap-1.5">
+                 <WidgetTool icon="/icons3d/image.png" label="Imagem" description="Exibe imagens de alta qualidade (PNG, JPG, SVG) com ajuste automático ao contêiner." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.IMAGE)} />
+                 <WidgetTool icon="/icons3d/video.png" label="Vídeo" description="Reproduz vídeos locais em looping ou links diretos do YouTube." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.VIDEO)} />
+                 <WidgetTool icon="/icons3d/text.png" label="Texto" description="Adiciona caixas de texto com fontes, cores e tamanhos personalizáveis." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.TEXT)} />
+                 <WidgetTool icon="/icons3d/gif.png" label="GIF" description="Exibe animações divertidas em formato GIF para atrair a atenção do público." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.GIF)} />
+                 <WidgetTool icon="/icons3d/web.png" label="Web" description="Incorpora qualquer site ou página web externa de forma interativa." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.IFRAME)} />
+               </div>
+             </div>
+
+             {/* Utilitários */}
+             <div className="mb-2.5">
+               <h4 className="text-[9px] font-black text-cyan-400 uppercase tracking-widest mb-1 flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-cyan-400 inline-block"></span>Utilitários</h4>
+               <div className="grid grid-cols-3 gap-1.5">
+                 <WidgetTool icon="/icons3d/clock.png" label="Relógio" description="Mostra um relógio digital sincronizado em tempo real com a cidade escolhida." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.CLOCK)} />
+                 <WidgetTool icon="/icons3d/weather.png" label="Clima" description="Exibe a previsão do tempo e temperatura em tempo real para qualquer cidade." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.WEATHER)} />
+                 <WidgetTool icon="/icons3d/full-info.png" label="Completo" description="Painel integrado de relógio, clima e fundos de alta definição." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.FULL_INFO)} />
+                 <WidgetTool icon="/icons3d/rss.png" label="RSS" description="Exibe feeds de notícias em tempo real de portais de notícias como G1 e CNN." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.RSS)} />
+                 <WidgetTool icon="/icons3d/calendar.png" label="Agenda" description="Integração direta com Google Agenda para exibir eventos e programações." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.CALENDAR)} />
+               </div>
+             </div>
+
+             {/* Interativos */}
+             <div className="mb-2.5">
+               <h4 className="text-[9px] font-black text-amber-400 uppercase tracking-widest mb-1 flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-amber-400 inline-block"></span>Interativos</h4>
+               <div className="grid grid-cols-3 gap-1.5">
+                 <WidgetTool icon="/icons3d/notes.png" label="Notas" description="Mural de notas adesivas com temas neon, glassmorphism e cores vibrantes." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.NOTES)} />
+                 <WidgetTool icon="/icons3d/todo.png" label="Tarefas" description="Lista de tarefas interativa com checkboxes e progresso de conclusão." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.TODO)} />
+                 <WidgetTool icon="/icons3d/countdown.png" label="Contador" description="Cronômetro regressivo para grandes eventos, metas ou datas especiais." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.COUNTDOWN)} />
+                 <WidgetTool icon="/icons3d/chores.png" label="Deveres" description="Quadro semanal de deveres domésticos ou corporativos com responsáveis." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.CHORES)} />
+                 <WidgetTool icon="/icons3d/meal-plan.png" label="Meal Plan" description="Planejador ou cardápio de refeições semanais com slide para os dias." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.MEAL_PLAN)} />
+               </div>
+             </div>
+
+             {/* Integrações */}
+             <div className="mb-2.5">
+               <h4 className="text-[9px] font-black text-rose-400 uppercase tracking-widest mb-1 flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-rose-400 inline-block"></span>Integrações</h4>
+               <div className="grid grid-cols-3 gap-1.5">
+                 <WidgetTool icon="/icons3d/market.png" label="Bolsa" description="Painel de cotações financeiras de ações e criptomoedas em tempo real." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.MARKET_WATCH)} />
+                 <WidgetTool icon="/icons3d/snapshot.png" label="Snapshot" description="Renderiza capturas estáticas e periódicas de páginas de forma segura." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.BROWSER_SNAPSHOT)} />
+                 <WidgetTool icon="/icons3d/google-docs.png" label="G Docs" description="Incorpora documentos, planilhas ou slides do Google Workspace." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.GOOGLE_DOCS)} />
+                 <WidgetTool icon="/icons3d/office-docs.png" label="Office Docs" description="Exibe planilhas Excel, documentos Word ou slides PowerPoint do Office 365." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.OFFICE_DOCS)} />
+                 <WidgetTool icon="/icons3d/power-bi.png" label="Power BI" description="Exibe painéis interativos e relatórios dinâmicos do Microsoft Power BI." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.POWER_BI)} />
+                 <WidgetTool icon="/icons3d/airtable.png" label="Airtable" description="Exibe visualizações, tabelas ou bases de dados completas do Airtable." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.AIRTABLE)} />
+                 <WidgetTool icon="/icons3d/pdf.png" label="PDF" description="Exibe documentos PDFs e apostilas corporativas página a página." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.PDF_DOCUMENT)} />
+                 <WidgetTool icon="/icons3d/html.png" label="HTML" description="Insira código HTML, CSS ou JS personalizado livremente." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.EMBED_HTML)} />
+               </div>
+             </div>
+             
+             <div className="mt-3 pt-3 border-t border-slate-800">
+                <button 
+                  onClick={() => setIsClearingScene(true)}
+                  className="w-full flex items-center justify-center gap-2 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 rounded-lg text-[9px] font-bold transition-colors border border-rose-500/20 uppercase tracking-wider"
+                >
+                  <Trash2 size={11} /> Limpar Todos os Widgets
+                </button>
+             </div>
+
+             {/* Dynamic Tooltip Explanation Box */}
+             <div className="mt-3 p-2.5 bg-slate-950/60 rounded-xl border border-slate-800/80 min-h-[48px] flex items-center gap-2">
+               <Info size={12} className="text-[#0ea5e9] shrink-0" />
+               <p className="text-[9px] text-slate-400 font-medium leading-relaxed">
+                 {hoveredDescription || "Passe o mouse sobre um widget para ver a descrição detalhada."}
+               </p>
+             </div>
+          </div>
+
+          {/* Section 2: Fundo da Cena */}
+          <div className="p-3.5">
+             <div className="flex items-center gap-2 mb-4">
+               <MonitorPlay size={12} className="text-indigo-500" />
+               <h3 className="text-[10px] font-black text-indigo-500 uppercase tracking-widest">
+                 Fundo da Cena
+               </h3>
              </div>
              
              <div className="space-y-4">
@@ -843,7 +1071,7 @@ const Editor: React.FC = () => {
                         <input 
                           type="checkbox" 
                           id="bg-video-mute"
-                          checked={activePage.backgroundVideoMuted !== false} // Default true
+                          checked={activePage.backgroundVideoMuted !== false}
                           onChange={(e) => {
                             const updated = [...display.pages];
                             updated[activePageIdx].backgroundVideoMuted = e.target.checked;
@@ -1029,207 +1257,21 @@ const Editor: React.FC = () => {
              </div>
              
              {activePage.broadcast_id && (
-               <div className="mt-3 p-2 bg-cyan-900/20 border border-cyan-800/30 rounded-xl flex items-start gap-2">
-                 <CalendarDays className="text-cyan-400 shrink-0 mt-0.5" size={14} />
-                 <div>
-                   <p className="text-[10px] font-bold text-cyan-400 mb-0.5">Cena Programada</p>
-                   <p className="text-[9px] text-cyan-200/60 leading-relaxed">
-                     Esta cena foi injetada pela Central. Alterações feitas aqui afetarão apenas esta tela.
-                   </p>
-                 </div>
-               </div>
+                <div className="mt-3 p-2 bg-cyan-900/20 border border-cyan-800/30 rounded-xl flex items-start gap-2">
+                  <CalendarDays className="text-cyan-400 shrink-0 mt-0.5" size={14} />
+                  <div>
+                    <p className="text-[10px] font-bold text-cyan-400 mb-0.5">Cena Programada</p>
+                    <p className="text-[9px] text-cyan-200/60 leading-relaxed">
+                      Esta cena foi injetada pela Central. Alterações feitas aqui afetarão apenas esta tela.
+                    </p>
+                  </div>
+                </div>
              )}
-          </div>
-
-          {/* Section 2: Camadas */}
-          <div className="p-3.5 border-b border-slate-800">
-             <h3 className="text-[10px] font-black text-purple-500 uppercase tracking-widest mb-3 flex items-center gap-1.5">
-               <Layers size={11} /> Camadas
-             </h3>
-             <div className="space-y-1">
-               {[...activePage.layout]
-                 .sort((a, b) => (b.data.zIndex ?? 10) - (a.data.zIndex ?? 10))
-                 .map((layer) => {
-                   const isSelected = selectedWidget === layer.i;
-                   const isDragging = draggedLayerId === layer.i;
-                   const isDragOver = dragOverLayerId === layer.i;
-
-                   const getIcon = (type: WidgetType) => {
-                     switch (type) {
-                       case WidgetType.IMAGE: return <ImageIcon size={12} />;
-                       case WidgetType.VIDEO: return <Film size={12} />;
-                       case WidgetType.TEXT: return <Type size={12} />;
-                       case WidgetType.CLOCK: return <Clock size={12} />;
-                       case WidgetType.CALENDAR: return <Calendar size={12} />;
-                       case WidgetType.WEATHER: return <CloudSun size={12} />;
-                       case WidgetType.FULL_INFO: return <Layout size={12} />;
-                       case WidgetType.RSS: return <Rss size={12} />;
-                       case WidgetType.IFRAME: return <Globe size={12} />;
-                       case WidgetType.GIF: return <Gift size={12} />;
-                       case WidgetType.NOTES: return <StickyNote size={12} className="text-yellow-400" />;
-                       case WidgetType.TODO: return <ListTodo size={12} className="text-emerald-400" />;
-                       case WidgetType.COUNTDOWN: return <Timer size={12} className="text-rose-400" />;
-                       case WidgetType.CHORES: return <ClipboardList size={12} className="text-cyan-400" />;
-                       case WidgetType.MEAL_PLAN: return <Utensils size={12} className="text-amber-400" />;
-                       case WidgetType.MARKET_WATCH: return <TrendingUp size={12} className="text-green-400" />;
-                       case WidgetType.BROWSER_SNAPSHOT: return <Camera size={12} className="text-blue-400" />;
-                       case WidgetType.GOOGLE_DOCS: return <FileText size={12} className="text-cyan-500" />;
-                       case WidgetType.OFFICE_DOCS: return <BookOpen size={12} className="text-blue-500" />;
-                       case WidgetType.POWER_BI: return <Layout size={12} className="text-amber-500" />;
-                       case WidgetType.EMBED_HTML: return <Code2 size={12} className="text-indigo-400" />;
-                       case WidgetType.AIRTABLE: return <Database size={12} className="text-rose-500" />;
-                       case WidgetType.PDF_DOCUMENT: return <FileText size={12} className="text-red-500" />;
-                       default: return <Layers size={12} />;
-                     }
-                   };
-
-                   const getName = (type: WidgetType) => {
-                     switch (type) {
-                       case WidgetType.IMAGE: return 'Imagem';
-                       case WidgetType.VIDEO: return 'Vídeo';
-                       case WidgetType.TEXT: return 'Texto';
-                       case WidgetType.CLOCK: return 'Relógio';
-                       case WidgetType.CALENDAR: return 'Agenda';
-                       case WidgetType.WEATHER: return 'Clima';
-                       case WidgetType.FULL_INFO: return 'Completo';
-                       case WidgetType.RSS: return 'Notícias';
-                       case WidgetType.IFRAME: return 'Website';
-                       case WidgetType.GIF: return 'GIF';
-                       case WidgetType.NOTES: return 'Notas';
-                       case WidgetType.TODO: return 'Tarefas';
-                       case WidgetType.COUNTDOWN: return 'Contador';
-                       case WidgetType.CHORES: return 'Deveres';
-                       case WidgetType.MEAL_PLAN: return 'Meal Plan';
-                       case WidgetType.MARKET_WATCH: return 'Bolsa';
-                       case WidgetType.BROWSER_SNAPSHOT: return 'Snapshot';
-                       case WidgetType.GOOGLE_DOCS: return 'G Docs';
-                       case WidgetType.OFFICE_DOCS: return 'Office Docs';
-                       case WidgetType.POWER_BI: return 'Power BI';
-                       case WidgetType.EMBED_HTML: return 'HTML';
-                       case WidgetType.AIRTABLE: return 'Airtable';
-                       case WidgetType.PDF_DOCUMENT: return 'PDF';
-                       default: return 'Widget';
-                     }
-                   };
-
-                   return (
-                     <div
-                       key={layer.i}
-                       draggable
-                       onDragStart={(e) => handleLayerDragStart(e, layer.i)}
-                       onDragOver={(e) => handleLayerDragOver(e, layer.i)}
-                       onDragLeave={handleLayerDragLeave}
-                       onDrop={(e) => handleLayerDrop(e, layer.i)}
-                       onDragEnd={handleLayerDragEnd}
-                       onClick={() => setSelectedWidget(layer.i)}
-                       className={`flex items-center gap-1.5 p-1.5 rounded-lg cursor-pointer transition-all border ${
-                         isSelected 
-                           ? 'bg-[#ea580c]/10 border-[#ea580c]/50 text-[#ea580c]' 
-                           : 'bg-slate-900 border-transparent hover:bg-slate-800 text-slate-300'
-                       } ${isDragging ? 'opacity-50' : 'opacity-100'} ${
-                         isDragOver ? 'border-t-2 border-t-[#ea580c]' : ''
-                       }`}
-                     >
-                       <div className="cursor-move text-slate-500 hover:text-slate-300">
-                         <GripVertical size={12} />
-                       </div>
-                       <div className="flex items-center justify-center w-5.5 h-5.5 rounded bg-slate-950/50 text-slate-400">
-                         {getIcon(layer.type)}
-                       </div>
-                       <span className="text-[10px] font-medium truncate flex-1">{getName(layer.type)}</span>
-                       {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-[#ea580c]"></div>}
-                     </div>
-                   );
-               })}
-               {activePage.layout.length === 0 && (
-                 <div className="text-center p-3 border border-dashed border-slate-800 rounded-lg text-slate-500 text-[9px]">
-                   Nenhuma camada nesta cena.
-                 </div>
-               )}
-             </div>
-             <p className="text-[8px] text-slate-500 mt-2 text-center">Arraste para reordenar (z-index)</p>
-          </div>
-
-          {/* Section 3: Biblioteca de Widgets */}
-          <div className="p-3.5">
-             <div className="flex justify-between items-center mb-3">
-               <h3 className="text-[10px] font-black text-[#ea580c] uppercase tracking-widest flex items-center gap-1.5">
-                 <Layers size={11} /> Biblioteca de Widgets
-               </h3>
-             </div>
-             
-             {/* Básicos */}
-             <div className="mb-2.5">
-               <h4 className="text-[9px] font-black text-emerald-400 uppercase tracking-widest mb-1 flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-emerald-400 inline-block"></span>Básicos</h4>
-               <div className="grid grid-cols-3 gap-1.5">
-                 <WidgetTool icon="/icons3d/image.png" label="Imagem" description="Exibe imagens de alta qualidade (PNG, JPG, SVG) com ajuste automático ao contêiner." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.IMAGE)} />
-                 <WidgetTool icon="/icons3d/video.png" label="Vídeo" description="Reproduz vídeos locais em looping ou links diretos do YouTube." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.VIDEO)} />
-                 <WidgetTool icon="/icons3d/text.png" label="Texto" description="Adiciona caixas de texto com fontes, cores e tamanhos personalizáveis." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.TEXT)} />
-                 <WidgetTool icon="/icons3d/gif.png" label="GIF" description="Exibe animações divertidas em formato GIF para atrair a atenção do público." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.GIF)} />
-                 <WidgetTool icon="/icons3d/web.png" label="Web" description="Incorpora qualquer site ou página web externa de forma interativa." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.IFRAME)} />
-               </div>
-             </div>
-
-             {/* Utilitários */}
-             <div className="mb-2.5">
-               <h4 className="text-[9px] font-black text-cyan-400 uppercase tracking-widest mb-1 flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-cyan-400 inline-block"></span>Utilitários</h4>
-               <div className="grid grid-cols-3 gap-1.5">
-                 <WidgetTool icon="/icons3d/clock.png" label="Relógio" description="Mostra um relógio digital sincronizado em tempo real com a cidade escolhida." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.CLOCK)} />
-                 <WidgetTool icon="/icons3d/weather.png" label="Clima" description="Exibe a previsão do tempo e temperatura em tempo real para qualquer cidade." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.WEATHER)} />
-                 <WidgetTool icon="/icons3d/full-info.png" label="Completo" description="Painel integrado de relógio, clima e fundos de alta definição." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.FULL_INFO)} />
-                 <WidgetTool icon="/icons3d/rss.png" label="RSS" description="Exibe feeds de notícias em tempo real de portais de notícias como G1 e CNN." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.RSS)} />
-                 <WidgetTool icon="/icons3d/calendar.png" label="Agenda" description="Integração direta com Google Agenda para exibir eventos e programações." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.CALENDAR)} />
-               </div>
-             </div>
-
-             {/* Interativos */}
-             <div className="mb-2.5">
-               <h4 className="text-[9px] font-black text-amber-400 uppercase tracking-widest mb-1 flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-amber-400 inline-block"></span>Interativos</h4>
-               <div className="grid grid-cols-3 gap-1.5">
-                 <WidgetTool icon="/icons3d/notes.png" label="Notas" description="Mural de notas adesivas com temas neon, glassmorphism e cores vibrantes." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.NOTES)} />
-                 <WidgetTool icon="/icons3d/todo.png" label="Tarefas" description="Lista de tarefas interativa com checkboxes e progresso de conclusão." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.TODO)} />
-                 <WidgetTool icon="/icons3d/countdown.png" label="Contador" description="Cronômetro regressivo para grandes eventos, metas ou datas especiais." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.COUNTDOWN)} />
-                 <WidgetTool icon="/icons3d/chores.png" label="Deveres" description="Quadro semanal de deveres domésticos ou corporativos com responsáveis." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.CHORES)} />
-                 <WidgetTool icon="/icons3d/meal-plan.png" label="Meal Plan" description="Planejador ou cardápio de refeições semanais com slide para os dias." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.MEAL_PLAN)} />
-               </div>
-             </div>
-
-             {/* Integrações */}
-             <div className="mb-2.5">
-               <h4 className="text-[9px] font-black text-rose-400 uppercase tracking-widest mb-1 flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-rose-400 inline-block"></span>Integrações</h4>
-               <div className="grid grid-cols-3 gap-1.5">
-                 <WidgetTool icon="/icons3d/market.png" label="Bolsa" description="Painel de cotações financeiras de ações e criptomoedas em tempo real." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.MARKET_WATCH)} />
-                 <WidgetTool icon="/icons3d/snapshot.png" label="Snapshot" description="Renderiza capturas estáticas e periódicas de páginas de forma segura." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.BROWSER_SNAPSHOT)} />
-                 <WidgetTool icon="/icons3d/google-docs.png" label="G Docs" description="Incorpora documentos, planilhas ou slides do Google Workspace." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.GOOGLE_DOCS)} />
-                 <WidgetTool icon="/icons3d/office-docs.png" label="Office Docs" description="Exibe planilhas Excel, documentos Word ou slides PowerPoint do Office 365." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.OFFICE_DOCS)} />
-                 <WidgetTool icon="/icons3d/power-bi.png" label="Power BI" description="Exibe painéis interativos e relatórios dinâmicos do Microsoft Power BI." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.POWER_BI)} />
-                 <WidgetTool icon="/icons3d/airtable.png" label="Airtable" description="Exibe visualizações, tabelas ou bases de dados completas do Airtable." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.AIRTABLE)} />
-                 <WidgetTool icon="/icons3d/pdf.png" label="PDF" description="Exibe documentos PDFs e apostilas corporativas página a página." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.PDF_DOCUMENT)} />
-                 <WidgetTool icon="/icons3d/html.png" label="HTML" description="Insira código HTML, CSS ou JS personalizado livremente." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.EMBED_HTML)} />
-               </div>
-             </div>
-             
-             <div className="mt-3 pt-3 border-t border-slate-800">
-                <button 
-                  onClick={() => setIsClearingScene(true)}
-                  className="w-full flex items-center justify-center gap-2 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 rounded-lg text-[9px] font-bold transition-colors border border-rose-500/20 uppercase tracking-wider"
-                >
-                  <Trash2 size={11} /> Limpar Todos os Widgets
-                </button>
-             </div>
-
-             {/* Dynamic Tooltip Explanation Box */}
-             <div className="mt-3 p-2.5 bg-slate-950/60 rounded-xl border border-slate-800/80 min-h-[48px] flex items-center gap-2">
-               <Info size={12} className="text-[#ea580c] shrink-0" />
-               <p className="text-[9px] text-slate-400 font-medium leading-relaxed">
-                 {hoveredDescription || "Passe o mouse sobre um widget para ver a descrição detalhada."}
-               </p>
-             </div>
           </div>
         </aside>
 
         {/* Canvas Area */}
-        <main className="flex-1 bg-[#1C1D22] relative overflow-hidden flex items-center justify-center p-8">
+        <main className="flex-1 bg-[#111827] relative overflow-hidden flex items-center justify-center p-8">
           {/* Background Grid Pattern */}
           <div className="absolute inset-0 z-0 opacity-10 pointer-events-none" 
                style={{ 
@@ -1249,7 +1291,7 @@ const Editor: React.FC = () => {
           
           <div 
             ref={containerRef}
-            className={`h-full bg-black shadow-[0_0_40px_rgba(0,0,0,0.8)] relative border border-[#ea580c] rounded-sm overflow-hidden shadow-[0_0_25px_rgba(124,58,237,0.15)] ${
+            className={`h-full bg-black shadow-[0_0_40px_rgba(0,0,0,0.8)] relative border border-[#0ea5e9] rounded-md overflow-hidden shadow-[0_0_25px_rgba(124,58,237,0.15)] ${
               display.orientation === 'vertical'
                 ? 'aspect-[9/16] max-h-full w-auto'
                 : 'w-full max-w-[100%] aspect-video'
@@ -1311,7 +1353,7 @@ const Editor: React.FC = () => {
                   <div 
                     key={w.i} 
                     onClick={(e) => { e.stopPropagation(); setSelectedWidget(w.i); }}
-                    className={`group transition-all ${selectedWidget === w.i ? 'border border-[#ea580c] shadow-[0_0_15px_rgba(124,58,237,0.35)]' : 'border border-transparent hover:border-white/20 hover:bg-white/5'} ${w.data.backgroundAnimation ? getBackgroundAnimationClass(w.data.backgroundAnimation) : (selectedWidget === w.i ? 'bg-slate-900/50 backdrop-blur-sm' : '')}`}
+                    className={`group transition-all ${selectedWidget === w.i ? 'border border-[#0ea5e9] shadow-[0_0_15px_rgba(124,58,237,0.35)]' : 'border border-transparent hover:border-white/20 hover:bg-white/5'} ${w.data.backgroundAnimation ? getBackgroundAnimationClass(w.data.backgroundAnimation) : (selectedWidget === w.i ? 'bg-slate-900/50 backdrop-blur-sm' : '')}`}
                     style={{ zIndex: selectedWidget === w.i ? 999 : (w.data.zIndex !== undefined ? w.data.zIndex : 10) }}
                   >
                     <div 
@@ -1322,7 +1364,7 @@ const Editor: React.FC = () => {
                       }}
                     >
                       {w.data.fullScreenMode && (
-                        <div className="absolute top-2 right-2 z-30 bg-indigo-950/80 border border-[#ea580c]/50 backdrop-blur-sm text-[#ea580c] text-[9px] font-black uppercase px-2 py-0.5 rounded-full shadow-[0_0_10px_rgba(124,58,237,0.3)] pointer-events-none animate-pulse flex items-center gap-1">
+                        <div className="absolute top-2 right-2 z-30 bg-indigo-950/80 border border-[#0ea5e9]/50 backdrop-blur-sm text-[#0ea5e9] text-[9px] font-black uppercase px-2 py-0.5 rounded-full shadow-[0_0_10px_rgba(124,58,237,0.3)] pointer-events-none animate-pulse flex items-center gap-1">
                           <span>📺 Tela Cheia (100% da TV)</span>
                         </div>
                       )}
@@ -1588,12 +1630,12 @@ const Editor: React.FC = () => {
         </main>
 
         {/* Sidebar Right: Properties */}
-        <aside className={`absolute md:relative right-0 top-0 h-full w-80 bg-[#2D3139] border-l border-slate-800 p-6 overflow-y-auto z-[60] shadow-xl transition-transform duration-300 ease-in-out ${showRightSidebar ? 'translate-x-0' : 'translate-x-full md:translate-x-0'}`}>
+        <aside className={`absolute md:relative right-0 top-0 h-full w-80 bg-[#1f2937] border-l border-slate-800 p-6 overflow-y-auto z-[60] shadow-xl transition-transform duration-300 ease-in-out ${showRightSidebar ? 'translate-x-0' : 'translate-x-full md:translate-x-0'}`}>
           {currentWidget ? (
             <div className="space-y-6 animate-in slide-in-from-right-4 duration-200">
               <div className="flex items-center justify-between border-b border-slate-800 pb-4">
                 <h3 className="font-bold text-slate-200 flex items-center gap-2 text-xs uppercase tracking-wider">
-                   <Settings size={14} className="text-[#ea580c]" /> Configuração
+                   <Settings size={14} className="text-[#0ea5e9]" /> Configuração
                 </h3>
                 <div className="flex items-center gap-2">
                   <button onClick={() => removeWidget(selectedWidget!)} className="text-rose-500 hover:bg-rose-500/10 p-2 rounded-lg transition-colors" title="Remover Widget">
@@ -1614,7 +1656,7 @@ const Editor: React.FC = () => {
                   </h4>
                   <button 
                     onClick={() => setShowBgAnimModal(true)}
-                    className="w-full py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold transition-colors shadow-lg shadow-indigo-900/20 flex items-center justify-center gap-2"
+                    className="w-full py-2 bg-indigo-600 hover:bg-sky-500 text-white rounded-lg text-xs font-bold transition-colors shadow-lg shadow-indigo-900/20 flex items-center justify-center gap-2"
                   >
                     <MonitorPlay size={14} />
                     {currentWidget.data.backgroundAnimation && currentWidget.data.backgroundAnimation !== 'none' 
@@ -2010,7 +2052,7 @@ const Editor: React.FC = () => {
                        <div className="mt-4 pt-4 border-t border-slate-800">
                           <button 
                             onClick={setFullScreen}
-                            className="w-full py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold transition-colors shadow-lg shadow-indigo-900/20 flex items-center justify-center gap-2"
+                            className="w-full py-2 bg-indigo-600 hover:bg-sky-500 text-white rounded-lg text-xs font-bold transition-colors shadow-lg shadow-indigo-900/20 flex items-center justify-center gap-2"
                           >
                             <Maximize2 size={14} />
                             Preencher Tela Inteira
@@ -2239,7 +2281,7 @@ const Editor: React.FC = () => {
                     <div className="mt-4 pt-4 border-t border-slate-800">
                       <button 
                         onClick={setFullScreen}
-                        className="w-full py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold transition-colors shadow-lg shadow-indigo-900/20 flex items-center justify-center gap-2"
+                        className="w-full py-2 bg-indigo-600 hover:bg-sky-500 text-white rounded-lg text-xs font-bold transition-colors shadow-lg shadow-indigo-900/20 flex items-center justify-center gap-2"
                       >
                         <Maximize2 size={14} />
                         Preencher Tela Inteira
@@ -2874,7 +2916,7 @@ const Editor: React.FC = () => {
                               input.value = '';
                             }
                           }}
-                          className="bg-indigo-600 hover:bg-indigo-500 px-3 rounded text-white text-xs font-bold"
+                          className="bg-indigo-600 hover:bg-sky-500 px-3 rounded text-white text-xs font-bold"
                         >
                           +
                         </button>
@@ -3015,7 +3057,7 @@ const Editor: React.FC = () => {
                             assInput.value = '';
                           }
                         }}
-                        className="w-full py-1.5 bg-indigo-600 hover:bg-indigo-500 rounded text-white text-xs font-bold transition-colors"
+                        className="w-full py-1.5 bg-indigo-600 hover:bg-sky-500 rounded text-white text-xs font-bold transition-colors"
                       >
                         Adicionar
                       </button>
@@ -3207,7 +3249,7 @@ const Editor: React.FC = () => {
                               input.value = '';
                             }
                           }}
-                          className="bg-indigo-600 hover:bg-indigo-500 px-3 rounded text-white text-xs font-bold"
+                          className="bg-indigo-600 hover:bg-sky-500 px-3 rounded text-white text-xs font-bold"
                         >
                           +
                         </button>
@@ -3578,10 +3620,10 @@ const WidgetTool = ({ icon, label, description, onClick, onHover }: any) => (
     onClick={onClick}
     onMouseEnter={() => onHover && onHover(description)}
     onMouseLeave={() => onHover && onHover('')}
-    className="relative flex flex-col items-center justify-center p-1 bg-[#1C1D22] border border-slate-800/60 rounded-lg hover:bg-[#ea580c]/10 hover:border-[#ea580c] hover:shadow-[0_0_12px_rgba(234,88,12,0.15)] active:scale-95 transition-all group w-full cursor-pointer py-1.5"
+    className="relative flex flex-col items-center justify-center p-1 bg-[#111827] border border-slate-800/60 rounded-lg hover:bg-[#0ea5e9]/10 hover:border-[#0ea5e9] hover:shadow-[0_0_12px_rgba(14,165,233,0.15)] active:scale-95 transition-all group w-full cursor-pointer py-1.5"
   >
     {/* Tiny Info Icon in Corner */}
-    <div className="absolute top-1 right-1 opacity-20 group-hover:opacity-100 transition-opacity text-slate-400 group-hover:text-[#ea580c]">
+    <div className="absolute top-1 right-1 opacity-20 group-hover:opacity-100 transition-opacity text-slate-400 group-hover:text-[#0ea5e9]">
       <Info size={8} />
     </div>
 
@@ -3594,12 +3636,12 @@ const WidgetTool = ({ icon, label, description, onClick, onHover }: any) => (
     </div>
 
     {/* Smaller Icon Container with LESS Spacing */}
-    <div className="text-slate-300 group-hover:text-[#ea580c] mb-0.5 transition-colors drop-shadow-sm flex items-center justify-center h-8 w-8">
+    <div className="text-slate-300 group-hover:text-[#0ea5e9] mb-0.5 transition-colors drop-shadow-sm flex items-center justify-center h-8 w-8">
       {typeof icon === 'string' ? (
         <img 
           src={icon} 
           alt={label} 
-          className="w-7 h-7 object-contain group-hover:scale-110 transition-transform duration-300 filter drop-shadow-[0_0_6px_rgba(234,88,12,0.15)]" 
+          className="w-7 h-7 object-contain group-hover:scale-110 transition-transform duration-300 filter drop-shadow-[0_0_6px_rgba(14,165,233,0.15)]" 
         />
       ) : (
         icon

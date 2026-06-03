@@ -37,7 +37,7 @@ const ForgotPassword: React.FC = () => {
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-background text-foreground">
       {/* Background Mesh Grid */}
-      <div className="absolute inset-0 bg-[radial-gradient(rgba(234,88,12,0.03)_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none z-0"></div>
+      <div className="absolute inset-0 bg-[radial-gradient(rgba(14,165,233,0.03)_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none z-0"></div>
 
       <div className="w-full max-w-md p-6 sm:p-8 relative z-10 flex flex-col gap-6">
         
@@ -54,7 +54,7 @@ const ForgotPassword: React.FC = () => {
           </p>
         </div>
 
-        <div className="bg-card border border-border shadow-md p-6 sm:p-8 transition-all duration-300 hover:border-accent/30">
+        <div className="bg-card border border-border shadow-md p-6 sm:p-8 transition-all duration-300 hover:border-sky-500/30 rounded-xl">
           
           {success ? (
             <div className="flex flex-col items-center gap-5 py-4">
@@ -72,7 +72,7 @@ const ForgotPassword: React.FC = () => {
               
               <Button 
                 onClick={() => navigate('/login')}
-                className="w-full bg-accent text-accent-foreground font-black py-6 rounded shadow mt-2 text-xs tracking-wider"
+                className="w-full bg-sky-500 hover:bg-sky-600 text-white font-black py-6 rounded-lg shadow-md mt-2 text-xs tracking-wider flex items-center justify-center gap-2"
               >
                 <ArrowLeft size={16} /> Voltar ao Login
               </Button>
@@ -105,7 +105,7 @@ const ForgotPassword: React.FC = () => {
               </div>
 
               {error && (
-                <div className="bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs p-3 rounded-sm font-bold text-center flex items-center justify-center gap-2">
+                <div className="bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs p-3 rounded-lg font-bold text-center flex items-center justify-center gap-2">
                   <AlertTriangle size={14} /> {error}
                 </div>
               )}
@@ -113,7 +113,7 @@ const ForgotPassword: React.FC = () => {
               <Button 
                 type="submit" 
                 disabled={loading || !email}
-                className="w-full bg-accent text-accent-foreground font-black py-6 rounded shadow hover:bg-accent/90 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed text-xs tracking-wider"
+                className="w-full bg-sky-500 hover:bg-sky-600 text-white font-black py-6 rounded-lg shadow-[0_4px_12px_rgba(14,165,233,0.15)] hover:shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed text-xs tracking-wider"
               >
                 {loading ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />} 
                 {loading ? 'ENVIANDO...' : 'ENVIAR LINK DE REDEFINIÇÃO'}

@@ -1,5 +1,5 @@
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -22,7 +22,7 @@ model Display {
   id         String   @id @default(uuid())
   name       String
   slug       String   @unique
-  pages      String   @db.Text
+  pages      String
   coverImage String?
   updatedAt  DateTime @updatedAt
   devices    Device[]
@@ -41,11 +41,11 @@ model Device {
 model Broadcast {
   id          String   @id @default(uuid())
   name        String
-  page        String   @db.Text
+  page        String
   startTime   String
   endTime     String
   isPermanent Boolean  @default(false)
-  displayIds  String   @db.Text
+  displayIds  String
   active      Boolean  @default(true)
   createdAt   DateTime @default(now())
   createdBy   String?
@@ -53,7 +53,7 @@ model Broadcast {
 
 model Setting {
   key       String   @id
-  value     String   @db.Text
+  value     String
   updatedAt DateTime @updatedAt
 }
 

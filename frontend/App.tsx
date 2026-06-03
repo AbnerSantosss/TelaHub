@@ -39,8 +39,8 @@ const ProtectedRoute = ({ children }: { children?: React.ReactNode }) => {
 
   if (loading) {
     return (
-      <div className="h-screen w-screen bg-slate-950 flex items-center justify-center">
-        <Loader2 className="animate-spin text-cyan-500" size={32} />
+      <div className="h-screen w-screen bg-gray-900 flex items-center justify-center">
+        <Loader2 className="animate-spin text-sky-500" size={32} />
       </div>
     );
   }
@@ -55,7 +55,7 @@ const ProtectedRoute = ({ children }: { children?: React.ReactNode }) => {
 const App: React.FC = () => {
   return (
     <HashRouter>
-      <div className="min-h-screen bg-[#1C1D22] text-slate-100 selection:bg-[#ea580c]/30 selection:text-purple-200">
+      <div className="min-h-screen bg-gray-900 text-slate-100 selection:bg-sky-500/30 selection:text-sky-200">
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />

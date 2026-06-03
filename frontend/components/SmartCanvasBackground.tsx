@@ -24,7 +24,7 @@ export const SmartCanvasBackground: React.FC<SmartCanvasBackgroundProps> = ({
   ];
 
   return (
-    <div className={cn("relative w-full h-full overflow-hidden bg-[#1C1D22]", className)}>
+    <div className={cn("relative w-full h-full overflow-hidden bg-gray-900", className)}>
       {/* Photon Beam Base Layer */}
       <div 
         className="absolute inset-0 z-0 pointer-events-none transition-opacity duration-1000"
@@ -37,8 +37,8 @@ export const SmartCanvasBackground: React.FC<SmartCanvasBackgroundProps> = ({
         />
         
         {/* Radial Ambient Glows */}
-        <div className="absolute top-[-20%] left-[-20%] w-[60%] h-[60%] rounded-full bg-gradient-to-br from-[#ea580c]/20 to-transparent blur-[120px]" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-gradient-to-tl from-[#00D8F6]/15 to-transparent blur-[100px]" />
+        <div className="absolute top-[-20%] left-[-20%] w-[60%] h-[60%] rounded-full bg-gradient-to-br from-[#0ea5e9]/15 to-transparent blur-[120px]" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-gradient-to-tl from-[#00D8F6]/10 to-transparent blur-[100px]" />
 
         {/* Animated Beams SVG */}
         <svg 
@@ -48,9 +48,9 @@ export const SmartCanvasBackground: React.FC<SmartCanvasBackgroundProps> = ({
         >
           <defs>
             <linearGradient id="beam-gradient-1" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#ea580c" stopOpacity="0" />
-              <stop offset="50%" stopColor="#ea580c" stopOpacity="0.8" />
-              <stop offset="100%" stopColor="#ea580c" stopOpacity="0" />
+              <stop offset="0%" stopColor="#0ea5e9" stopOpacity="0" />
+              <stop offset="50%" stopColor="#0ea5e9" stopOpacity="0.8" />
+              <stop offset="100%" stopColor="#0ea5e9" stopOpacity="0" />
             </linearGradient>
             <linearGradient id="beam-gradient-2" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stopColor="#00D8F6" stopOpacity="0" />
@@ -63,19 +63,19 @@ export const SmartCanvasBackground: React.FC<SmartCanvasBackgroundProps> = ({
               <feComposite in="SourceGraphic" in2="blur" operator="over" />
             </filter>
           </defs>
-
+ 
           {paths.map((path, idx) => {
             const isPurple = idx % 2 === 0;
             const duration = 8 + (idx * 3);
             const delay = idx * 1.5;
-
+ 
             return (
               <g key={idx}>
                 {/* Background static path for reference */}
                 <path
                   d={path}
                   fill="none"
-                  stroke={isPurple ? "rgba(124, 90, 237, 0.03)" : "rgba(0, 216, 246, 0.03)"}
+                  stroke={isPurple ? "rgba(14, 165, 233, 0.03)" : "rgba(0, 216, 246, 0.03)"}
                   strokeWidth="2"
                 />
                 
