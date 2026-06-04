@@ -65,19 +65,19 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
 }) => {
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-w-2xl border border-border bg-[#151926]/95 backdrop-blur-md p-0 overflow-hidden shadow-2xl rounded-2xl flex flex-col max-h-[90vh] animate-in fade-in zoom-in-95 duration-200">
-        <DialogHeader className="p-6 border-b border-border bg-gray-950/20 flex flex-row items-center justify-between">
-          <DialogTitle className="font-black text-lg text-text flex items-center gap-2">
+      <DialogContent showCloseButton={false} className="sm:max-w-2xl max-w-2xl flex flex-col max-h-[90vh]">
+        <div className="flex items-center justify-between p-5 border-b border-white/10">
+          <h2 className="font-bold text-lg flex items-center gap-2" style={{ color: 'var(--color-text)' }}>
             <UsersIcon className="text-emerald-400" size={20} /> Gestão de Usuários
-          </DialogTitle>
+          </h2>
           <DialogClose asChild>
-            <Button variant="ghost" size="icon" className="size-8 text-text-muted hover:text-danger rounded-lg">
+            <Button variant="ghost" size="icon" className="size-8 rounded-lg" style={{ color: 'var(--color-text-muted)' }}>
               <X size={18} />
             </Button>
           </DialogClose>
-        </DialogHeader>
+        </div>
 
-        <div className="p-6 flex-1 overflow-y-auto space-y-6">
+        <div className="p-6 flex-1 min-h-0 overflow-y-auto overflow-x-hidden space-y-6">
           {/* SMTP Not Configured Warning */}
           {!smtpConfigured && (
             <div className="bg-warning/10 border border-warning/20 rounded-xl p-4 flex items-start gap-3">

@@ -633,18 +633,15 @@ const Dashboard: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background text-text">
-      {/* Background Mesh Grid (Technical Dot-Grid) */}
-      <div className="absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.015)_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none z-0"></div>
-
-      <div className="p-4 md:p-8 max-w-7xl mx-auto relative min-h-screen">
+    <div className="min-h-screen relative z-10" style={{ color: 'var(--color-text)' }}>
+      <div className="th-container py-6 md:py-8 relative min-h-screen">
         
         {/* HEADER */}
-        <motion.header
+        <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-          className="flex flex-col mb-8 relative z-10 bg-surface/50 backdrop-blur-md border border-border rounded-2xl shadow-soft overflow-hidden"
+          className="mb-6 relative z-10"
         >
           <TopBar
             currentUser={currentUser}
@@ -660,10 +657,7 @@ const Dashboard: React.FC = () => {
             onOpenUserManagement={() => setIsUserModalOpen(true)}
             onOpenEmailSettings={openSettingsModal}
           />
-        </motion.header>
-
-        {/* STATS ROW */}
-        <StatsRow displays={displays} devices={devices} />
+        </motion.div>
 
         {/* DISPLAY GRID */}
         <DisplayGrid
@@ -681,6 +675,9 @@ const Dashboard: React.FC = () => {
           onOpenDisplaySettings={openDisplaySettings}
           onCreateFirstDisplay={openCreateModal}
         />
+
+        {/* STATS ROW */}
+        <StatsRow displays={displays} devices={devices} />
 
         {/* LINKED DEVICES SECTION */}
         {devices.filter(d => d.status === 'linked').length > 0 && (

@@ -25,6 +25,26 @@ export default defineConfig(({ mode }) => {
         alias: {
           '@': path.resolve(__dirname, '.'),
         }
+      },
+      build: {
+        chunkSizeWarningLimit: 800,
+        rollupOptions: {
+          output: {
+            manualChunks(id) {
+              if (id.includes('node_modules')) {
+                if (id.includes('react') || id.includes('react-dom') || id.includes('scheduler')) {
+                  return 'vendor-react';
+                }
+                if (id.includes('motion') || id.includes('framer-motion')) {
+                  return 'vendor-motion';
+                }
+                if (id.includes('recharts') || id.includes('d3')) {
+                  return 'vendor-recharts';
+                }
+              }
+            }
+          }
+        }
       }
     };
 });

@@ -15,7 +15,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip
 } from 'recharts';
 import { motion, AnimatePresence } from 'motion/react';
-import { getAlignmentClasses } from '../Player';
+import { getAlignmentClasses, getWeatherAnimationClass } from '../Player';
 
 // Import Recharts parts to make sure they are accessible (recharts does not default export AreaChart sometimes)
 // If Recharts has specific issues, importing them directly as named works in Vite.

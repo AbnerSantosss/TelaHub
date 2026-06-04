@@ -2,8 +2,8 @@ import React from 'react';
 import { Display, Device } from '../../types';
 import { DisplayCard } from './DisplayCard';
 import { motion } from 'motion/react';
-import { staggerGrid } from '../../libs/motion';
-import { Monitor } from 'lucide-react';
+import { staggerGrid, cardItem } from '../../libs/motion';
+import { Monitor, Plus } from 'lucide-react';
 import { Button } from '../ui/button';
 
 interface DisplayGridProps {
@@ -41,7 +41,7 @@ export const DisplayGrid: React.FC<DisplayGridProps> = ({
 }) => {
   if (loading && displays.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-64 text-text-muted relative z-10">
+      <div className="flex flex-col items-center justify-center h-64 relative z-10" style={{ color: 'var(--color-text-muted)' }}>
         <div className="flex items-center gap-1.5 mb-4">
           <div className="w-2.5 h-2.5 rounded-full bg-accent dot-pulse"></div>
           <div className="w-2.5 h-2.5 rounded-full bg-accent dot-pulse delay-100"></div>
@@ -55,15 +55,23 @@ export const DisplayGrid: React.FC<DisplayGridProps> = ({
 
   return (
     <div className="relative z-10 mb-12">
-      <h2 className="text-xl font-black text-text mb-6 flex items-center gap-2">
-        <Monitor className="text-accent" size={20} /> Suas Telas
-      </h2>
+      {/* Section Header */}
+      <div className="section-header">
+        <div className="section-title">
+          <div className="icon-box">
+            <Monitor size={15} className="text-[#38bdf8]" />
+          </div>
+          Suas Telas
+        </div>
+      </div>
+
+      {/* Grid */}
       <motion.div
         ref={displaysParentRef}
         variants={staggerGrid}
         initial="hidden"
         animate="show"
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+        className="displays-grid"
       >
         {displays.map(display => (
           <DisplayCard
@@ -82,10 +90,29 @@ export const DisplayGrid: React.FC<DisplayGridProps> = ({
           />
         ))}
 
+        {/* Card "Nova Tela" — mesma altura que os demais */}
+        {displays.length > 0 && (
+          <motion.div
+            variants={cardItem}
+            whileHover={{ y: -5 }}
+            transition={{ type: 'spring', stiffness: 260, damping: 20 }}
+            onClick={onCreateFirstDisplay}
+            style={{ height: '100%' }}
+          >
+            <div className="new-display-card">
+              <div className="icon-circle">
+                <Plus size={20} style={{ color: 'var(--color-text-muted)' }} />
+              </div>
+              <span className="label">Nova Tela</span>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Empty state */}
         {displays.length === 0 && !loading && (
-          <div className="col-span-full py-16 text-center border border-dashed border-border rounded-2xl bg-surface/30 backdrop-blur-md animate-in fade-in zoom-in-95 duration-200">
-            <Monitor size={48} className="mx-auto text-text-muted/40 mb-4" />
-            <p className="text-text-muted mb-6">Você ainda não tem telas configuradas.</p>
+          <div className="col-span-full py-16 text-center border border-dashed rounded-2xl" style={{ borderColor: 'var(--color-border)', background: 'var(--color-surface)' }}>
+            <Monitor size={48} className="mx-auto mb-4" style={{ color: 'rgba(255,255,255,0.15)' }} />
+            <p className="mb-6" style={{ color: 'var(--color-text-muted)' }}>Você ainda não tem telas configuradas.</p>
             <Button onClick={onCreateFirstDisplay} variant="brand">
               Criar primeira tela
             </Button>

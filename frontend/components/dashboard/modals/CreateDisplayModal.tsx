@@ -29,21 +29,45 @@ export const CreateDisplayModal: React.FC<CreateDisplayModalProps> = ({
   setNewDisplayOrientation,
   onSubmit,
 }) => {
+  const [showError, setShowError] = React.useState(false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newDisplayName.trim()) {
+      setShowError(true);
+      return;
+    }
+    setShowError(false);
+    onSubmit(e);
+  };
+
+  React.useEffect(() => {
+    if (newDisplayName.trim()) {
+      setShowError(false);
+    }
+  }, [newDisplayName]);
+
+  React.useEffect(() => {
+    if (!open) {
+      setShowError(false);
+    }
+  }, [open]);
+
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-w-md border border-border bg-[#151926]/95 backdrop-blur-md p-0 overflow-hidden shadow-2xl rounded-2xl animate-in fade-in zoom-in-95 duration-200">
-        <DialogHeader className="p-6 border-b border-border bg-gray-950/20 flex flex-row items-center justify-between">
-          <DialogTitle className="font-black text-lg text-text flex items-center gap-2">
-            <Plus className="text-accent" size={20} /> Nova Tela
-          </DialogTitle>
+      <DialogContent showCloseButton={false} className="sm:max-w-md max-w-md">
+        <div className="flex items-center justify-between p-5 border-b border-white/10">
+          <h2 className="font-bold text-lg flex items-center gap-2" style={{ color: 'var(--color-text)' }}>
+            <Plus className="text-[#38bdf8]" size={20} /> Nova Tela
+          </h2>
           <DialogClose asChild>
-            <Button variant="ghost" size="icon" className="size-8 text-text-muted hover:text-danger rounded-lg">
+            <Button variant="ghost" size="icon" className="size-8 rounded-lg" style={{ color: 'var(--color-text-muted)' }}>
               <X size={18} />
             </Button>
           </DialogClose>
-        </DialogHeader>
-        <form onSubmit={onSubmit} className="p-6 space-y-6">
-          <div className="space-y-2">
+        </div>
+        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          <div className="space-y-2 relative">
             <label className="block text-xs font-black text-text-muted uppercase tracking-wider pl-0.5">Nome do Dispositivo</label>
             <Input
               autoFocus
@@ -51,8 +75,18 @@ export const CreateDisplayModal: React.FC<CreateDisplayModalProps> = ({
               value={newDisplayName}
               onChange={(e) => setNewDisplayName(e.target.value)}
               placeholder="Ex: Recepção, Vitrine..."
-              className="w-full bg-gray-950/40 border border-border text-text placeholder:text-text-muted/40 focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/40 h-11 rounded-xl"
+              className={`w-full bg-gray-950/40 border text-text placeholder:text-text-muted/40 focus-visible:ring-2 h-11 rounded-xl transition-all ${
+                showError 
+                  ? 'border-danger/80 focus-visible:ring-danger/40' 
+                  : 'border-border focus-visible:border-accent focus-visible:ring-accent/40'
+              }`}
             />
+            {showError && (
+              <div className="absolute -top-1.5 right-0 bg-danger text-white text-[11px] font-bold px-3 py-1 rounded-md shadow-lg flex items-center gap-1.5 animate-in fade-in slide-in-from-bottom-2 duration-200">
+                <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
+                <span>Por favor, insira o nome da tela</span>
+              </div>
+            )}
           </div>
 
           <div className="space-y-3">
@@ -61,19 +95,13 @@ export const CreateDisplayModal: React.FC<CreateDisplayModalProps> = ({
               <button
                 type="button"
                 onClick={() => setNewDisplayOrientation('horizontal')}
-                className={`flex flex-col items-center justify-center gap-2.5 p-4 rounded-xl border-2 transition-all cursor-pointer ${
-                  newDisplayOrientation === 'horizontal'
-                    ? 'border-accent bg-accent/5 shadow-[0_0_16px_rgba(56,189,248,0.1)]'
-                    : 'border-border/40 bg-gray-950/30 hover:border-text-muted/50'
-                }`}
+                className={`orientation-btn ${newDisplayOrientation === 'horizontal' ? 'active' : ''}`}
               >
-                <div className={`w-16 h-9 rounded border flex items-center justify-center transition-colors ${
-                  newDisplayOrientation === 'horizontal' ? 'border-accent/60 bg-accent/5' : 'border-border bg-gray-900/30'
-                }`}>
+                <div className="w-16 h-9 rounded orientation-preview-box">
                   <Monitor size={14} className={newDisplayOrientation === 'horizontal' ? 'text-accent' : 'text-text-muted'} />
                 </div>
                 <div className="text-center">
-                  <p className={`text-xs font-black ${newDisplayOrientation === 'horizontal' ? 'text-accent' : 'text-text-muted'}`}>Horizontal</p>
+                  <p className="text-xs font-black uppercase tracking-wider">Horizontal</p>
                   <p className="text-[10px] text-text-muted/60 font-mono mt-0.5">16:9 — TV / Monitor</p>
                 </div>
               </button>
@@ -81,19 +109,13 @@ export const CreateDisplayModal: React.FC<CreateDisplayModalProps> = ({
               <button
                 type="button"
                 onClick={() => setNewDisplayOrientation('vertical')}
-                className={`flex flex-col items-center justify-center gap-2.5 p-4 rounded-xl border-2 transition-all cursor-pointer ${
-                  newDisplayOrientation === 'vertical'
-                    ? 'border-accent bg-accent/5 shadow-[0_0_16px_rgba(56,189,248,0.1)]'
-                    : 'border-border/40 bg-gray-950/30 hover:border-text-muted/50'
-                }`}
+                className={`orientation-btn ${newDisplayOrientation === 'vertical' ? 'active' : ''}`}
               >
-                <div className={`w-9 h-16 rounded border flex items-center justify-center transition-colors ${
-                  newDisplayOrientation === 'vertical' ? 'border-accent/60 bg-accent/5' : 'border-border bg-gray-900/30'
-                }`}>
+                <div className="w-9 h-16 rounded orientation-preview-box">
                   <Tv size={14} className={newDisplayOrientation === 'vertical' ? 'text-accent' : 'text-text-muted'} />
                 </div>
                 <div className="text-center">
-                  <p className={`text-xs font-black ${newDisplayOrientation === 'vertical' ? 'text-accent' : 'text-text-muted'}`}>Vertical</p>
+                  <p className="text-xs font-black uppercase tracking-wider">Vertical</p>
                   <p className="text-[10px] text-text-muted/60 font-mono mt-0.5">9:16 — Totem / Kiosk</p>
                 </div>
               </button>

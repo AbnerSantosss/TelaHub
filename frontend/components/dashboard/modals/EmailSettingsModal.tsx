@@ -49,17 +49,17 @@ export const EmailSettingsModal: React.FC<EmailSettingsModalProps> = ({
 }) => {
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-w-md border border-border bg-[#151926]/95 backdrop-blur-md p-0 overflow-hidden shadow-2xl rounded-2xl animate-in fade-in zoom-in-95 duration-200">
-        <DialogHeader className="p-6 border-b border-border bg-gray-950/20 flex flex-row items-center justify-between">
-          <DialogTitle className="font-black text-lg text-text flex items-center gap-2">
-            <Settings className="text-accent" size={20} /> Configurações de E-mail
-          </DialogTitle>
+      <DialogContent showCloseButton={false} className="sm:max-w-md max-w-md">
+        <div className="flex items-center justify-between p-5 border-b border-white/10">
+          <h2 className="font-bold text-lg flex items-center gap-2" style={{ color: 'var(--color-text)' }}>
+            <Settings className="text-[#38bdf8]" size={20} /> Configurações de E-mail
+          </h2>
           <DialogClose asChild>
-            <Button variant="ghost" size="icon" className="size-8 text-text-muted hover:text-danger rounded-lg">
+            <Button variant="ghost" size="icon" className="size-8 rounded-lg" style={{ color: 'var(--color-text-muted)' }}>
               <X size={18} />
             </Button>
           </DialogClose>
-        </DialogHeader>
+        </div>
 
         <form onSubmit={onSaveSmtp} className="p-6 space-y-4">
           {/* Setup Guide */}

@@ -88,7 +88,7 @@ const generatePairingCode = () => {
   return Math.floor(100000 + Math.random() * 900000).toString();
 };
 
-const getWeatherAnimationClass = (code: number, isDay: number = 1) => {
+export const getWeatherAnimationClass = (code: number, isDay: number = 1) => {
   const isNight = isDay === 0;
 
   if (code <= 1) return isNight ? 'bg-anim-clear-night' : 'bg-anim-clear-day'; // Sunny/Clear

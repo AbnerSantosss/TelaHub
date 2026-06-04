@@ -15,10 +15,50 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip
 } from 'recharts';
 import { motion, AnimatePresence } from 'motion/react';
-import { getAlignmentClasses } from '../Player';
+import { getAlignmentClasses, getWeatherAnimationClass } from '../Player';
 
 // Import Recharts parts to make sure they are accessible (recharts does not default export AreaChart sometimes)
 // If Recharts has specific issues, importing them directly as named works in Vite.
+
+const getWeatherText = (code: number) => {
+  if (code <= 1) return 'Ensolarado';
+  if (code <= 3) return 'Parcialmente Nublado';
+  if (code <= 48) return 'Nevoeiro';
+  if (code >= 51 && code <= 67) return 'Chuva Leve';
+  if (code >= 71 && code <= 77) return 'Neve';
+  if (code >= 80 && code <= 82) return 'Pancadas de Chuva';
+  if (code >= 95) return 'Tempestade';
+  return 'Parcialmente Nublado';
+};
+
+const getWeatherImageUrl = (code: number, isDay: boolean = true) => {
+  // Sunny / Clear Sky
+  if (code <= 1) {
+    return isDay 
+      ? "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1920&q=80" // Sunny beach
+      : "https://images.unsplash.com/photo-1506318137071-a8e063b4bec0?auto=format&fit=crop&w=1920&q=80"; // Starry night
+  }
+  // Cloudy / Foggy
+  if (code <= 48) {
+    return isDay
+      ? "https://images.unsplash.com/photo-1501630834273-4b5604d2ee31?auto=format&fit=crop&w=1920&q=80" // Cloudy day
+      : "https://images.unsplash.com/photo-1513628253939-010e64ac66cd?auto=format&fit=crop&w=1920&q=80"; // Cloudy night
+  }
+  // Rain / Showers
+  if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) {
+    return "https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?auto=format&fit=crop&w=1920&q=80"; // Rainy street/window
+  }
+  // Snow
+  if ((code >= 71 && code <= 77) || (code >= 85 && code <= 86)) {
+    return "https://images.unsplash.com/photo-1483921020237-2ff51e8e4b22?auto=format&fit=crop&w=1920&q=80"; // Snow
+  }
+  // Storm / Lightning
+  if (code >= 95) {
+    return "https://images.unsplash.com/photo-1492011221367-f47e3ccd77a0?auto=format&fit=crop&w=1920&q=80"; // Lightning storm
+  }
+  // Default fallback (nice nature/landscape)
+  return "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=1920&q=80";
+};
 
 export const FullInfoWidget: React.FC<{
   city: string;
@@ -32,10 +72,60 @@ export const FullInfoWidget: React.FC<{
 }> = ({ city, backgroundImage, backgroundAnimation, model = 'standard', textSize = 100, numberSize = 100, transparentBackground = false, backgroundColor }) => {
   const [weather, setWeather] = useState<any>(null);
   const [time, setTime] = useState(new Date());
+  const [jpWeather, setJpWeather] = useState<any>(null);
+  const [recifeWeather, setRecifeWeather] = useState<any>(null);
+  const [weatherImageFailed, setWeatherImageFailed] = useState(false);
+
+  const weatherImageUrl = useMemo(() => {
+    if (!weather) return null;
+    return getWeatherImageUrl(weather.code, weather.isDay);
+  }, [weather]);
+
+  useEffect(() => {
+    setWeatherImageFailed(false);
+  }, [weatherImageUrl]);
+
+  useEffect(() => {
+    if (!weatherImageUrl) return;
+    const img = new Image();
+    img.src = weatherImageUrl;
+    img.onerror = () => {
+      console.warn("Falha ao carregar imagem de clima da internet:", weatherImageUrl);
+      setWeatherImageFailed(true);
+    };
+  }, [weatherImageUrl]);
 
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    const fetchOtherCities = async () => {
+      try {
+        const jpRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=-7.1198&longitude=-34.8450&current_weather=true`);
+        if (jpRes.ok) {
+          const jpData = await jpRes.json();
+          setJpWeather({
+            temp: Math.round(jpData.current_weather.temperature),
+            code: jpData.current_weather.weathercode,
+          });
+        }
+        const recRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=-8.0542&longitude=-34.8813&current_weather=true`);
+        if (recRes.ok) {
+          const recData = await recRes.json();
+          setRecifeWeather({
+            temp: Math.round(recData.current_weather.temperature),
+            code: recData.current_weather.weathercode,
+          });
+        }
+      } catch (error) {
+        console.error("Erro ao buscar clima de outras cidades", error);
+      }
+    };
+    fetchOtherCities();
+    const interval = setInterval(fetchOtherCities, 300000);
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
@@ -91,6 +181,26 @@ export const FullInfoWidget: React.FC<{
     if (transparentBackground) return null;
     
     if (backgroundImage) {
+      const isVideo = backgroundImage.split('?')[0].split('#')[0].toLowerCase().endsWith('.mp4') ||
+                      backgroundImage.split('?')[0].split('#')[0].toLowerCase().endsWith('.webm') ||
+                      backgroundImage.split('?')[0].split('#')[0].toLowerCase().endsWith('.ogg') ||
+                      backgroundImage.includes('/video/') ||
+                      backgroundImage.includes('blob:');
+      if (isVideo) {
+        return (
+          <div className="absolute inset-0 z-0 overflow-hidden">
+            <video 
+              src={backgroundImage} 
+              className="w-full h-full object-cover" 
+              autoPlay 
+              muted 
+              loop 
+              playsInline
+            />
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+          </div>
+        );
+      }
       return (
         <div 
           className="absolute inset-0 z-0 bg-cover bg-center"
@@ -100,12 +210,26 @@ export const FullInfoWidget: React.FC<{
         </div>
       );
     }
-    if (backgroundAnimation && backgroundAnimation !== 'none') {
+    
+    // Default weather-related background image from the internet
+    if (weatherImageUrl && !weatherImageFailed) {
+      return (
+        <div 
+          className="absolute inset-0 z-0 bg-cover bg-center animate-fade-in duration-500"
+          style={{ backgroundImage: `url(${weatherImageUrl})` }}
+        >
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px]" />
+        </div>
+      );
+    }
+    
+    const anim = backgroundAnimation || 'auto-weather';
+    if (anim && anim !== 'none') {
       let animClass = '';
-      if (backgroundAnimation === 'auto-weather' && weather) {
+      if (anim === 'auto-weather' && weather) {
         animClass = getWeatherAnimationClass(weather.code, weather.isDay);
       } else {
-        switch (backgroundAnimation) {
+        switch (anim) {
           case 'gradient-flow': animClass = 'bg-anim-gradient-flow'; break;
           case 'clouds': animClass = 'bg-anim-clouds'; break;
           case 'rain': animClass = 'bg-anim-rain'; break;
@@ -193,16 +317,16 @@ export const FullInfoWidget: React.FC<{
   }
 
   if (model === 'modern') {
-    const hasCustomBg = !transparentBackground && (backgroundImage || (backgroundAnimation && backgroundAnimation !== 'none'));
+    const hasBg = !transparentBackground;
     const customBgColor = !transparentBackground && backgroundColor ? backgroundColor : undefined;
-    const isDarkTheme = transparentBackground || hasCustomBg || customBgColor;
+    const isDarkTheme = transparentBackground || hasBg || customBgColor;
 
     return (
       <div 
-        className={`w-full h-full relative overflow-hidden flex ${transparentBackground ? 'bg-transparent text-white' : hasCustomBg || customBgColor ? 'text-white rounded-3xl shadow-2xl border border-white/20' : 'bg-slate-50 text-slate-800 rounded-3xl shadow-2xl border border-slate-200/50'}`}
+        className={`w-full h-full relative overflow-hidden flex ${transparentBackground ? 'bg-transparent text-white' : 'text-white rounded-3xl shadow-2xl border border-white/20'}`}
         style={customBgColor ? { backgroundColor: customBgColor } : {}}
       >
-        {hasCustomBg && <BackgroundLayer />}
+        {hasBg && <BackgroundLayer />}
         
         {/* Left Panel - Blue Gradient */}
         <div className={`w-1/3 h-full flex flex-col justify-between p-8 md:p-12 ${isDarkTheme ? 'bg-black/40 backdrop-blur-md border-r border-white/10' : 'bg-gradient-to-br from-blue-500 to-blue-600'} text-white relative overflow-hidden z-10`}>
@@ -314,22 +438,38 @@ export const FullInfoWidget: React.FC<{
             <div className="flex gap-6">
               <div className={`flex-1 p-6 rounded-3xl border shadow-sm flex items-center justify-between ${isDarkTheme ? 'bg-white/10 border-white/10' : 'bg-white border-slate-100'}`}>
                 <div>
-                  <div className={`font-bold ${isDarkTheme ? 'text-white' : 'text-slate-800'}`} style={{ fontSize: `calc(1.8cqw * ${textSize / 100})` }}>São Paulo</div>
-                  <div className={`mt-1 ${isDarkTheme ? 'text-white/60' : 'text-slate-500'}`} style={{ fontSize: `calc(1.5cqw * ${textSize / 100})` }}>Ensolarado</div>
+                  <div className={`font-bold ${isDarkTheme ? 'text-white' : 'text-slate-800'}`} style={{ fontSize: `calc(1.8cqw * ${textSize / 100})` }}>João Pessoa</div>
+                  <div className={`mt-1 ${isDarkTheme ? 'text-white/60' : 'text-slate-500'}`} style={{ fontSize: `calc(1.5cqw * ${textSize / 100})` }}>
+                    {jpWeather ? getWeatherText(jpWeather.code) : 'Carregando...'}
+                  </div>
                 </div>
                 <div className="flex items-center gap-4">
-                  <Sun size={40 * (numberSize / 100)} className="text-yellow-400" />
-                  <span className={`font-bold ${isDarkTheme ? 'text-white' : 'text-slate-800'}`} style={{ fontSize: `calc(3cqw * ${numberSize / 100})` }}>28°</span>
+                  {jpWeather ? (
+                    <>
+                      {getWeatherIcon(jpWeather.code, 40 * (numberSize / 100))}
+                      <span className={`font-bold ${isDarkTheme ? 'text-white' : 'text-slate-800'}`} style={{ fontSize: `calc(3cqw * ${numberSize / 100})` }}>{jpWeather.temp}°</span>
+                    </>
+                  ) : (
+                    <Loader2 className="animate-spin text-white/50" size={24} />
+                  )}
                 </div>
               </div>
               <div className={`flex-1 p-6 rounded-3xl border shadow-sm flex items-center justify-between ${isDarkTheme ? 'bg-white/10 border-white/10' : 'bg-white border-slate-100'}`}>
                 <div>
-                  <div className={`font-bold ${isDarkTheme ? 'text-white' : 'text-slate-800'}`} style={{ fontSize: `calc(1.8cqw * ${textSize / 100})` }}>Rio de Janeiro</div>
-                  <div className={`mt-1 ${isDarkTheme ? 'text-white/60' : 'text-slate-500'}`} style={{ fontSize: `calc(1.5cqw * ${textSize / 100})` }}>Parcialmente Nublado</div>
+                  <div className={`font-bold ${isDarkTheme ? 'text-white' : 'text-slate-800'}`} style={{ fontSize: `calc(1.8cqw * ${textSize / 100})` }}>Recife</div>
+                  <div className={`mt-1 ${isDarkTheme ? 'text-white/60' : 'text-slate-500'}`} style={{ fontSize: `calc(1.5cqw * ${textSize / 100})` }}>
+                    {recifeWeather ? getWeatherText(recifeWeather.code) : 'Carregando...'}
+                  </div>
                 </div>
                 <div className="flex items-center gap-4">
-                  <CloudSun size={40 * (numberSize / 100)} className={isDarkTheme ? 'text-white/50' : 'text-slate-400'} />
-                  <span className={`font-bold ${isDarkTheme ? 'text-white' : 'text-slate-800'}`} style={{ fontSize: `calc(3cqw * ${numberSize / 100})` }}>32°</span>
+                  {recifeWeather ? (
+                    <>
+                      {getWeatherIcon(recifeWeather.code, 40 * (numberSize / 100))}
+                      <span className={`font-bold ${isDarkTheme ? 'text-white' : 'text-slate-800'}`} style={{ fontSize: `calc(3cqw * ${numberSize / 100})` }}>{recifeWeather.temp}°</span>
+                    </>
+                  ) : (
+                    <Loader2 className="animate-spin text-white/50" size={24} />
+                  )}
                 </div>
               </div>
             </div>

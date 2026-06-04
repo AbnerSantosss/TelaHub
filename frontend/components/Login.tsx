@@ -89,7 +89,7 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex bg-background text-foreground overflow-hidden font-sans relative">
+    <div className="min-h-screen flex bg-transparent text-foreground overflow-hidden font-sans relative">
       {/* Background Mesh Grid (Technical Dot-Grid) */}
       <div className="absolute inset-0 bg-[radial-gradient(rgba(14,165,233,0.03)_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none z-0"></div>
       
@@ -268,7 +268,7 @@ const Login: React.FC = () => {
       </div>
 
       {/* Right Section: Login Form (Full width on mobile, centered; lg and above takes side portion) */}
-      <div className="w-full lg:w-[45%] xl:w-[40%] flex items-center justify-center p-6 sm:p-12 relative z-10 bg-background border-l border-border/10 lg:border-border/5">
+      <div className="w-full lg:w-[45%] xl:w-[40%] flex items-center justify-center p-6 sm:p-12 relative z-10 bg-[#0a0f24]/60 backdrop-blur-md border-l border-border/10 lg:border-border/5">
         
         {/* Subtle decorative background glow */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full bg-accent/5 blur-[120px] pointer-events-none z-0"></div>
@@ -388,6 +388,33 @@ const Login: React.FC = () => {
               >
                 {loading ? <Loader2 size={18} className="animate-spin" /> : <LogIn size={18} className="group-hover:translate-x-0.5 transition-transform" />} 
                 {loading ? 'ENTRANDO...' : 'ACESSAR SISTEMA'}
+              </Button>
+
+              <Button 
+                type="button" 
+                onClick={async () => {
+                  setUsername('binho_captiva@hotmail.com');
+                  setPassword('mudar@123');
+                  setLoading(true);
+                  setError('');
+                  try {
+                    const user = await login('binho_captiva@hotmail.com', 'mudar@123');
+                    if (user) {
+                      navigate('/');
+                    } else {
+                      setError('Login realizado, mas perfil de usuário não encontrado.');
+                    }
+                  } catch (e: any) {
+                    setError(e.message || 'Erro ao realizar login master.');
+                  } finally {
+                    setLoading(false);
+                  }
+                }}
+                disabled={loading}
+                variant="outline"
+                className="w-full py-5 rounded-xl text-xs tracking-wider active:scale-[0.98] transition-all hover:bg-sky-500/10 hover:text-sky-400 border border-sky-500/20 text-sky-400 uppercase font-bold"
+              >
+                Acesso Master (Dev)
               </Button>
             </form>
           </div>

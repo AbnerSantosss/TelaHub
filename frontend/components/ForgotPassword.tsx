@@ -35,7 +35,7 @@ const ForgotPassword: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-background text-foreground">
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-transparent text-foreground">
       {/* Background Mesh Grid */}
       <div className="absolute inset-0 bg-[radial-gradient(rgba(14,165,233,0.03)_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none z-0"></div>
 
@@ -54,7 +54,7 @@ const ForgotPassword: React.FC = () => {
           </p>
         </div>
 
-        <div className="bg-card border border-border shadow-md p-6 sm:p-8 transition-all duration-300 hover:border-sky-500/30 rounded-xl">
+        <div className="bg-[#0a0f24]/60 backdrop-blur-md border border-border shadow-soft p-6 sm:p-8 transition-all duration-300 hover:border-sky-500/30 rounded-xl">
           
           {success ? (
             <div className="flex flex-col items-center gap-5 py-4">

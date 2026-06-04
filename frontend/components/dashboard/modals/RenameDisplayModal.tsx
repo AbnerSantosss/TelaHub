@@ -32,17 +32,17 @@ export const RenameDisplayModal: React.FC<RenameDisplayModalProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-w-md border border-border bg-[#151926]/95 backdrop-blur-md p-0 overflow-hidden shadow-2xl rounded-2xl animate-in fade-in zoom-in-95 duration-200">
-        <DialogHeader className="p-6 border-b border-border bg-gray-950/20 flex flex-row items-center justify-between">
-          <DialogTitle className="font-black text-lg text-text flex items-center gap-2">
-            <Pencil className="text-accent" size={18} /> Renomear Tela
-          </DialogTitle>
+      <DialogContent showCloseButton={false} className="sm:max-w-md max-w-md">
+        <div className="flex items-center justify-between p-5 border-b border-white/10">
+          <h2 className="font-bold text-lg flex items-center gap-2" style={{ color: 'var(--color-text)' }}>
+            <Pencil className="text-[#38bdf8]" size={18} /> Renomear Tela
+          </h2>
           <DialogClose asChild>
-            <Button variant="ghost" size="icon" className="size-8 text-text-muted hover:text-danger rounded-lg">
+            <Button variant="ghost" size="icon" className="size-8 rounded-lg" style={{ color: 'var(--color-text-muted)' }}>
               <X size={18} />
             </Button>
           </DialogClose>
-        </DialogHeader>
+        </div>
 
         <form onSubmit={onSubmit} className="p-6 space-y-5">
           <div className="space-y-1.5">

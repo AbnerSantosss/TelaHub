@@ -18,42 +18,76 @@ export const ModuleNav: React.FC<ModuleNavProps> = ({
   onOpenEmailSettings,
 }) => {
   const navigate = useNavigate();
+  const currentHash = window.location.hash;
+
+  const isRouteActive = (route: string) => currentHash.startsWith(route);
+
+  const getNavItemClass = (active: boolean) => {
+    return `flex items-center gap-2 px-3.5 py-1 h-[32px] rounded-xl font-semibold text-[11.5px] uppercase tracking-wider transition-all whitespace-nowrap cursor-pointer ${active ? 'nav-item-dashboard active' : 'nav-item-dashboard'
+      }`;
+  };
 
   return (
-    <div className="bg-gray-950/40 px-6 py-3 flex gap-2 overflow-x-auto scrollbar-none items-center border-t border-border/40">
-      <span className="text-[10px] font-black text-text-muted uppercase tracking-widest mr-2.5 hidden md:inline">Módulos:</span>
+    <div
+      className="flex gap-2 items-center relative z-10 w-full overflow-x-auto scrollbar-none"
+      style={{
+        background: 'var(--color-surface, rgba(255,255,255,0.025))',
+        border: '1px solid var(--color-border, rgba(255,255,255,0.07))',
+        borderRadius: '14px',
+        height: '46px',
+        padding: '5px 16px',
+        marginBottom: '16px'
+      }}
+    >
+      <span
+        className="uppercase tracking-widest mr-2.5 hidden md:inline border-r pr-3 h-[18px] flex items-center shrink-0"
+        style={{
+          fontSize: '9.5px',
+          color: 'var(--txt3)',
+          borderColor: 'var(--border)'
+        }}
+      >
+        MÓDULOS
+      </span>
 
       <Button
         variant="ghost"
         onClick={() => navigate('/scheduler')}
-        className="flex items-center gap-2 bg-gray-950/40 border border-sky-500/15 hover:border-sky-500/50 text-sky-400 hover:bg-sky-500/10 px-3.5 py-1.5 h-auto rounded-xl font-bold text-xs uppercase tracking-wider transition-all whitespace-nowrap"
+        className={getNavItemClass(isRouteActive('#/scheduler'))}
       >
-        <Calendar size={13} /> <span>Central de Programação</span>
+        {isRouteActive('#/scheduler') && (
+          <span className="w-[6px] h-[6px] rounded-full bg-[#0ea5e9] shrink-0"></span>
+        )}
+        <Calendar size={13} />
+        <span className="hidden min-[681px]:inline">Central de Programação</span>
       </Button>
 
       <Button
         variant="ghost"
         onClick={onOpenMediaLibrary}
-        className="flex items-center gap-2 bg-gray-950/40 border border-fuchsia-500/15 hover:border-fuchsia-500/50 text-fuchsia-400 hover:bg-fuchsia-500/10 px-3.5 py-1.5 h-auto rounded-xl font-bold text-xs uppercase tracking-wider transition-all whitespace-nowrap"
+        className={getNavItemClass(false)}
       >
-        <FileImage size={13} /> <span>Mídia</span>
+        <FileImage size={13} />
+        <span className="hidden min-[681px]:inline">Mídia</span>
       </Button>
 
       <Button
         variant="ghost"
         onClick={onOpenUserManagement}
-        className="flex items-center gap-2 bg-gray-950/40 border border-emerald-500/15 hover:border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10 px-3.5 py-1.5 h-auto rounded-xl font-bold text-xs uppercase tracking-wider transition-all whitespace-nowrap"
+        className={getNavItemClass(false)}
       >
-        <UsersIcon size={13} /> <span>Usuários</span>
+        <UsersIcon size={13} />
+        <span className="hidden min-[681px]:inline">Usuários</span>
       </Button>
 
       {(currentUser?.role === 'admin' || currentUser?.role === 'master') && (
         <Button
           variant="ghost"
           onClick={onOpenEmailSettings}
-          className="flex items-center gap-2 bg-gray-950/40 border border-accent/15 hover:border-accent/50 text-accent hover:bg-accent/10 px-3.5 py-1.5 h-auto rounded-xl font-bold text-xs uppercase tracking-wider transition-all whitespace-nowrap"
+          className={getNavItemClass(false)}
         >
-          <Settings size={13} /> <span>Config. E-mail</span>
+          <Settings size={13} />
+          <span className="hidden min-[681px]:inline">Config. E-mail</span>
         </Button>
       )}
     </div>

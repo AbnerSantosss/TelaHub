@@ -51,4 +51,4 @@ export const PdfDocumentWidget: React.FC<{ data: any }> = ({ data }) => {
   );
 };
 
-export default Player;
+export default PdfDocumentWidget;

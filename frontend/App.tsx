@@ -1,16 +1,18 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
-import Dashboard from './components/Dashboard';
-import Editor from './components/Editor';
-import Scheduler from './components/Scheduler';
-import Player from './components/Player';
-import Login from './components/Login';
-import ForgotPassword from './components/ForgotPassword';
-import ResetPassword from './components/ResetPassword';
 import { getCurrentUser } from './services/storage';
 import { Loader2 } from 'lucide-react';
 import { Toaster } from './components/ui/sonner';
+
+// Lazy load screen components to improve initial load time
+const Dashboard = React.lazy(() => import('./components/Dashboard'));
+const Editor = React.lazy(() => import('./components/Editor'));
+const Scheduler = React.lazy(() => import('./components/Scheduler'));
+const Player = React.lazy(() => import('./components/Player'));
+const Login = React.lazy(() => import('./components/Login'));
+const ForgotPassword = React.lazy(() => import('./components/ForgotPassword'));
+const ResetPassword = React.lazy(() => import('./components/ResetPassword'));
 
 // Componente para Proteger Rotas
 const ProtectedRoute = ({ children }: { children?: React.ReactNode }) => {
@@ -56,40 +58,48 @@ const ProtectedRoute = ({ children }: { children?: React.ReactNode }) => {
 const App: React.FC = () => {
   return (
     <HashRouter>
-      <div className="min-h-screen bg-gray-900 text-slate-100 selection:bg-sky-500/30 selection:text-sky-200">
+      <div className="min-h-screen bg-transparent text-slate-100 selection:bg-sky-500/30 selection:text-sky-200">
         <Toaster closeButton theme="dark" position="top-right" />
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
-          
-          {/* Rotas Protegidas */}
-          <Route path="/" element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          } />
-          <Route path="/edit/:id" element={
-            <ProtectedRoute>
-              <Editor />
-            </ProtectedRoute>
-          } />
-          <Route path="/scheduler" element={
-            <ProtectedRoute>
-              <Scheduler />
-            </ProtectedRoute>
-          } />
-          
-          {/* Rota Pública (Player não precisa de login para funcionar na TV) */}
-          <Route path="/player" element={<Player />} />
-          <Route path="/player/:slug" element={<Player />} />
+        <Suspense fallback={
+          <div className="h-screen w-screen bg-slate-950 flex flex-col items-center justify-center gap-4">
+            <Loader2 className="animate-spin text-[#0ea5e9]" size={32} />
+            <p className="text-xs uppercase tracking-widest font-bold text-slate-500">Carregando...</p>
+          </div>
+        }>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            
+            {/* Rotas Protegidas */}
+            <Route path="/" element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/edit/:id" element={
+              <ProtectedRoute>
+                <Editor />
+              </ProtectedRoute>
+            } />
+            <Route path="/scheduler" element={
+              <ProtectedRoute>
+                <Scheduler />
+              </ProtectedRoute>
+            } />
+            
+            {/* Rota Pública (Player não precisa de login para funcionar na TV) */}
+            <Route path="/player" element={<Player />} />
+            <Route path="/player/:slug" element={<Player />} />
 
-          {/* Catch-all para redirecionar rotas inválidas */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+            {/* Catch-all para redirecionar rotas inválidas */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Suspense>
       </div>
     </HashRouter>
   );
 };
 
 export default App;
+

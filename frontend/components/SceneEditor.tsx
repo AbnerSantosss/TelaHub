@@ -111,9 +111,13 @@ const SceneEditor: React.FC<SceneEditorProps> = ({
     let defaultWidth = 8;
     let defaultHeight = 6;
 
-    if (type === WidgetType.VIDEO || type === WidgetType.IFRAME || type === WidgetType.CALENDAR || type === WidgetType.GIF || type === WidgetType.FULL_INFO) {
+    if (type === WidgetType.VIDEO || type === WidgetType.IFRAME || type === WidgetType.CALENDAR || type === WidgetType.GIF) {
       defaultWidth = 12;
       defaultHeight = 8;
+    } else if (type === WidgetType.FULL_INFO) {
+      defaultWidth = GRID_COLS;
+      const ch = containerRef.current?.clientHeight || 0;
+      defaultHeight = ch > 0 && rowHeight > 0 ? Math.ceil(ch / rowHeight) : 27;
     } else if (type === WidgetType.RSS) {
       defaultWidth = 12;
       defaultHeight = 6;
@@ -146,10 +150,11 @@ const SceneEditor: React.FC<SceneEditorProps> = ({
       defaultHeight = 12;
     }
 
+    const isFullInfo = type === WidgetType.FULL_INFO;
     const newWidget: LayoutItem = {
       i: Math.random().toString(36).substr(2, 9),
-      x: 18,
-      y: 10,
+      x: isFullInfo ? 0 : 18,
+      y: isFullInfo ? 0 : 10,
       w: defaultWidth,
       h: defaultHeight,
       type,
@@ -235,7 +240,9 @@ const SceneEditor: React.FC<SceneEditorProps> = ({
         } : undefined,
         pdfDocumentConfig: type === WidgetType.PDF_DOCUMENT ? {
           pdfUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf'
-        } : undefined
+        } : undefined,
+        fullScreenMode: type === WidgetType.FULL_INFO ? true : undefined,
+        zIndex: type === WidgetType.FULL_INFO ? 0 : 10
       }
     };
 
@@ -710,6 +717,91 @@ const renderWidgetControls = (
   // Simplified controls for the prototype
   return (
     <div className="space-y-4">
+      {w.data.fillContainer && (
+        <div className="bg-gradient-to-b from-[#0ea5e9]/15 to-slate-950/90 p-4 rounded-xl border border-[#0ea5e9]/40 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+          <div className="flex items-center gap-2">
+            <Maximize2 size={12} className="text-[#0ea5e9]" />
+            <span className="text-[10px] font-black text-[#0ea5e9] uppercase tracking-wider">Modo Tela Cheia Ativo</span>
+          </div>
+
+          <button
+            onClick={() => {
+              const cleanedLayout = page.layout.filter(item => item.i === w.i);
+              const updatedWidget = cleanedLayout.find(item => item.i === w.i);
+              if (updatedWidget) {
+                updatedWidget.data = {
+                  ...updatedWidget.data,
+                  fillContainer: true,
+                  fullScreenMode: true,
+                  contentAlignment: 'stretch',
+                  fitContainerMode: 'stretch',
+                  padding: '0px',
+                  margin: '0px',
+                };
+                updatedWidget.x = 0;
+                updatedWidget.y = 0;
+                updatedWidget.w = 48;
+                const containerHeight = document.querySelector('[data-canvas-ref]')?.clientHeight || 0;
+                const cWidth = document.querySelector('[data-canvas-ref]')?.clientWidth || 1200;
+                const rh = cWidth / 48;
+                updatedWidget.h = containerHeight > 0 && rh > 0 ? Math.ceil(containerHeight / rh) : 27;
+              }
+              onChange({ ...page, layout: cleanedLayout });
+            }}
+            className="w-full py-2.5 bg-gradient-to-r from-blue-600 to-sky-500 hover:from-blue-500 hover:to-sky-400 text-white rounded-lg text-xs font-black uppercase tracking-wider transition-all shadow-[0_4px_12px_rgba(14,165,233,0.25)] flex items-center justify-center gap-2 relative overflow-hidden group border border-sky-400/30"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+            <Maximize2 size={14} className="relative z-10" />
+            <span className="relative z-10">Preencher Tela Inteira</span>
+          </button>
+          <p className="text-[8px] text-amber-400/80 text-center leading-tight">
+            ⚠️ Atenção: Isso removerá todos os outros widgets desta cena e deixará o widget ocupando 100% da tela como fundo.
+          </p>
+          
+          <div className="pt-2 border-t border-slate-800/60 space-y-2">
+            <label className="text-[9px] font-black text-slate-400 uppercase block">Selecione o Background</label>
+            <input
+              type="text"
+              value={w.data.backgroundImage || ''}
+              onChange={e => updateData(w.i, { backgroundImage: e.target.value })}
+              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#0ea5e9]"
+              placeholder="URL da imagem ou vídeo de fundo..."
+            />
+            <div className="grid grid-cols-2 gap-1.5 mt-1.5">
+              <button
+                onClick={() => {
+                  setMediaLibraryConfig({
+                    isOpen: true,
+                    allowedTypes: 'image' as const,
+                    onSelect: (url: string) => {
+                      updateData(w.i, { backgroundImage: url });
+                    }
+                  });
+                }}
+                className="py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded text-[10px] font-bold uppercase transition-colors flex items-center justify-center gap-1.5 border border-slate-700"
+              >
+                <Upload size={10} />
+                Selecionar Imagem
+              </button>
+              <button
+                onClick={() => {
+                  setMediaLibraryConfig({
+                    isOpen: true,
+                    allowedTypes: 'video' as const,
+                    onSelect: (url: string) => {
+                      updateData(w.i, { backgroundImage: url });
+                    }
+                  });
+                }}
+                className="py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded text-[10px] font-bold uppercase transition-colors flex items-center justify-center gap-1.5 border border-slate-700"
+              >
+                <Upload size={10} />
+                Selecionar Vídeo
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {w.type === WidgetType.TEXT && (
         <>
           <div>
@@ -829,34 +921,61 @@ const renderWidgetControls = (
                 <option value="modern">Moderno (Dividido)</option>
               </select>
 
-              <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Imagem de Fundo (Opcional)</label>
-              <input
-                type="text"
-                value={w.data.backgroundImage || ''}
-                onChange={e => updateData(w.i, { backgroundImage: e.target.value })}
-                className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#0ea5e9]"
-                placeholder="URL da imagem (ex: https://...)"
-              />
+              <div className="pt-2 border-t border-slate-800/60 space-y-2 mt-2">
+                <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Selecione o Background</label>
+                <input
+                  type="text"
+                  value={w.data.backgroundImage || ''}
+                  onChange={e => updateData(w.i, { backgroundImage: e.target.value })}
+                  className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#0ea5e9]"
+                  placeholder="URL da imagem ou vídeo (ex: https://...)"
+                />
+                <div className="grid grid-cols-2 gap-1.5 mt-1.5">
+                  <button
+                    onClick={() => {
+                      setMediaLibraryConfig({
+                        isOpen: true,
+                        allowedTypes: 'image' as const,
+                        onSelect: (url: string) => {
+                          updateData(w.i, { backgroundImage: url });
+                        }
+                      });
+                    }}
+                    className="py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded text-[10px] font-bold uppercase transition-colors flex items-center justify-center gap-1.5 border border-slate-700"
+                  >
+                    <Upload size={10} />
+                    Selecionar Imagem
+                  </button>
+                  <button
+                    onClick={() => {
+                      setMediaLibraryConfig({
+                        isOpen: true,
+                        allowedTypes: 'video' as const,
+                        onSelect: (url: string) => {
+                          updateData(w.i, { backgroundImage: url });
+                        }
+                      });
+                    }}
+                    className="py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded text-[10px] font-bold uppercase transition-colors flex items-center justify-center gap-1.5 border border-slate-700"
+                  >
+                    <Upload size={10} />
+                    Selecionar Vídeo
+                  </button>
+                </div>
+              </div>
 
-              <div className="mt-4 pt-4 border-t border-slate-800 space-y-2">
-                {!isFullscreen ? (
+              {!w.data.fillContainer && (
+                <div className="mt-4 pt-4 border-t border-slate-800 space-y-2">
                   <button
                     onClick={() => setFullScreen(w.i)}
-                    className="w-full py-2 bg-indigo-600 hover:bg-sky-500 text-white rounded-lg text-xs font-bold transition-colors shadow-lg shadow-indigo-900/20 flex items-center justify-center gap-2"
+                    className="w-full py-2.5 bg-gradient-to-r from-blue-600 to-sky-500 hover:from-blue-500 hover:to-sky-400 text-white rounded-lg text-xs font-black uppercase tracking-wider transition-all shadow-[0_4px_12px_rgba(14,165,233,0.25)] flex items-center justify-center gap-2 relative overflow-hidden group border border-sky-400/30"
                   >
-                    <Maximize2 size={14} />
-                    Preencher Tela Inteira
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+                    <Maximize2 size={14} className="relative z-10" />
+                    <span className="relative z-10">Preencher Tela Inteira</span>
                   </button>
-                ) : (
-                  <button
-                    onClick={() => restoreSize(w.i)}
-                    className="w-full py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-lg text-xs font-bold transition-colors shadow-lg shadow-amber-900/20 flex items-center justify-center gap-2"
-                  >
-                    <Minimize2 size={14} />
-                    Restaurar Tamanho
-                  </button>
-                )}
-              </div>
+                </div>
+              )}
             </>
           )}
         </div>
@@ -891,7 +1010,7 @@ const renderWidgetControls = (
             {!isFullscreen ? (
               <button
                 onClick={() => setFullScreen(w.i)}
-                className="w-full py-2 bg-indigo-600 hover:bg-sky-500 text-white rounded-lg text-xs font-bold transition-colors shadow-lg shadow-indigo-900/20 flex items-center justify-center gap-2"
+                className="w-full py-2 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white rounded-lg text-xs font-bold transition-all shadow-[0_4px_12px_rgba(14,165,233,0.2)] flex items-center justify-center gap-2"
               >
                 <Maximize2 size={14} />
                 Preencher Tela Inteira
@@ -921,7 +1040,7 @@ const renderWidgetControls = (
             {!isFullscreen ? (
               <button
                 onClick={() => setFullScreen(w.i)}
-                className="w-full py-2 bg-indigo-600 hover:bg-sky-500 text-white rounded-lg text-xs font-bold transition-colors shadow-lg shadow-indigo-900/20 flex items-center justify-center gap-2"
+                className="w-full py-2 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white rounded-lg text-xs font-bold transition-all shadow-[0_4px_12px_rgba(14,165,233,0.2)] flex items-center justify-center gap-2"
               >
                 <Maximize2 size={14} />
                 Preencher Tela Inteira
@@ -1664,78 +1783,7 @@ const renderWidgetControls = (
           </label>
         </div>
 
-        {/* Painel de Tela Cheia — aparece quando fillContainer está ativo */}
-        {w.data.fillContainer && (
-          <div className="bg-gradient-to-b from-[#0ea5e9]/10 to-slate-950/80 p-3 rounded-xl border border-[#0ea5e9]/30 space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
-            <div className="flex items-center gap-2 mb-1">
-              <Maximize2 size={12} className="text-[#0ea5e9]" />
-              <span className="text-[9px] font-black text-[#0ea5e9] uppercase tracking-wider">Modo Tela Cheia Ativo</span>
-            </div>
-            
-            {/* Imagem de Fundo do Widget */}
-            <div>
-              <label className="text-[9px] font-black text-slate-400 uppercase mb-1 block">Imagem de Fundo (Opcional)</label>
-              <input
-                type="text"
-                value={w.data.backgroundImage || ''}
-                onChange={e => updateData(w.i, { backgroundImage: e.target.value })}
-                className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#0ea5e9]"
-                placeholder="URL da imagem de fundo..."
-              />
-              <button
-                onClick={() => {
-                  setMediaLibraryConfig({
-                    isOpen: true,
-                    allowedTypes: 'image' as const,
-                    onSelect: (url: string) => {
-                      updateData(w.i, { backgroundImage: url });
-                    }
-                  });
-                }}
-                className="w-full mt-1.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded text-[10px] font-bold uppercase transition-colors flex items-center justify-center gap-2"
-              >
-                <Upload size={12} />
-                Selecionar Imagem de Fundo
-              </button>
-            </div>
-
-            {/* Botão de Preenchimento Automático */}
-            <button
-              onClick={() => {
-                // Remove ALL other widgets — this one becomes the sole fullscreen background widget
-                const cleanedLayout = page.layout.filter(item => item.i === w.i);
-                const updatedWidget = cleanedLayout.find(item => item.i === w.i);
-                if (updatedWidget) {
-                  updatedWidget.data = {
-                    ...updatedWidget.data,
-                    fillContainer: true,
-                    fullScreenMode: true,
-                    contentAlignment: 'stretch',
-                    fitContainerMode: 'stretch',
-                    padding: '0px',
-                    margin: '0px',
-                  };
-                  updatedWidget.x = 0;
-                  updatedWidget.y = 0;
-                  updatedWidget.w = 48; // GRID_COLS
-                  const containerHeight = document.querySelector('[data-canvas-ref]')?.clientHeight || 0;
-                  const cWidth = document.querySelector('[data-canvas-ref]')?.clientWidth || 1200;
-                  const rh = cWidth / 48;
-                  updatedWidget.h = containerHeight > 0 && rh > 0 ? Math.ceil(containerHeight / rh) : 27;
-                }
-                onChange({ ...page, layout: cleanedLayout });
-              }}
-              className="w-full py-2.5 bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-600 hover:from-indigo-500 hover:via-violet-500 hover:to-indigo-500 text-white rounded-lg text-xs font-black uppercase tracking-wider transition-all shadow-lg shadow-indigo-900/30 flex items-center justify-center gap-2 relative overflow-hidden group"
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
-              <Maximize2 size={14} className="relative z-10" />
-              <span className="relative z-10">Preencher Tela Inteira</span>
-            </button>
-            <p className="text-[8px] text-amber-400/80 text-center leading-tight">
-              ⚠️ Atenção: Isso removerá todos os outros widgets desta cena e deixará o widget ocupando 100% da tela como fundo.
-            </p>
-          </div>
-        )}
+        {/* Painel de Tela Cheia removido daqui e movido para o topo */}
 
         {/* Alinhamento Interno */}
         {!w.data.fillContainer && (

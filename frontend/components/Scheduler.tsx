@@ -14,6 +14,15 @@ import { getBroadcasts, saveBroadcast, deleteBroadcast, getDisplays, getCurrentU
 import { Broadcast, Display, Page, User, WidgetType, LayoutItem, Device } from '../types';
 import SceneEditor from './SceneEditor';
 import { MediaLibrary } from './MediaLibrary';
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogDescription, 
+  DialogHeader, 
+  DialogTitle 
+} from './ui/dialog';
+import { fadeUp, staggerGrid, cardItem } from '../libs/motion';
+import { motion } from 'motion/react';
 
 const isYouTubeUrl = (url: string) => {
   if (!url) return false;
@@ -560,7 +569,7 @@ const Scheduler: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 p-4 md:p-8">
+    <div className="min-h-screen bg-transparent text-slate-100 p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
         
         {/* HEADER */}
@@ -700,11 +709,11 @@ const Scheduler: React.FC = () => {
                   <div className="mb-2.5">
                     <h4 className="text-[9px] font-black text-emerald-400 uppercase tracking-widest mb-1 flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-emerald-400 inline-block"></span>Básicos</h4>
                     <div className="grid grid-cols-3 gap-1.5">
-                      <WidgetTool icon="/icons3d/image.png" label="Imagem" description="Exibe imagens de alta qualidade (PNG, JPG, SVG) com ajuste automático ao contêiner." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.IMAGE)} />
-                      <WidgetTool icon="/icons3d/video.png" label="Vídeo" description="Reproduz vídeos locais em looping ou links diretos do YouTube." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.VIDEO)} />
-                      <WidgetTool icon="/icons3d/text.png" label="Texto" description="Adiciona caixas de texto com fontes, cores e tamanhos personalizáveis." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.TEXT)} />
-                      <WidgetTool icon="/icons3d/gif.png" label="GIF" description="Exibe animações divertidas em formato GIF para atrair a atenção do público." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.GIF)} />
-                      <WidgetTool icon="/icons3d/web.png" label="Web" description="Incorpora qualquer site ou página web externa de forma interativa." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.IFRAME)} />
+                      <WidgetTool icon="/icons3d/image.png" label="Imagem" description="Exibe imagens de alta qualidade (PNG, JPG, SVG) com ajuste automático ao contêiner." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.IMAGE)} tooltipAlign="left" />
+                      <WidgetTool icon="/icons3d/video.png" label="Vídeo" description="Reproduz vídeos locais em looping ou links diretos do YouTube." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.VIDEO)} tooltipAlign="center" />
+                      <WidgetTool icon="/icons3d/text.png" label="Texto" description="Adiciona caixas de texto com fontes, cores e tamanhos personalizáveis." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.TEXT)} tooltipAlign="right" />
+                      <WidgetTool icon="/icons3d/gif.png" label="GIF" description="Exibe animações divertidas em formato GIF para atrair a atenção do público." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.GIF)} tooltipAlign="left" />
+                      <WidgetTool icon="/icons3d/web.png" label="Web" description="Incorpora qualquer site ou página web externa de forma interativa." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.IFRAME)} tooltipAlign="center" />
                     </div>
                   </div>
 
@@ -712,11 +721,11 @@ const Scheduler: React.FC = () => {
                   <div className="mb-2.5">
                     <h4 className="text-[9px] font-black text-cyan-400 uppercase tracking-widest mb-1 flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-cyan-400 inline-block"></span>Utilitários</h4>
                     <div className="grid grid-cols-3 gap-1.5">
-                      <WidgetTool icon="/icons3d/clock.png" label="Relógio" description="Mostra um relógio digital sincronizado em tempo real com a cidade escolhida." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.CLOCK)} />
-                      <WidgetTool icon="/icons3d/weather.png" label="Clima" description="Exibe a previsão do tempo e temperatura em tempo real para qualquer cidade." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.WEATHER)} />
-                      <WidgetTool icon="/icons3d/full-info.png" label="Completo" description="Painel integrado de relógio, clima e fundos de alta definição." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.FULL_INFO)} />
-                      <WidgetTool icon="/icons3d/rss.png" label="RSS" description="Exibe feeds de notícias em tempo real de portais de notícias como G1 e CNN." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.RSS)} />
-                      <WidgetTool icon="/icons3d/calendar.png" label="Agenda" description="Integração direta com Google Agenda para exibir eventos e programações." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.CALENDAR)} />
+                      <WidgetTool icon="/icons3d/clock.png" label="Relógio" description="Mostra um relógio digital sincronizado em tempo real com a cidade escolhida." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.CLOCK)} tooltipAlign="left" />
+                      <WidgetTool icon="/icons3d/weather.png" label="Clima" description="Exibe a previsão do tempo e temperatura em tempo real para qualquer cidade." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.WEATHER)} tooltipAlign="center" />
+                      <WidgetTool icon="/icons3d/full-info.png" label="Completo" description="Painel integrado de relógio, clima e fundos de alta definição." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.FULL_INFO)} tooltipAlign="right" />
+                      <WidgetTool icon="/icons3d/rss.png" label="RSS" description="Exibe feeds de notícias em tempo real de portais de notícias como G1 e CNN." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.RSS)} tooltipAlign="left" />
+                      <WidgetTool icon="/icons3d/calendar.png" label="Agenda" description="Integração direta com Google Agenda para exibir eventos e programações." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.CALENDAR)} tooltipAlign="center" />
                     </div>
                   </div>
 
@@ -724,11 +733,11 @@ const Scheduler: React.FC = () => {
                   <div className="mb-2.5">
                     <h4 className="text-[9px] font-black text-amber-400 uppercase tracking-widest mb-1 flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-amber-400 inline-block"></span>Interativos</h4>
                     <div className="grid grid-cols-3 gap-1.5">
-                      <WidgetTool icon="/icons3d/notes.png" label="Notas" description="Mural de notas adesivas com temas neon, glassmorphism e cores vibrantes." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.NOTES)} />
-                      <WidgetTool icon="/icons3d/todo.png" label="Tarefas" description="Lista de tarefas interativa com checkboxes e progresso de conclusão." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.TODO)} />
-                      <WidgetTool icon="/icons3d/countdown.png" label="Contador" description="Cronômetro regressivo para grandes eventos, metas ou datas especiais." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.COUNTDOWN)} />
-                      <WidgetTool icon="/icons3d/chores.png" label="Deveres" description="Quadro semanal de deveres domésticos ou corporativos com responsáveis." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.CHORES)} />
-                      <WidgetTool icon="/icons3d/meal-plan.png" label="Meal Plan" description="Planejador ou cardápio de refeições semanais com slide para os dias." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.MEAL_PLAN)} />
+                      <WidgetTool icon="/icons3d/notes.png" label="Notas" description="Mural de notas adesivas com temas neon, glassmorphism e cores vibrantes." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.NOTES)} tooltipAlign="left" />
+                      <WidgetTool icon="/icons3d/todo.png" label="Tarefas" description="Lista de tarefas interativa com checkboxes e progresso de conclusão." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.TODO)} tooltipAlign="center" />
+                      <WidgetTool icon="/icons3d/countdown.png" label="Contador" description="Cronômetro regressivo para grandes eventos, metas ou datas especiais." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.COUNTDOWN)} tooltipAlign="right" />
+                      <WidgetTool icon="/icons3d/chores.png" label="Deveres" description="Quadro semanal de deveres domésticos ou corporativos com responsáveis." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.CHORES)} tooltipAlign="left" />
+                      <WidgetTool icon="/icons3d/meal-plan.png" label="Meal Plan" description="Planejador ou cardápio de refeições semanais com slide para os dias." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.MEAL_PLAN)} tooltipAlign="center" />
                     </div>
                   </div>
 
@@ -736,14 +745,14 @@ const Scheduler: React.FC = () => {
                   <div className="mb-2.5">
                     <h4 className="text-[9px] font-black text-rose-400 uppercase tracking-widest mb-1 flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-rose-400 inline-block"></span>Integrações</h4>
                     <div className="grid grid-cols-3 gap-1.5">
-                      <WidgetTool icon="/icons3d/market.png" label="Bolsa" description="Painel de cotações financeiras de ações e criptomoedas em tempo real." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.MARKET_WATCH)} />
-                      <WidgetTool icon="/icons3d/snapshot.png" label="Snapshot" description="Renderiza capturas estáticas e periódicas de páginas de forma segura." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.BROWSER_SNAPSHOT)} />
-                      <WidgetTool icon="/icons3d/google-docs.png" label="G Docs" description="Incorpora documentos, planilhas ou slides do Google Workspace." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.GOOGLE_DOCS)} />
-                      <WidgetTool icon="/icons3d/office-docs.png" label="Office Docs" description="Exibe planilhas Excel, documentos Word ou slides PowerPoint do Office 365." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.OFFICE_DOCS)} />
-                      <WidgetTool icon="/icons3d/power-bi.png" label="Power BI" description="Exibe painéis interativos e relatórios dinâmicos do Microsoft Power BI." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.POWER_BI)} />
-                      <WidgetTool icon="/icons3d/airtable.png" label="Airtable" description="Exibe visualizações, tabelas ou bases de dados completas do Airtable." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.AIRTABLE)} />
-                      <WidgetTool icon="/icons3d/pdf.png" label="PDF" description="Exibe documentos PDFs e apostilas corporativas página a página." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.PDF_DOCUMENT)} />
-                      <WidgetTool icon="/icons3d/html.png" label="HTML" description="Insira código HTML, CSS ou JS personalizado livremente." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.EMBED_HTML)} />
+                      <WidgetTool icon="/icons3d/market.png" label="Bolsa" description="Painel de cotações financeiras de ações e criptomoedas em tempo real." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.MARKET_WATCH)} tooltipAlign="left" />
+                      <WidgetTool icon="/icons3d/snapshot.png" label="Snapshot" description="Renderiza capturas estáticas e periódicas de páginas de forma segura." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.BROWSER_SNAPSHOT)} tooltipAlign="center" />
+                      <WidgetTool icon="/icons3d/google-docs.png" label="G Docs" description="Incorpora documentos, planilhas ou slides do Google Workspace." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.GOOGLE_DOCS)} tooltipAlign="right" />
+                      <WidgetTool icon="/icons3d/office-docs.png" label="Office Docs" description="Exibe planilhas Excel, documentos Word ou slides PowerPoint do Office 365." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.OFFICE_DOCS)} tooltipAlign="left" />
+                      <WidgetTool icon="/icons3d/power-bi.png" label="Power BI" description="Exibe painéis interativos e relatórios dinâmicos do Microsoft Power BI." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.POWER_BI)} tooltipAlign="center" />
+                      <WidgetTool icon="/icons3d/airtable.png" label="Airtable" description="Exibe visualizações, tabelas ou bases de dados completas do Airtable." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.AIRTABLE)} tooltipAlign="right" />
+                      <WidgetTool icon="/icons3d/pdf.png" label="PDF" description="Exibe documentos PDFs e apostilas corporativas página a página." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.PDF_DOCUMENT)} tooltipAlign="left" />
+                      <WidgetTool icon="/icons3d/html.png" label="HTML" description="Insira código HTML, CSS ou JS personalizado livremente." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.EMBED_HTML)} tooltipAlign="center" />
                     </div>
                   </div>
                   
@@ -1182,7 +1191,12 @@ const Scheduler: React.FC = () => {
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-4">
+              <motion.div 
+                variants={staggerGrid}
+                initial="hidden"
+                animate="show"
+                className="grid grid-cols-1 gap-4"
+              >
                 {broadcasts.map(broadcast => {
                   const now = new Date();
                   const start = new Date(broadcast.start_time);
@@ -1192,7 +1206,13 @@ const Scheduler: React.FC = () => {
                   const isScheduled = now < start;
 
                   return (
-                    <div key={broadcast.id} className="bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-2xl p-6 hover:border-sky-500/50 transition-all group">
+                    <motion.div 
+                      key={broadcast.id} 
+                      variants={cardItem}
+                      whileHover={{ y: -4 }}
+                      transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                      className="bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-2xl p-6 hover:border-sky-500/50 transition-all group"
+                    >
                       <div className="flex flex-col md:flex-row justify-between gap-6">
                         
                         <div className="flex gap-6 items-start">
@@ -1243,14 +1263,14 @@ const Scheduler: React.FC = () => {
                         <div className="flex items-center gap-3 self-end md:self-center">
                           <button 
                             onClick={() => handleEdit(broadcast)}
-                            className="p-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl transition-all border border-slate-700"
+                            className="p-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl transition-all border border-slate-700 cursor-pointer"
                             title="Editar"
                           >
                             <Edit3 size={18} />
                           </button>
                           <button 
                             onClick={() => confirmDelete(broadcast.id)}
-                            className="p-3 bg-slate-800 hover:bg-rose-500/20 text-slate-300 hover:text-rose-500 rounded-xl transition-all border border-slate-700 hover:border-rose-500/30"
+                            className="p-3 bg-slate-800 hover:bg-rose-500/20 text-slate-300 hover:text-rose-500 rounded-xl transition-all border border-slate-700 hover:border-rose-500/30 cursor-pointer"
                             title="Excluir"
                           >
                             <Trash2 size={18} />
@@ -1258,10 +1278,10 @@ const Scheduler: React.FC = () => {
                         </div>
 
                       </div>
-                    </div>
+                    </motion.div>
                   );
                 })}
-              </div>
+              </motion.div>
             )}
           </div>
         )}
@@ -1269,423 +1289,404 @@ const Scheduler: React.FC = () => {
       </div>
 
       {/* ORIENTATION SELECTION MODAL */}
-      {showOrientationModal && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-300">
-            <div className="p-6 border-b border-slate-800 flex justify-between items-center">
-              <div>
-                <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                  {pendingAllScreens ? (
-                    <><Megaphone className="text-amber-400" size={20} /> Aviso em Todas as Telas</>
-                  ) : (
-                    <><Tv className="text-[#0ea5e9]" size={20} /> Modelo de Tela</>
-                  )}
-                </h3>
-                <p className="text-xs text-slate-500 mt-1">
-                  {pendingAllScreens 
-                    ? 'Escolha a orientação do conteúdo que será exibido em todas as telas.' 
-                    : 'Escolha a orientação da tela para esta programação.'}
-                </p>
-              </div>
-              <button 
-                onClick={() => { setShowOrientationModal(false); setPendingAllScreens(false); }}
-                className="text-slate-400 hover:text-rose-500 transition-colors"
-              >
-                <X size={20} />
-              </button>
-            </div>
-            <div className="p-6">
-              <div className="grid grid-cols-2 gap-4">
-                <button
-                  onClick={() => confirmOrientation('horizontal')}
-                  className="flex flex-col items-center justify-center gap-3 p-6 rounded-2xl border-2 border-white/10 bg-slate-950 hover:border-[#0ea5e9] hover:bg-[#0ea5e9]/10 hover:shadow-[0_0_25px_rgba(124,58,237,0.2)] transition-all group"
-                >
-                  <div className="w-20 h-[45px] rounded-lg border-2 border-white/10 group-hover:border-[#0ea5e9]/60 bg-slate-800 group-hover:bg-[#0ea5e9]/10 flex items-center justify-center transition-all">
-                    <Monitor size={20} className="text-slate-500 group-hover:text-[#0ea5e9] transition-colors" />
-                  </div>
-                  <div className="text-center">
-                    <p className="text-sm font-bold text-slate-300 group-hover:text-[#0ea5e9] transition-colors">Horizontal</p>
-                    <p className="text-[10px] text-slate-600 font-mono mt-0.5">16:9 — TV / Monitor</p>
-                  </div>
-                </button>
-
-                <button
-                  onClick={() => confirmOrientation('vertical')}
-                  className="flex flex-col items-center justify-center gap-3 p-6 rounded-2xl border-2 border-white/10 bg-slate-950 hover:border-purple-500 hover:bg-purple-500/10 hover:shadow-[0_0_25px_rgba(168,85,247,0.2)] transition-all group"
-                >
-                  <div className="w-[45px] h-20 rounded-lg border-2 border-white/10 group-hover:border-purple-500/60 bg-slate-800 group-hover:bg-purple-500/10 flex items-center justify-center transition-all">
-                    <Smartphone size={20} className="text-slate-500 group-hover:text-purple-400 transition-colors" />
-                  </div>
-                  <div className="text-center">
-                    <p className="text-sm font-bold text-slate-300 group-hover:text-purple-400 transition-colors">Vertical</p>
-                    <p className="text-[10px] text-slate-600 font-mono mt-0.5">9:16 — Totem / Kiosk</p>
-                  </div>
-                </button>
-              </div>
-
-              {pendingAllScreens && (
-                <div className="mt-4 bg-amber-500/10 border border-amber-500/20 rounded-xl p-3 flex items-start gap-2">
-                  <AlertCircle size={14} className="text-amber-400 mt-0.5 shrink-0" />
-                  <p className="text-[11px] text-amber-400/80 leading-relaxed">
-                    O conteúdo será exibido em <strong>todas as {displays.length} telas</strong> conectadas. Ideal para avisos urgentes.
-                  </p>
-                </div>
+      <Dialog open={showOrientationModal} onOpenChange={(open) => {
+        if (!open) {
+          setShowOrientationModal(false);
+          setPendingAllScreens(false);
+        }
+      }}>
+        <DialogContent className="max-w-md bg-slate-900 border-slate-800 text-slate-100 p-6 overflow-hidden shadow-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-bold text-white flex items-center gap-2">
+              {pendingAllScreens ? (
+                <><Megaphone className="text-amber-400" size={20} /> Aviso em Todas as Telas</>
+              ) : (
+                <><Tv className="text-[#0ea5e9]" size={20} /> Modelo de Tela</>
               )}
-            </div>
+            </DialogTitle>
+            <DialogDescription className="text-xs text-slate-500 mt-1">
+              {pendingAllScreens 
+                ? 'Escolha a orientação do conteúdo que será exibido em todas as telas.' 
+                : 'Escolha a orientação da tela para esta programação.'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-4 mt-2">
+            <button
+              onClick={() => confirmOrientation('horizontal')}
+              className="flex flex-col items-center justify-center gap-3 p-6 rounded-2xl border-2 border-white/10 bg-slate-950 hover:border-[#0ea5e9] hover:bg-[#0ea5e9]/10 hover:shadow-[0_0_25px_rgba(124,58,237,0.2)] transition-all group cursor-pointer"
+            >
+              <div className="w-20 h-[45px] rounded-lg border-2 border-white/10 group-hover:border-[#0ea5e9]/60 bg-slate-800 group-hover:bg-[#0ea5e9]/10 flex items-center justify-center transition-all">
+                <Monitor size={20} className="text-slate-500 group-hover:text-[#0ea5e9] transition-colors" />
+              </div>
+              <div className="text-center">
+                <p className="text-sm font-bold text-slate-300 group-hover:text-[#0ea5e9] transition-colors">Horizontal</p>
+                <p className="text-[10px] text-slate-600 font-mono mt-0.5">16:9 — TV / Monitor</p>
+              </div>
+            </button>
+
+            <button
+              onClick={() => confirmOrientation('vertical')}
+              className="flex flex-col items-center justify-center gap-3 p-6 rounded-2xl border-2 border-white/10 bg-slate-950 hover:border-purple-500 hover:bg-purple-500/10 hover:shadow-[0_0_25px_rgba(168,85,247,0.2)] transition-all group cursor-pointer"
+            >
+              <div className="w-[45px] h-20 rounded-lg border-2 border-white/10 group-hover:border-purple-500/60 bg-slate-800 group-hover:bg-purple-500/10 flex items-center justify-center transition-all">
+                <Smartphone size={20} className="text-slate-500 group-hover:text-purple-400 transition-colors" />
+              </div>
+              <div className="text-center">
+                <p className="text-sm font-bold text-slate-300 group-hover:text-purple-400 transition-colors">Vertical</p>
+                <p className="text-[10px] text-slate-600 font-mono mt-0.5">9:16 — Totem / Kiosk</p>
+              </div>
+            </button>
           </div>
-        </div>
-      )}
+
+          {pendingAllScreens && (
+            <div className="mt-2 bg-amber-500/10 border border-amber-500/20 rounded-xl p-3 flex items-start gap-2">
+              <AlertCircle size={14} className="text-amber-400 mt-0.5 shrink-0" />
+              <p className="text-[11px] text-amber-400/80 leading-relaxed">
+                O conteúdo será exibido em <strong>todas as {displays.length} telas</strong> conectadas. Ideal para avisos urgentes.
+              </p>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
       {/* Delete Modal */}
-      {showDeleteModal && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-md w-full shadow-2xl">
-            <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+      <Dialog open={showDeleteModal} onOpenChange={(open) => {
+        if (!open) {
+          setShowDeleteModal(false);
+          setBroadcastToDelete(null);
+        }
+      }}>
+        <DialogContent className="max-w-md bg-slate-900 border-slate-800 text-slate-100 p-6 shadow-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-white flex items-center gap-2">
               <AlertCircle className="text-rose-500" />
               Excluir Programação
-            </h3>
-            <p className="text-slate-400 mb-6">
+            </DialogTitle>
+            <DialogDescription className="text-slate-400 mt-2">
               Tem certeza que deseja excluir esta programação? Ela será removida de todas as telas selecionadas. Esta ação não pode ser desfeita.
-            </p>
-            <div className="flex gap-3">
-              <button 
-                onClick={() => {
-                  setShowDeleteModal(false);
-                  setBroadcastToDelete(null);
-                }}
-                className="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold transition-all"
-              >
-                Cancelar
-              </button>
-              <button 
-                onClick={handleDelete}
-                disabled={loading}
-                className="flex-1 py-3 bg-rose-600 hover:bg-rose-500 text-white rounded-xl font-bold transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-              >
-                {loading ? <Loader2 className="animate-spin" size={18} /> : <Trash2 size={18} />}
-                Excluir
-              </button>
-            </div>
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex gap-3 mt-4">
+            <button 
+              onClick={() => {
+                setShowDeleteModal(false);
+                setBroadcastToDelete(null);
+              }}
+              className="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold transition-all cursor-pointer"
+            >
+              Cancelar
+            </button>
+            <button 
+              onClick={handleDelete}
+              disabled={loading}
+              className="flex-1 py-3 bg-rose-600 hover:bg-rose-500 text-white rounded-xl font-bold transition-all disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
+            >
+              {loading ? <Loader2 className="animate-spin" size={18} /> : <Trash2 size={18} />}
+              Excluir
+            </button>
           </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
 
       {/* ALL SCREENS STATUS MODAL */}
-      {showAllScreensModal && (
-        <div className="fixed inset-0 bg-black/85 backdrop-blur-sm z-[200] flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col max-h-[85vh]">
-            <div className="p-6 border-b border-slate-800 flex justify-between items-center bg-slate-900/50">
-              <div>
-                <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                  <Monitor className="text-sky-500" size={20} />
-                  <span>Status e Monitoramento de Telas ({displays.length})</span>
-                </h3>
-                <p className="text-xs text-slate-500 mt-1">
-                  Visualize o status de conexão em tempo real e as programações ativas de cada monitor corporativo.
-                </p>
-              </div>
-              <button 
-                onClick={() => setShowAllScreensModal(false)}
-                className="text-slate-400 hover:text-rose-500 transition-colors p-1.5 rounded-lg hover:bg-slate-800"
-              >
-                <X size={20} />
-              </button>
-            </div>
+      <Dialog open={showAllScreensModal} onOpenChange={setShowAllScreensModal}>
+        <DialogContent className="max-w-4xl bg-slate-900 border-slate-800 text-slate-100 p-6 shadow-2xl flex flex-col max-h-[85vh]">
+          <DialogHeader className="bg-slate-900/50">
+            <DialogTitle className="text-lg font-bold text-white flex items-center gap-2">
+              <Monitor className="text-sky-500" size={20} />
+              <span>Status e Monitoramento de Telas ({displays.length})</span>
+            </DialogTitle>
+            <DialogDescription className="text-xs text-slate-500 mt-1">
+              Visualize o status de conexão em tempo real e as programações ativas de cada monitor corporativo.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="mt-4 overflow-y-auto flex-1 bg-slate-950/40 grid grid-cols-1 md:grid-cols-2 gap-4 p-1">
+            {displays.map(display => {
+              const isOnline = devices.filter(d => d.display_id === display.id).some(d => (Date.now() - d.last_seen) < 60000);
+              
+              return (
+                <div key={display.id} className="bg-slate-900/80 border border-slate-800 hover:border-slate-700/80 p-5 rounded-2xl transition-all flex flex-col justify-between gap-4">
+                  <div className="flex justify-between items-start gap-4">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center border bg-slate-950 ${
+                        isOnline ? 'border-emerald-500/20 text-emerald-400' : 'border-rose-500/20 text-rose-500'
+                      }`}>
+                        <Monitor size={20} />
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-sm text-slate-100">{display.name}</h4>
+                        <span className="text-[10px] text-slate-500 font-mono block mt-0.5">ID: {display.slug || display.id}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <span className={`w-2.5 h-2.5 rounded-full ${isOnline ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`}></span>
+                      <span className={`text-[10px] font-black uppercase ${isOnline ? 'text-emerald-400' : 'text-rose-500'}`}>
+                        {isOnline ? 'Online' : 'Offline'}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-3 border-t border-slate-800/60 pt-3 text-[11px] text-slate-400">
+                    <div>
+                      <span className="text-slate-600 block uppercase text-[8px] font-black tracking-wider">Orientação</span>
+                      <span className="font-bold text-slate-300 flex items-center gap-1 mt-0.5">
+                        {display.orientation === 'vertical' ? (
+                          <><Smartphone size={12} className="text-purple-400" /> Vertical (9:16)</>
+                        ) : (
+                          <><Monitor size={12} className="text-sky-400" /> Horizontal (16:9)</>
+                        )}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-slate-600 block uppercase text-[8px] font-black tracking-wider">Programações Injetadas</span>
+                      <span className="font-bold text-slate-300 mt-0.5 block">{display.pages.filter(p => p.broadcast_id).length} cenas</span>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center justify-between border-t border-slate-800/60 pt-3">
+                    <span className="text-[10px] text-slate-500 font-medium">Atualizado {new Date(display.updatedAt).toLocaleDateString()}</span>
+                    <a 
+                      href={`/#/player/${display.slug || display.id}`} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="text-xs font-bold text-[#0ea5e9] hover:text-sky-300 flex items-center gap-1.5 transition-colors uppercase tracking-wider"
+                    >
+                      Abrir Player <Maximize2 size={12} />
+                    </a>
+                  </div>
+                </div>
+              );
+            })}
             
-            <div className="p-6 overflow-y-auto flex-1 bg-slate-950/40 grid grid-cols-1 md:grid-cols-2 gap-4">
-              {displays.map(display => {
-                const isOnline = devices.filter(d => d.display_id === display.id).some(d => (Date.now() - d.last_seen) < 60000);
-                
+            {displays.length === 0 && (
+              <div className="col-span-full py-12 text-center text-slate-500 text-xs">
+                Nenhuma tela registrada para monitoramento.
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal de Camadas */}
+      <Dialog open={showLayersModal && !!currentBroadcast?.page} onOpenChange={setShowLayersModal}>
+        <DialogContent className="max-w-md bg-slate-900 border-slate-800 text-slate-100 p-6 shadow-2xl flex flex-col max-h-[85vh]">
+          <DialogHeader>
+            <DialogTitle className="text-sm font-bold text-white flex items-center gap-2 uppercase tracking-wider">
+              <Layers className="text-sky-500" size={16} /> Camadas da Cena ({currentBroadcast?.page?.layout?.length || 0})
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="mt-4 flex-1 overflow-y-auto pr-1 space-y-1.5 custom-scrollbar min-h-0">
+            {currentBroadcast?.page && [...currentBroadcast.page.layout]
+              .sort((a, b) => (b.data.zIndex ?? 10) - (a.data.zIndex ?? 10))
+              .map((layer) => {
+                const isSelected = selectedWidget === layer.i;
+                const isDragging = draggedLayerId === layer.i;
+                const isDragOver = dragOverLayerId === layer.i;
+
+                const getIcon = (type: WidgetType) => {
+                  switch (type) {
+                    case WidgetType.IMAGE: return <ImageIcon size={14} />;
+                    case WidgetType.VIDEO: return <Film size={14} />;
+                    case WidgetType.TEXT: return <Type size={14} />;
+                    case WidgetType.CLOCK: return <Clock size={14} />;
+                    case WidgetType.CALENDAR: return <CalendarIcon size={14} />;
+                    case WidgetType.WEATHER: return <CloudSun size={14} />;
+                    case WidgetType.FULL_INFO: return <LayoutIcon size={14} />;
+                    case WidgetType.RSS: return <Rss size={14} />;
+                    case WidgetType.IFRAME: return <Globe size={14} />;
+                    case WidgetType.GIF: return <Gift size={14} />;
+                    case WidgetType.NOTES: return <StickyNote size={14} className="text-yellow-400" />;
+                    case WidgetType.TODO: return <ListTodo size={14} className="text-emerald-400" />;
+                    case WidgetType.COUNTDOWN: return <Timer size={14} className="text-rose-400" />;
+                    case WidgetType.CHORES: return <ClipboardList size={14} className="text-cyan-400" />;
+                    case WidgetType.MEAL_PLAN: return <Utensils size={14} className="text-amber-400" />;
+                    case WidgetType.MARKET_WATCH: return <TrendingUp size={14} className="text-green-400" />;
+                    case WidgetType.BROWSER_SNAPSHOT: return <Camera size={14} className="text-blue-400" />;
+                    case WidgetType.GOOGLE_DOCS: return <FileText size={14} className="text-cyan-500" />;
+                    case WidgetType.OFFICE_DOCS: return <BookOpen size={14} className="text-blue-500" />;
+                    case WidgetType.POWER_BI: return <LayoutIcon size={14} className="text-amber-500" />;
+                    case WidgetType.EMBED_HTML: return <Code2 size={14} className="text-indigo-400" />;
+                    case WidgetType.AIRTABLE: return <Database size={14} className="text-rose-500" />;
+                    case WidgetType.PDF_DOCUMENT: return <FileText size={14} className="text-red-500" />;
+                    default: return <Layers size={14} />;
+                  }
+                };
+
+                const getName = (type: WidgetType) => {
+                  switch (type) {
+                    case WidgetType.IMAGE: return 'Imagem';
+                    case WidgetType.VIDEO: return 'Vídeo';
+                    case WidgetType.TEXT: return 'Texto';
+                    case WidgetType.CLOCK: return 'Relógio';
+                    case WidgetType.CALENDAR: return 'Agenda';
+                    case WidgetType.WEATHER: return 'Clima';
+                    case WidgetType.FULL_INFO: return 'Completo';
+                    case WidgetType.RSS: return 'Notícias';
+                    case WidgetType.IFRAME: return 'Website';
+                    case WidgetType.GIF: return 'GIF';
+                    case WidgetType.NOTES: return 'Notas';
+                    case WidgetType.TODO: return 'Tarefas';
+                    case WidgetType.COUNTDOWN: return 'Contador';
+                    case WidgetType.CHORES: return 'Deveres';
+                    case WidgetType.MEAL_PLAN: return 'Meal Plan';
+                    case WidgetType.MARKET_WATCH: return 'Bolsa';
+                    case WidgetType.BROWSER_SNAPSHOT: return 'Snapshot';
+                    case WidgetType.GOOGLE_DOCS: return 'G Docs';
+                    case WidgetType.OFFICE_DOCS: return 'Office Docs';
+                    case WidgetType.POWER_BI: return 'Power BI';
+                    case WidgetType.EMBED_HTML: return 'HTML';
+                    case WidgetType.AIRTABLE: return 'Airtable';
+                    case WidgetType.PDF_DOCUMENT: return 'PDF';
+                    default: return 'Widget';
+                  }
+                };
+
                 return (
-                  <div key={display.id} className="bg-slate-900/80 border border-slate-800 hover:border-slate-700/80 p-5 rounded-2xl transition-all flex flex-col justify-between gap-4">
-                    <div className="flex justify-between items-start gap-4">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center border bg-slate-950 ${
-                          isOnline ? 'border-emerald-500/20 text-emerald-400' : 'border-rose-500/20 text-rose-500'
-                        }`}>
-                          <Monitor size={20} />
-                        </div>
-                        <div>
-                          <h4 className="font-bold text-sm text-slate-100">{display.name}</h4>
-                          <span className="text-[10px] text-slate-500 font-mono block mt-0.5">ID: {display.slug || display.id}</span>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center gap-2">
-                        <span className={`w-2.5 h-2.5 rounded-full ${isOnline ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`}></span>
-                        <span className={`text-[10px] font-black uppercase ${isOnline ? 'text-emerald-400' : 'text-rose-500'}`}>
-                          {isOnline ? 'Online' : 'Offline'}
-                        </span>
-                      </div>
+                  <div
+                    key={layer.i}
+                    draggable
+                    onDragStart={(e) => handleLayerDragStart(e, layer.i)}
+                    onDragOver={(e) => handleLayerDragOver(e, layer.i)}
+                    onDragLeave={handleLayerDragLeave}
+                    onDrop={(e) => handleLayerDrop(e, layer.i)}
+                    onDragEnd={handleLayerDragEnd}
+                    onClick={() => {
+                      setSelectedWidget(layer.i);
+                      setShowLayersModal(false);
+                    }}
+                    className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all border ${
+                      isSelected 
+                        ? 'bg-sky-500/10 border-sky-500/50 text-sky-400 shadow-md shadow-sky-500/5' 
+                        : 'bg-slate-900/60 border-slate-800 hover:border-slate-700 text-slate-300 hover:bg-slate-900'
+                    } ${isDragging ? 'opacity-50' : 'opacity-100'} ${
+                      isDragOver ? 'border-t-2 border-t-sky-500' : ''
+                    }`}
+                  >
+                    <div className="cursor-move text-slate-500 hover:text-slate-300 p-1">
+                      <GripVertical size={14} />
                     </div>
-                    
-                    <div className="grid grid-cols-2 gap-3 border-t border-slate-800/60 pt-3 text-[11px] text-slate-400">
-                      <div>
-                        <span className="text-slate-600 block uppercase text-[8px] font-black tracking-wider">Orientação</span>
-                        <span className="font-bold text-slate-300 flex items-center gap-1 mt-0.5">
-                          {display.orientation === 'vertical' ? (
-                            <><Smartphone size={12} className="text-purple-400" /> Vertical (9:16)</>
-                          ) : (
-                            <><Monitor size={12} className="text-sky-400" /> Horizontal (16:9)</>
-                          )}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="text-slate-600 block uppercase text-[8px] font-black tracking-wider">Programações Injetadas</span>
-                        <span className="font-bold text-slate-300 mt-0.5 block">{display.pages.filter(p => p.broadcast_id).length} cenas</span>
-                      </div>
+                    <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-slate-950/80 border border-slate-800 text-slate-400">
+                      {getIcon(layer.type)}
                     </div>
+                    <span className="text-xs font-bold truncate flex-1">{getName(layer.type)}</span>
                     
-                    <div className="flex items-center justify-between border-t border-slate-800/60 pt-3">
-                      <span className="text-[10px] text-slate-500 font-medium">Atualizado {new Date(display.updatedAt).toLocaleDateString()}</span>
-                      <a 
-                        href={`/#/player/${display.slug || display.id}`} 
-                        target="_blank" 
-                        rel="noopener noreferrer" 
-                        className="text-xs font-bold text-[#0ea5e9] hover:text-sky-300 flex items-center gap-1.5 transition-colors uppercase tracking-wider"
+                    <div className="flex items-center gap-1">
+                      <button 
+                        onClick={(e) => { 
+                          e.stopPropagation(); 
+                          removeWidget(layer.i); 
+                        }}
+                        className="p-1.5 hover:bg-rose-500/10 text-slate-500 hover:text-rose-500 rounded-lg transition-colors cursor-pointer"
+                        title="Excluir Camada"
                       >
-                        Abrir Player <Maximize2 size={12} />
-                      </a>
+                        <Trash2 size={14} />
+                      </button>
+                      {isSelected && <div className="w-2 h-2 rounded-full bg-sky-500 animate-pulse"></div>}
                     </div>
                   </div>
                 );
               })}
-              
-              {displays.length === 0 && (
-                <div className="col-span-full py-12 text-center text-slate-500 text-xs">
-                  Nenhuma tela registrada para monitoramento.
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modal de Camadas */}
-      {showLayersModal && currentBroadcast?.page && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-slate-900 border border-slate-700 p-6 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[85vh]">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-4 mb-4">
-              <h3 className="text-sm font-bold text-white flex items-center gap-2 uppercase tracking-wider">
-                <Layers className="text-sky-500" size={16} /> Camadas da Cena ({currentBroadcast.page.layout.length})
-              </h3>
-              <button onClick={() => setShowLayersModal(false)} className="text-slate-400 hover:text-rose-500 transition-colors">
-                <X size={20} />
-              </button>
-            </div>
-            
-            <div className="flex-1 overflow-y-auto pr-1 space-y-1.5 custom-scrollbar min-h-0">
-              {[...currentBroadcast.page.layout]
-                .sort((a, b) => (b.data.zIndex ?? 10) - (a.data.zIndex ?? 10))
-                .map((layer) => {
-                  const isSelected = selectedWidget === layer.i;
-                  const isDragging = draggedLayerId === layer.i;
-                  const isDragOver = dragOverLayerId === layer.i;
-
-                  const getIcon = (type: WidgetType) => {
-                    switch (type) {
-                      case WidgetType.IMAGE: return <ImageIcon size={14} />;
-                      case WidgetType.VIDEO: return <Film size={14} />;
-                      case WidgetType.TEXT: return <Type size={14} />;
-                      case WidgetType.CLOCK: return <Clock size={14} />;
-                      case WidgetType.CALENDAR: return <CalendarIcon size={14} />;
-                      case WidgetType.WEATHER: return <CloudSun size={14} />;
-                      case WidgetType.FULL_INFO: return <LayoutIcon size={14} />;
-                      case WidgetType.RSS: return <Rss size={14} />;
-                      case WidgetType.IFRAME: return <Globe size={14} />;
-                      case WidgetType.GIF: return <Gift size={14} />;
-                      case WidgetType.NOTES: return <StickyNote size={14} className="text-yellow-400" />;
-                      case WidgetType.TODO: return <ListTodo size={14} className="text-emerald-400" />;
-                      case WidgetType.COUNTDOWN: return <Timer size={14} className="text-rose-400" />;
-                      case WidgetType.CHORES: return <ClipboardList size={14} className="text-cyan-400" />;
-                      case WidgetType.MEAL_PLAN: return <Utensils size={14} className="text-amber-400" />;
-                      case WidgetType.MARKET_WATCH: return <TrendingUp size={14} className="text-green-400" />;
-                      case WidgetType.BROWSER_SNAPSHOT: return <Camera size={14} className="text-blue-400" />;
-                      case WidgetType.GOOGLE_DOCS: return <FileText size={14} className="text-cyan-500" />;
-                      case WidgetType.OFFICE_DOCS: return <BookOpen size={14} className="text-blue-500" />;
-                      case WidgetType.POWER_BI: return <LayoutIcon size={14} className="text-amber-500" />;
-                      case WidgetType.EMBED_HTML: return <Code2 size={14} className="text-indigo-400" />;
-                      case WidgetType.AIRTABLE: return <Database size={14} className="text-rose-500" />;
-                      case WidgetType.PDF_DOCUMENT: return <FileText size={14} className="text-red-500" />;
-                      default: return <Layers size={14} />;
-                    }
-                  };
-
-                  const getName = (type: WidgetType) => {
-                    switch (type) {
-                      case WidgetType.IMAGE: return 'Imagem';
-                      case WidgetType.VIDEO: return 'Vídeo';
-                      case WidgetType.TEXT: return 'Texto';
-                      case WidgetType.CLOCK: return 'Relógio';
-                      case WidgetType.CALENDAR: return 'Agenda';
-                      case WidgetType.WEATHER: return 'Clima';
-                      case WidgetType.FULL_INFO: return 'Completo';
-                      case WidgetType.RSS: return 'Notícias';
-                      case WidgetType.IFRAME: return 'Website';
-                      case WidgetType.GIF: return 'GIF';
-                      case WidgetType.NOTES: return 'Notas';
-                      case WidgetType.TODO: return 'Tarefas';
-                      case WidgetType.COUNTDOWN: return 'Contador';
-                      case WidgetType.CHORES: return 'Deveres';
-                      case WidgetType.MEAL_PLAN: return 'Meal Plan';
-                      case WidgetType.MARKET_WATCH: return 'Bolsa';
-                      case WidgetType.BROWSER_SNAPSHOT: return 'Snapshot';
-                      case WidgetType.GOOGLE_DOCS: return 'G Docs';
-                      case WidgetType.OFFICE_DOCS: return 'Office Docs';
-                      case WidgetType.POWER_BI: return 'Power BI';
-                      case WidgetType.EMBED_HTML: return 'HTML';
-                      case WidgetType.AIRTABLE: return 'Airtable';
-                      case WidgetType.PDF_DOCUMENT: return 'PDF';
-                      default: return 'Widget';
-                    }
-                  };
-
-                  return (
-                    <div
-                      key={layer.i}
-                      draggable
-                      onDragStart={(e) => handleLayerDragStart(e, layer.i)}
-                      onDragOver={(e) => handleLayerDragOver(e, layer.i)}
-                      onDragLeave={handleLayerDragLeave}
-                      onDrop={(e) => handleLayerDrop(e, layer.i)}
-                      onDragEnd={handleLayerDragEnd}
-                      onClick={() => {
-                        setSelectedWidget(layer.i);
-                        setShowLayersModal(false);
-                      }}
-                      className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all border ${
-                        isSelected 
-                          ? 'bg-sky-500/10 border-sky-500/50 text-sky-400 shadow-md shadow-sky-500/5' 
-                          : 'bg-slate-900/60 border-slate-800 hover:border-slate-700 text-slate-300 hover:bg-slate-900'
-                      } ${isDragging ? 'opacity-50' : 'opacity-100'} ${
-                        isDragOver ? 'border-t-2 border-t-sky-500' : ''
-                      }`}
-                    >
-                      <div className="cursor-move text-slate-500 hover:text-slate-300 p-1">
-                        <GripVertical size={14} />
-                      </div>
-                      <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-slate-950/80 border border-slate-800 text-slate-400">
-                        {getIcon(layer.type)}
-                      </div>
-                      <span className="text-xs font-bold truncate flex-1">{getName(layer.type)}</span>
-                      
-                      <div className="flex items-center gap-1">
-                        <button 
-                          onClick={(e) => { 
-                            e.stopPropagation(); 
-                            removeWidget(layer.i); 
-                          }}
-                          className="p-1.5 hover:bg-rose-500/10 text-slate-500 hover:text-rose-500 rounded-lg transition-colors"
-                          title="Excluir Camada"
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                        {isSelected && <div className="w-2 h-2 rounded-full bg-sky-500 animate-pulse"></div>}
-                      </div>
-                    </div>
-                  );
-                })}
-              {currentBroadcast.page.layout.length === 0 && (
-                <div className="text-center p-6 border border-dashed border-slate-800 rounded-xl text-slate-500 text-xs">
-                  Nenhuma camada nesta cena.
-                </div>
-              )}
-            </div>
-            
-            {currentBroadcast.page.layout.length > 0 && (
-              <p className="text-[10px] text-slate-500 mt-4 text-center border-t border-slate-800 pt-3">
-                💡 Arraste as camadas usando o indicador de arrastar para alterar a ordem de sobreposição (z-index).
-              </p>
+            {currentBroadcast?.page?.layout?.length === 0 && (
+              <div className="text-center p-6 border border-dashed border-slate-800 rounded-xl text-slate-500 text-xs">
+                Nenhuma camada nesta cena.
+              </div>
             )}
           </div>
-        </div>
-      )}
+          
+          {currentBroadcast?.page && currentBroadcast.page.layout.length > 0 && (
+            <p className="text-[10px] text-slate-500 mt-4 text-center border-t border-slate-800 pt-3">
+              💡 Arraste as camadas usando o indicador de arrastar para alterar a ordem de sobreposição (z-index).
+            </p>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Background Animation Selection Modal */}
-      {showBgAnimModal && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-slate-900 border border-slate-700 p-6 rounded-xl shadow-2xl max-w-2xl w-full mx-4 animate-in zoom-in-95 duration-200 max-h-[80vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                <MonitorPlay className="text-sky-500" size={20} /> Escolher Fundo Animado
-              </h3>
-              <button onClick={() => setShowBgAnimModal(false)} className="text-slate-500 hover:text-white transition-colors">
-                <X size={24} />
-              </button>
-            </div>
-            
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-              {[
-                { id: '', label: 'Nenhum', desc: 'Remover animação' },
-                { id: 'auto-weather', label: 'Automático (Clima)', desc: 'Muda com o tempo' },
-                { id: 'gradient-flow', label: 'Fluxo Gradiente', desc: 'Suave e colorido' },
-                { id: 'clouds', label: 'Céu e Nuvens', desc: 'Calmo e relaxante' },
-                { id: 'rain', label: 'Chuva Digital', desc: 'Dark mode com chuva' },
-                { id: 'snow', label: 'Neve Caindo', desc: 'Inverno suave' },
-                { id: 'fire', label: 'Chamas', desc: 'Intenso e quente' },
-                { id: 'tech-grid', label: 'Grid Tech', desc: 'Futurista e técnico' },
-                { id: 'pulse-red', label: 'Alerta Vermelho', desc: 'Para avisos urgentes' },
-                { id: 'pulse-blue', label: 'Pulso Azul', desc: 'Tecnológico suave' },
-                { id: 'pulse-green', label: 'Pulso Verde', desc: 'Status positivo' },
-                { id: 'aurora', label: 'Aurora Boreal', desc: 'Místico e elegante' },
-              ].map((option) => (
-                <button
-                  key={option.id}
-                  onClick={() => {
-                    updateActivePage({
-                      backgroundAnimation: option.id as any,
-                      backgroundImage: '',
-                      backgroundVideoUrl: ''
-                    });
-                    setShowBgAnimModal(false);
-                  }}
-                  className={`group relative overflow-hidden rounded-xl border-2 transition-all h-32 flex flex-col items-center justify-center p-4 ${
-                    (currentBroadcast?.page?.backgroundAnimation || '') === option.id 
-                    ? 'border-sky-500 ring-2 ring-sky-500/20' 
-                    : 'border-slate-800 hover:border-slate-600 hover:scale-[1.02]'
-                  }`}
-                >
-                  <div className={`absolute inset-0 z-0 opacity-50 group-hover:opacity-80 transition-opacity ${getBackgroundAnimationClass(option.id)}`}></div>
-                  
-                  <div className="relative z-10 text-center">
-                    <span className="block font-bold text-white text-sm drop-shadow-md mb-1">{option.label}</span>
-                    <span className="block text-[10px] text-slate-300 drop-shadow-md">{option.desc}</span>
+      <Dialog open={showBgAnimModal} onOpenChange={setShowBgAnimModal}>
+        <DialogContent className="max-w-2xl bg-slate-900 border border-slate-700 p-6 shadow-2xl max-h-[80vh] overflow-y-auto text-slate-100">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-bold text-white flex items-center gap-2">
+              <MonitorPlay className="text-sky-500" size={20} /> Escolher Fundo Animado
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-4">
+            {[
+              { id: '', label: 'Nenhum', desc: 'Remover animação' },
+              { id: 'auto-weather', label: 'Automático (Clima)', desc: 'Muda com o tempo' },
+              { id: 'gradient-flow', label: 'Fluxo Gradiente', desc: 'Suave e colorido' },
+              { id: 'clouds', label: 'Céu e Nuvens', desc: 'Calmo e relaxante' },
+              { id: 'rain', label: 'Chuva Digital', desc: 'Dark mode com chuva' },
+              { id: 'snow', label: 'Neve Caindo', desc: 'Inverno suave' },
+              { id: 'fire', label: 'Chamas', desc: 'Intenso e quente' },
+              { id: 'tech-grid', label: 'Grid Tech', desc: 'Futurista e técnico' },
+              { id: 'pulse-red', label: 'Alerta Vermelho', desc: 'Para avisos urgentes' },
+              { id: 'pulse-blue', label: 'Pulso Azul', desc: 'Tecnológico suave' },
+              { id: 'pulse-green', label: 'Pulso Verde', desc: 'Status positivo' },
+              { id: 'aurora', label: 'Aurora Boreal', desc: 'Místico e elegante' },
+            ].map((option) => (
+              <button
+                key={option.id}
+                onClick={() => {
+                  updateActivePage({
+                    backgroundAnimation: option.id as any,
+                    backgroundImage: '',
+                    backgroundVideoUrl: ''
+                  });
+                  setShowBgAnimModal(false);
+                }}
+                className={`group relative overflow-hidden rounded-xl border-2 transition-all h-32 flex flex-col items-center justify-center p-4 cursor-pointer ${
+                  (currentBroadcast?.page?.backgroundAnimation || '') === option.id 
+                  ? 'border-sky-500 ring-2 ring-sky-500/20' 
+                  : 'border-slate-800 hover:border-slate-600 hover:scale-[1.02]'
+                }`}
+              >
+                <div className={`absolute inset-0 z-0 opacity-50 group-hover:opacity-80 transition-opacity ${getBackgroundAnimationClass(option.id)}`}></div>
+                
+                <div className="relative z-10 text-center">
+                  <span className="block font-bold text-white text-sm drop-shadow-md mb-1">{option.label}</span>
+                  <span className="block text-[10px] text-slate-300 drop-shadow-md">{option.desc}</span>
+                </div>
+                
+                {(currentBroadcast?.page?.backgroundAnimation || '') === option.id && (
+                  <div className="absolute top-2 right-2 z-20 bg-sky-500 text-black rounded-full p-1 shadow-lg">
+                    <CheckCircle2 size={12} strokeWidth={3} />
                   </div>
-                  
-                  {(currentBroadcast?.page?.backgroundAnimation || '') === option.id && (
-                    <div className="absolute top-2 right-2 z-20 bg-sky-500 text-black rounded-full p-1 shadow-lg">
-                      <CheckCircle2 size={12} strokeWidth={3} />
-                    </div>
-                  )}
-                </button>
-              ))}
-            </div>
+                )}
+              </button>
+            ))}
           </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
 
       {/* Delete Confirmation Modal */}
-      {isClearingScene && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-slate-900 border border-slate-700 p-6 rounded-xl shadow-2xl max-w-sm w-full mx-4 animate-in zoom-in-95 duration-200">
-            <h3 className="text-lg font-bold text-white mb-2">Limpar Todos os Widgets?</h3>
-            <p className="text-slate-400 text-sm mb-6">Todos os widgets desta cena serão removidos permanentemente. Esta ação não pode ser desfeita.</p>
-            <div className="flex justify-end gap-3">
-              <button 
-                onClick={() => setIsClearingScene(false)}
-                className="px-4 py-2 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors text-sm font-medium"
-              >
-                Cancelar
-              </button>
-              <button 
-                onClick={clearAllWidgets}
-                className="px-4 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-white transition-colors text-sm font-bold shadow-lg shadow-rose-900/20"
-              >
-                Sim, Limpar Tudo
-              </button>
-            </div>
+      <Dialog open={isClearingScene} onOpenChange={setIsClearingScene}>
+        <DialogContent className="max-w-sm bg-slate-900 border border-slate-700 p-6 shadow-2xl text-slate-100">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-bold text-white mb-2">Limpar Todos os Widgets?</DialogTitle>
+            <DialogDescription className="text-slate-400 text-sm">
+              Todos os widgets desta cena serão removidos permanentemente. Esta ação não pode ser desfeita.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-3 mt-4">
+            <button 
+              onClick={() => setIsClearingScene(false)}
+              className="px-4 py-2 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors text-sm font-medium cursor-pointer"
+            >
+              Cancelar
+            </button>
+            <button 
+              onClick={clearAllWidgets}
+              className="px-4 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-white transition-colors text-sm font-bold shadow-lg shadow-rose-900/20 cursor-pointer"
+            >
+              Sim, Limpar Tudo
+            </button>
           </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
 
       {mediaLibraryConfig?.isOpen && (
         <MediaLibrary 
@@ -1698,42 +1699,54 @@ const Scheduler: React.FC = () => {
   );
 };
 
-const WidgetTool = ({ icon, label, description, onClick, onHover }: any) => (
-  <button 
-    onClick={onClick}
-    onMouseEnter={() => onHover && onHover(description)}
-    onMouseLeave={() => onHover && onHover('')}
-    className="relative flex flex-col items-center justify-center p-1 bg-[#111827] border border-slate-800/60 rounded-lg hover:bg-[#0ea5e9]/10 hover:border-[#0ea5e9] hover:shadow-[0_0_12px_rgba(14,165,233,0.15)] active:scale-95 transition-all group w-full cursor-pointer py-1.5"
-  >
-    {/* Tiny Info Icon in Corner */}
-    <div className="absolute top-1 right-1 opacity-20 group-hover:opacity-100 transition-opacity text-slate-400 group-hover:text-[#0ea5e9]">
-      <Info size={8} />
-    </div>
+const WidgetTool = ({ icon, label, description, onClick, onHover, tooltipAlign = 'center' }: any) => {
+  const alignClass = 
+    tooltipAlign === 'left' ? 'left-0 items-start' :
+    tooltipAlign === 'right' ? 'right-0 items-end' :
+    'left-1/2 -translate-x-1/2 items-center';
 
-    {/* Elegant Pure CSS Tooltip */}
-    <div className="absolute bottom-full mb-2 hidden group-hover:flex flex-col items-center pointer-events-none z-50 animate-in fade-in zoom-in-95 duration-200">
-      <div className="bg-slate-950 border border-slate-800 text-slate-200 text-[9px] font-bold py-1.5 px-3 rounded-lg shadow-xl w-48 text-center leading-relaxed">
-        {description}
+  const arrowClass = 
+    tooltipAlign === 'left' ? 'left-8' :
+    tooltipAlign === 'right' ? 'right-8' :
+    '';
+
+  return (
+    <button 
+      onClick={onClick}
+      onMouseEnter={() => onHover && onHover(description)}
+      onMouseLeave={() => onHover && onHover('')}
+      className="relative flex flex-col items-center justify-center p-1 bg-[#111827] border border-slate-800/60 rounded-lg hover:bg-[#0ea5e9]/10 hover:border-[#0ea5e9] hover:shadow-[0_0_12px_rgba(14,165,233,0.15)] active:scale-95 transition-all group w-full cursor-pointer py-1.5"
+    >
+      {/* Tiny Info Icon in Corner */}
+      <div className="absolute top-1 right-1 opacity-20 group-hover:opacity-100 transition-opacity text-slate-400 group-hover:text-[#0ea5e9]">
+        <Info size={8} />
       </div>
-      <div className="w-2 h-2 bg-slate-950 border-r border-b border-slate-800 rotate-45 -mt-1"></div>
-    </div>
 
-    {/* Smaller Icon Container with LESS Spacing */}
-    <div className="text-slate-300 group-hover:text-[#0ea5e9] mb-0.5 transition-colors drop-shadow-sm flex items-center justify-center h-8 w-8">
-      {typeof icon === 'string' ? (
-        <img 
-          src={icon} 
-          alt={label} 
-          className="w-7 h-7 object-contain group-hover:scale-110 transition-transform duration-300 filter drop-shadow-[0_0_6px_rgba(14,165,233,0.15)]" 
-        />
-      ) : (
-        icon
-      )}
-    </div>
-    <span className="text-[8px] font-bold text-slate-400 group-hover:text-white uppercase tracking-wider transition-colors text-center truncate w-full px-0.5">
-      {label}
-    </span>
-  </button>
-);
+      {/* Elegant Pure CSS Tooltip */}
+      <div className={`absolute bottom-full mb-2 hidden group-hover:flex flex-col pointer-events-none z-50 animate-in fade-in zoom-in-95 duration-200 ${alignClass}`}>
+        <div className="bg-slate-950 border border-slate-800 text-slate-200 text-[9px] font-bold py-1.5 px-3 rounded-lg shadow-xl w-48 text-center leading-relaxed">
+          {description}
+        </div>
+        <div className={`w-2 h-2 bg-slate-950 border-r border-b border-slate-800 rotate-45 -mt-1 ${arrowClass}`}></div>
+      </div>
+
+      {/* Smaller Icon Container with LESS Spacing */}
+      <div className="text-slate-300 group-hover:text-[#0ea5e9] mb-0.5 transition-colors drop-shadow-sm flex items-center justify-center h-8 w-8">
+        {typeof icon === 'string' ? (
+          <img 
+            src={icon} 
+            alt={label} 
+            className="w-7 h-7 object-contain group-hover:scale-110 transition-transform duration-300 filter drop-shadow-[0_0_6px_rgba(14,165,233,0.15)]" 
+          />
+        ) : (
+          icon
+        )}
+      </div>
+      <span className="text-[8px] font-bold text-slate-400 group-hover:text-white uppercase tracking-wider transition-colors text-center truncate w-full px-0.5">
+        {label}
+      </span>
+    </button>
+  );
+};
 
 export default Scheduler;

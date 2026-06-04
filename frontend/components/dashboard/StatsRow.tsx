@@ -26,31 +26,35 @@ export const StatsRow: React.FC<StatsRowProps> = ({ displays, devices }) => {
     {
       label: 'Total de Telas',
       value: totalDisplays,
-      icon: <Monitor className="text-accent size-5" />,
-      glowColor: 'rgba(56, 189, 248, 0.15)',
+      color: '#0ea5e9',
+      glowRgb: '14, 165, 233',
+      icon: <Monitor className="size-4 text-[#0ea5e9]" />,
     },
     {
       label: 'Telas Online',
       value: onlineDisplays,
-      icon: <Wifi className="text-success size-5" />,
-      glowColor: 'rgba(52, 211, 153, 0.15)',
+      color: '#22c55e',
+      glowRgb: '34, 197, 94',
+      icon: <Wifi className="size-4 text-[#22c55e]" />,
     },
     {
       label: 'Telas Offline',
       value: offlineDisplays,
-      icon: <WifiOff className="text-danger size-5" />,
-      glowColor: 'rgba(248, 113, 113, 0.15)',
+      color: '#ef4444',
+      glowRgb: '239, 68, 68',
+      icon: <WifiOff className="size-4 text-[#ef4444]" />,
     },
     {
       label: 'TVs Vinculadas',
       value: totalDevices,
-      icon: <Tv className="text-violet size-5" />,
-      glowColor: 'rgba(232, 121, 249, 0.15)',
+      color: '#a855f7',
+      glowRgb: '168, 85, 247',
+      icon: <Tv className="size-4 text-[#a855f7]" />,
     },
   ];
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8 relative z-10">
+    <div className="grid grid-cols-[repeat(4,1fr)] max-[1050px]:grid-cols-2 gap-[8px] mt-[16px] relative z-10 mb-8">
       {stats.map((stat, i) => (
         <motion.div
           key={i}
@@ -58,20 +62,52 @@ export const StatsRow: React.FC<StatsRowProps> = ({ displays, devices }) => {
           whileHover={{ y: -4 }}
           transition={{ type: 'spring', stiffness: 300, damping: 20 }}
         >
-          <Card className="border border-border bg-surface backdrop-blur-md overflow-hidden relative group hover:border-accent-2/30 transition-all duration-300">
+          <Card 
+            className="relative group transition-all duration-300 overflow-hidden"
+            style={{
+              background: 'var(--color-surface, rgba(255,255,255,0.025))',
+              border: '1px solid var(--color-border, rgba(255,255,255,0.07))',
+              borderRadius: '10px',
+            }}
+          >
+            {/* Top color bar */}
+            <div 
+              className="absolute top-0 left-0 right-0 h-[2px]" 
+              style={{ backgroundColor: stat.color }}
+            />
+
             {/* Subtle background glow on hover */}
             <div 
               className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
               style={{
-                background: `radial-gradient(circle at 100% 0%, ${stat.glowColor} 0%, transparent 60%)`
+                background: `radial-gradient(circle at 100% 0%, rgba(${stat.glowRgb}, 0.15), transparent 60%)`
               }}
             />
-            <CardContent className="p-5 flex items-center justify-between">
-              <div className="space-y-1">
-                <p className="text-xs font-black text-text-muted uppercase tracking-wider">{stat.label}</p>
-                <h3 className="text-3xl font-black text-text tracking-tight">{stat.value}</h3>
+
+            <CardContent 
+              className="flex items-center justify-between"
+              style={{ padding: '10px 14px' }}
+            >
+              <div className="space-y-0.5">
+                <p 
+                  className="font-extrabold uppercase tracking-[0.12em]"
+                  style={{ fontSize: '8.5px', color: 'var(--txt3)' }}
+                >
+                  {stat.label}
+                </p>
+                <h3 
+                  className="font-extrabold tracking-tight"
+                  style={{ fontSize: '20px', color: 'var(--txt)' }}
+                >
+                  {stat.value}
+                </h3>
               </div>
-              <div className="p-3 rounded-xl bg-gray-950/40 border border-white/5 group-hover:border-white/10 transition-colors">
+              <div 
+                className="w-[30px] h-[30px] rounded-[8px] flex items-center justify-center border border-white/5 group-hover:border-white/10 transition-colors"
+                style={{
+                  backgroundColor: `rgba(${stat.glowRgb}, 0.1)`,
+                }}
+              >
                 {stat.icon}
               </div>
             </CardContent>

@@ -76,38 +76,43 @@ export const AccountSettingsModal: React.FC<AccountSettingsModalProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-w-lg border border-border bg-[#151926]/95 backdrop-blur-md p-0 overflow-hidden shadow-2xl rounded-2xl flex flex-col max-h-[90vh] animate-in fade-in zoom-in-95 duration-200">
-        <DialogHeader className="p-6 border-b border-border bg-gray-950/20 flex flex-row items-center justify-between">
-          <DialogTitle className="font-black text-lg text-text flex items-center gap-2">
-            <Settings className="text-accent" size={20} /> Configurações de Conta
-          </DialogTitle>
+      <DialogContent 
+        showCloseButton={false}
+        className="sm:max-w-lg max-w-lg max-h-[90vh] overflow-y-auto flex flex-col"
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between p-5 border-b border-white/10">
+          <h2 className="font-bold text-lg flex items-center gap-2" style={{ color: 'var(--color-text)' }}>
+            <Settings className="text-[#38bdf8]" size={20} /> Configurações de Conta
+          </h2>
           <DialogClose asChild>
-            <Button variant="ghost" size="icon" className="size-8 text-text-muted hover:text-danger rounded-lg">
+            <Button variant="ghost" size="icon" className="size-8 rounded-lg" style={{ color: 'var(--color-text-muted)' }}>
               <X size={18} />
             </Button>
           </DialogClose>
-        </DialogHeader>
+        </div>
 
-        <div className="p-6 flex-1 overflow-y-auto space-y-5">
+        {/* Body */}
+        <div className="p-5 flex-1 min-h-0 overflow-y-auto space-y-5">
           {/* Notifications */}
           {accountError && (
-            <div className="bg-danger/10 border border-danger/25 rounded-xl p-3.5 flex items-start gap-2.5">
-              <XCircle className="text-danger shrink-0 mt-0.5" size={16} />
-              <p className="text-danger text-xs leading-relaxed font-bold">{accountError}</p>
+            <div className="rounded-xl p-3.5 flex items-start gap-2.5" style={{ background: 'rgba(248,113,113,0.1)', border: '1px solid rgba(248,113,113,0.25)' }}>
+              <XCircle className="text-[#f87171] shrink-0 mt-0.5" size={16} />
+              <p className="text-[#f87171] text-xs leading-relaxed font-bold">{accountError}</p>
             </div>
           )}
           {accountSuccess && (
-            <div className="bg-success/10 border border-success/25 rounded-xl p-3.5 flex items-start gap-2.5">
-              <CheckCircle className="text-success shrink-0 mt-0.5" size={16} />
-              <p className="text-success text-xs leading-relaxed font-bold">{accountSuccess}</p>
+            <div className="rounded-xl p-3.5 flex items-start gap-2.5" style={{ background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.25)' }}>
+              <CheckCircle className="text-[#34d399] shrink-0 mt-0.5" size={16} />
+              <p className="text-[#34d399] text-xs leading-relaxed font-bold">{accountSuccess}</p>
             </div>
           )}
 
           {/* User Profile Card */}
-          <div className="bg-gray-950/40 p-5 rounded-xl border border-border space-y-3">
-            <p className="text-[10px] font-black text-text-muted uppercase tracking-wider pl-0.5">Perfil do Usuário</p>
+          <div className="p-5 rounded-xl space-y-3" style={{ background: 'rgba(0,0,0,0.25)', border: '1px solid var(--color-border)' }}>
+            <p className="text-[10px] font-bold uppercase tracking-wider pl-0.5" style={{ color: 'var(--color-text-muted)' }}>Perfil do Usuário</p>
             <div className="flex justify-between items-center text-xs">
-              <span className="text-text-muted">Nome de Exibição:</span>
+              <span style={{ color: 'var(--color-text-muted)' }}>Nome de Exibição:</span>
               {isEditingName ? (
                 <div className="flex items-center gap-1.5">
                   <Input
@@ -119,14 +124,15 @@ export const AccountSettingsModal: React.FC<AccountSettingsModalProps> = ({
                       if (e.key === 'Enter') onUpdateName(); 
                       if (e.key === 'Escape') setIsEditingName(false); 
                     }}
-                    className="bg-gray-950/60 border-accent/50 text-text w-36 h-8 rounded-lg text-xs"
+                    className="w-36 h-8 rounded-lg text-xs"
+                    style={{ background: 'rgba(0,0,0,0.3)', borderColor: 'rgba(56,189,248,0.3)', color: 'var(--color-text)' }}
                   />
                   <Button
                     size="icon"
                     variant="ghost"
                     onClick={onUpdateName}
                     disabled={accountActionLoading}
-                    className="size-7 text-success hover:bg-success/10 rounded-md"
+                    className="size-7 text-[#34d399] hover:bg-[#34d399]/10 rounded-md"
                     title="Salvar"
                   >
                     <Check size={14} />
@@ -138,7 +144,8 @@ export const AccountSettingsModal: React.FC<AccountSettingsModalProps> = ({
                       setIsEditingName(false); 
                       setEditName(currentUser.name || currentUser.username); 
                     }}
-                    className="size-7 text-text-muted hover:bg-gray-950 rounded-md"
+                    className="size-7 rounded-md"
+                    style={{ color: 'var(--color-text-muted)' }}
                     title="Cancelar"
                   >
                     <X size={12} />
@@ -146,7 +153,7 @@ export const AccountSettingsModal: React.FC<AccountSettingsModalProps> = ({
                 </div>
               ) : (
                 <div className="flex items-center gap-1.5">
-                  <span className="font-bold text-text">{currentUser.name || currentUser.username}</span>
+                  <span className="font-bold" style={{ color: 'var(--color-text)' }}>{currentUser.name || currentUser.username}</span>
                   <Button
                     size="icon"
                     variant="ghost"
@@ -154,7 +161,8 @@ export const AccountSettingsModal: React.FC<AccountSettingsModalProps> = ({
                       setEditName(currentUser.name || currentUser.username); 
                       setIsEditingName(true); 
                     }}
-                    className="size-6 text-text-muted hover:text-accent rounded-md"
+                    className="size-6 hover:text-[#38bdf8] rounded-md"
+                    style={{ color: 'var(--color-text-muted)' }}
                     title="Editar nome"
                   >
                     <Pencil size={12} />
@@ -163,24 +171,24 @@ export const AccountSettingsModal: React.FC<AccountSettingsModalProps> = ({
               )}
             </div>
             <div className="flex justify-between items-center text-xs">
-              <span className="text-text-muted">Permissão:</span>
-              <span className="font-mono text-[10px] px-2.5 py-0.5 rounded bg-gray-900 border border-border text-text-muted uppercase tracking-wider font-bold">
+              <span style={{ color: 'var(--color-text-muted)' }}>Permissão:</span>
+              <span className="font-mono text-[10px] px-2.5 py-0.5 rounded uppercase tracking-wider font-bold" style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid var(--color-border)', color: 'var(--color-text-muted)' }}>
                 {currentUser.role === 'master' ? 'Owner (Dono)' : currentUser.role === 'admin' ? 'Administrador' : 'Operador'}
               </span>
             </div>
             <div className="flex justify-between items-center text-xs">
-              <span className="text-text-muted">E-mail Cadastrado:</span>
-              <span className="font-bold text-text truncate max-w-[200px]">{currentUser.email || 'Nenhum'}</span>
+              <span style={{ color: 'var(--color-text-muted)' }}>E-mail Cadastrado:</span>
+              <span className="font-bold truncate max-w-[200px]" style={{ color: 'var(--color-text)' }}>{currentUser.email || 'Nenhum'}</span>
             </div>
           </div>
 
           {/* Master Only: Configure Master Email */}
           {currentUser.role === 'master' && (
-            <form onSubmit={onUpdateEmail} className="space-y-3.5 pt-4 border-t border-border/60">
-              <h4 className="text-xs font-black text-accent uppercase tracking-wider flex items-center gap-1.5 pl-0.5">
+            <form onSubmit={onUpdateEmail} className="space-y-3.5 pt-4" style={{ borderTop: '1px solid var(--color-border)' }}>
+              <h4 className="text-xs font-bold text-[#38bdf8] uppercase tracking-wider flex items-center gap-1.5 pl-0.5">
                 <Mail size={14} /> Configurar E-mail Principal do Sistema
               </h4>
-              <p className="text-[11px] text-text-muted leading-relaxed pl-0.5">
+              <p className="text-[11px] leading-relaxed pl-0.5" style={{ color: 'var(--color-text-muted)' }}>
                 Como proprietário do sistema, você pode atualizar o endereço de e-mail administrativo principal.
               </p>
               <div className="flex gap-2.5">
@@ -189,14 +197,15 @@ export const AccountSettingsModal: React.FC<AccountSettingsModalProps> = ({
                   required
                   value={accountEmail}
                   onChange={(e) => setAccountEmail(e.target.value)}
-                  className="flex-1 bg-gray-950/40 border border-border text-text placeholder:text-text-muted/40 h-10 rounded-xl text-xs"
+                  className="flex-1 h-10 rounded-xl text-xs"
+                  style={{ background: 'rgba(0,0,0,0.25)', border: '1px solid var(--color-border)', color: 'var(--color-text)' }}
                   placeholder="novo-email@exemplo.com"
                 />
                 <Button
                   type="submit"
                   variant="brand"
                   disabled={accountActionLoading}
-                  className="h-10 px-4 rounded-xl text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all"
+                  className="h-10 px-4 rounded-xl text-xs font-bold uppercase tracking-wider whitespace-nowrap"
                 >
                   {accountActionLoading ? 'Salvando...' : 'Atualizar'}
                 </Button>
@@ -205,43 +214,46 @@ export const AccountSettingsModal: React.FC<AccountSettingsModalProps> = ({
           )}
 
           {/* Change Password */}
-          <form onSubmit={onChangePassword} className="space-y-4 pt-4 border-t border-border/60">
-            <h4 className="text-xs font-black text-text uppercase tracking-wider flex items-center gap-1.5 pl-0.5">
-              <KeyRound size={14} className="text-accent" /> Alterar Senha de Acesso
+          <form onSubmit={onChangePassword} className="space-y-4 pt-4" style={{ borderTop: '1px solid var(--color-border)' }}>
+            <h4 className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 pl-0.5" style={{ color: 'var(--color-text)' }}>
+              <KeyRound size={14} className="text-[#38bdf8]" /> Alterar Senha de Acesso
             </h4>
 
             <div className="space-y-3">
               <div className="space-y-1.5">
-                <label className="text-[10px] font-black text-text-muted uppercase block pl-0.5">Senha Atual</label>
+                <label className="text-[10px] font-bold uppercase block pl-0.5" style={{ color: 'var(--color-text-muted)' }}>Senha Atual</label>
                 <Input
                   type="password"
                   required
                   value={currentPassword}
                   onChange={(e) => setCurrentPassword(e.target.value)}
-                  className="w-full bg-gray-950/40 border border-border text-text placeholder:text-text-muted/40 h-10 rounded-xl text-xs"
+                  className="w-full h-10 rounded-xl text-xs"
+                  style={{ background: 'rgba(0,0,0,0.25)', border: '1px solid var(--color-border)', color: 'var(--color-text)' }}
                   placeholder="••••••••"
                 />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-text-muted uppercase block pl-0.5">Nova Senha</label>
+                  <label className="text-[10px] font-bold uppercase block pl-0.5" style={{ color: 'var(--color-text-muted)' }}>Nova Senha</label>
                   <Input
                     type="password"
                     required
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    className="w-full bg-gray-950/40 border border-border text-text placeholder:text-text-muted/40 h-10 rounded-xl text-xs"
+                    className="w-full h-10 rounded-xl text-xs"
+                    style={{ background: 'rgba(0,0,0,0.25)', border: '1px solid var(--color-border)', color: 'var(--color-text)' }}
                     placeholder="Mín. 6 caracteres"
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-text-muted uppercase block pl-0.5">Confirmar Nova Senha</label>
+                  <label className="text-[10px] font-bold uppercase block pl-0.5" style={{ color: 'var(--color-text-muted)' }}>Confirmar Nova Senha</label>
                   <Input
                     type="password"
                     required
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full bg-gray-950/40 border border-border text-text placeholder:text-text-muted/40 h-10 rounded-xl text-xs"
+                    className="w-full h-10 rounded-xl text-xs"
+                    style={{ background: 'rgba(0,0,0,0.25)', border: '1px solid var(--color-border)', color: 'var(--color-text)' }}
                     placeholder="••••••••"
                   />
                 </div>
@@ -254,7 +266,8 @@ export const AccountSettingsModal: React.FC<AccountSettingsModalProps> = ({
                 variant="ghost"
                 onClick={onSendResetEmail}
                 disabled={accountActionLoading || !smtpConfigured}
-                className="w-full sm:w-auto text-text-muted hover:text-accent text-[11px] font-black uppercase tracking-wider flex items-center gap-1.5 bg-transparent p-0 justify-start hover:bg-transparent"
+                className="w-full sm:w-auto text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5 bg-transparent p-0 justify-start hover:bg-transparent hover:text-[#38bdf8]"
+                style={{ color: 'var(--color-text-muted)' }}
                 title={!smtpConfigured ? 'Configure o SMTP para redefinir por e-mail' : ''}
               >
                 <Mail size={12} /> Solicitar redefinição por e-mail
@@ -263,7 +276,7 @@ export const AccountSettingsModal: React.FC<AccountSettingsModalProps> = ({
                 type="submit"
                 variant="brand"
                 disabled={accountActionLoading}
-                className="w-full sm:w-auto px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all"
+                className="w-full sm:w-auto px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider"
               >
                 {accountActionLoading ? 'Salvando...' : 'Salvar Nova Senha'}
               </Button>
@@ -271,12 +284,14 @@ export const AccountSettingsModal: React.FC<AccountSettingsModalProps> = ({
           </form>
         </div>
 
-        <div className="bg-gray-950/20 p-4 border-t border-border flex justify-end">
+        {/* Footer */}
+        <div className="p-4 flex justify-end" style={{ borderTop: '1px solid rgba(255,255,255,0.1)' }}>
           <Button
             type="button"
             variant="ghost"
             onClick={onClose}
-            className="px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-gray-950/40"
+            className="px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider"
+            style={{ color: 'var(--color-text-muted)' }}
           >
             Fechar
           </Button>
