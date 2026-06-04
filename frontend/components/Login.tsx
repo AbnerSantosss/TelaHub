@@ -5,6 +5,7 @@ import { motion } from 'motion/react';
 import { login } from '../services/storage';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
+import { fadeUp } from '../libs/motion';
 
 // Geometric minimal icon representing a matrix of interconnected screens (Swiss Grid / Signal Orange Theme)
 export const LogoHub: React.FC<{ className?: string; size?: number }> = ({ className = '', size = 48 }) => {
@@ -90,7 +91,7 @@ const Login: React.FC = () => {
   return (
     <div className="min-h-screen flex bg-background text-foreground overflow-hidden font-sans relative">
       {/* Background Mesh Grid (Technical Dot-Grid) */}
-      <div className="absolute inset-0 bg-[radial-gradient(rgba(14,165,233,0.04)_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none z-0"></div>
+      <div className="absolute inset-0 bg-[radial-gradient(rgba(14,165,233,0.03)_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none z-0"></div>
       
       {/* Premium Video Background — Login Only (ABOVE panels, blended) */}
       <div className="absolute inset-0 z-[15] pointer-events-none overflow-hidden">
@@ -108,7 +109,7 @@ const Login: React.FC = () => {
             width: '100%', 
             height: '100%', 
             objectFit: 'cover', 
-            opacity: 0.15,
+            opacity: 0.1,
             mixBlendMode: 'screen'
           }}
         />
@@ -119,7 +120,7 @@ const Login: React.FC = () => {
         
         {/* Upper Header: Logo and Brand Name */}
         <div className="flex items-center gap-3 z-10">
-          <div className="w-12 h-12 bg-background border border-border flex items-center justify-center shadow-md p-1.5">
+          <div className="w-12 h-12 bg-background border border-border flex items-center justify-center shadow-md p-1.5 rounded-lg">
             <LogoHub size={28} />
           </div>
           <span className="text-xl font-black tracking-tight text-foreground uppercase font-sans">
@@ -144,7 +145,7 @@ const Login: React.FC = () => {
           {/* Benefits list */}
           <div className="space-y-5">
             <div className="flex gap-4 items-start">
-              <div className="w-10 h-10 bg-accent/5 border border-accent/10 flex items-center justify-center text-accent shrink-0 mt-0.5">
+              <div className="w-10 h-10 bg-accent/5 border border-accent/10 flex items-center justify-center text-accent shrink-0 mt-0.5 rounded-lg">
                 <Tv size={18} />
               </div>
               <div>
@@ -154,7 +155,7 @@ const Login: React.FC = () => {
             </div>
 
             <div className="flex gap-4 items-start">
-              <div className="w-10 h-10 bg-accent/5 border border-accent/10 flex items-center justify-center text-accent shrink-0 mt-0.5">
+              <div className="w-10 h-10 bg-accent/5 border border-accent/10 flex items-center justify-center text-accent shrink-0 mt-0.5 rounded-lg">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-layout-grid"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
               </div>
               <div>
@@ -164,7 +165,7 @@ const Login: React.FC = () => {
             </div>
 
             <div className="flex gap-4 items-start">
-              <div className="w-10 h-10 bg-emerald-500/5 border border-emerald-500/10 flex items-center justify-center text-emerald-400 shrink-0 mt-0.5">
+              <div className="w-10 h-10 bg-emerald-500/5 border border-emerald-500/10 flex items-center justify-center text-emerald-400 shrink-0 mt-0.5 rounded-lg">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-zap"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
               </div>
               <div>
@@ -268,18 +269,21 @@ const Login: React.FC = () => {
 
       {/* Right Section: Login Form (Full width on mobile, centered; lg and above takes side portion) */}
       <div className="w-full lg:w-[45%] xl:w-[40%] flex items-center justify-center p-6 sm:p-12 relative z-10 bg-background border-l border-border/10 lg:border-border/5">
+        
+        {/* Subtle decorative background glow */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full bg-accent/5 blur-[120px] pointer-events-none z-0"></div>
 
         <motion.div 
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          variants={fadeUp}
+          initial="hidden"
+          animate="show"
           className="w-full max-w-md relative z-10 flex flex-col gap-6"
         >
           
           {/* Logo e Branding */}
-          <div className="flex flex-col items-center animate-in fade-in slide-in-from-top-4 duration-500">
+          <div className="flex flex-col items-center">
             {/* Logo perfeitamente alinhado acima do H1 */}
-            <div className="w-20 h-20 bg-card flex items-center justify-center border border-border mb-4 shadow-md relative p-2.5">
+            <div className="w-20 h-20 bg-card flex items-center justify-center border border-border mb-4 shadow-md relative p-2.5 rounded-xl">
                <LogoHub size={44} />
             </div>
             
@@ -304,7 +308,7 @@ const Login: React.FC = () => {
             </div>
           </div>
 
-          <div className={`bg-gray-800/50 border border-slate-700/50 shadow-2xl p-6 sm:p-8 rounded-2xl transition-all duration-300 ease-out hover:border-sky-500/30 ${!isConfigured ? 'opacity-50 pointer-events-none grayscale' : ''}`}>
+          <div className={`bg-surface/30 backdrop-blur-md border border-border shadow-soft p-6 sm:p-8 rounded-xl transition-all duration-300 ease-out hover:border-accent/20 hover:shadow-lift ${!isConfigured ? 'opacity-50 pointer-events-none grayscale' : ''}`}>
             
             <form onSubmit={handleLogin} className="space-y-5">
               <div className="space-y-1.5">
@@ -314,11 +318,11 @@ const Login: React.FC = () => {
                     type="text" 
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    className="pl-10 text-foreground border-slate-700 bg-gray-900/60 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none h-11 rounded-lg transition-all duration-300 ease-out"
+                    className="pl-10 text-foreground border-border bg-gray-950/40 focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/40 h-11 rounded-xl transition-all duration-300 ease-out"
                     placeholder="Ex: seu.email@exemplo.com"
                     autoComplete="username"
                   />
-                  <User size={16} className="absolute left-3.5 top-3.5 text-muted-foreground group-focus-within:text-sky-400 transition-colors" />
+                  <User size={16} className="absolute left-3.5 top-3.5 text-muted-foreground group-focus-within:text-accent transition-colors" />
                 </div>
               </div>
 
@@ -329,15 +333,15 @@ const Login: React.FC = () => {
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="pl-10 pr-10 text-foreground border-slate-700 bg-gray-900/60 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none h-11 rounded-lg transition-all duration-300 ease-out"
+                    className="pl-10 pr-10 text-foreground border-border bg-gray-950/40 focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/40 h-11 rounded-xl transition-all duration-300 ease-out"
                     placeholder="Digite sua senha"
                     autoComplete="current-password"
                   />
-                  <Lock size={16} className="absolute left-3.5 top-3.5 text-muted-foreground group-focus-within:text-sky-400 transition-colors" />
+                  <Lock size={16} className="absolute left-3.5 top-3.5 text-muted-foreground group-focus-within:text-accent transition-colors" />
                   <button 
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3.5 top-3.5 text-muted-foreground hover:text-sky-400 transition-colors"
+                    className="absolute right-3.5 top-3.5 text-muted-foreground hover:text-accent transition-colors"
                   >
                     {showPassword ? (
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></svg>
@@ -350,7 +354,7 @@ const Login: React.FC = () => {
 
               <div className="flex items-center justify-between pt-1">
                 <label className="flex items-center gap-2 cursor-pointer group select-none">
-                  <div className={`w-4 h-4 rounded-md border flex items-center justify-center transition-all duration-300 ease-out ${rememberMe ? 'bg-sky-500 border-sky-500' : 'border-slate-700 bg-gray-900/60 group-hover:border-sky-400'}`}>
+                  <div className={`w-4 h-4 rounded-md border flex items-center justify-center transition-all duration-300 ease-out ${rememberMe ? 'bg-accent border-accent' : 'border-border bg-gray-950/40 group-hover:border-accent'}`}>
                     {rememberMe && <CheckCircle2 size={10} className="text-white stroke-[4]" />}
                   </div>
                   <input 
@@ -359,14 +363,14 @@ const Login: React.FC = () => {
                     onChange={(e) => setRememberMe(e.target.checked)}
                     className="hidden"
                   />
-                  <span className={`text-xs font-semibold transition-colors duration-300 ease-out ${rememberMe ? 'text-sky-400' : 'text-slate-400 group-hover:text-slate-200'}`}>Lembrar meu usuário</span>
+                  <span className={`text-xs font-semibold transition-colors duration-300 ease-out ${rememberMe ? 'text-accent' : 'text-text-muted group-hover:text-text'}`}>Lembrar meu usuário</span>
                 </label>
                 
-                <button type="button" onClick={() => navigate('/forgot-password')} className="text-xs font-semibold text-slate-400 hover:text-sky-400 transition-colors duration-300 ease-out">Esqueceu a senha?</button>
+                <button type="button" onClick={() => navigate('/forgot-password')} className="text-xs font-semibold text-text-muted hover:text-accent transition-colors duration-300 ease-out">Esqueceu a senha?</button>
               </div>
 
               {error && (
-                <div className="bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs p-3 rounded-lg font-bold text-center animate-in fade-in slide-in-from-top-2 flex flex-col gap-1">
+                <div className="bg-danger/10 border border-danger/25 text-danger text-xs p-3 rounded-xl font-bold text-center animate-in fade-in slide-in-from-top-2 flex flex-col gap-1">
                   <span>{error}</span>
                   {error.includes('incorretos') && (
                     <span className="text-[10px] font-normal opacity-80 block mt-1">
@@ -379,7 +383,8 @@ const Login: React.FC = () => {
               <Button 
                 type="submit" 
                 disabled={loading}
-                className="w-full bg-sky-500 hover:bg-sky-600 text-white font-black py-6 rounded-lg shadow-md hover:shadow-[0_0_20px_rgba(56,189,248,0.4)] transition-all duration-300 ease-out flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed text-xs tracking-wider active:scale-[0.98] border border-white/10 uppercase"
+                variant="brand"
+                className="w-full py-6 rounded-xl hover:shadow-[0_0_20px_rgba(56,189,248,0.3)] transition-all duration-300 ease-out flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed text-xs tracking-wider active:scale-[0.98] border border-white/10 uppercase"
               >
                 {loading ? <Loader2 size={18} className="animate-spin" /> : <LogIn size={18} className="group-hover:translate-x-0.5 transition-transform" />} 
                 {loading ? 'ENTRANDO...' : 'ACESSAR SISTEMA'}

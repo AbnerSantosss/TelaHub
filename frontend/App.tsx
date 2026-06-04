@@ -10,6 +10,7 @@ import ForgotPassword from './components/ForgotPassword';
 import ResetPassword from './components/ResetPassword';
 import { getCurrentUser } from './services/storage';
 import { Loader2 } from 'lucide-react';
+import { Toaster } from './components/ui/sonner';
 
 // Componente para Proteger Rotas
 const ProtectedRoute = ({ children }: { children?: React.ReactNode }) => {
@@ -56,6 +57,7 @@ const App: React.FC = () => {
   return (
     <HashRouter>
       <div className="min-h-screen bg-gray-900 text-slate-100 selection:bg-sky-500/30 selection:text-sky-200">
+        <Toaster closeButton theme="dark" position="top-right" />
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
