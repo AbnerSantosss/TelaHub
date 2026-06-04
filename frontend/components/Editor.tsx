@@ -7,7 +7,8 @@ import {
   Image as ImageIcon, Type, CloudSun, Clock, Calendar, CalendarDays,
   Settings, Layers, Home, Move, Upload, Link as LinkIcon, CheckCircle2,
   Maximize2, Film, Info, Loader2, MonitorPlay, Rss, Globe, Gift, Search, Palette, Map, Layout, MoveHorizontal, GripVertical,
-  FileText, ListTodo, Timer, ClipboardList, Utensils, TrendingUp, Code2, Database, StickyNote, Camera, BookOpen, ChevronDown
+  FileText, ListTodo, Timer, ClipboardList, Utensils, TrendingUp, Code2, Database, StickyNote, Camera, BookOpen, ChevronDown,
+  BarChart3, LayoutDashboard, Sparkles, Aperture
 } from 'lucide-react';
 import { getDisplays, saveDisplay, uploadMedia } from '../services/storage';
 import { Display, Page, WidgetType, LayoutItem } from '../types';
@@ -16,9 +17,9 @@ import {
   LiveClock, WeatherWidget, RssFeed, FullInfoWidget,
   NotesWidget, TodoWidget, CountdownWidget, ChoresWidget, MealPlanWidget,
   MarketWatchWidget, BrowserSnapshotWidget, GoogleDocsWidget, OfficeDocsWidget,
-  PowerBIWidget, EmbedHtmlWidget, AirtableWidget, PdfDocumentWidget,
-  getAlignmentClasses
-} from './Player';
+  PowerBIWidget, EmbedHtmlWidget, AirtableWidget, PdfDocumentWidget
+} from './widgets';
+import { getAlignmentClasses } from './Player';
 import { SizeInput } from './SizeInput';
 import { MediaLibrary } from './MediaLibrary';
 
@@ -657,22 +658,22 @@ const Editor: React.FC = () => {
                       case WidgetType.VIDEO: return <Film size={14} />;
                       case WidgetType.TEXT: return <Type size={14} />;
                       case WidgetType.CLOCK: return <Clock size={14} />;
-                      case WidgetType.CALENDAR: return <Calendar size={14} />;
+                      case WidgetType.CALENDAR: return <CalendarDays size={14} />;
                       case WidgetType.WEATHER: return <CloudSun size={14} />;
-                      case WidgetType.FULL_INFO: return <Layout size={14} />;
+                      case WidgetType.FULL_INFO: return <LayoutDashboard size={14} />;
                       case WidgetType.RSS: return <Rss size={14} />;
                       case WidgetType.IFRAME: return <Globe size={14} />;
-                      case WidgetType.GIF: return <Gift size={14} />;
+                      case WidgetType.GIF: return <Sparkles size={14} />;
                       case WidgetType.NOTES: return <StickyNote size={14} className="text-yellow-400" />;
                       case WidgetType.TODO: return <ListTodo size={14} className="text-emerald-400" />;
                       case WidgetType.COUNTDOWN: return <Timer size={14} className="text-rose-400" />;
                       case WidgetType.CHORES: return <ClipboardList size={14} className="text-cyan-400" />;
                       case WidgetType.MEAL_PLAN: return <Utensils size={14} className="text-amber-400" />;
                       case WidgetType.MARKET_WATCH: return <TrendingUp size={14} className="text-green-400" />;
-                      case WidgetType.BROWSER_SNAPSHOT: return <Camera size={14} className="text-blue-400" />;
+                      case WidgetType.BROWSER_SNAPSHOT: return <Aperture size={14} className="text-blue-400" />;
                       case WidgetType.GOOGLE_DOCS: return <FileText size={14} className="text-cyan-500" />;
                       case WidgetType.OFFICE_DOCS: return <BookOpen size={14} className="text-blue-500" />;
-                      case WidgetType.POWER_BI: return <Layout size={14} className="text-amber-500" />;
+                      case WidgetType.POWER_BI: return <BarChart3 size={14} className="text-amber-500" />;
                       case WidgetType.EMBED_HTML: return <Code2 size={14} className="text-indigo-400" />;
                       case WidgetType.AIRTABLE: return <Database size={14} className="text-rose-500" />;
                       case WidgetType.PDF_DOCUMENT: return <FileText size={14} className="text-red-500" />;
@@ -944,11 +945,11 @@ const Editor: React.FC = () => {
              <div className="mb-2.5">
                <h4 className="text-[9px] font-black text-emerald-400 uppercase tracking-widest mb-1 flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-emerald-400 inline-block"></span>Básicos</h4>
                <div className="grid grid-cols-3 gap-1.5">
-                 <WidgetTool icon="/icons3d/image.png" label="Imagem" description="Exibe imagens de alta qualidade (PNG, JPG, SVG) com ajuste automático ao contêiner." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.IMAGE)} />
-                 <WidgetTool icon="/icons3d/video.png" label="Vídeo" description="Reproduz vídeos locais em looping ou links diretos do YouTube." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.VIDEO)} />
-                 <WidgetTool icon="/icons3d/text.png" label="Texto" description="Adiciona caixas de texto com fontes, cores e tamanhos personalizáveis." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.TEXT)} />
-                 <WidgetTool icon="/icons3d/gif.png" label="GIF" description="Exibe animações divertidas em formato GIF para atrair a atenção do público." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.GIF)} />
-                 <WidgetTool icon="/icons3d/web.png" label="Web" description="Incorpora qualquer site ou página web externa de forma interativa." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.IFRAME)} />
+                 <WidgetTool icon={<ImageIcon size={20} className="text-sky-400" />} label="Imagem" description="Exibe imagens de alta qualidade (PNG, JPG, SVG) com ajuste automático ao contêiner." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.IMAGE)} />
+                 <WidgetTool icon={<Film size={20} className="text-rose-400" />} label="Vídeo" description="Reproduz vídeos locais em looping ou links diretos do YouTube." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.VIDEO)} />
+                 <WidgetTool icon={<Type size={20} className="text-slate-200" />} label="Texto" description="Adiciona caixas de texto com fontes, cores e tamanhos personalizáveis." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.TEXT)} />
+                 <WidgetTool icon={<Sparkles size={20} className="text-fuchsia-400" />} label="GIF" description="Exibe animações divertidas em formato GIF para atrair a atenção do público." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.GIF)} />
+                 <WidgetTool icon={<Globe size={20} className="text-cyan-400" />} label="Web" description="Incorpora qualquer site ou página web externa de forma interativa." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.IFRAME)} />
                </div>
              </div>
 
@@ -956,11 +957,11 @@ const Editor: React.FC = () => {
              <div className="mb-2.5">
                <h4 className="text-[9px] font-black text-cyan-400 uppercase tracking-widest mb-1 flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-cyan-400 inline-block"></span>Utilitários</h4>
                <div className="grid grid-cols-3 gap-1.5">
-                 <WidgetTool icon="/icons3d/clock.png" label="Relógio" description="Mostra um relógio digital sincronizado em tempo real com a cidade escolhida." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.CLOCK)} />
-                 <WidgetTool icon="/icons3d/weather.png" label="Clima" description="Exibe a previsão do tempo e temperatura em tempo real para qualquer cidade." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.WEATHER)} />
-                 <WidgetTool icon="/icons3d/full-info.png" label="Completo" description="Painel integrado de relógio, clima e fundos de alta definição." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.FULL_INFO)} />
-                 <WidgetTool icon="/icons3d/rss.png" label="RSS" description="Exibe feeds de notícias em tempo real de portais de notícias como G1 e CNN." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.RSS)} />
-                 <WidgetTool icon="/icons3d/calendar.png" label="Agenda" description="Integração direta com Google Agenda para exibir eventos e programações." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.CALENDAR)} />
+                 <WidgetTool icon={<Clock size={20} className="text-sky-300" />} label="Relógio" description="Mostra um relógio digital sincronizado em tempo real com a cidade escolhida." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.CLOCK)} />
+                 <WidgetTool icon={<CloudSun size={20} className="text-amber-400" />} label="Clima" description="Exibe a previsão do tempo e temperatura em tempo real para qualquer cidade." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.WEATHER)} />
+                 <WidgetTool icon={<LayoutDashboard size={20} className="text-teal-400" />} label="Completo" description="Painel integrado de relógio, clima e fundos de alta definição." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.FULL_INFO)} />
+                 <WidgetTool icon={<Rss size={20} className="text-orange-400" />} label="RSS" description="Exibe feeds de notícias em tempo real de portais de notícias como G1 e CNN." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.RSS)} />
+                 <WidgetTool icon={<CalendarDays size={20} className="text-rose-300" />} label="Agenda" description="Integração direta com Google Agenda para exibir eventos e programações." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.CALENDAR)} />
                </div>
              </div>
 
@@ -968,11 +969,11 @@ const Editor: React.FC = () => {
              <div className="mb-2.5">
                <h4 className="text-[9px] font-black text-amber-400 uppercase tracking-widest mb-1 flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-amber-400 inline-block"></span>Interativos</h4>
                <div className="grid grid-cols-3 gap-1.5">
-                 <WidgetTool icon="/icons3d/notes.png" label="Notas" description="Mural de notas adesivas com temas neon, glassmorphism e cores vibrantes." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.NOTES)} />
-                 <WidgetTool icon="/icons3d/todo.png" label="Tarefas" description="Lista de tarefas interativa com checkboxes e progresso de conclusão." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.TODO)} />
-                 <WidgetTool icon="/icons3d/countdown.png" label="Contador" description="Cronômetro regressivo para grandes eventos, metas ou datas especiais." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.COUNTDOWN)} />
-                 <WidgetTool icon="/icons3d/chores.png" label="Deveres" description="Quadro semanal de deveres domésticos ou corporativos com responsáveis." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.CHORES)} />
-                 <WidgetTool icon="/icons3d/meal-plan.png" label="Meal Plan" description="Planejador ou cardápio de refeições semanais com slide para os dias." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.MEAL_PLAN)} />
+                 <WidgetTool icon={<StickyNote size={20} className="text-yellow-400" />} label="Notas" description="Mural de notas adesivas com temas neon, glassmorphism e cores vibrantes." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.NOTES)} />
+                 <WidgetTool icon={<ListTodo size={20} className="text-emerald-400" />} label="Tarefas" description="Lista de tarefas interativa com checkboxes e progresso de conclusão." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.TODO)} />
+                 <WidgetTool icon={<Timer size={20} className="text-rose-400" />} label="Contador" description="Cronômetro regressivo para grandes eventos, metas ou datas especiais." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.COUNTDOWN)} />
+                 <WidgetTool icon={<ClipboardList size={20} className="text-cyan-400" />} label="Deveres" description="Quadro semanal de deveres domésticos ou corporativos com responsáveis." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.CHORES)} />
+                 <WidgetTool icon={<Utensils size={20} className="text-amber-400" />} label="Meal Plan" description="Planejador ou cardápio de refeições semanais com slide para os dias." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.MEAL_PLAN)} />
                </div>
              </div>
 
@@ -980,14 +981,14 @@ const Editor: React.FC = () => {
              <div className="mb-2.5">
                <h4 className="text-[9px] font-black text-rose-400 uppercase tracking-widest mb-1 flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-rose-400 inline-block"></span>Integrações</h4>
                <div className="grid grid-cols-3 gap-1.5">
-                 <WidgetTool icon="/icons3d/market.png" label="Bolsa" description="Painel de cotações financeiras de ações e criptomoedas em tempo real." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.MARKET_WATCH)} />
-                 <WidgetTool icon="/icons3d/snapshot.png" label="Snapshot" description="Renderiza capturas estáticas e periódicas de páginas de forma segura." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.BROWSER_SNAPSHOT)} />
-                 <WidgetTool icon="/icons3d/google-docs.png" label="G Docs" description="Incorpora documentos, planilhas ou slides do Google Workspace." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.GOOGLE_DOCS)} />
-                 <WidgetTool icon="/icons3d/office-docs.png" label="Office Docs" description="Exibe planilhas Excel, documentos Word ou slides PowerPoint do Office 365." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.OFFICE_DOCS)} />
-                 <WidgetTool icon="/icons3d/power-bi.png" label="Power BI" description="Exibe painéis interativos e relatórios dinâmicos do Microsoft Power BI." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.POWER_BI)} />
-                 <WidgetTool icon="/icons3d/airtable.png" label="Airtable" description="Exibe visualizações, tabelas ou bases de dados completas do Airtable." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.AIRTABLE)} />
-                 <WidgetTool icon="/icons3d/pdf.png" label="PDF" description="Exibe documentos PDFs e apostilas corporativas página a página." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.PDF_DOCUMENT)} />
-                 <WidgetTool icon="/icons3d/html.png" label="HTML" description="Insira código HTML, CSS ou JS personalizado livremente." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.EMBED_HTML)} />
+                 <WidgetTool icon={<TrendingUp size={20} className="text-green-400" />} label="Bolsa" description="Painel de cotações financeiras de ações e criptomoedas em tempo real." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.MARKET_WATCH)} />
+                 <WidgetTool icon={<Aperture size={20} className="text-blue-400" />} label="Snapshot" description="Renderiza capturas estáticas e periódicas de páginas de forma segura." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.BROWSER_SNAPSHOT)} />
+                 <WidgetTool icon={<FileText size={20} className="text-cyan-500" />} label="G Docs" description="Incorpora documentos, planilhas ou slides do Google Workspace." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.GOOGLE_DOCS)} />
+                 <WidgetTool icon={<BookOpen size={20} className="text-blue-500" />} label="Office Docs" description="Exibe planilhas Excel, documentos Word ou slides PowerPoint do Office 365." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.OFFICE_DOCS)} />
+                 <WidgetTool icon={<BarChart3 size={20} className="text-amber-500" />} label="Power BI" description="Exibe painéis interativos e relatórios dinâmicos do Microsoft Power BI." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.POWER_BI)} />
+                 <WidgetTool icon={<Database size={20} className="text-rose-500" />} label="Airtable" description="Exibe visualizações, tabelas ou bases de dados completas do Airtable." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.AIRTABLE)} />
+                 <WidgetTool icon={<FileText size={20} className="text-red-500" />} label="PDF" description="Exibe documentos PDFs e apostilas corporativas página a página." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.PDF_DOCUMENT)} />
+                 <WidgetTool icon={<Code2 size={20} className="text-indigo-400" />} label="HTML" description="Insira código HTML, CSS ou JS personalizado livremente." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.EMBED_HTML)} />
                </div>
              </div>
              

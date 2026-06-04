@@ -1,0 +1,20 @@
+import React from 'react';
+
+export const LiveClock = React.lazy(() => import('./LiveClock').then(m => ({ default: m.LiveClock })));
+export const RssFeed = React.lazy(() => import('./RssFeed').then(m => ({ default: m.RssFeed })));
+export const WeatherWidget = React.lazy(() => import('./WeatherWidget').then(m => ({ default: m.WeatherWidget })));
+export const FullInfoWidget = React.lazy(() => import('./FullInfoWidget').then(m => ({ default: m.FullInfoWidget })));
+export const NotesWidget = React.lazy(() => import('./NotesWidget').then(m => ({ default: m.NotesWidget })));
+export const TodoWidget = React.lazy(() => import('./TodoWidget').then(m => ({ default: m.TodoWidget })));
+export const CountdownWidget = React.lazy(() => import('./CountdownWidget').then(m => ({ default: m.CountdownWidget })));
+export const ChoresWidget = React.lazy(() => import('./ChoresWidget').then(m => ({ default: m.ChoresWidget })));
+export const MealPlanWidget = React.lazy(() => import('./MealPlanWidget').then(m => ({ default: m.MealPlanWidget })));
+export const MarketWatchWidget = React.lazy(() => import('./MarketWatchWidget').then(m => ({ default: m.MarketWatchWidget })));
+export const BrowserSnapshotWidget = React.lazy(() => import('./BrowserSnapshotWidget').then(m => ({ default: m.BrowserSnapshotWidget })));
+export const EmbedHtmlWidget = React.lazy(() => import('./EmbedHtmlWidget').then(m => ({ default: m.EmbedHtmlWidget })));
+export const GoogleDocsWidget = React.lazy(() => import('./GoogleDocsWidget').then(m => ({ default: m.GoogleDocsWidget })));
+export const OfficeDocsWidget = React.lazy(() => import('./OfficeDocsWidget').then(m => ({ default: m.OfficeDocsWidget })));
+export const PowerBIWidget = React.lazy(() => import('./PowerBIWidget').then(m => ({ default: m.PowerBIWidget })));
+export const AirtableWidget = React.lazy(() => import('./AirtableWidget').then(m => ({ default: m.AirtableWidget })));
+export const PdfDocumentWidget = React.lazy(() => import('./PdfDocumentWidget').then(m => ({ default: m.PdfDocumentWidget })));
+export { getAlignmentClasses } from '../Player';

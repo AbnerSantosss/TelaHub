@@ -14,9 +14,9 @@ import {
   LiveClock, WeatherWidget, RssFeed, FullInfoWidget,
   NotesWidget, TodoWidget, CountdownWidget, ChoresWidget, MealPlanWidget,
   MarketWatchWidget, BrowserSnapshotWidget, GoogleDocsWidget, OfficeDocsWidget,
-  PowerBIWidget, EmbedHtmlWidget, AirtableWidget, PdfDocumentWidget,
-  getAlignmentClasses
-} from './Player';
+  PowerBIWidget, EmbedHtmlWidget, AirtableWidget, PdfDocumentWidget
+} from './widgets';
+import { getAlignmentClasses } from './Player';
 import { SizeInput } from './SizeInput';
 import { MediaLibrary } from './MediaLibrary';
 
