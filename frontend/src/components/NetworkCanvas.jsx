@@ -44,7 +44,7 @@ const NetworkCanvas = () => {
       draw() {
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(148, 163, 184, 0.15)'; // Subtle slate particles on dark bg
+        ctx.fillStyle = 'rgba(148, 163, 184, 0.45)'; // Brighter slate particles
         ctx.fill();
       }
     }
@@ -68,12 +68,12 @@ const NetworkCanvas = () => {
           const dist = Math.sqrt(dx * dx + dy * dy);
 
           if (dist < connectionDist) {
-            const alpha = (1 - dist / connectionDist) * 0.4;
+            const alpha = (1 - dist / connectionDist) * 0.6;
             ctx.beginPath();
             ctx.moveTo(p1.x, p1.y);
             ctx.lineTo(p2.x, p2.y);
-            ctx.strokeStyle = `rgba(51, 65, 85, ${alpha})`; // Slate dark connection lines
-            ctx.lineWidth = 0.65;
+            ctx.strokeStyle = `rgba(100, 116, 139, ${alpha})`; // Lighter slate connection lines
+            ctx.lineWidth = 0.8;
             ctx.stroke();
           }
         }
@@ -83,12 +83,12 @@ const NetworkCanvas = () => {
           const dy = p1.y - mouse.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
           if (dist < connectionDist * 1.5) {
-            const alpha = (1 - dist / (connectionDist * 1.5)) * 0.25;
+            const alpha = (1 - dist / (connectionDist * 1.5)) * 0.7;
             ctx.beginPath();
             ctx.moveTo(p1.x, p1.y);
             ctx.lineTo(mouse.x, mouse.y);
-            ctx.strokeStyle = `rgba(14, 165, 233, ${alpha})`; // Sky Blue responsive connection on hover
-            ctx.lineWidth = 0.85;
+            ctx.strokeStyle = `rgba(56, 189, 248, ${alpha})`; // Bright Sky Blue on hover
+            ctx.lineWidth = 1.2;
             ctx.stroke();
           }
         }
