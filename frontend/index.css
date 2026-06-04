@@ -1,5 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@100..900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Syncopate:wght@400;700&family=Manrope:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap');
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@fontsource-variable/geist";
+
+@custom-variant dark (&:is(.dark *));
 
 @theme {
   --font-sans: 'Geist', 'Outfit', 'Inter', sans-serif;
@@ -38,10 +43,32 @@
   --color-border: hsl(var(--border));
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));
-  
-  --radius-lg: var(--radius);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-sm: calc(var(--radius) - 4px);
+
+  /* Superfícies dark premium */
+  --color-bg:          #0a0d16;
+  --color-surface:     rgba(255,255,255,0.025);
+  --color-surface-2:   rgba(255,255,255,0.045);
+  --color-border-hover:rgba(56,189,248,0.40);
+
+  /* Texto */
+  --color-text:        #e8edf5;
+  --color-text-muted:  #7b8794;
+
+  /* Marca / acentos */
+  --color-accent-2:    #2563eb;   /* azul ação  */
+  --color-success:     #34d399;
+  --color-danger:      #f87171;
+  --color-warning:     #fbbf24;
+  --color-violet:      #e879f9;
+
+  /* Raio (cantos suaves consistentes) */
+  --radius-sm: 0.625rem;  /* 10px */
+  --radius:    0.875rem;  /* 14px */
+  --radius-lg: 1.125rem;  /* 18px */
+  --radius-xl: 1.25rem;   /* 20px */
+
+  /* Easing/Spring */
+  --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .react-grid-layout {
@@ -275,33 +302,33 @@
 
 /* --- Shadcn UI core CSS variables --- */
 :root {
-  --background: 222.2 47.4% 11.2%; /* Deep Navy (#111827) */
-  --foreground: 210 40% 98%;
-  --card: 215.4 25% 17.1%;         /* Slate Suave (#1f2937) */
-  --card-foreground: 210 40% 98%;
-  --popover: 222.2 47.4% 11.2%;
-  --popover-foreground: 210 40% 98%;
-  --primary: 198.6 92.8% 48.4%;    /* Sky Blue (#0ea5e9) */
-  --primary-foreground: 222.2 47.4% 11.2%;
-  --secondary: 217.2 32.6% 17.5%;
-  --secondary-foreground: 210 40% 98%;
-  --muted: 217.2 32.6% 17.5%;
-  --muted-foreground: 215 20.2% 65.1%;
-  --accent: 198.6 92.8% 48.4%;     /* Sky Blue */
-  --accent-foreground: 210 40% 98%;
-  --destructive: 0 62.8% 30.6%;
-  --destructive-foreground: 210 40% 98%;
-  --border: 217.2 32.6% 17.5%;
-  --input: 217.2 32.6% 17.5%;
-  --ring: 198.6 92.8% 48.4%;       /* Sky Blue */
-  --radius: 8px;                    /* Suavizado (rounded-lg) */
+  --background: 225 36.8% 6.1%;
+  --foreground: 216 35.3% 93.3%;
+  --card: 225 30% 8%;
+  --card-foreground: 216 35.3% 93.3%;
+  --popover: 225 30% 6.5%;
+  --popover-foreground: 216 35.3% 93.3%;
+  --primary: 198.6 92.8% 59.6%;
+  --primary-foreground: 225 36.8% 6.1%;
+  --secondary: 225 26.8% 12.7%;
+  --secondary-foreground: 216 35.3% 93.3%;
+  --muted: 225 26.8% 12.7%;
+  --muted-foreground: 212 11% 53%;
+  --accent: 221.2 83.2% 53.3%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 91.3% 70.2%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 225 20% 15%;
+  --input: 225 20% 15%;
+  --ring: 198.6 92.8% 59.6%;
+  --radius: 0.875rem;
 
   /* Mapeamento de compatibilidade para código legante anterior */
-  --brand-bg: #111827;       /* Deep Navy bg-gray-900 */
-  --brand-surface: #1f2937;  /* Slate/Navy bg-gray-800 */
-  --brand-accent: #0ea5e9;   /* Sky Blue */
-  --brand-text-high: #ffffff;/* Branco Puro */
-  --brand-text-sec: #94a3b8; /* Cool Gray (slate-400) */
+  --brand-bg: #0a0d16;
+  --brand-surface: #111420;
+  --brand-accent: #38bdf8;
+  --brand-text-high: #e8edf5;
+  --brand-text-sec: #7b8794;
 }
 
 /* Custom utility overrides */
@@ -428,3 +455,72 @@
   animation-delay: 0.75s;
 }
 
+/* Sombras em camadas (utilitários) */
+.shadow-soft { box-shadow: 0 8px 32px rgba(0,0,0,0.30); }
+.shadow-lift { box-shadow: 0 20px 48px rgba(0,0,0,0.40), 0 0 0 1px rgba(56,189,248,0.15); }
+.shadow-glow { box-shadow: 0 6px 18px rgba(37,99,235,0.35); }
+
+/* Glows ambientes (decorativos, position fixed nos containers) */
+.glow { position: fixed; border-radius: 50%; filter: blur(120px); pointer-events: none; z-index: 0; }
+
+/* Status pulse */
+@keyframes pulse-dot { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+.dot-pulse { animation: pulse-dot 2s infinite; }
+
+/* Acessibilidade — OBRIGATÓRIO com as novas animações */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.dark {
+  --background: 225 36.8% 6.1%;
+  --foreground: 216 35.3% 93.3%;
+  --card: 225 30% 8%;
+  --card-foreground: 216 35.3% 93.3%;
+  --popover: 225 30% 6.5%;
+  --popover-foreground: 216 35.3% 93.3%;
+  --primary: 198.6 92.8% 59.6%;
+  --primary-foreground: 225 36.8% 6.1%;
+  --secondary: 225 26.8% 12.7%;
+  --secondary-foreground: 216 35.3% 93.3%;
+  --muted: 225 26.8% 12.7%;
+  --muted-foreground: 212 11% 53%;
+  --accent: 221.2 83.2% 53.3%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 91.3% 70.2%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 225 20% 15%;
+  --input: 225 20% 15%;
+  --ring: 198.6 92.8% 59.6%;
+  --radius: 0.875rem;
+
+  --chart-1: #38bdf8;
+  --chart-2: #2563eb;
+  --chart-3: #34d399;
+  --chart-4: #e879f9;
+  --chart-5: #fbbf24;
+  --sidebar: #0e111a;
+  --sidebar-foreground: #e8edf5;
+  --sidebar-primary: #38bdf8;
+  --sidebar-primary-foreground: #0a0d16;
+  --sidebar-accent: #181c29;
+  --sidebar-accent-foreground: #e8edf5;
+  --sidebar-border: rgba(255,255,255,0.07);
+  --sidebar-ring: #38bdf8;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+}
