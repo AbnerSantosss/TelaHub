@@ -659,6 +659,9 @@ const Dashboard: React.FC = () => {
           />
         </motion.div>
 
+        {/* STATS ROW */}
+        <StatsRow displays={displays} devices={devices} />
+
         {/* DISPLAY GRID */}
         <DisplayGrid
           displays={displays}
@@ -675,9 +678,6 @@ const Dashboard: React.FC = () => {
           onOpenDisplaySettings={openDisplaySettings}
           onCreateFirstDisplay={openCreateModal}
         />
-
-        {/* STATS ROW */}
-        <StatsRow displays={displays} devices={devices} />
 
         {/* LINKED DEVICES SECTION */}
         {devices.filter(d => d.status === 'linked').length > 0 && (
@@ -708,7 +708,7 @@ const Dashboard: React.FC = () => {
                       variant="outline"
                       size="icon"
                       onClick={() => confirmDeleteDevice(device.id)}
-                      className="size-8 bg-gray-950/40 hover:bg-rose-500/10 text-text-muted hover:text-danger border border-border hover:border-danger/30 rounded-xl transition-all"
+                      className="size-8 touch-target-48 bg-gray-950/40 hover:bg-rose-500/10 text-text-muted hover:text-danger border border-border hover:border-danger/30 rounded-xl transition-all"
                       title="Excluir Dispositivo"
                     >
                       <Trash2 size={14} />

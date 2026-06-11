@@ -1,9 +1,7 @@
 import React from 'react';
-import { Card, CardContent } from '../ui/card';
 import { Monitor, Wifi, WifiOff, Tv } from 'lucide-react';
 import { Display, Device } from '../../types';
 import { motion } from 'motion/react';
-import { cardItem } from '../../libs/motion';
 
 interface StatsRowProps {
   displays: Display[];
@@ -28,92 +26,74 @@ export const StatsRow: React.FC<StatsRowProps> = ({ displays, devices }) => {
       value: totalDisplays,
       color: '#0ea5e9',
       glowRgb: '14, 165, 233',
-      icon: <Monitor className="size-4 text-[#0ea5e9]" />,
+      icon: <Monitor className="size-3.5 text-[#0ea5e9]" />,
     },
     {
       label: 'Telas Online',
       value: onlineDisplays,
       color: '#22c55e',
       glowRgb: '34, 197, 94',
-      icon: <Wifi className="size-4 text-[#22c55e]" />,
+      icon: <Wifi className="size-3.5 text-[#22c55e]" />,
     },
     {
       label: 'Telas Offline',
       value: offlineDisplays,
       color: '#ef4444',
       glowRgb: '239, 68, 68',
-      icon: <WifiOff className="size-4 text-[#ef4444]" />,
+      icon: <WifiOff className="size-3.5 text-[#ef4444]" />,
     },
     {
       label: 'TVs Vinculadas',
       value: totalDevices,
       color: '#a855f7',
       glowRgb: '168, 85, 247',
-      icon: <Tv className="size-4 text-[#a855f7]" />,
+      icon: <Tv className="size-3.5 text-[#a855f7]" />,
     },
   ];
 
   return (
-    <div className="grid grid-cols-[repeat(4,1fr)] max-[1050px]:grid-cols-2 gap-[8px] mt-[16px] relative z-10 mb-8">
-      {stats.map((stat, i) => (
-        <motion.div
-          key={i}
-          variants={cardItem}
-          whileHover={{ y: -4 }}
-          transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-        >
-          <Card 
-            className="relative group transition-all duration-300 overflow-hidden"
-            style={{
-              background: 'var(--color-surface, rgba(255,255,255,0.025))',
-              border: '1px solid var(--color-border, rgba(255,255,255,0.07))',
-              borderRadius: '10px',
-            }}
-          >
-            {/* Top color bar */}
+    <motion.div
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+      className="w-full flex flex-wrap items-center justify-between md:justify-start gap-x-6 gap-y-3 px-4 py-2.5 relative z-10 mb-6 backdrop-blur-md"
+      style={{
+        background: 'var(--color-surface, rgba(255,255,255,0.015))',
+        border: '1px solid var(--color-border, rgba(255,255,255,0.06))',
+        borderRadius: '12px',
+      }}
+    >
+      <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-slate-500 border-r border-white/5 pr-4 mr-2 hidden sm:flex">
+        <span>Status</span>
+      </div>
+      
+      <div className="flex flex-wrap items-center gap-x-5 gap-y-2 w-full sm:w-auto">
+        {stats.map((stat, i) => (
+          <div key={i} className="flex items-center gap-2.5 shrink-0">
             <div 
-              className="absolute top-0 left-0 right-0 h-[2px]" 
-              style={{ backgroundColor: stat.color }}
-            />
-
-            {/* Subtle background glow on hover */}
-            <div 
-              className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+              className="w-7 h-7 rounded-lg flex items-center justify-center border border-white/5"
               style={{
-                background: `radial-gradient(circle at 100% 0%, rgba(${stat.glowRgb}, 0.15), transparent 60%)`
+                backgroundColor: `rgba(${stat.glowRgb}, 0.08)`,
               }}
-            />
-
-            <CardContent 
-              className="flex items-center justify-between"
-              style={{ padding: '10px 14px' }}
             >
-              <div className="space-y-0.5">
-                <p 
-                  className="font-extrabold uppercase tracking-[0.12em]"
-                  style={{ fontSize: '8.5px', color: 'var(--txt3)' }}
-                >
-                  {stat.label}
-                </p>
-                <h3 
-                  className="font-extrabold tracking-tight"
-                  style={{ fontSize: '20px', color: 'var(--txt)' }}
-                >
-                  {stat.value}
-                </h3>
-              </div>
-              <div 
-                className="w-[30px] h-[30px] rounded-[8px] flex items-center justify-center border border-white/5 group-hover:border-white/10 transition-colors"
-                style={{
-                  backgroundColor: `rgba(${stat.glowRgb}, 0.1)`,
-                }}
+              {stat.icon}
+            </div>
+            <div className="flex items-baseline gap-1.5">
+              <span 
+                className="font-bold text-[11px] md:text-[12px] uppercase tracking-wider text-slate-400"
               >
-                {stat.icon}
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-      ))}
-    </div>
+                {stat.label}:
+              </span>
+              <span 
+                className="font-extrabold text-[13px] md:text-[14px]"
+                style={{ color: stat.color }}
+              >
+                {stat.value}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </motion.div>
   );
 };

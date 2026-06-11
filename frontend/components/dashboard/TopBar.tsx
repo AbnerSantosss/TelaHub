@@ -80,7 +80,7 @@ export const TopBar: React.FC<TopBarProps> = ({
           variant="outline"
           size="icon"
           onClick={onRefresh}
-          className="flex items-center justify-center w-[34px] h-[34px] rounded-[10px] btn-tb-outline"
+          className="flex items-center justify-center w-[34px] h-[34px] touch-target-48 rounded-[10px] btn-tb-outline"
           title="Atualizar lista"
         >
           <RefreshCw size={14} className={loading ? 'animate-spin text-accent' : ''} />
@@ -90,7 +90,7 @@ export const TopBar: React.FC<TopBarProps> = ({
           variant="outline"
           size="icon"
           onClick={onLogout}
-          className="flex items-center justify-center w-[34px] h-[34px] rounded-[10px] btn-tb-danger"
+          className="flex items-center justify-center w-[34px] h-[34px] touch-target-48 rounded-[10px] btn-tb-danger"
           title="Sair"
         >
           <LogOut size={14} />

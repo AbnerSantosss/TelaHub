@@ -15,7 +15,7 @@ import {
   SelectTrigger, 
   SelectValue 
 } from '../../ui/select';
-import { Tv, X, Link as LinkIcon, Loader2 } from 'lucide-react';
+import { Tv, X, Link as LinkIcon, Loader2, Copy, ExternalLink } from 'lucide-react';
 import { Display } from '../../../types';
 
 interface LinkDeviceModalProps {
@@ -108,6 +108,44 @@ export const LinkDeviceModal: React.FC<LinkDeviceModalProps> = ({
                 ))}
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="mt-2 p-3 rounded-xl bg-accent/5 border border-accent/10 space-y-2">
+            <label className="block text-xs font-black text-accent uppercase tracking-wider">
+              Link do Player
+            </label>
+            <p className="text-[10px] text-text-muted">
+              Acesse este link no navegador da TV ou dispositivo para abrir o player e gerar o código de pareamento:
+            </p>
+            <div className="flex gap-2 items-center">
+              <Input
+                readOnly
+                value={`${window.location.origin}${window.location.pathname}#/player`}
+                className="w-full text-xs bg-gray-950/60 border border-border text-text h-9 rounded-lg"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  navigator.clipboard.writeText(`${window.location.origin}${window.location.pathname}#/player`);
+                }}
+                className="h-9 px-3 border border-border rounded-lg text-text-muted hover:text-text shrink-0 flex items-center gap-1"
+                title="Copiar link"
+              >
+                <Copy size={14} />
+                <span className="hidden sm:inline">Copiar</span>
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => window.open('#/player', '_blank')}
+                className="h-9 px-3 border border-accent/20 bg-accent/10 rounded-lg text-accent hover:bg-accent/20 shrink-0 flex items-center gap-1"
+                title="Abrir em nova aba"
+              >
+                <ExternalLink size={14} />
+                <span className="hidden sm:inline">Abrir</span>
+              </Button>
+            </div>
           </div>
 
           <div className="flex gap-3 justify-end pt-3">

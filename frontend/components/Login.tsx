@@ -131,7 +131,7 @@ const Login: React.FC = () => {
         {/* Core Marketing Copy & Feature List */}
         <div className="my-auto z-10 max-w-xl space-y-8 pr-8 animate-in fade-in slide-in-from-left-4 duration-500">
           <div className="space-y-4">
-            <span className="text-[10px] font-semibold text-sky-400 uppercase tracking-widest bg-sky-500/10 px-3.5 py-1.5 border border-sky-500/20 rounded-full inline-block">
+            <span className="text-[11px] font-semibold text-sky-400 uppercase tracking-widest bg-sky-500/10 px-3.5 py-1.5 border border-sky-500/20 rounded-full inline-block">
               Mídia Digital Corporativa Premium
             </span>
             <h2 className="text-4xl xl:text-5xl font-extrabold leading-tight tracking-tight font-sans bg-clip-text text-transparent bg-gradient-to-r from-sky-400 to-white pb-1">
@@ -189,7 +189,7 @@ const Login: React.FC = () => {
             className="absolute top-[5%] left-[20px] w-[260px] flex flex-col select-none bg-gray-800/40 border border-white/10 backdrop-blur-md shadow-2xl rounded-xl p-4 transition-all duration-300 ease-out hover:border-sky-500/50 hover:shadow-sky-500/5"
           >
             <div className="flex justify-between items-center mb-3">
-              <span className="text-[9px] font-bold text-sky-400 uppercase tracking-widest">Display Copa #01</span>
+              <span className="text-[11px] font-bold text-sky-400 uppercase tracking-widest">Display Copa #01</span>
               <span className="flex h-2 w-2 relative">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
@@ -215,8 +215,8 @@ const Login: React.FC = () => {
             className="absolute top-[34%] right-[20px] w-[180px] flex flex-col select-none bg-gray-800/40 border border-white/10 backdrop-blur-md shadow-2xl rounded-xl p-4 transition-all duration-300 ease-out hover:border-sky-500/50 hover:shadow-sky-500/5 h-[220px]"
           >
             <div className="flex justify-between items-center mb-3">
-              <span className="text-[8px] font-bold text-sky-400 uppercase tracking-widest">Totem Sul #02</span>
-              <span className="text-[10px] font-mono font-bold text-emerald-400">+2.47%</span>
+              <span className="text-[11px] font-bold text-sky-400 uppercase tracking-widest">Totem Sul #02</span>
+              <span className="text-[11px] font-mono font-bold text-emerald-400">+2.47%</span>
             </div>
             <div className="flex-1 flex flex-col justify-between">
               <div>
@@ -243,8 +243,8 @@ const Login: React.FC = () => {
             className="absolute top-[68%] left-[0px] w-[250px] flex flex-col select-none bg-gray-800/40 border border-white/10 backdrop-blur-md shadow-2xl rounded-xl p-4 transition-all duration-300 ease-out hover:border-sky-500/50 hover:shadow-sky-500/5"
           >
             <div className="flex justify-between items-center mb-3">
-              <span className="text-[9px] font-bold text-sky-400 uppercase tracking-widest">Display Recepção</span>
-              <span className="text-[9px] font-mono text-emerald-400 font-bold">100% OK</span>
+              <span className="text-[11px] font-bold text-sky-400 uppercase tracking-widest">Display Recepção</span>
+              <span className="text-[11px] font-mono text-emerald-400 font-bold">100% OK</span>
             </div>
             <div className="space-y-2">
               <div className="flex items-center gap-2">
@@ -260,7 +260,7 @@ const Login: React.FC = () => {
         </div>
 
         {/* Footer info in sidebar */}
-        <div className="text-muted-foreground text-[10px] font-mono tracking-widest z-10 flex items-center gap-2">
+        <div className="text-muted-foreground text-[11px] font-mono tracking-widest z-10 flex items-center gap-2">
           <span>TELA_HUB_OS v2.0</span>
           <span>•</span>
           <span>CORPORATE DIGITAL SIGNAGE</span>
@@ -312,7 +312,7 @@ const Login: React.FC = () => {
             
             <form onSubmit={handleLogin} className="space-y-5">
               <div className="space-y-1.5">
-                <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider pl-0.5">E-mail de Acesso</label>
+                <label className="text-xs font-black text-muted-foreground uppercase tracking-wider pl-0.5">E-mail de Acesso</label>
                 <div className="relative group">
                   <Input 
                     type="text" 
@@ -327,7 +327,7 @@ const Login: React.FC = () => {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider pl-0.5">Senha</label>
+                <label className="text-xs font-black text-muted-foreground uppercase tracking-wider pl-0.5">Senha</label>
                 <div className="relative group">
                   <Input 
                     type={showPassword ? "text" : "password"}
@@ -373,7 +373,7 @@ const Login: React.FC = () => {
                 <div className="bg-danger/10 border border-danger/25 text-danger text-xs p-3 rounded-xl font-bold text-center animate-in fade-in slide-in-from-top-2 flex flex-col gap-1">
                   <span>{error}</span>
                   {error.includes('incorretos') && (
-                    <span className="text-[10px] font-normal opacity-80 block mt-1">
+                    <span className="text-[11px] font-normal opacity-80 block mt-1">
                       Dica: Use o <strong>E-mail</strong> completo (ex: abner@hotmail.com)
                     </span>
                   )}
@@ -420,7 +420,7 @@ const Login: React.FC = () => {
           </div>
           
           <div className="text-center space-y-2 lg:hidden">
-            <p className="text-muted-foreground text-[9px] font-mono uppercase tracking-widest">
+            <p className="text-muted-foreground text-[11px] font-mono uppercase tracking-widest">
               &copy; {new Date().getFullYear()} TelaHub System v2.0
             </p>
             <div className="flex justify-center gap-4">

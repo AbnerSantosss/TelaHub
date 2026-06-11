@@ -863,7 +863,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 1px;
   padding: 5px 11px;
@@ -962,7 +962,7 @@
 }
 .display-code {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0.5px;
   color: var(--color-text-muted, #7b8794);
   text-transform: uppercase;
@@ -977,7 +977,7 @@
   background: rgba(56,189,248,0.08);
   border: 1px solid rgba(56,189,248,0.2);
   color: var(--color-accent, #38bdf8);
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 700;
   flex-shrink: 0;
 }
@@ -1308,5 +1308,62 @@
   border-color: rgba(14, 165, 233, 0.7);
   background: rgba(14, 165, 233, 0.08);
   box-shadow: inset 0 0 8px rgba(14, 165, 233, 0.2);
+}
+
+/* ========================================
+   UX REFACTORING UTILITIES (Design System v1.0)
+   ======================================== */
+
+/* Área de toque ativa de 48px para elementos interativos menores */
+.touch-target-48 {
+  position: relative;
+}
+.touch-target-48::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  min-height: 48px;
+  z-index: 10;
+}
+
+.menu-button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 48px;
+  height: 48px;
+}
+
+.gear-button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 48px;
+  height: 48px;
+}
+
+/* Altura mínima em touch targets para botões secundários */
+@media (any-pointer: coarse) {
+  .btn-sub {
+    min-height: 48px;
+  }
+}
+
+/* Acessibilidade de foco global */
+:focus {
+  outline: none;
+}
+:focus-visible {
+  outline: 2px solid var(--color-accent, #0ea5e9);
+  outline-offset: 2px;
 }
 
