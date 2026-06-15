@@ -392,20 +392,52 @@ const SceneEditor: React.FC<SceneEditorProps> = ({
             backgroundSize: `${rowHeight}px ${rowHeight}px`
           }}></div>
 
+          {/* Caixa externa: tamanho visual (405×720 para 9:16) */}
           <div
-            ref={containerRef}
-            data-canvas-ref
-            className="relative bg-black shadow-[0_0_100px_rgba(0,0,0,0.5)] border border-slate-800 overflow-hidden shrink-0"
-            style={{
-              ...(orientation === 'vertical'
-                ? { width: '405px', height: '720px' }
-                : { width: '100%', height: 'auto', aspectRatio: '16/9', maxWidth: '1200px' }
-              ),
-              backgroundImage: page.backgroundImage ? `url(${page.backgroundImage})` : 'none',
-              backgroundSize: 'cover',
-              backgroundPosition: 'center'
-            }}
+            className="relative shadow-[0_0_100px_rgba(0,0,0,0.5)] border border-slate-800 shrink-0 overflow-hidden bg-black"
+            style={
+              orientation === 'vertical'
+                ? { width: 405, height: 720 }
+                : {
+                    width: '100%',
+                    height: 'auto',
+                    aspectRatio: '16/9',
+                    maxWidth: '1200px',
+                    position: 'relative',
+                  }
+            }
           >
+            {/* Div interna: resolução nativa 1080×1920, escalada para 405×720 */}
+            <div
+              ref={containerRef}
+              data-canvas-ref
+              style={{
+                ...(orientation === 'vertical'
+                  ? {
+                      width: 1080,
+                      height: 1920,
+                      transform: 'scale(0.375)',
+                      transformOrigin: 'top left',
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      backgroundImage: page.backgroundImage ? `url(${page.backgroundImage})` : 'none',
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                    }
+                  : {
+                      width: '100%',
+                      height: '100%',
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      backgroundImage: page.backgroundImage ? `url(${page.backgroundImage})` : 'none',
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                    }
+                ),
+              }}
+            >
             <GridLayout
               className="layout"
               layout={page.layout.map(w => ({ i: w.i, x: w.x, y: w.y, w: w.w, h: w.h }))}
@@ -461,8 +493,10 @@ const SceneEditor: React.FC<SceneEditorProps> = ({
                 </div>
               ))}
             </GridLayout>
+            </div>
+            {/* fim: div interna resolução nativa (containerRef) */}
           </div>
-        </div>
+          {/* fim: caixa externa visual */}
 
         {/* PROPERTIES PANEL */}
         {selectedWidget && currentWidget && (

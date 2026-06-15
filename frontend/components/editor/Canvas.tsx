@@ -306,22 +306,47 @@ export const Canvas: React.FC<CanvasProps> = ({
       </div>
       
       {/*
-        9:16 vertical: canvas tem largura fixa 405px × altura 720px (ratio exato 9:16).
-        Isso dá espaço suficiente para editar com fidelidade.
-        O container dá scroll vertical para acomodar o canvas inteiro.
+        ABORDAGEM: CSS Transform Scale para fidelidade total
+        ─────────────────────────────────────────────────────
+        9:16 vertical:
+          • Caixa externa  → 405 × 720 px  (tamanho visual no editor)
+          • Div interna    → 1080 × 1920 px (resolução nativa da TV)
+          • transform: scale(405/1080 = 0.375)
+          ⟹ cqw calculado sobre 1080px — igual ao player na TV
+          ⟹ fontes, ícones, espaçamentos IDÊNTICOS ao que a TV exibe
 
-        16:9 horizontal: canvas preenche a largura disponível sem scroll.
+        16:9 horizontal: preenche a largura disponível (comportamento atual).
       */}
-      <div 
-        ref={containerRef}
-        className="bg-black shadow-[0_0_40px_rgba(0,0,0,0.8)] relative border border-[#0ea5e9] rounded-md overflow-hidden shrink-0"
+
+      {/* ── Caixa externa: tamanho visual no editor ── */}
+      <div
+        className="border border-[#0ea5e9] rounded-md shadow-[0_0_40px_rgba(0,0,0,0.8)] shrink-0 overflow-hidden relative bg-black"
         style={
           display.orientation === 'vertical'
-            ? { width: '405px', height: '720px' }
-            : { width: '100%', maxWidth: '100%', aspectRatio: '16/9' }
+            ? { width: 405, height: 720 }
+            : { width: '100%', maxWidth: '100%', aspectRatio: '16/9', position: 'relative' }
         }
-        onClick={() => setSelectedWidget(null)}
       >
+        {/* ── Div interna: resolução nativa ── */}
+        <div
+          ref={containerRef}
+          className="bg-black"
+          style={
+            display.orientation === 'vertical'
+              ? {
+                  // Renderiza a 1080×1920 (nativo) e escala visualmente para 405×720
+                  width: 1080,
+                  height: 1920,
+                  transform: 'scale(0.375)',
+                  transformOrigin: 'top left',
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                }
+              : { width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }
+          }
+          onClick={() => setSelectedWidget(null)}
+        >
         {activePage.backgroundVideoUrl && (
           <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden bg-black">
              {isYouTubeUrl(activePage.backgroundVideoUrl) ? (
@@ -429,7 +454,11 @@ export const Canvas: React.FC<CanvasProps> = ({
             ))}
           </GridLayout>
         </div>
+        {/* fim: absoluto inset z-10 */}
+        </div>
+        {/* fim: div interna resolução nativa (containerRef) */}
       </div>
+      {/* fim: caixa externa visual */}
     </main>
   );
 };

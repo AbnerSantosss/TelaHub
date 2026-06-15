@@ -39,7 +39,7 @@ const Editor: React.FC = () => {
   const [selectedWidget, setSelectedWidget] = useState<string | null>(null);
   const [showToast, setShowToast] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [containerWidth, setContainerWidth] = useState(1200);
+  const [containerWidth, setContainerWidth] = useState(1080);
   const [pageToDelete, setPageToDelete] = useState<number | null>(null);
   const [isClearingScene, setIsClearingScene] = useState(false);
   const [activeMealDay, setActiveMealDay] = useState<string>('Segunda');
