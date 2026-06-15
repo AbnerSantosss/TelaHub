@@ -1,47 +1,40 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Tv, 
-  Trash2, 
-  Settings, 
-  X, 
-  ExternalLink 
-} from 'lucide-react';
-import { 
-  getDisplays, 
-  deleteDisplay, 
-  saveDisplay, 
-  getCurrentUser, 
-  logout, 
-  getUsers, 
-  saveUser, 
-  deleteUser, 
-  resendInvite, 
-  adminSendPasswordReset, 
-  getDevices, 
-  linkDevice, 
-  unlinkDevice, 
-  updateDeviceDisplay, 
-  getSmtpSettings, 
-  saveSmtpSettings, 
-  testSmtpConnection, 
-  getSmtpStatus, 
-  updateMyEmail, 
-  changeMyPassword, 
-  updateMyName, 
-  forgotPassword 
+import { Settings } from 'lucide-react';
+import {
+  getDisplays,
+  deleteDisplay,
+  saveDisplay,
+  getCurrentUser,
+  logout,
+  getUsers,
+  saveUser,
+  deleteUser,
+  resendInvite,
+  adminSendPasswordReset,
+  getDevices,
+  linkDevice,
+  unlinkDevice,
+  updateDeviceDisplay,
+  getSmtpSettings,
+  saveSmtpSettings,
+  testSmtpConnection,
+  getSmtpStatus,
+  updateMyEmail,
+  changeMyPassword,
+  updateMyName,
+  forgotPassword
 } from '../services/storage';
 import { Display, User, Device } from '../types';
 import { MediaLibrary } from './MediaLibrary';
 import { toast } from 'sonner';
 import { motion } from 'motion/react';
-import { useAutoAnimate } from '@formkit/auto-animate/react';
 import { Button } from './ui/button';
 
 // Decomposed components
 import { TopBar } from './dashboard/TopBar';
 import { ModuleNav } from './dashboard/ModuleNav';
-import { StatsRow } from './dashboard/StatsRow';
+import { DeviceChips } from './dashboard/DeviceChips';
 import { DisplayGrid } from './dashboard/DisplayGrid';
 
 // Decomposed Modals
@@ -55,8 +48,6 @@ import { RenameDisplayModal } from './dashboard/modals/RenameDisplayModal';
 import { ConfirmDeleteModal } from './dashboard/modals/ConfirmDeleteModal';
 
 const Dashboard: React.FC = () => {
-  const [devicesParent] = useAutoAnimate<HTMLDivElement>();
-  
   const [displays, setDisplays] = useState<Display[]>([]);
   const [devices, setDevices] = useState<Device[]>([]);
   const [usersList, setUsersList] = useState<User[]>([]);
@@ -635,7 +626,7 @@ const Dashboard: React.FC = () => {
   return (
     <div className="min-h-screen relative z-10" style={{ color: 'var(--color-text)' }}>
       <div className="th-container py-6 md:py-8 relative min-h-screen">
-        
+
         {/* HEADER */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -646,6 +637,8 @@ const Dashboard: React.FC = () => {
           <TopBar
             currentUser={currentUser}
             loading={loading}
+            displays={displays}
+            devices={devices}
             onLinkTv={() => setIsLinkModalOpen(true)}
             onCreateDisplay={openCreateModal}
             onRefresh={refreshData}
@@ -657,10 +650,16 @@ const Dashboard: React.FC = () => {
             onOpenUserManagement={() => setIsUserModalOpen(true)}
             onOpenEmailSettings={openSettingsModal}
           />
-        </motion.div>
 
-        {/* STATS ROW */}
-        <StatsRow displays={displays} devices={devices} />
+          {/* STATUS BAR — dispositivos vinculados */}
+          <div className="flex items-center gap-3 flex-wrap mb-6 px-1">
+            {devices.filter(d => d.status === 'linked').length > 0 && (
+              <>
+                <DeviceChips devices={devices} displays={displays} />
+              </>
+            )}
+          </div>
+        </motion.div>
 
         {/* DISPLAY GRID */}
         <DisplayGrid
@@ -679,46 +678,7 @@ const Dashboard: React.FC = () => {
           onCreateFirstDisplay={openCreateModal}
         />
 
-        {/* LINKED DEVICES SECTION */}
-        {devices.filter(d => d.status === 'linked').length > 0 && (
-          <div className="mt-16 relative z-10 animate-in fade-in duration-700">
-            <h2 className="text-xl font-black text-text mb-6 flex items-center gap-2">
-              <Tv className="text-accent" size={20} /> Dispositivos Vinculados
-            </h2>
-            <div ref={devicesParent} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {devices.filter(d => d.status === 'linked').map(device => {
-                const linkedDisplay = displays.find(d => d.id === device.display_id);
-                const isOnline = (Date.now() - device.last_seen) < 60000;
-
-                return (
-                  <div 
-                    key={device.id} 
-                    className="bg-surface/30 border border-border rounded-xl p-4 flex items-center justify-between group hover:border-accent-2/30 transition-all backdrop-blur-md shadow-soft hover:shadow-lift duration-300"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-success shadow-[0_0_8px_rgba(52,211,153,0.4)]' : 'bg-text-muted/50'}`}></div>
-                      <div>
-                        <h4 className="font-bold text-text text-sm">{device.name || 'Dispositivo sem nome'}</h4>
-                        <p className="text-[10px] text-text-muted font-mono">
-                          {linkedDisplay ? `Exibindo: ${linkedDisplay.name}` : 'Sem conteúdo'}
-                        </p>
-                      </div>
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => confirmDeleteDevice(device.id)}
-                      className="size-8 touch-target-48 bg-gray-950/40 hover:bg-rose-500/10 text-text-muted hover:text-danger border border-border hover:border-danger/30 rounded-xl transition-all"
-                      title="Excluir Dispositivo"
-                    >
-                      <Trash2 size={14} />
-                    </Button>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
+        {/* Dispositivos vinculados agora exibidos como chips no topo */}
       </div>
 
       {/* FIXED ACCOUNT SETTINGS BUTTON */}

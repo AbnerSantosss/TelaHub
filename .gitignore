@@ -6,6 +6,14 @@ node_modules/
 .env.*
 !.env.example
 
+# Build artifacts
+backend/dist/
+frontend/dist/
+
+# SQLite residual
+*.db
+*.db-journal
+
 # Docker local overrides (expõem portas internas - dev only)
 docker-compose.override.yml
 
@@ -20,3 +28,12 @@ Thumbs.db
 
 # Agents (AI workspace)
 .agents/
+
+# Temporary / Dev utilities
+backend/fix-*.js
+generate-wiki.js
+docker-compose.dev.yml
+package-lock.json
+
+# Docs com dados sensíveis
+RESUMO_PROJETO.md

@@ -23,24 +23,23 @@ export const ModuleNav: React.FC<ModuleNavProps> = ({
   const isRouteActive = (route: string) => currentHash.startsWith(route);
 
   const getNavItemClass = (active: boolean) => {
-    return `flex items-center gap-2 px-3.5 py-1 h-[32px] rounded-xl font-semibold text-[11.5px] uppercase tracking-wider transition-all whitespace-nowrap cursor-pointer ${active ? 'nav-item-dashboard active' : 'nav-item-dashboard'
-      }`;
+    return `flex items-center gap-2 px-1 h-[44px] font-bold text-[11.5px] uppercase tracking-wider transition-all whitespace-nowrap cursor-pointer border-b-[3px] rounded-none hover:bg-transparent ${
+      active ? 'text-[#0ea5e9] border-[#0ea5e9]' : 'text-slate-500 border-transparent hover:text-slate-300'
+    }`;
   };
 
   return (
     <div
-      className="flex gap-2 items-center relative z-10 w-full overflow-x-auto scrollbar-none"
+      className="flex gap-6 items-center relative z-10 w-full overflow-x-auto scrollbar-none px-4"
       style={{
-        background: 'var(--color-surface, rgba(255,255,255,0.025))',
-        border: '1px solid var(--color-border, rgba(255,255,255,0.07))',
-        borderRadius: '14px',
+        background: 'transparent',
+        borderBottom: '1px solid var(--color-border, rgba(255,255,255,0.07))',
         height: '46px',
-        padding: '5px 16px',
-        marginBottom: '16px'
+        marginBottom: '24px'
       }}
     >
       <span
-        className="uppercase tracking-widest mr-2.5 hidden md:inline border-r pr-3 h-[18px] flex items-center shrink-0"
+        className="uppercase tracking-widest mr-2 hidden md:inline border-r pr-4 h-[18px] flex items-center shrink-0 font-bold"
         style={{
           fontSize: '9.5px',
           color: 'var(--txt3)',
@@ -53,12 +52,9 @@ export const ModuleNav: React.FC<ModuleNavProps> = ({
       <Button
         variant="ghost"
         onClick={() => navigate('/scheduler')}
-        className={getNavItemClass(isRouteActive('#/scheduler'))}
+        className={getNavItemClass(isRouteActive('#/scheduler') || currentHash === '#/')}
       >
-        {isRouteActive('#/scheduler') && (
-          <span className="w-[6px] h-[6px] rounded-full bg-[#0ea5e9] shrink-0"></span>
-        )}
-        <Calendar size={13} />
+        <Calendar size={14} className={isRouteActive('#/scheduler') || currentHash === '#/' ? 'text-[#0ea5e9]' : ''} />
         <span className="hidden min-[681px]:inline">Central de Programação</span>
       </Button>
 
@@ -67,7 +63,7 @@ export const ModuleNav: React.FC<ModuleNavProps> = ({
         onClick={onOpenMediaLibrary}
         className={getNavItemClass(false)}
       >
-        <FileImage size={13} />
+        <FileImage size={14} />
         <span className="hidden min-[681px]:inline">Mídia</span>
       </Button>
 
@@ -76,7 +72,7 @@ export const ModuleNav: React.FC<ModuleNavProps> = ({
         onClick={onOpenUserManagement}
         className={getNavItemClass(false)}
       >
-        <UsersIcon size={13} />
+        <UsersIcon size={14} />
         <span className="hidden min-[681px]:inline">Usuários</span>
       </Button>
 
@@ -86,7 +82,7 @@ export const ModuleNav: React.FC<ModuleNavProps> = ({
           onClick={onOpenEmailSettings}
           className={getNavItemClass(false)}
         >
-          <Settings size={13} />
+          <Settings size={14} />
           <span className="hidden min-[681px]:inline">Config. E-mail</span>
         </Button>
       )}

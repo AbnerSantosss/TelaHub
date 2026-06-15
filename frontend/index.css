@@ -809,7 +809,7 @@
   box-shadow: 0 20px 48px rgba(0,0,0,0.45), 0 0 0 1px rgba(56,189,248,0.12);
 }
 
-/* PREVIEW — ALTURA FIXA igual para todos (Compacto para ganhar espaço) */
+/* PREVIEW — ALTURA FIXA igual para todos */
 .display-preview {
   position: relative;
   height: 140px;
@@ -821,6 +821,7 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  overflow: hidden;
 }
 
 /* MOLDURA DE TV dentro do preview */

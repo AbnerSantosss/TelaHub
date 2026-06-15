@@ -9,26 +9,69 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Executando seed do banco de dados...');
 
-  // ── Admin principal ──
-  const adminEmail = process.env.ADMIN_EMAIL || 'admin@example.com';
-  const adminRawPassword = process.env.ADMIN_PASSWORD || 'Mudar@123';
-  const abnerPassword = await bcrypt.hash(adminRawPassword, 10);
+  // ── Admin principal (Abner - Master) ──
+  const masterEmail = 'binho_captiva@hotmail.com';
+  const masterPassword = await bcrypt.hash('mudar@123', 10);
 
   const abner = await prisma.user.upsert({
     where: { username: 'admin' },
     update: {
-      email: adminEmail,
-      password: abnerPassword,
+      name: 'Abner',
+      email: masterEmail,
+      password: masterPassword,
+      role: 'master',
     },
     create: {
       username: 'admin',
-      email: adminEmail,
-      password: abnerPassword,
+      name: 'Abner',
+      email: masterEmail,
+      password: masterPassword,
+      role: 'master',
+    },
+  });
+
+  console.log(`✅ Admin Master criado: ${abner.username} (role: ${abner.role})`);
+
+  // ── Usuário Jackson ──
+  const jacksonPassword = await bcrypt.hash('Mudar123', 10);
+
+  const jackson = await prisma.user.upsert({
+    where: { username: 'jackson' },
+    update: {
+      name: 'Jackson',
+      email: 'jacksonlogamebr@gmail.com',
+      password: jacksonPassword,
+      role: 'admin',
+    },
+    create: {
+      username: 'jackson',
+      name: 'Jackson',
+      email: 'jacksonlogamebr@gmail.com',
+      password: jacksonPassword,
       role: 'admin',
     },
   });
 
-  console.log(`✅ Admin criado: ${abner.username} (role: ${abner.role})`);
+  console.log(`✅ Admin Jackson criado: ${jackson.username} (role: ${jackson.role})`);
+
+  // ── Usuário Dev (Para testes rápidos) ──
+  const devPassword = await bcrypt.hash('Mudar@123', 10);
+  const devUser = await prisma.user.upsert({
+    where: { username: 'admin-dev' },
+    update: {
+      email: 'admin@example.com',
+      password: devPassword,
+      role: 'admin',
+    },
+    create: {
+      username: 'admin-dev',
+      email: 'admin@example.com',
+      password: devPassword,
+      role: 'admin',
+    },
+  });
+
+  console.log(`✅ Usuário Dev criado: ${devUser.username} (role: ${devUser.role})`);
 
   // Cria display de demonstração
   const demoDisplay = await prisma.display.upsert({
