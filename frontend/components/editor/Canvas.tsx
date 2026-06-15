@@ -283,30 +283,43 @@ export const Canvas: React.FC<CanvasProps> = ({
   const GRID_COLS = 48;
 
   return (
-    <main className="flex-1 bg-[#111827] relative overflow-hidden flex items-center justify-center p-8">
+    <main className={`flex-1 bg-[#111827] relative flex justify-center p-4 ${
+      display.orientation === 'vertical'
+        ? 'overflow-y-auto overflow-x-hidden items-start'
+        : 'overflow-hidden items-center'
+    }`}>
       <div className="absolute inset-0 z-0 opacity-10 pointer-events-none" 
            style={{ 
              backgroundImage: 'radial-gradient(#4f46e5 1px, transparent 1px)', 
              backgroundSize: '20px 20px' 
            }}>
       </div>
-      
-      <div className={`absolute top-4 left-4 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest bg-slate-900/80 px-3 py-1.5 rounded-full border backdrop-blur-sm z-20 ${
+
+      {/* Orientation label */}
+      <div className={`absolute top-3 left-3 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest bg-slate-900/80 px-3 py-1.5 rounded-full border backdrop-blur-sm z-20 ${
         display.orientation === 'vertical'
           ? 'text-purple-400 border-purple-800'
           : 'text-slate-600 border-slate-800'
       }`}>
         <Maximize2 size={12} className={display.orientation === 'vertical' ? 'text-purple-500' : 'text-[#F97316]'} />
-        {display.orientation === 'vertical' ? 'Canvas Livre 9:16 — Vertical' : 'Canvas Livre 16:9 — Horizontal'}
+        {display.orientation === 'vertical' ? 'Canvas 9:16 — Vertical' : 'Canvas 16:9 — Horizontal'}
       </div>
       
+      {/*
+        9:16 vertical: canvas tem largura fixa 405px × altura 720px (ratio exato 9:16).
+        Isso dá espaço suficiente para editar com fidelidade.
+        O container dá scroll vertical para acomodar o canvas inteiro.
+
+        16:9 horizontal: canvas preenche a largura disponível sem scroll.
+      */}
       <div 
         ref={containerRef}
-        className={`h-full bg-black shadow-[0_0_40px_rgba(0,0,0,0.8)] relative border border-[#0ea5e9] rounded-md overflow-hidden shadow-[0_0_25px_rgba(124,58,237,0.15)] ${
+        className="bg-black shadow-[0_0_40px_rgba(0,0,0,0.8)] relative border border-[#0ea5e9] rounded-md overflow-hidden shrink-0"
+        style={
           display.orientation === 'vertical'
-            ? 'aspect-[9/16] max-h-full w-auto'
-            : 'w-full max-w-[100%] aspect-video'
-        }`}
+            ? { width: '405px', height: '720px' }
+            : { width: '100%', maxWidth: '100%', aspectRatio: '16/9' }
+        }
         onClick={() => setSelectedWidget(null)}
       >
         {activePage.backgroundVideoUrl && (

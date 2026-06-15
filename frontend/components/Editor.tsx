@@ -179,8 +179,10 @@ const Editor: React.FC = () => {
         color: '#ffffff',
         fontSize: '2vw',
         fillContainer: true,
-        contentAlignment: 'stretch',
-        fitContainerMode: 'stretch',
+        contentAlignment: type === WidgetType.FULL_INFO ? 'center' : 'stretch',
+        fitContainerMode: type === WidgetType.FULL_INFO ? 'contain' : 'stretch',
+        textSize: type === WidgetType.FULL_INFO ? 0 : undefined,
+        numberSize: type === WidgetType.FULL_INFO ? 0 : undefined,
         notesConfig: type === WidgetType.NOTES ? {
           fontFamily: 'Inter',
           fontSize: '1.2rem',

@@ -1132,7 +1132,7 @@ const Scheduler: React.FC = () => {
               </aside>
 
               {/* CANVAS AREA */}
-              <main className="flex-1 bg-slate-950 relative overflow-hidden flex items-center justify-center p-4 md:p-8">
+              <main className="flex-1 bg-slate-950 relative overflow-hidden flex items-center justify-center p-4 md:p-6">
                 <div className="absolute inset-0 z-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(#4f46e5 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
                 <div className={`absolute top-4 left-4 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest bg-slate-900/80 px-3 py-1.5 rounded-full border backdrop-blur-sm z-20 ${
                   currentBroadcast?.orientation === 'vertical'
