@@ -12,6 +12,7 @@ docker-compose.override.yml
 # IDE
 .vscode/
 .idea/
+.obsidian/
 *.sw?
 
 # OS
@@ -20,3 +21,7 @@ Thumbs.db
 
 # Agents (AI workspace)
 .agents/
+
+# Generated Obsidian Vaults / Local wikis
+tela-vaut/
+telahub/
