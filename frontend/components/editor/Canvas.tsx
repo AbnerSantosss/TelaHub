@@ -283,32 +283,70 @@ export const Canvas: React.FC<CanvasProps> = ({
   const GRID_COLS = 48;
 
   return (
-    <main className="flex-1 bg-[#111827] relative overflow-hidden flex items-center justify-center p-8">
+    <main className={`flex-1 bg-[#111827] relative flex justify-center p-4 ${
+      display.orientation === 'vertical'
+        ? 'overflow-y-auto overflow-x-hidden items-start'
+        : 'overflow-hidden items-center'
+    }`}>
       <div className="absolute inset-0 z-0 opacity-10 pointer-events-none" 
            style={{ 
              backgroundImage: 'radial-gradient(#4f46e5 1px, transparent 1px)', 
              backgroundSize: '20px 20px' 
            }}>
       </div>
-      
-      <div className={`absolute top-4 left-4 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest bg-slate-900/80 px-3 py-1.5 rounded-full border backdrop-blur-sm z-20 ${
+
+      {/* Orientation label */}
+      <div className={`absolute top-3 left-3 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest bg-slate-900/80 px-3 py-1.5 rounded-full border backdrop-blur-sm z-20 ${
         display.orientation === 'vertical'
           ? 'text-purple-400 border-purple-800'
           : 'text-slate-600 border-slate-800'
       }`}>
         <Maximize2 size={12} className={display.orientation === 'vertical' ? 'text-purple-500' : 'text-[#F97316]'} />
-        {display.orientation === 'vertical' ? 'Canvas Livre 9:16 — Vertical' : 'Canvas Livre 16:9 — Horizontal'}
+        {display.orientation === 'vertical' ? 'Canvas 9:16 — Vertical' : 'Canvas 16:9 — Horizontal'}
       </div>
       
-      <div 
-        ref={containerRef}
-        className={`h-full bg-black shadow-[0_0_40px_rgba(0,0,0,0.8)] relative border border-[#0ea5e9] rounded-md overflow-hidden shadow-[0_0_25px_rgba(124,58,237,0.15)] ${
+      {/*
+        ABORDAGEM: CSS Transform Scale para fidelidade total
+        ─────────────────────────────────────────────────────
+        9:16 vertical:
+          • Caixa externa  → 405 × 720 px  (tamanho visual no editor)
+          • Div interna    → 1080 × 1920 px (resolução nativa da TV)
+          • transform: scale(405/1080 = 0.375)
+          ⟹ cqw calculado sobre 1080px — igual ao player na TV
+          ⟹ fontes, ícones, espaçamentos IDÊNTICOS ao que a TV exibe
+
+        16:9 horizontal: preenche a largura disponível (comportamento atual).
+      */}
+
+      {/* ── Caixa externa: tamanho visual no editor ── */}
+      <div
+        className="border border-[#0ea5e9] rounded-md shadow-[0_0_40px_rgba(0,0,0,0.8)] shrink-0 overflow-hidden relative bg-black"
+        style={
           display.orientation === 'vertical'
-            ? 'aspect-[9/16] max-h-full w-auto'
-            : 'w-full max-w-[100%] aspect-video'
-        }`}
-        onClick={() => setSelectedWidget(null)}
+            ? { width: 405, height: 720 }
+            : { width: '100%', maxWidth: '100%', aspectRatio: '16/9', position: 'relative' }
+        }
       >
+        {/* ── Div interna: resolução nativa ── */}
+        <div
+          ref={containerRef}
+          className="bg-black"
+          style={
+            display.orientation === 'vertical'
+              ? {
+                  // Renderiza a 1080×1920 (nativo) e escala visualmente para 405×720
+                  width: 1080,
+                  height: 1920,
+                  transform: 'scale(0.375)',
+                  transformOrigin: 'top left',
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                }
+              : { width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }
+          }
+          onClick={() => setSelectedWidget(null)}
+        >
         {activePage.backgroundVideoUrl && (
           <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden bg-black">
              {isYouTubeUrl(activePage.backgroundVideoUrl) ? (
@@ -416,7 +454,11 @@ export const Canvas: React.FC<CanvasProps> = ({
             ))}
           </GridLayout>
         </div>
+        {/* fim: absoluto inset z-10 */}
+        </div>
+        {/* fim: div interna resolução nativa (containerRef) */}
       </div>
+      {/* fim: caixa externa visual */}
     </main>
   );
 };

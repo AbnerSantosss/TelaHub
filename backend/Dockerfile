@@ -1,17 +1,21 @@
+# syntax=docker/dockerfile:1
 FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Dependências para o Prisma
 RUN apk add --no-cache openssl
 
+# 1. Instala deps — só re-executa se package.json mudar
 COPY package*.json ./
-RUN npm install
+RUN --mount=type=cache,target=/root/.npm \
+    npm install --prefer-offline
 
+# 2. Copia o resto, gera Prisma e compila TypeScript
 COPY . .
 RUN npx prisma generate
 RUN npm run build
 
+# ── Imagem final leve ────────────────────────────────────────
 FROM node:20-alpine
 
 WORKDIR /app

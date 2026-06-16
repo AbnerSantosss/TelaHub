@@ -169,8 +169,10 @@ const SceneEditor: React.FC<SceneEditorProps> = ({
         color: '#ffffff',
         fontSize: '2vw',
         fillContainer: true,
-        contentAlignment: 'stretch',
-        fitContainerMode: 'stretch',
+        contentAlignment: type === WidgetType.FULL_INFO ? 'center' : 'stretch',
+        fitContainerMode: type === WidgetType.FULL_INFO ? 'contain' : 'stretch',
+        textSize: type === WidgetType.FULL_INFO ? 0 : undefined,
+        numberSize: type === WidgetType.FULL_INFO ? 0 : undefined,
         notesConfig: type === WidgetType.NOTES ? {
           fontFamily: 'Inter',
           fontSize: '1.2rem',
@@ -379,29 +381,63 @@ const SceneEditor: React.FC<SceneEditorProps> = ({
       <div className="flex-1 flex overflow-hidden relative">
 
         {/* CANVAS AREA */}
-        <div className="flex-1 overflow-auto bg-slate-950 p-8 flex items-center justify-center custom-scrollbar relative">
+        <div className={`flex-1 bg-slate-950 custom-scrollbar relative flex justify-center ${
+          orientation === 'vertical'
+            ? 'overflow-y-auto overflow-x-hidden items-start p-4'
+            : 'overflow-hidden items-center p-4'
+        }`}>
           {/* Grid Background */}
           <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{
             backgroundImage: `radial-gradient(#fff 1px, transparent 1px)`,
             backgroundSize: `${rowHeight}px ${rowHeight}px`
           }}></div>
 
+          {/* Caixa externa: tamanho visual (405×720 para 9:16) */}
           <div
-            ref={containerRef}
-            data-canvas-ref
-            className={`relative bg-black shadow-[0_0_100px_rgba(0,0,0,0.5)] border border-slate-800 overflow-hidden shrink-0 ${
-              orientation === 'vertical' ? 'h-full w-auto' : 'w-full'
-            }`}
-            style={{
-              ...(orientation === 'vertical'
-                ? { maxHeight: '100%', aspectRatio: '9/16' }
-                : { maxWidth: '1200px', aspectRatio: '16/9' }
-              ),
-              backgroundImage: page.backgroundImage ? `url(${page.backgroundImage})` : 'none',
-              backgroundSize: 'cover',
-              backgroundPosition: 'center'
-            }}
+            className="relative shadow-[0_0_100px_rgba(0,0,0,0.5)] border border-slate-800 shrink-0 overflow-hidden bg-black"
+            style={
+              orientation === 'vertical'
+                ? { width: 405, height: 720 }
+                : {
+                    width: '100%',
+                    height: 'auto',
+                    aspectRatio: '16/9',
+                    maxWidth: '1200px',
+                    position: 'relative',
+                  }
+            }
           >
+            {/* Div interna: resolução nativa 1080×1920, escalada para 405×720 */}
+            <div
+              ref={containerRef}
+              data-canvas-ref
+              style={{
+                ...(orientation === 'vertical'
+                  ? {
+                      width: 1080,
+                      height: 1920,
+                      transform: 'scale(0.375)',
+                      transformOrigin: 'top left',
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      backgroundImage: page.backgroundImage ? `url(${page.backgroundImage})` : 'none',
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                    }
+                  : {
+                      width: '100%',
+                      height: '100%',
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      backgroundImage: page.backgroundImage ? `url(${page.backgroundImage})` : 'none',
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                    }
+                ),
+              }}
+            >
             <GridLayout
               className="layout"
               layout={page.layout.map(w => ({ i: w.i, x: w.x, y: w.y, w: w.w, h: w.h }))}
@@ -457,8 +493,10 @@ const SceneEditor: React.FC<SceneEditorProps> = ({
                 </div>
               ))}
             </GridLayout>
+            </div>
+            {/* fim: div interna resolução nativa (containerRef) */}
           </div>
-        </div>
+          {/* fim: caixa externa visual */}
 
         {/* PROPERTIES PANEL */}
         {selectedWidget && currentWidget && (
