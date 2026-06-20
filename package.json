@@ -5,8 +5,11 @@
     "node": "20.x"
   },
   "scripts": {
+    "setup": "node setup-dev.js",
+    "clean-telahub": "node delete-telahub.js",
     "build": "cd backend && npm install && npx prisma generate && npm run build",
     "start": "cd backend && npx prisma db push --accept-data-loss && npm start",
-    "seed": "cd backend && npx prisma db seed"
+    "seed": "cd backend && npx prisma db seed",
+    "prepare": "husky"
   }
 }
