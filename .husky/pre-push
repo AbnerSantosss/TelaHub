@@ -1,0 +1,2 @@
+echo "📚 Atualizando a Wiki do Obsidian antes do push..."
+node gerar-wiki.js
