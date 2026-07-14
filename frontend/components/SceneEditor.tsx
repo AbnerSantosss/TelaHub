@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import { uploadMedia } from '../services/storage';
 import { Page, WidgetType, LayoutItem, WidgetData } from '../types';
-import { 
+import {
   LiveClock, WeatherWidget, RssFeed, FullInfoWidget,
   NotesWidget, TodoWidget, CountdownWidget, ChoresWidget, MealPlanWidget,
   MarketWatchWidget, BrowserSnapshotWidget, GoogleDocsWidget, OfficeDocsWidget,
@@ -39,7 +39,7 @@ const getEmbedUrl = (url: string, config?: { autoplay?: boolean, mute?: boolean,
     const loop = config?.loop !== false ? 1 : 0;
     const controls = config?.controls === true ? 1 : 0;
     const quality = config?.youtubeQuality || 'highres';
-    
+
     return `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=${autoplay}&mute=${mute}&loop=${loop}&playlist=${videoId}&controls=${controls}&disablekb=1&fs=0&modestbranding=1&rel=0&playsinline=1&enablejsapi=1&showinfo=0&iv_load_policy=3&vq=${quality}`;
   }
   return url;
@@ -54,9 +54,9 @@ interface SceneEditorProps {
   onSelectWidget?: (id: string | null) => void;
 }
 
-const SceneEditor: React.FC<SceneEditorProps> = ({ 
-  page, 
-  onChange, 
+const SceneEditor: React.FC<SceneEditorProps> = ({
+  page,
+  onChange,
   orientation = 'horizontal',
   hideToolbar = false,
   selectedWidget: propSelectedWidget,
@@ -171,8 +171,8 @@ const SceneEditor: React.FC<SceneEditorProps> = ({
         fillContainer: true,
         contentAlignment: type === WidgetType.FULL_INFO ? 'center' : 'stretch',
         fitContainerMode: type === WidgetType.FULL_INFO ? 'contain' : 'stretch',
-        textSize: type === WidgetType.FULL_INFO ? 0 : undefined,
-        numberSize: type === WidgetType.FULL_INFO ? 0 : undefined,
+        textSize: type === WidgetType.FULL_INFO ? 50 : undefined,
+        numberSize: type === WidgetType.FULL_INFO ? 50 : undefined,
         notesConfig: type === WidgetType.NOTES ? {
           fontFamily: 'Inter',
           fontSize: '1.2rem',
@@ -381,11 +381,10 @@ const SceneEditor: React.FC<SceneEditorProps> = ({
       <div className="flex-1 flex overflow-hidden relative">
 
         {/* CANVAS AREA */}
-        <div className={`flex-1 bg-slate-950 custom-scrollbar relative flex justify-center ${
-          orientation === 'vertical'
+        <div className={`flex-1 bg-slate-950 custom-scrollbar relative flex justify-center ${orientation === 'vertical'
             ? 'overflow-y-auto overflow-x-hidden items-start p-4'
             : 'overflow-hidden items-center p-4'
-        }`}>
+          }`}>
           {/* Grid Background */}
           <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{
             backgroundImage: `radial-gradient(#fff 1px, transparent 1px)`,
@@ -399,12 +398,12 @@ const SceneEditor: React.FC<SceneEditorProps> = ({
               orientation === 'vertical'
                 ? { width: 405, height: 720 }
                 : {
-                    width: '100%',
-                    height: 'auto',
-                    aspectRatio: '16/9',
-                    maxWidth: '1200px',
-                    position: 'relative',
-                  }
+                  width: '100%',
+                  height: 'auto',
+                  aspectRatio: '16/9',
+                  maxWidth: '1200px',
+                  position: 'relative',
+                }
             }
           >
             {/* Div interna: resolução nativa 1080×1920, escalada para 405×720 */}
@@ -414,96 +413,97 @@ const SceneEditor: React.FC<SceneEditorProps> = ({
               style={{
                 ...(orientation === 'vertical'
                   ? {
-                      width: 1080,
-                      height: 1920,
-                      transform: 'scale(0.375)',
-                      transformOrigin: 'top left',
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      backgroundImage: page.backgroundImage ? `url(${page.backgroundImage})` : 'none',
-                      backgroundSize: 'cover',
-                      backgroundPosition: 'center',
-                    }
+                    width: 1080,
+                    height: 1920,
+                    transform: 'scale(0.375)',
+                    transformOrigin: 'top left',
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    backgroundImage: page.backgroundImage ? `url(${page.backgroundImage})` : 'none',
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                  }
                   : {
-                      width: '100%',
-                      height: '100%',
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      backgroundImage: page.backgroundImage ? `url(${page.backgroundImage})` : 'none',
-                      backgroundSize: 'cover',
-                      backgroundPosition: 'center',
-                    }
+                    width: '100%',
+                    height: '100%',
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    backgroundImage: page.backgroundImage ? `url(${page.backgroundImage})` : 'none',
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                  }
                 ),
               }}
             >
-            <GridLayout
-              className="layout"
-              layout={page.layout.map(w => ({ i: w.i, x: w.x, y: w.y, w: w.w, h: w.h }))}
-              cols={GRID_COLS}
-              rowHeight={rowHeight}
-              margin={[0, 0]}
-              onLayoutChange={handleLayoutChange}
-              draggableHandle=".drag-handle"
-              resizeHandle={<div className="absolute bottom-0 right-0 p-1 cursor-se-resize text-[#0ea5e9] opacity-0 group-hover:opacity-100 transition-opacity"><MoveHorizontal size={12} /></div>}
-            >
-              {page.layout.map(w => (
-                <div
-                  key={w.i}
-                  className={`group relative border transition-all ${selectedWidget === w.i ? 'border-[#0ea5e9] ring-2 ring-cyan-500/20 z-20' : 'border-transparent hover:border-slate-700'}`}
-                  onClick={(e) => { e.stopPropagation(); setSelectedWidget(w.i); }}
-                >
-                  <div className="drag-handle absolute top-0 left-0 w-full h-4 bg-slate-900/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 cursor-move flex items-center justify-center z-10 transition-opacity">
-                    <div className="w-8 h-1 bg-slate-700 rounded-full"></div>
-                  </div>
-
-                  {w.data.fullScreenMode && (
-                    <div className="absolute top-5 right-2 z-30 bg-cyan-950/80 border border-[#0ea5e9]/50 backdrop-blur-sm text-[#0ea5e9] text-[8px] font-black uppercase px-2 py-0.5 rounded-full shadow-[0_0_10px_rgba(6,182,212,0.3)] pointer-events-none animate-pulse flex items-center gap-1">
-                      <span>📺 Tela Cheia</span>
-                    </div>
-                  )}
-
-                  {/* Background Image Layer for fullscreen widgets */}
-                  {w.data.fullScreenMode && w.data.backgroundImage && (
-                    <div 
-                      className="absolute inset-0 z-0 bg-center bg-no-repeat pointer-events-none"
-                      style={{
-                        backgroundImage: `url(${w.data.backgroundImage})`,
-                        backgroundSize: 'cover',
-                      }}
-                    />
-                  )}
-
-                  <div 
-                    className={`w-full h-full overflow-hidden pointer-events-none select-none flex relative z-[1] ${getAlignmentClasses(w.data.fillContainer ? 'stretch' : w.data.contentAlignment)}`}
-                    style={{ padding: w.data.padding || undefined, margin: w.data.margin || undefined }}
+              <GridLayout
+                className="layout"
+                layout={page.layout.map(w => ({ i: w.i, x: w.x, y: w.y, w: w.w, h: w.h }))}
+                cols={GRID_COLS}
+                rowHeight={rowHeight}
+                margin={[0, 0]}
+                onLayoutChange={handleLayoutChange}
+                draggableHandle=".drag-handle"
+                resizeHandle={<div className="absolute bottom-0 right-0 p-1 cursor-se-resize text-[#0ea5e9] opacity-0 group-hover:opacity-100 transition-opacity"><MoveHorizontal size={12} /></div>}
+              >
+                {page.layout.map(w => (
+                  <div
+                    key={w.i}
+                    className={`group relative border transition-all ${selectedWidget === w.i ? 'border-[#0ea5e9] ring-2 ring-cyan-500/20 z-20' : 'border-transparent hover:border-slate-700'}`}
+                    onClick={(e) => { e.stopPropagation(); setSelectedWidget(w.i); }}
                   >
-                    {renderWidgetPreview(w)}
-                  </div>
+                    <div className="drag-handle absolute top-0 left-0 w-full h-4 bg-slate-900/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 cursor-move flex items-center justify-center z-10 transition-opacity">
+                      <div className="w-8 h-1 bg-slate-700 rounded-full"></div>
+                    </div>
 
-                  {selectedWidget === w.i && (
-                    <button
-                      onClick={(e) => { e.stopPropagation(); removeWidget(w.i); }}
-                      className="absolute -top-2 -right-2 p-1.5 bg-rose-600 text-white rounded-full shadow-lg hover:bg-rose-500 transition-all z-30"
+                    {w.data.fullScreenMode && (
+                      <div className="absolute top-5 right-2 z-30 bg-cyan-950/80 border border-[#0ea5e9]/50 backdrop-blur-sm text-[#0ea5e9] text-[8px] font-black uppercase px-2 py-0.5 rounded-full shadow-[0_0_10px_rgba(6,182,212,0.3)] pointer-events-none animate-pulse flex items-center gap-1">
+                        <span>📺 Tela Cheia</span>
+                      </div>
+                    )}
+
+                    {/* Background Image Layer for fullscreen widgets */}
+                    {w.data.fullScreenMode && w.data.backgroundImage && (
+                      <div
+                        className="absolute inset-0 z-0 bg-center bg-no-repeat pointer-events-none"
+                        style={{
+                          backgroundImage: `url(${w.data.backgroundImage})`,
+                          backgroundSize: 'cover',
+                        }}
+                      />
+                    )}
+
+                    <div
+                      className={`w-full h-full overflow-hidden pointer-events-none select-none flex relative z-[1] ${getAlignmentClasses(w.data.fillContainer ? 'stretch' : w.data.contentAlignment)}`}
+                      style={{ padding: w.data.padding || undefined, margin: w.data.margin || undefined }}
                     >
-                      <Trash2 size={12} />
-                    </button>
-                  )}
-                </div>
-              ))}
-            </GridLayout>
+                      {renderWidgetPreview(w)}
+                    </div>
+
+                    {selectedWidget === w.i && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); removeWidget(w.i); }}
+                        className="absolute -top-2 -right-2 p-1.5 bg-rose-600 text-white rounded-full shadow-lg hover:bg-rose-500 transition-all z-30"
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </GridLayout>
             </div>
             {/* fim: div interna resolução nativa (containerRef) */}
           </div>
           {/* fim: caixa externa visual */}
+        </div>
 
         {/* PROPERTIES PANEL */}
         {selectedWidget && currentWidget && (
           <>
             {/* Backdrop overlay for mobile properties panel */}
-            <div 
-              className="fixed inset-0 bg-black/60 z-30 md:hidden animate-in fade-in duration-200" 
+            <div
+              className="fixed inset-0 bg-black/60 z-30 md:hidden animate-in fade-in duration-200"
               onClick={() => setSelectedWidget(null)}
             />
             <div className="absolute md:relative right-0 top-0 h-full w-80 bg-slate-900 border-l border-slate-800 p-6 overflow-y-auto custom-scrollbar z-40 shadow-2xl transition-all duration-300 animate-in slide-in-from-right duration-300">
@@ -558,10 +558,10 @@ const WidgetTool: React.FC<{ icon: React.ReactNode | string, label: string, desc
     {/* Larger Icon Container with LESS Spacing */}
     <div className="flex items-center justify-center h-10 w-10">
       {typeof icon === 'string' ? (
-        <img 
-          src={icon} 
-          alt={label} 
-          className="w-9 h-9 object-contain group-hover:scale-110 transition-transform duration-300 filter drop-shadow-[0_0_5px_rgba(14,165,233,0.1)]" 
+        <img
+          src={icon}
+          alt={label}
+          className="w-9 h-9 object-contain group-hover:scale-110 transition-transform duration-300 filter drop-shadow-[0_0_5px_rgba(14,165,233,0.1)]"
         />
       ) : (
         <div className="group-hover:scale-110 transition-transform">{icon}</div>
@@ -575,18 +575,18 @@ const renderWidgetPreview = (w: LayoutItem) => {
   switch (w.type) {
     case WidgetType.TEXT:
       return (
-        <div 
+        <div
           className="w-full h-full flex"
-          style={{ 
+          style={{
             alignItems: (w.data.fillContainer || w.data.contentAlignment === 'stretch') ? 'stretch' : w.data.contentAlignment === 'start' ? 'flex-start' : w.data.contentAlignment === 'end' ? 'flex-end' : 'center',
             justifyContent: (w.data.fillContainer || w.data.contentAlignment === 'stretch') ? 'stretch' : w.data.contentAlignment === 'start' ? 'flex-start' : w.data.contentAlignment === 'end' ? 'flex-end' : w.data.textConfig?.textAlign === 'left' ? 'flex-start' : w.data.textConfig?.textAlign === 'right' ? 'flex-end' : 'center',
             padding: w.data.padding !== undefined ? w.data.padding : '0.5rem',
           }}
         >
-          <p 
-            className="font-bold pointer-events-none select-none break-words overflow-hidden leading-tight drop-shadow-lg" 
-            style={{ 
-              color: w.data.color, 
+          <p
+            className="font-bold pointer-events-none select-none break-words overflow-hidden leading-tight drop-shadow-lg"
+            style={{
+              color: w.data.color,
               fontSize: w.data.textConfig?.fontSize || w.data.fontSize || 'inherit',
               textAlign: w.data.textConfig?.textAlign || 'center',
               width: '100%'
@@ -599,17 +599,17 @@ const renderWidgetPreview = (w: LayoutItem) => {
     case WidgetType.IMAGE:
       return w.data.url ? (
         <div className={`w-full h-full flex ${getAlignmentClasses(w.data.fillContainer ? 'stretch' : w.data.contentAlignment)} overflow-hidden`}>
-          <img 
-            src={w.data.url} 
-            className="pointer-events-none select-none w-full h-full" 
-            style={{ 
-              width: '100%', 
+          <img
+            src={w.data.url}
+            className="pointer-events-none select-none w-full h-full"
+            style={{
+              width: '100%',
               height: '100%',
               objectFit: (w.data.fillContainer || w.data.fitContainerMode === 'stretch') ? 'fill' : (w.data.fitContainerMode || w.data.imageConfig?.objectFit || 'cover'),
               transform: `scale(${w.data.imageConfig?.scale || 1})`,
               transformOrigin: 'center'
-            }} 
-            alt="Preview" 
+            }}
+            alt="Preview"
             referrerPolicy="no-referrer"
           />
         </div>
@@ -622,16 +622,16 @@ const renderWidgetPreview = (w: LayoutItem) => {
     case WidgetType.GIF:
       return w.data.url ? (
         <div className={`w-full h-full relative bg-black/20 flex ${getAlignmentClasses(w.data.fillContainer ? 'stretch' : w.data.contentAlignment)}`}>
-           <img 
-             src={w.data.url} 
-             className="pointer-events-none select-none w-full h-full"
-             style={{
-               width: '100%',
-               height: '100%',
-               objectFit: (w.data.fillContainer || w.data.fitContainerMode === 'stretch') ? 'fill' : (w.data.fitContainerMode || 'contain')
-             }}
-             alt="GIF Preview"
-           />
+          <img
+            src={w.data.url}
+            className="pointer-events-none select-none w-full h-full"
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: (w.data.fillContainer || w.data.fitContainerMode === 'stretch') ? 'fill' : (w.data.fitContainerMode || 'contain')
+            }}
+            alt="GIF Preview"
+          />
         </div>
       ) : (
         <div className="flex flex-col items-center justify-center w-full h-full">
@@ -648,40 +648,40 @@ const renderWidgetPreview = (w: LayoutItem) => {
     case WidgetType.VIDEO:
       return (
         <div className="w-full h-full flex flex-col items-center justify-center bg-slate-950 pointer-events-none relative overflow-hidden">
-            {w.data.videoUrl ? (
-              isYouTubeUrl(w.data.videoUrl) ? (
-                <iframe
-                  src={getEmbedUrl(w.data.videoUrl, w.data.videoConfig)}
-                  className="w-full h-full pointer-events-none"
-                  style={{
-                    border: 'none',
-                    transform: `scale(${w.data.scale || 1.05})`,
-                    transformOrigin: 'center'
-                  }}
-                  allow="autoplay; encrypted-media"
-                  title="YouTube Video Preview"
-                />
-              ) : (
-                <video 
-                  src={w.data.videoUrl} 
-                  className="w-full h-full opacity-80" 
-                  style={{
-                    objectFit: (w.data.fillContainer || w.data.fitContainerMode === 'stretch') ? 'fill' : (w.data.fitContainerMode || 'cover')
-                  }}
-                  autoPlay={w.data.videoConfig?.autoplay !== false}
-                  muted={w.data.videoConfig?.mute !== false}
-                  loop={w.data.videoConfig?.loop !== false}
-                  controls={w.data.videoConfig?.controls === true}
-                />
-              )
+          {w.data.videoUrl ? (
+            isYouTubeUrl(w.data.videoUrl) ? (
+              <iframe
+                src={getEmbedUrl(w.data.videoUrl, w.data.videoConfig)}
+                className="w-full h-full pointer-events-none"
+                style={{
+                  border: 'none',
+                  transform: `scale(${w.data.scale || 1.05})`,
+                  transformOrigin: 'center'
+                }}
+                allow="autoplay; encrypted-media"
+                title="YouTube Video Preview"
+              />
             ) : (
-              <>
-                <Film className="text-slate-700 mb-2" size={32} />
-                <span className="text-[10px] uppercase text-slate-600 font-bold">Vídeo Player</span>
-              </>
-            )}
-            <div className="absolute inset-0 z-10 bg-transparent"></div>
-         </div>
+              <video
+                src={w.data.videoUrl}
+                className="w-full h-full opacity-80"
+                style={{
+                  objectFit: (w.data.fillContainer || w.data.fitContainerMode === 'stretch') ? 'fill' : (w.data.fitContainerMode || 'cover')
+                }}
+                autoPlay={w.data.videoConfig?.autoplay !== false}
+                muted={w.data.videoConfig?.mute !== false}
+                loop={w.data.videoConfig?.loop !== false}
+                controls={w.data.videoConfig?.controls === true}
+              />
+            )
+          ) : (
+            <>
+              <Film className="text-slate-700 mb-2" size={32} />
+              <span className="text-[10px] uppercase text-slate-600 font-bold">Vídeo Player</span>
+            </>
+          )}
+          <div className="absolute inset-0 z-10 bg-transparent"></div>
+        </div>
       );
     case WidgetType.RSS:
       return <div className="w-full h-full bg-slate-900/50 p-2 overflow-hidden text-[8px] text-slate-500">RSS Feed: {w.data.rssUrl}</div>;
@@ -713,9 +713,9 @@ const renderWidgetPreview = (w: LayoutItem) => {
       return <div className="w-full h-full overflow-hidden"><PdfDocumentWidget data={w.data} /></div>;
     case WidgetType.CALENDAR:
       return (
-        <div 
+        <div
           className="w-full h-full relative overflow-hidden p-2 rounded-xl"
-          style={{ 
+          style={{
             backgroundColor: w.data.calendarConfig?.transparent ? 'transparent' : (w.data.calendarConfig?.backgroundColor || 'rgba(15, 23, 42, 0.5)'),
             backdropFilter: w.data.calendarConfig?.transparent ? 'none' : 'blur(12px)',
             border: w.data.calendarConfig?.transparent ? 'none' : '1px solid rgba(255,255,255,0.1)'
@@ -723,9 +723,9 @@ const renderWidgetPreview = (w: LayoutItem) => {
         >
           <div className="absolute inset-0 z-10 bg-transparent"></div>
           {w.data.calendarId ? (
-            <iframe 
-              src={`https://calendar.google.com/calendar/embed?src=${encodeURIComponent(w.data.calendarId)}&showTitle=0&showPrint=0&showTabs=0&showCalendars=0&showTz=0&bgcolor=${encodeURIComponent(w.data.calendarConfig?.backgroundColor || '#ffffff')}`} 
-              className="w-full h-full border-none pointer-events-none" 
+            <iframe
+              src={`https://calendar.google.com/calendar/embed?src=${encodeURIComponent(w.data.calendarId)}&showTitle=0&showPrint=0&showTabs=0&showCalendars=0&showTz=0&bgcolor=${encodeURIComponent(w.data.calendarConfig?.backgroundColor || '#ffffff')}`}
+              className="w-full h-full border-none pointer-events-none"
               style={{
                 filter: w.data.calendarConfig?.theme === 'dark' ? 'invert(1) hue-rotate(180deg) contrast(1.2)' : 'none',
                 mixBlendMode: w.data.calendarConfig?.transparent ? (w.data.calendarConfig?.theme === 'dark' ? 'screen' : 'multiply') : 'normal'
@@ -795,7 +795,7 @@ const renderWidgetControls = (
           <p className="text-[8px] text-amber-400/80 text-center leading-tight">
             ⚠️ Atenção: Isso removerá todos os outros widgets desta cena e deixará o widget ocupando 100% da tela como fundo.
           </p>
-          
+
           <div className="pt-2 border-t border-slate-800/60 space-y-2">
             <label className="text-[9px] font-black text-slate-400 uppercase block">Selecione o Background</label>
             <input
@@ -850,20 +850,20 @@ const renderWidgetControls = (
               className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#0ea5e9] h-24"
             />
           </div>
-          
+
           <div className="grid grid-cols-2 gap-3 mt-2">
-            <SizeInput 
+            <SizeInput
               label="Tamanho da Fonte"
               value={w.data.textConfig?.fontSize || w.data.fontSize}
-              onChange={(val) => updateData(w.i, { 
+              onChange={(val) => updateData(w.i, {
                 textConfig: { ...(w.data.textConfig || {}), fontSize: val },
-                fontSize: val 
+                fontSize: val
               })}
               placeholder="4cqw"
               step={0.5}
               isFont={true}
             />
-            
+
             <div>
               <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Cor do Texto</label>
               <div className="flex gap-2 h-[38px]">
@@ -873,11 +873,11 @@ const renderWidgetControls = (
                   onChange={e => updateData(w.i, { color: e.target.value })}
                   className="h-full w-10 bg-transparent border-0 cursor-pointer rounded overflow-hidden p-0"
                 />
-                <input 
-                  type="text" 
-                  value={w.data.color || '#ffffff'} 
-                  onChange={e => updateData(w.i, { color: e.target.value })} 
-                  className="w-full bg-slate-950 border border-slate-700 rounded text-[10px] text-slate-300 px-2 uppercase font-mono outline-none focus:border-[#0ea5e9]" 
+                <input
+                  type="text"
+                  value={w.data.color || '#ffffff'}
+                  onChange={e => updateData(w.i, { color: e.target.value })}
+                  className="w-full bg-slate-950 border border-slate-700 rounded text-[10px] text-slate-300 px-2 uppercase font-mono outline-none focus:border-[#0ea5e9]"
                 />
               </div>
             </div>
@@ -1099,9 +1099,9 @@ const renderWidgetControls = (
       {w.type === WidgetType.CALENDAR && (
         <div className="space-y-3">
           <label className="text-[9px] font-black text-slate-500 uppercase flex items-center gap-1"><Calendar size={10} /> ID do Google Calendar</label>
-          <input 
-            type="text" 
-            value={w.data.calendarId || ''} 
+          <input
+            type="text"
+            value={w.data.calendarId || ''}
             onChange={(e) => {
               let raw = e.target.value.trim();
               const iframeSrcMatch = raw.match(/src=["']([^"']+)["']/i);
@@ -1112,10 +1112,10 @@ const renderWidgetControls = (
                   const srcParam = url.searchParams.get('src');
                   if (srcParam) { raw = srcParam; }
                 }
-              } catch {}
+              } catch { }
               updateData(w.i, { calendarId: raw });
-            }} 
-            className="w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-xs text-slate-200 outline-none focus:border-[#0ea5e9] transition-all font-mono" 
+            }}
+            className="w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-xs text-slate-200 outline-none focus:border-[#0ea5e9] transition-all font-mono"
             placeholder="Cole aqui o ID, URL ou iframe do Google Calendar"
           />
           <p className="text-[9px] text-emerald-500/80 leading-relaxed bg-emerald-500/5 p-2 rounded border border-emerald-500/10">
@@ -1201,7 +1201,7 @@ const renderWidgetControls = (
               <option value="display">Display (Negrito)</option>
             </select>
           </div>
-          <SizeInput 
+          <SizeInput
             label="Tamanho da Fonte"
             value={w.data.notesConfig?.fontSize}
             onChange={(val) => updateData(w.i, { notesConfig: { ...w.data.notesConfig, fontSize: val } })}
@@ -1347,7 +1347,7 @@ const renderWidgetControls = (
               className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#0ea5e9]"
             />
           </div>
-          
+
           <div className="bg-slate-900/40 p-2 rounded border border-slate-800 space-y-2">
             <span className="text-[9px] font-black text-slate-400 uppercase block">Adicionar Dever</span>
             <input
@@ -1450,7 +1450,7 @@ const renderWidgetControls = (
               className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#0ea5e9]"
             />
           </div>
-          
+
           <div>
             <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Dia para Editar</label>
             <select
@@ -1458,7 +1458,7 @@ const renderWidgetControls = (
               className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#0ea5e9]"
               defaultValue="Segunda"
               onChange={() => {
-                updateData(w.i, {}); 
+                updateData(w.i, {});
               }}
             >
               <option value="Segunda">Segunda-feira</option>
@@ -1763,16 +1763,16 @@ const renderWidgetControls = (
       {/* Ajustes de Layout */}
       <div className="mt-4 pt-4 border-t border-slate-800 space-y-3">
         <span className="text-[9px] font-black text-slate-500 uppercase tracking-wider block">Ajustes de Layout</span>
-        
+
         {/* Grid de Switches */}
         <div className="grid grid-cols-1 gap-2">
           <label className={`flex items-center gap-3 text-[11px] text-slate-300 cursor-pointer p-2.5 rounded-lg border transition-all w-full select-none ${w.data.fillContainer ? 'bg-[#0ea5e9]/10 border-[#0ea5e9]/50 ring-1 ring-[#0ea5e9]/20' : 'bg-slate-950/60 border-slate-800/80 hover:border-[#0ea5e9]/30 hover:bg-slate-950'}`}>
-            <input 
-              type="checkbox" 
-              checked={w.data.fillContainer || false} 
+            <input
+              type="checkbox"
+              checked={w.data.fillContainer || false}
               onChange={(e) => {
                 const checked = e.target.checked;
-                updateData(w.i, { 
+                updateData(w.i, {
                   fillContainer: checked,
                   fullScreenMode: checked,
                   contentAlignment: checked ? 'stretch' : 'center',
@@ -1793,12 +1793,12 @@ const renderWidgetControls = (
           </label>
 
           <label className={`flex items-center gap-3 text-[11px] text-slate-300 cursor-pointer p-2.5 rounded-lg border transition-all w-full select-none ${w.data.fullScreenMode ? 'bg-indigo-950/40 border-indigo-500/50 ring-1 ring-indigo-500/20' : 'bg-slate-950/60 border-slate-800/80 hover:border-[#0ea5e9]/30 hover:bg-slate-950'}`}>
-            <input 
-              type="checkbox" 
-              checked={w.data.fullScreenMode || false} 
+            <input
+              type="checkbox"
+              checked={w.data.fullScreenMode || false}
               onChange={(e) => {
                 const checked = e.target.checked;
-                updateData(w.i, { 
+                updateData(w.i, {
                   fullScreenMode: checked,
                   ...(checked ? {
                     fillContainer: true,
@@ -1838,11 +1838,10 @@ const renderWidgetControls = (
                   key={align.id}
                   type="button"
                   onClick={() => updateData(w.i, { contentAlignment: align.id as any })}
-                  className={`py-1 text-[9px] rounded font-medium border transition-all ${
-                    (w.data.contentAlignment || 'center') === align.id
+                  className={`py-1 text-[9px] rounded font-medium border transition-all ${(w.data.contentAlignment || 'center') === align.id
                       ? 'bg-[#0ea5e9]/20 text-[#0ea5e9] border-[#0ea5e9]'
                       : 'bg-slate-950 text-slate-400 border-slate-800 hover:border-slate-700'
-                  }`}
+                    }`}
                 >
                   {align.label}
                 </button>
@@ -1854,15 +1853,15 @@ const renderWidgetControls = (
         {/* Padding e Margin — oculto se fillContainer ativo */}
         {!w.data.fillContainer && (
           <div className="grid grid-cols-2 gap-2">
-            <SizeInput 
-              label="Espaçamento (Padding)" 
-              value={w.data.padding} 
+            <SizeInput
+              label="Espaçamento (Padding)"
+              value={w.data.padding}
               onChange={(val) => updateData(w.i, { padding: val })}
               placeholder="0px"
             />
-            <SizeInput 
-              label="Margem (Margin)" 
-              value={w.data.margin} 
+            <SizeInput
+              label="Margem (Margin)"
+              value={w.data.margin}
               onChange={(val) => updateData(w.i, { margin: val })}
               placeholder="0px"
             />

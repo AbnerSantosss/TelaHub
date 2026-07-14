@@ -13,6 +13,7 @@ const Player = React.lazy(() => import('./components/Player'));
 const Login = React.lazy(() => import('./components/Login'));
 const ForgotPassword = React.lazy(() => import('./components/ForgotPassword'));
 const ResetPassword = React.lazy(() => import('./components/ResetPassword'));
+const Landing = React.lazy(() => import('./components/Landing'));
 
 // Componente para Proteger Rotas
 const ProtectedRoute = ({ children }: { children?: React.ReactNode }) => {
@@ -70,6 +71,7 @@ const App: React.FC = () => {
             <Route path="/login" element={<Login />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/vendas" element={<Landing />} />
             
             {/* Rotas Protegidas */}
             <Route path="/" element={

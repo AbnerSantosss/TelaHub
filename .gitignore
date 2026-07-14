@@ -29,25 +29,10 @@ Thumbs.db
 
 # Agents (AI workspace)
 .agents/
-
-# Generated Obsidian Vaults / Local wikis
-tela-vaut/
-telahub/
+.claude/settings.local.json
+.playwright-mcp/
 
 # Temporary / Dev utilities
 backend/fix-*.js
-generate-wiki.js
 docker-compose.dev.yml
 **/package-lock.json
-
-# Docs com dados sensíveis / estratégicos
-RESUMO_PROJETO.md
-APRESENTACAO_VENDAS.md
-
-# AI e Arquivos locais
-PROJECT_MEMORY.md
-.antigravityrules
-check-env.js
-gerar-wiki.js
-delete-telahub.js
-setup-dev.js

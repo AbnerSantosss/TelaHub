@@ -90,6 +90,11 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
   activeMealDay,
   setActiveMealDay
 }) => {
+  // When no widget is selected, don't render the panel at all so the canvas stays centered
+  if (!currentWidget) {
+    return null;
+  }
+
   return (
     <aside className={`absolute md:relative right-0 top-0 h-full w-80 bg-[#1f2937] border-l border-slate-800 p-6 overflow-y-auto z-[60] shadow-xl transition-transform duration-300 ease-in-out ${showRightSidebar ? 'translate-x-0' : 'translate-x-full md:translate-x-0'}`}>
       {currentWidget ? (
