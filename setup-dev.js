@@ -13,6 +13,7 @@
 const fs = require('fs');
 const path = require('path');
 const net = require('net');
+const { execSync } = require('child_process');
 
 const ROOT = __dirname;
 
@@ -110,6 +111,22 @@ services:
 
   fs.writeFileSync(overridePath, overrideContent, 'utf-8');
   log(colors.green, '✓', `docker-compose.override.yml criado (porta ${dbPort})`);
+
+  // 2b. Rede compartilhada pelas stacks (painel, site, checkout, cloudflared).
+  // O compose a declara como `external`, então ela precisa existir ANTES do
+  // `docker compose up` — inclusive localmente, senão o comando falha com
+  // "network telahub_net declared as external, but could not be found".
+  try {
+    execSync('docker network inspect telahub_net', { stdio: 'ignore' });
+    log(colors.green, '✓', 'Rede docker telahub_net já existe');
+  } catch {
+    try {
+      execSync('docker network create telahub_net', { stdio: 'ignore' });
+      log(colors.green, '✓', 'Rede docker telahub_net criada');
+    } catch {
+      log(colors.yellow, '!', 'Não foi possível criar a rede telahub_net (o Docker está rodando?). Crie com: docker network create telahub_net');
+    }
+  }
 
   // 3. Criar backend/.env
   const backendEnvPath = path.join(ROOT, 'backend', '.env');

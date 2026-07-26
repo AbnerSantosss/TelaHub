@@ -1,3 +1,15 @@
+# Stack de PRODUÇÃO do painel (backend + banco + frontend).
+#
+# Duas regras que valem para as quatro stacks do produto:
+#
+# 1. NENHUMA porta publicada. Quem expõe qualquer coisa à internet é o
+#    Cloudflare Tunnel, que alcança os containers pelo nome de serviço na rede
+#    `telahub_net`. Publicar porta aqui reabre a VPS para acesso direto,
+#    contornando o Zero Trust.
+# 2. NENHUM `build:`. As imagens vêm prontas do GHCR, montadas pelo GitHub
+#    Actions. Buildar na VPS disputa RAM com o que está no ar e — pior — não
+#    aplicaria as variáveis `VITE_*` da stack, porque o Vite as resolve em tempo
+#    de build, não de execução.
 
 services:
   # 1. Banco de Dados PostgreSQL
@@ -11,67 +23,95 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     networks:
-      - display_network
+      - telahub_net
+    healthcheck:
+      # O backend espera com `sleep 5`, que é um chute. O healthcheck deixa o
+      # `depends_on` abaixo esperar o banco aceitar conexão de verdade.
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}']
+      interval: 5s
+      timeout: 5s
+      retries: 12
 
   # 2. Backend (Node.js API)
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    image: ghcr.io/abnersantosss/telahub-backend:${IMAGE_TAG:-latest}
     restart: unless-stopped
-    ports:
-      - "3027:3001"
     environment:
+      - NODE_ENV=production
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}?schema=public
       - JWT_SECRET=${JWT_SECRET}
       - PORT=3001
-      - CORS_ORIGINS=${CORS_ORIGINS:-*}
-      - APP_URL=${APP_URL:-http://localhost:3025}
+      # Origens exatas — a comparação é por igualdade, então barra final a mais
+      # ou domínio parcial derruba a comunicação do painel com a API.
+      - CORS_ORIGINS=${CORS_ORIGINS:-https://app.telahub.com.br,https://checkout.telahub.com.br}
+      - APP_URL=${APP_URL:-https://app.telahub.com.br}
+      # Nº de proxies na frente do backend. Com Cloudflare Tunnel → Nginx →
+      # backend são DOIS saltos; com 1, o rate limit de login agrupa todos os
+      # visitantes num contador só.
+      - TRUST_PROXY=${TRUST_PROXY:-2}
+      # Seed do admin. Sem estes valores o seed aborta e o container não sobe —
+      # ver `backend/prisma/seed-prod.js`.
+      - ADMIN_EMAIL=${ADMIN_EMAIL}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - ADMIN_NAME=${ADMIN_NAME:-Administrador}
+      - ADMIN_PASSWORD_RESET=${ADMIN_PASSWORD_RESET:-false}
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     volumes:
       - uploads_data:/app/uploads
     networks:
-      - display_network
-    # Cria/atualiza tabelas no banco + cria admin + inicia o servidor (com delay de 5s para o Postgres subir)
+      - telahub_net
+    # Sequência de boot. A ORDEM IMPORTA:
+    #   1. db push            — aplica o schema (inclui Plan/Subscription/AuditLog e o escopo de tenant)
+    #   2. backfill-tenant    — vincula usuários/devices/broadcasts pré-existentes a uma organização.
+    #                           Sem isto, todo usuário que não seja `master` recebe 403 e os
+    #                           registros antigos ficam invisíveis — é o passo que evita
+    #                           trancar a operação atual fora do sistema.
+    #   3. seed-plans         — cria o catálogo de planos (o seed-prod depende do plano `loja`)
+    #   4. seed-prod          — admin, display demo e assinatura herdada das organizações existentes
+    # Todos os quatro são idempotentes: podem rodar em cada restart do container.
+    # Encadeado com `&&` de propósito: se o seed falhar por falta de
+    # ADMIN_PASSWORD, o container NÃO sobe — é melhor do que subir sem admin.
+    # Nota: os passos 2 e 3 usam `tsx`, que existe na imagem porque o Dockerfile
+    # copia o `node_modules` completo do builder. Se algum dia o build passar a
+    # instalar só dependências de produção, converta esses scripts para JS puro.
     command: >
-      sh -c "sleep 5 && npx prisma db push --skip-generate && node prisma/seed-prod.js && npm start"
+      sh -c "npx prisma db push --skip-generate &&
+      npx tsx prisma/backfill-tenant-scope.ts &&
+      npx tsx prisma/seed-plans.ts &&
+      node prisma/seed-prod.js &&
+      npm start"
 
-  # 3. Frontend (React + Vite servido pelo Nginx)
+  # 3. Frontend (React + Vite servido pelo Nginx, na porta 3025)
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-      args:
-        # Usamos rota relativa /api para que o NGINX faça o proxy reverso
-        - VITE_API_URL=/api
+    image: ghcr.io/abnersantosss/telahub-frontend:${IMAGE_TAG:-latest}
     restart: unless-stopped
-    ports:
-      - "3025:3025"
     networks:
-      - display_network
+      - telahub_net
 
-  # 4. pgAdmin — Interface visual para o banco de dados
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    restart: unless-stopped
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
-    ports:
-      - "5053:80"
-    volumes:
-      - pgadmin_data:/var/lib/pgadmin
-    depends_on:
-      - db
-    networks:
-      - display_network
+# ─────────────────────────────────────────────────────────────────────────────
+# pgAdmin saiu desta stack de propósito.
+#
+# Ele estava publicado em `5053:80`, ou seja: um administrador de banco de dados
+# aberto na internet, protegido só por usuário e senha em variável de ambiente.
+# Para administrar o banco, prefira uma destas:
+#   - `docker exec -it <container-db> psql -U $POSTGRES_USER -d $POSTGRES_DB`
+#   - um pgAdmin efêmero, subido só quando precisar e sem porta publicada,
+#     alcançado por um hostname do Tunnel protegido por Cloudflare Access.
+# ─────────────────────────────────────────────────────────────────────────────
 
 networks:
-  display_network:
-    driver: bridge
+  # Rede COMPARTILHADA pelas quatro stacks (painel, site, checkout, cloudflared).
+  # Criada uma única vez, fora do compose:  docker network create telahub_net
+  #
+  # Externa e com nome fixo de propósito: antes o checkout referenciava
+  # `app-projeto_display_network`, nome DERIVADO do nome da stack — renomear a
+  # stack no Portainer quebrava o checkout com um erro de DNS difícil de ligar à
+  # causa.
+  telahub_net:
+    external: true
 
 volumes:
   pgdata:
-  pgadmin_data:
   uploads_data:
