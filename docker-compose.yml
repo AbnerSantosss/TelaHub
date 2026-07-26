@@ -1,11 +1,13 @@
 # Stack de PRODUÇÃO do painel (backend + banco + frontend).
 #
-# Duas regras que valem para as quatro stacks do produto:
+# Duas regras que valem para as stacks do produto:
 #
-# 1. NENHUMA porta publicada. Quem expõe qualquer coisa à internet é o
-#    Cloudflare Tunnel, que alcança os containers pelo nome de serviço na rede
-#    `telahub_net`. Publicar porta aqui reabre a VPS para acesso direto,
-#    contornando o Zero Trust.
+# 1. AS PORTAS PUBLICADAS SÃO NECESSÁRIAS. O `cloudflared` desta VPS roda no
+#    HOST, não em container, e as rotas do túnel apontam para `localhost:PORTA`
+#    / `192.168.3.16:PORTA` — não para nomes de serviço do Docker. Remover
+#    `ports:` aqui derruba o produto do ar.
+#    Se um dia o cloudflared virar container na rede `telahub_net`, aí sim estas
+#    portas saem e as rotas passam a apontar para `frontend:3025` etc.
 # 2. NENHUM `build:`. As imagens vêm prontas do GHCR, montadas pelo GitHub
 #    Actions. Buildar na VPS disputa RAM com o que está no ar e — pior — não
 #    aplicaria as variáveis `VITE_*` da stack, porque o Vite as resolve em tempo
@@ -36,6 +38,9 @@ services:
   backend:
     image: ghcr.io/abnersantosss/telahub-backend:${IMAGE_TAG:-latest}
     restart: unless-stopped
+    ports:
+      # Exigida pelo túnel (roda no host). Ver o comentário no topo do arquivo.
+      - "3027:3001"
     environment:
       - NODE_ENV=production
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}?schema=public
@@ -43,8 +48,8 @@ services:
       - PORT=3001
       # Origens exatas — a comparação é por igualdade, então barra final a mais
       # ou domínio parcial derruba a comunicação do painel com a API.
-      - CORS_ORIGINS=${CORS_ORIGINS:-https://app.telahub.com.br,https://checkout.telahub.com.br}
-      - APP_URL=${APP_URL:-https://app.telahub.com.br}
+      - CORS_ORIGINS=${CORS_ORIGINS:-https://telahub.proxserverabner.site,https://checkout.proxserverabner.site}
+      - APP_URL=${APP_URL:-https://telahub.proxserverabner.site}
       # Nº de proxies na frente do backend. Com Cloudflare Tunnel → Nginx →
       # backend são DOIS saltos; com 1, o rate limit de login agrupa todos os
       # visitantes num contador só.
@@ -87,6 +92,9 @@ services:
   frontend:
     image: ghcr.io/abnersantosss/telahub-frontend:${IMAGE_TAG:-latest}
     restart: unless-stopped
+    ports:
+      # telahub.proxserverabner.site -> 192.168.3.16:3025 (rota do túnel)
+      - "3025:3025"
     networks:
       - telahub_net
 

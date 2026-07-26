@@ -19,12 +19,12 @@ const stripTrailingSlash = (value: string): string => value.replace(/\/+$/, '');
 
 /** Site de vendas público (SSR/SEO). */
 export const SITE_URL = stripTrailingSlash(
-  import.meta.env.VITE_SITE_URL || 'https://telahub.com.br'
+  import.meta.env.VITE_SITE_URL || 'https://sitetelahub.proxserverabner.site'
 );
 
 /** App de checkout — é ele que conduz a contratação de plano pago. */
 export const CHECKOUT_URL = stripTrailingSlash(
-  import.meta.env.VITE_CHECKOUT_URL || 'https://checkout.telahub.com.br'
+  import.meta.env.VITE_CHECKOUT_URL || 'https://checkout.proxserverabner.site'
 );
 
 /** Seção de planos do site de vendas. */

@@ -66,8 +66,8 @@ jobs:
           # Só o frontend consome estes args; o Dockerfile do backend os ignora.
           build-args: |
             VITE_API_URL=/api
-            VITE_SITE_URL=https://telahub.com.br
-            VITE_CHECKOUT_URL=https://checkout.telahub.com.br
+            VITE_SITE_URL=https://sitetelahub.proxserverabner.site
+            VITE_CHECKOUT_URL=https://checkout.proxserverabner.site
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
