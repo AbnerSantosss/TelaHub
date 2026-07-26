@@ -1,6 +1,17 @@
 
-import { api, setAuthToken, getAuthToken } from '../libs/api';
-import { Display, User, Device, Broadcast } from '../types';
+import { api, setAuthToken, getAuthToken, setActiveOrganizationId } from '../libs/api';
+import {
+  Display,
+  User,
+  Device,
+  Broadcast,
+  Organization,
+  OrganizationReport,
+  Plan,
+  SignupPayload,
+  SignupResponse,
+  SubscriptionState,
+} from '../types';
 
 // ==============================================================================
 // AUTH & USER FUNCTIONS
@@ -29,8 +40,30 @@ export const login = async (loginInput: string, password: string): Promise<User 
   return user;
 };
 
+/**
+ * Cadastro self-service (rota pública `POST /api/signup`).
+ * Cria organização + usuário admin + assinatura em trial e devolve
+ * `{ token, user }` no mesmo formato do login — o token é persistido aqui,
+ * exatamente como em `login()`.
+ */
+export const signup = async (payload: SignupPayload): Promise<SignupResponse> => {
+  const result = await api.post<SignupResponse>('/signup', {
+    companyName: payload.companyName.trim(),
+    name: payload.name.trim(),
+    email: payload.email.trim(),
+    password: payload.password,
+  });
+
+  setAuthToken(result.token);
+  return result;
+};
+
 export const logout = async (): Promise<void> => {
   setAuthToken(null);
+  // Limpa também o escopo de organização: sem isto, o tenant do usuário
+  // anterior sobrevive no localStorage e seria enviado no login seguinte
+  // feito na mesma máquina.
+  setActiveOrganizationId(null);
 };
 
 export const getUsers = async (): Promise<User[]> => {
@@ -220,13 +253,13 @@ export const checkDeviceStatus = async (deviceId: string): Promise<Device | null
   }
 };
 
-export const linkDevice = async (code: string, displayId: string, name: string): Promise<boolean> => {
-  try {
-    await api.post('/devices/link', { code, displayId, name });
-    return true;
-  } catch {
-    return false;
-  }
+/**
+ * Vincula um dispositivo a um display.
+ * Propaga o erro da API (inclui 402 de assinatura inválida e 403 de quota
+ * estourada) para que a UI possa exibir a mensagem que o backend mandou.
+ */
+export const linkDevice = async (code: string, displayId: string, name: string): Promise<void> => {
+  await api.post('/devices/link', { code, displayId, name });
 };
 
 export const unlinkDevice = async (deviceId: string): Promise<void> => {
@@ -268,6 +301,67 @@ export const saveBroadcast = async (broadcast: Broadcast): Promise<void> => {
 
 export const deleteBroadcast = async (id: string): Promise<void> => {
   await api.delete(`/broadcasts/${id}`);
+};
+
+// ==============================================================================
+// ORGANIZATION FUNCTIONS
+// ==============================================================================
+
+export const getOrganizations = async (): Promise<Organization[]> => {
+  try {
+    return await api.get<Organization[]>('/organizations');
+  } catch (error) {
+    console.error("Erro ao carregar organizações:", error);
+    return [];
+  }
+};
+
+export const createOrganization = async (name: string): Promise<Organization> => {
+  return await api.post<Organization>('/organizations', { name });
+};
+
+export const getOrganizationReport = async (
+  organizationId: string,
+  period?: { startDate?: string; endDate?: string }
+): Promise<OrganizationReport | null> => {
+  try {
+    const params = new URLSearchParams();
+    if (period?.startDate) params.set('startDate', period.startDate);
+    if (period?.endDate) params.set('endDate', period.endDate);
+    const query = params.toString() ? `?${params.toString()}` : '';
+    return await api.get<OrganizationReport>(`/organizations/${organizationId}/report${query}`);
+  } catch (error) {
+    console.error("Erro ao carregar relatório da organização:", error);
+    return null;
+  }
+};
+
+// ==============================================================================
+// BILLING / PLANS FUNCTIONS
+// ==============================================================================
+
+/** `GET /api/plans` (pública). Devolve [] se a rota ainda não existir. */
+export const getPlans = async (): Promise<Plan[]> => {
+  try {
+    return await api.get<Plan[]>('/plans');
+  } catch {
+    // Backend de billing pode ainda não estar no ar — degrada silenciosamente.
+    return [];
+  }
+};
+
+/**
+ * `GET /api/billing/subscription` (autenticada).
+ * Devolve `null` — sem lançar e sem poluir o console — quando o endpoint
+ * ainda não existe (404) ou a rede falha. A UI simplesmente não renderiza
+ * a faixa de assinatura nesse caso.
+ */
+export const getSubscription = async (): Promise<SubscriptionState | null> => {
+  try {
+    return await api.get<SubscriptionState>('/billing/subscription');
+  } catch {
+    return null;
+  }
 };
 
 // ==============================================================================
