@@ -5,10 +5,13 @@
 # deploy antigo junto — e o ponto deste aqui é justamente ser independente.
 #
 # ─── O que muda em relação ao antigo ──────────────────────────────────────────
-# 1. NENHUMA porta publicada. Quem expõe é o `cloudflared` de `infra/tunnel-
-#    compose.yml`, que roda na mesma rede e alcança os containers pelo NOME.
-#    É isso que permite as duas stacks coexistirem: sem porta publicada, não há
-#    conflito com as 3025/3027 que a antiga ocupa.
+# 1. PORTAS PRÓPRIAS, diferentes das da stack antiga. O túnel desta VPS roda no
+#    HOST e roteia para `localhost:PORTA` — ele não enxerga nomes de container,
+#    então publicar porta é obrigatório. Usar as mesmas 3025/3027 da stack
+#    antiga faria o container novo nem subir ("port is already allocated"),
+#    por isso a faixa 40xx.
+#      4025 → painel   (rota: painel.proxserverabner.site)
+#    O backend NÃO publica porta: o Nginx do frontend já faz proxy de /api.
 # 2. Banco NOVO E VAZIO. O volume é próprio desta stack, então nada da base
 #    antiga vem junto — é uma instalação limpa. A base antiga continua intacta
 #    no volume dela, servindo a stack antiga.
@@ -87,6 +90,9 @@ services:
       npm start"
 
   frontend:
+    ports:
+      # painel.proxserverabner.site -> localhost:4025 (rota no túnel do host)
+      - "4025:3025"
     build:
       context: ./frontend
       dockerfile: Dockerfile

@@ -1,4 +1,15 @@
-# Cloudflare Tunnel — a única porta de entrada da stack NOVA.
+# Cloudflare Tunnel em container — NÃO USADO HOJE. Guardado como caminho futuro.
+#
+# A VPS já tem um `cloudflared` rodando no HOST, com as rotas apontando para
+# `localhost:PORTA`, e é ele que serve tanto a stack antiga quanto a nova. Por
+# isso a stack nova publica portas (4025/4038/4039) em vez de depender deste
+# arquivo.
+#
+# Migrar para o modelo abaixo — cloudflared como container na rede `telahub_net`
+# — permitiria remover TODAS as portas publicadas: nada da VPS ficaria acessível
+# pelo IP público, só pelo túnel. Para fazer isso: criar um túnel novo, subir
+# esta stack com o token, repontar os hostnames para os nomes de serviço, e só
+# então apagar os blocos `ports:` dos outros composes.
 #
 # Diferente do túnel antigo, que roda no HOST e alcança os serviços por
 # `localhost:PORTA`, este roda como container DENTRO da rede `telahub_net` e
