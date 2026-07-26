@@ -1,8 +1,9 @@
 # Stack NOVA do site de vendas, em paralelo à antiga.
 #
 # Arquivo separado do `docker-compose.yml`, que é o usado pela stack antiga.
-# Sem porta publicada: quem expõe é o `cloudflared` da stack `telahub-tunnel`,
-# que roda na mesma rede e alcança este container pelo nome `site`.
+# Porta própria (4038), diferente da 42938 da stack antiga: o túnel desta VPS
+# roda no HOST e roteia para `localhost:PORTA`, então publicar é obrigatório, e
+# repetir a porta da stack antiga impediria o container de subir.
 
 services:
   site:
@@ -16,6 +17,9 @@ services:
         - VITE_APP_URL=${VITE_APP_URL:-https://painel.proxserverabner.site}
     container_name: telahub-site-prod
     restart: unless-stopped
+    ports:
+      # vendas.proxserverabner.site -> localhost:4038
+      - "4038:80"
     networks:
       - telahub_net
     healthcheck:
