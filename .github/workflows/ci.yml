@@ -39,6 +39,12 @@ jobs:
           cache-dependency-path: backend/package-lock.json
       - run: npm ci
       - run: npx prisma db push --skip-generate
+      # Catálogo de planos. Vários testes (quota, subscription) consultam os
+      # planos REAIS por código — `suggestUpgradeFor` procura o `loja` para
+      # sugerir o upgrade, por exemplo. Sem semear, o banco do CI só tem os
+      # planos que cada teste cria para si, e a sugestão cai num fallback:
+      # é a diferença entre o CI e a máquina do dev, onde o catálogo já existe.
+      - run: npx tsx prisma/seed-plans.ts
       # `build` compila só o código de produção (tsconfig.build.json), então o
       # type-check dos testes precisa de um passo próprio.
       - run: npm run typecheck
