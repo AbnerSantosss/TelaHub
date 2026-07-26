@@ -2,26 +2,26 @@ const BentoFeatures = () => {
   const desires = [
     {
       id: 1,
-      title: "Exibir cardápios do dia sem complicação",
-      description: "Substitua quadros de giz ou impressos. Destaque o prato do dia, altere preços no celular e faça seus clientes comerem com os olhos.",
+      title: "Trocar o preço do prato do dia às 11h, do celular",
+      description: "Acabou o salmão? Você tira do cardápio antes do almoço, sem reimprimir nada. Quadro de giz e cartaz plastificado viram custo fixo que você deixa de pagar todo mês.",
       emoji: "🍽️"
     },
     {
       id: 2,
-      title: "Passar o vídeo institucional da sua clínica",
-      description: "Esqueça canais de TV aberta chatos na recepção. Promova seus tratamentos, passe dicas de saúde e eduque seus pacientes em loop contínuo.",
+      title: "Ocupar os 18 minutos que o paciente passa na sua recepção",
+      description: "Em vez de novela e propaganda de concorrente, sua sala de espera roda seus tratamentos, seus casos e suas orientações — em loop, sem ninguém apertar play.",
       emoji: "🩺"
     },
     {
       id: 3,
-      title: "Parar de brigar com a TV da sua loja",
-      description: "Chega de pen-drives corrompidos, cabos HDMI enormes ou sistemas caros que travam todo dia. Controle tudo da recepção de forma simples.",
+      title: "Nunca mais atravessar a loja com um pen-drive na mão",
+      description: "Pen-drive corrompido, cabo HDMI atravessando a parede, sistema que trava e mostra a tela preta na frente do cliente. Você publica de onde estiver e a TV obedece.",
       emoji: "📺"
     },
     {
       id: 4,
-      title: "Vender muito mais no piloto automático",
-      description: "Exiba ofertas dinâmicas, promoções relâmpago e QR Codes diretamente para os clientes que já estão dentro do seu estabelecimento.",
+      title: "Anunciar para quem já está com a carteira na mão",
+      description: "Seu cliente já entrou. É o momento mais barato de vender pra ele: oferta do dia, combo, QR Code de cadastro. Sem disputar leilão de anúncio com ninguém.",
       emoji: "📈"
     }
   ];
@@ -30,7 +30,7 @@ const BentoFeatures = () => {
     <section id="recursos" aria-labelledby="recursos-heading">
       <div className="container">
         <div className="section-header" style={{ textAlign: 'center', marginBottom: '56px' }}>
-          <div className="label reveal" style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10B981', borderColor: 'rgba(16, 185, 129, 0.25)', borderRadius: '99px' }}>
+          <div className="label reveal" style={{ background: 'rgba(14, 165, 233, 0.1)', color: '#0ea5e9', borderColor: 'rgba(14, 165, 233, 0.25)', borderRadius: '99px' }}>
             Foco no Dono do Negócio
           </div>
           <h2 id="recursos-heading" className="reveal" style={{ fontSize: 'clamp(1.8rem, 3vw, 2.5rem)', fontWeight: '800' }}>
@@ -61,13 +61,13 @@ const BentoFeatures = () => {
               <div style={{
                 width: '36px',
                 height: '36px',
-                background: 'rgba(16, 185, 129, 0.1)',
-                border: '1px solid rgba(16, 185, 129, 0.25)',
+                background: 'rgba(14, 165, 233, 0.1)',
+                border: '1px solid rgba(14, 165, 233, 0.25)',
                 borderRadius: '50%',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: '#10B981',
+                color: '#0ea5e9',
                 fontSize: '1.1rem',
                 fontWeight: 'bold'
               }}>

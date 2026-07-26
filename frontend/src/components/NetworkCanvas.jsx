@@ -44,7 +44,7 @@ const NetworkCanvas = () => {
       draw() {
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(148, 163, 184, 0.45)'; // Brighter slate particles
+        ctx.fillStyle = 'rgba(14, 165, 233, 0.3)'; // Brighter slate particles
         ctx.fill();
       }
     }
@@ -72,7 +72,7 @@ const NetworkCanvas = () => {
             ctx.beginPath();
             ctx.moveTo(p1.x, p1.y);
             ctx.lineTo(p2.x, p2.y);
-            ctx.strokeStyle = `rgba(100, 116, 139, ${alpha})`; // Lighter slate connection lines
+            ctx.strokeStyle = `rgba(14, 165, 233, ${alpha * 0.5})`; // Lighter slate connection lines
             ctx.lineWidth = 0.8;
             ctx.stroke();
           }
@@ -87,7 +87,7 @@ const NetworkCanvas = () => {
             ctx.beginPath();
             ctx.moveTo(p1.x, p1.y);
             ctx.lineTo(mouse.x, mouse.y);
-            ctx.strokeStyle = `rgba(56, 189, 248, ${alpha})`; // Bright Sky Blue on hover
+            ctx.strokeStyle = `rgba(2, 132, 199, ${alpha})`; // Bright Sky Blue on hover
             ctx.lineWidth = 1.2;
             ctx.stroke();
           }

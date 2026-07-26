@@ -1,0 +1,17 @@
+{
+  "name": "TelaHub — Gerenciamento de Telas Digitais",
+  "short_name": "TelaHub",
+  "description": "Gerencie todas as suas telas digitais remotamente, sem hardware proprietário.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0ea5e9",
+  "lang": "pt-BR",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

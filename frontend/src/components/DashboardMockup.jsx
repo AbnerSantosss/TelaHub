@@ -77,7 +77,7 @@ const DashboardMockup = ({ telemetry, lastSyncTime, triggerConversionModal }) =>
       </div>
 
       {/* Floating Active Pulse Notification Badge */}
-      <div className="hero-float-badge" aria-hidden="true" onClick={() => triggerConversionModal('Business')} style={{ cursor: 'pointer' }}>
+      <div className="hero-float-badge" aria-hidden="true" onClick={() => triggerConversionModal('Grátis')} style={{ cursor: 'pointer' }}>
         <span className="float-icon">⚡</span>
         <div className="float-text">
           <strong>Atualização enviada</strong>

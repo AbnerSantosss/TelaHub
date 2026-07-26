@@ -1,3 +1,5 @@
+import { trackEvent } from '../lib/tracking';
+
 const TV_DATA = {
   cond: {
     landscape: { img: '/assets/images/recepcao_boas_vindas.png', label: '16:9 Horizontal' },
@@ -45,7 +47,32 @@ const TvSimulation = ({ tabKey }) => {
   );
 };
 
+const TABS = [
+  { key: 'cond', label: 'Condomínios', icon: '🏢' },
+  { key: 'corp', label: 'Prédios Corporativos', icon: '🏙️' },
+  { key: 'varejo', label: 'Varejo & Alimentação', icon: '🍽️' },
+  { key: 'rh', label: 'Endomarketing & RH', icon: '📣' }
+];
+
 const UseCases = ({ activeTab, setActiveTab, telemetry }) => {
+  const handleTabChange = (tabKey, tabLabel) => {
+    setActiveTab(tabKey);
+    trackEvent('use_case_tab_select', { tab_id: tabKey, tab_label: tabLabel });
+  };
+
+  const handleTabKeyDown = (e, index) => {
+    if (!['ArrowRight', 'ArrowLeft', 'Home', 'End'].includes(e.key)) return;
+    e.preventDefault();
+    let nextIndex = index;
+    if (e.key === 'ArrowRight') nextIndex = (index + 1) % TABS.length;
+    if (e.key === 'ArrowLeft') nextIndex = (index - 1 + TABS.length) % TABS.length;
+    if (e.key === 'Home') nextIndex = 0;
+    if (e.key === 'End') nextIndex = TABS.length - 1;
+    const next = TABS[nextIndex];
+    handleTabChange(next.key, next.label);
+    document.getElementById(`tab-${next.key}`)?.focus();
+  };
+
   return (
     <section id="casos" aria-labelledby="casos-heading">
       <div className="container">
@@ -62,43 +89,26 @@ const UseCases = ({ activeTab, setActiveTab, telemetry }) => {
         <div className="tabs-wrapper reveal">
           {/* Navigation Tabs */}
           <div className="tabs-nav" role="tablist" aria-label="Casos de uso por segmento">
-            <button 
-              className={`tab-btn ${activeTab === 'cond' ? 'active' : ''}`} 
-              role="tab" 
-              aria-selected={activeTab === 'cond'} 
-              onClick={() => setActiveTab('cond')}
-            >
-              <span className="tab-icon">🏢</span> Condomínios
-            </button>
-            <button 
-              className={`tab-btn ${activeTab === 'corp' ? 'active' : ''}`} 
-              role="tab" 
-              aria-selected={activeTab === 'corp'} 
-              onClick={() => setActiveTab('corp')}
-            >
-              <span className="tab-icon">🏙️</span> Prédios Corporativos
-            </button>
-            <button 
-              className={`tab-btn ${activeTab === 'varejo' ? 'active' : ''}`} 
-              role="tab" 
-              aria-selected={activeTab === 'varejo'} 
-              onClick={() => setActiveTab('varejo')}
-            >
-              <span className="tab-icon">🍽️</span> Varejo & Alimentação
-            </button>
-            <button 
-              className={`tab-btn ${activeTab === 'rh' ? 'active' : ''}`} 
-              role="tab" 
-              aria-selected={activeTab === 'rh'} 
-              onClick={() => setActiveTab('rh')}
-            >
-              <span className="tab-icon">📣</span> Endomarketing & RH
-            </button>
+            {TABS.map((tab, index) => (
+              <button
+                key={tab.key}
+                id={`tab-${tab.key}`}
+                className={`tab-btn ${activeTab === tab.key ? 'active' : ''}`}
+                role="tab"
+                aria-selected={activeTab === tab.key}
+                aria-controls={`panel-${tab.key}`}
+                tabIndex={activeTab === tab.key ? 0 : -1}
+                onClick={() => handleTabChange(tab.key, tab.label)}
+                onKeyDown={(e) => handleTabKeyDown(e, index)}
+              >
+                <span className="tab-icon" aria-hidden="true">{tab.icon}</span> {tab.label}
+              </button>
+            ))}
           </div>
 
           {/* Tab Content: Condominios */}
           {activeTab === 'cond' && (
-            <div className="tab-panel active" role="tabpanel">
+            <div className="tab-panel active" id="panel-cond" role="tabpanel" aria-labelledby="tab-cond">
               <div className="tab-content">
                 <h3>Comunicação que os moradores realmente leem.</h3>
                 <p>
@@ -149,7 +159,7 @@ const UseCases = ({ activeTab, setActiveTab, telemetry }) => {
 
           {/* Tab Content: Corporativo */}
           {activeTab === 'corp' && (
-            <div className="tab-panel active" role="tabpanel">
+            <div className="tab-panel active" id="panel-corp" role="tabpanel" aria-labelledby="tab-corp">
               <div className="tab-content">
                 <h3>Recepções que impressionam.</h3>
                 <p>
@@ -198,7 +208,7 @@ const UseCases = ({ activeTab, setActiveTab, telemetry }) => {
 
           {/* Tab Content: Varejo */}
           {activeTab === 'varejo' && (
-            <div className="tab-panel active" role="tabpanel">
+            <div className="tab-panel active" id="panel-varejo" role="tabpanel" aria-labelledby="tab-varejo">
               <div className="tab-content">
                 <h3>O fim da impressão de cardápios.</h3>
                 <p>
@@ -247,7 +257,7 @@ const UseCases = ({ activeTab, setActiveTab, telemetry }) => {
 
           {/* Tab Content: RH */}
           {activeTab === 'rh' && (
-            <div className="tab-panel active" role="tabpanel">
+            <div className="tab-panel active" id="panel-rh" role="tabpanel" aria-labelledby="tab-rh">
               <div className="tab-content">
                 <h3>Equipe alinhada e motivada.</h3>
                 <p>
@@ -296,12 +306,12 @@ const UseCases = ({ activeTab, setActiveTab, telemetry }) => {
         </div>
 
         {/* Testimonials Section - Prova Social */}
-        <div style={{ marginTop: '72px', borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '56px' }}>
+        <div style={{ marginTop: '72px', borderTop: '1px solid var(--border)', paddingTop: '56px' }}>
           <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-            <h2 style={{ fontSize: 'clamp(1.5rem, 2.5vw, 2.2rem)', fontWeight: '800', marginBottom: '12px', color: '#F8FAFC' }}>
+            <h2 style={{ fontSize: 'clamp(1.5rem, 2.5vw, 2.2rem)', fontWeight: '800', marginBottom: '12px', color: 'var(--text-primary)' }}>
               Quem já usa o TelaHub para modernizar suas telas...
             </h2>
-            <p style={{ color: '#94A3B8', fontSize: '1rem', maxWidth: '520px', marginLeft: 'auto', marginRight: 'auto' }}>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '1rem', maxWidth: '520px', marginLeft: 'auto', marginRight: 'auto' }}>
               Veja como empresários reais aboliram o pen-drive e transformaram o visual das suas recepções em minutos.
             </p>
           </div>
@@ -312,31 +322,31 @@ const UseCases = ({ activeTab, setActiveTab, telemetry }) => {
             gap: '24px'
           }}>
             {/* Testimonial 1 */}
-            <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', padding: '32px 28px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div style={{ display: 'flex', gap: '4px', color: '#FBBF24', fontSize: '1.2rem' }}>★★★★★</div>
-              <p style={{ fontSize: '0.95rem', color: '#CBD5E1', lineHeight: '1.6', fontStyle: 'italic', margin: 0 }}>
+            <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '12px', padding: '32px 28px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div aria-label="Avaliação 5 de 5 estrelas" style={{ display: 'flex', gap: '4px', color: '#D97706', fontSize: '1.2rem' }}>★★★★★</div>
+              <p style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', lineHeight: '1.6', fontStyle: 'italic', margin: 0 }}>
                 "Eu perdia horas toda semana gravando vídeos em pendrives para colocar na TV da recepção. Com o TelaHub, eu atualizo a grade de aulas e os avisos de feriado direto de casa, em dois minutos. A recepção da academia ficou com cara de rede gigante."
               </p>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '8px' }}>
-                <div style={{ width: '36px', height: '36px', background: 'rgba(14,165,233,0.2)', border: '1px solid rgba(14,165,233,0.35)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', color: '#38bdf8', fontSize: '0.9rem' }}>RA</div>
+                <div style={{ width: '36px', height: '36px', background: 'var(--cyan-dim)', border: '1px solid rgba(14,165,233,0.35)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', color: 'var(--cyan-soft)', fontSize: '0.9rem' }}>RA</div>
                 <div>
-                  <h4 style={{ fontSize: '0.9rem', fontWeight: '700', color: '#E2E8F0', margin: 0 }}>Rodrigo Alencar</h4>
-                  <span style={{ fontSize: '0.78rem', color: '#64748B' }}>Proprietário da FitLife Academia</span>
+                  <h4 style={{ fontSize: '0.9rem', fontWeight: '700', color: 'var(--text-primary)', margin: 0 }}>Rodrigo Alencar</h4>
+                  <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Proprietário da FitLife Academia</span>
                 </div>
               </div>
             </div>
 
             {/* Testimonial 2 */}
-            <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '2px', padding: '32px 28px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div style={{ display: 'flex', gap: '4px', color: '#FBBF24', fontSize: '1.2rem' }}>★★★★★</div>
-              <p style={{ fontSize: '0.95rem', color: '#CBD5E1', lineHeight: '1.6', fontStyle: 'italic', margin: 0 }}>
+            <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '12px', padding: '32px 28px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div aria-label="Avaliação 5 de 5 estrelas" style={{ display: 'flex', gap: '4px', color: '#D97706', fontSize: '1.2rem' }}>★★★★★</div>
+              <p style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', lineHeight: '1.6', fontStyle: 'italic', margin: 0 }}>
                 "As TVs da minha clínica ficavam desligadas ou passando canais abertos que não interessavam a ninguém. Hoje, nós exibimos os vídeos dos nossos procedimentos estéticos, dicas de saúde e comunicados em loop automático. Nossos clientes elogiam a modernidade."
               </p>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '8px' }}>
-                <div style={{ width: '36px', height: '36px', background: 'rgba(14,165,233,0.2)', border: '1px solid rgba(14,165,233,0.35)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', color: '#38bdf8', fontSize: '0.9rem' }}>MC</div>
+                <div style={{ width: '36px', height: '36px', background: 'var(--cyan-dim)', border: '1px solid rgba(14,165,233,0.35)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', color: 'var(--cyan-soft)', fontSize: '0.9rem' }}>MC</div>
                 <div>
-                  <h4 style={{ fontSize: '0.9rem', fontWeight: '700', color: '#E2E8F0', margin: 0 }}>Dra. Mariana Costa</h4>
-                  <span style={{ fontSize: '0.78rem', color: '#64748B' }}>Diretora da OdontoClean</span>
+                  <h4 style={{ fontSize: '0.9rem', fontWeight: '700', color: 'var(--text-primary)', margin: 0 }}>Dra. Mariana Costa</h4>
+                  <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Diretora da OdontoClean</span>
                 </div>
               </div>
             </div>

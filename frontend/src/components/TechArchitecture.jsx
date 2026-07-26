@@ -3,7 +3,7 @@ const TechArchitecture = () => {
     <section id="argumento" aria-labelledby="argumento-heading">
       <div className="container">
         <div className="argumento-header" style={{ textAlign: 'center', marginBottom: '56px' }}>
-          <div className="label reveal" style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10B981', borderColor: 'rgba(16, 185, 129, 0.25)', borderRadius: '99px' }}>
+          <div className="label reveal" style={{ background: 'rgba(14, 165, 233, 0.1)', color: '#0ea5e9', borderColor: 'rgba(14, 165, 233, 0.25)', borderRadius: '99px' }}>
             Simplicidade Extrema
           </div>
           <h2 id="argumento-heading" className="reveal" style={{ fontSize: 'clamp(1.8rem, 3vw, 2.5rem)', fontWeight: '800' }}>
