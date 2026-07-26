@@ -22,6 +22,9 @@ on:
 
 env:
   REGISTRY: ghcr.io
+  # Minúsculo obrigatoriamente: `github.repository_owner` vem como
+  # "AbnerSantosss" e o GHCR recusa com "repository name must be lowercase".
+  OWNER: abnersantosss
 
 jobs:
   build:
@@ -58,8 +61,8 @@ jobs:
           context: ${{ matrix.context }}
           push: true
           tags: |
-            ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.name }}:latest
-            ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.name }}:${{ github.sha }}
+            ${{ env.REGISTRY }}/${{ env.OWNER }}/${{ matrix.name }}:latest
+            ${{ env.REGISTRY }}/${{ env.OWNER }}/${{ matrix.name }}:${{ github.sha }}
           # Só o frontend consome estes args; o Dockerfile do backend os ignora.
           build-args: |
             VITE_API_URL=/api

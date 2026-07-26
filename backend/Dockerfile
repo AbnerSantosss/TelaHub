@@ -6,9 +6,9 @@ WORKDIR /app
 RUN apk add --no-cache openssl
 
 # 1. Instala deps — só re-executa se package.json mudar
-COPY package*.json ./
+COPY package.json package-lock.json ./
 RUN --mount=type=cache,target=/root/.npm \
-    npm install --prefer-offline
+    npm ci --prefer-offline
 
 # 2. Copia o resto, gera Prisma e compila TypeScript
 COPY . .

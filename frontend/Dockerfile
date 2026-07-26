@@ -4,9 +4,9 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 # 1. Instala deps — camada cacheada: só re-executa se package.json mudar
-COPY package*.json ./
+COPY package.json package-lock.json ./
 RUN --mount=type=cache,target=/root/.npm \
-    npm install --prefer-offline
+    npm ci --prefer-offline
 
 # 2. Copia o resto e faz o build
 COPY . .

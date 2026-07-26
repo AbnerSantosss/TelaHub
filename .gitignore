@@ -35,4 +35,11 @@ Thumbs.db
 # Temporary / Dev utilities
 backend/fix-*.js
 docker-compose.dev.yml
-**/package-lock.json
+
+# package-lock.json NÃO é ignorado de propósito.
+#
+# Ele não contém segredo nenhum, e sem ele o build não é reproduzível: o
+# Dockerfile resolve as versões de novo a cada build, então a imagem que foi
+# testada não é a imagem que vai para produção — uma release de patch de
+# qualquer dependência transitiva entra sozinha, sem ninguém aprovar.
+# É também o que permite trocar `npm install` por `npm ci` no Dockerfile.
