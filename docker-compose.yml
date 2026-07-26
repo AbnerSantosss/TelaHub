@@ -8,10 +8,14 @@
 #    `ports:` aqui derruba o produto do ar.
 #    Se um dia o cloudflared virar container na rede `telahub_net`, aí sim estas
 #    portas saem e as rotas passam a apontar para `frontend:3025` etc.
-# 2. NENHUM `build:`. As imagens vêm prontas do GHCR, montadas pelo GitHub
-#    Actions. Buildar na VPS disputa RAM com o que está no ar e — pior — não
-#    aplicaria as variáveis `VITE_*` da stack, porque o Vite as resolve em tempo
-#    de build, não de execução.
+# 2. O BUILD ACONTECE NA VPS. Esta stack é ligada ao Git: o Portainer puxa este
+#    arquivo do repositório e builda aqui mesmo. O GitHub Actions também publica
+#    as imagens no GHCR a cada push — elas servem de rollback e de caminho de
+#    migração, e para passar a usá-las basta tornar os pacotes públicos (ou
+#    cadastrar credencial em Registries) e trocar `build:` por `image:`.
+#    Os `args` abaixo são o que faz as variáveis `VITE_*` chegarem ao bundle:
+#    o Vite as resolve em tempo de BUILD, então configurá-las apenas como
+#    variável de ambiente da stack não teria efeito nenhum.
 
 services:
   # 1. Banco de Dados PostgreSQL
@@ -36,6 +40,9 @@ services:
 
   # 2. Backend (Node.js API)
   backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
     image: ghcr.io/abnersantosss/telahub-backend:${IMAGE_TAG:-latest}
     restart: unless-stopped
     ports:
@@ -90,6 +97,15 @@ services:
 
   # 3. Frontend (React + Vite servido pelo Nginx, na porta 3025)
   frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # Rota relativa: o Nginx desta imagem faz o proxy de /api.
+        - VITE_API_URL=/api
+        # Os outros dois apps vivem em domínios próprios (ver external-urls.ts).
+        - VITE_SITE_URL=${VITE_SITE_URL:-https://sitetelahub.proxserverabner.site}
+        - VITE_CHECKOUT_URL=${VITE_CHECKOUT_URL:-https://checkout.proxserverabner.site}
     image: ghcr.io/abnersantosss/telahub-frontend:${IMAGE_TAG:-latest}
     restart: unless-stopped
     ports:

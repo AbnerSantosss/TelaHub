@@ -17,16 +17,29 @@ async function main() {
   // código: este arquivo é versionado, e senha em repositório é senha pública —
   // vale para todo mundo que instalar o produto, não só para esta conta.
   //
-  // Em produção a ausência das variáveis é ERRO FATAL, não aviso. Cair de volta
-  // num default conhecido seria pior do que não subir: criaria silenciosamente
-  // um `master` com senha previsível e ninguém perceberia até ser tarde.
+  // A exigência das variáveis vale para CRIAR o admin, não para todo boot: numa
+  // instalação que já tem admin não há o que criar, e travar o boot pedindo uma
+  // senha para não usá-la deixaria a atualização refém de uma variável inútil.
+  //
+  // Quando não há admin e estamos em produção, aí sim a ausência é ERRO FATAL.
+  // Cair de volta num default conhecido seria pior do que não subir: criaria
+  // silenciosamente um `master` com senha previsível, e ninguém perceberia até
+  // ser tarde.
   const adminEmail = process.env.ADMIN_EMAIL?.trim();
   const adminPassword = process.env.ADMIN_PASSWORD;
   const isProduction = process.env.NODE_ENV === 'production';
 
-  if (!adminEmail || !adminPassword) {
+  const existingAdmin = await prisma.user.findUnique({
+    where: { username: 'admin' },
+    select: { id: true, role: true },
+  });
+
+  if (existingAdmin && !adminPassword) {
+    // Caminho normal de toda atualização de uma instalação já em uso.
+    console.log('✅ Admin já existe — seed do admin pulado (nada a criar).');
+  } else if (!adminEmail || !adminPassword) {
     const message =
-      'ADMIN_EMAIL e ADMIN_PASSWORD são obrigatórios para o seed de produção. ' +
+      'Não existe usuário admin e ADMIN_EMAIL/ADMIN_PASSWORD não foram definidos. ' +
       'Defina-os nas variáveis da stack (Portainer) — ver SECRETS.md.';
     if (isProduction) throw new Error(message);
     console.warn(`⚠️  ${message} Seed do admin PULADO.`);
