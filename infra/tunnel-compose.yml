@@ -1,0 +1,44 @@
+# Cloudflare Tunnel — a única porta de entrada da stack NOVA.
+#
+# Diferente do túnel antigo, que roda no HOST e alcança os serviços por
+# `localhost:PORTA`, este roda como container DENTRO da rede `telahub_net` e
+# alcança os serviços pelo NOME. A diferença não é estética:
+#
+#   - a stack nova não publica porta nenhuma, então não disputa as portas
+#     3025/3027/42938 com a stack antiga — as duas convivem na mesma VPS;
+#   - nada da stack nova fica acessível pelo IP público da VPS, só pelo túnel.
+#
+# ─── Antes de subir ────────────────────────────────────────────────────────────
+# 1. A rede já existe:  docker network create telahub_net
+# 2. Cloudflare Zero Trust → Networks → Tunnels → Create a tunnel → Cloudflared.
+#    Dê um nome próprio (ex.: `telahub-prod`) para não confundir com o antigo.
+#    Copie o TOKEN.
+# 3. Cole o token na variável TUNNEL_TOKEN da stack no Portainer — nunca aqui,
+#    nunca no Git: quem tem o token abre uma entrada para dentro desta rede.
+#
+# ─── Public Hostnames a cadastrar no túnel NOVO ───────────────────────────────
+#   painel.proxserverabner.site    →  HTTP  →  frontend:3025
+#   vendas.proxserverabner.site    →  HTTP  →  site:80
+#   checkout.proxserverabner.site  →  HTTP  →  checkout:80
+#
+# Os nomes acima são os dos serviços das outras stacks; todas precisam estar em
+# `telahub_net` para este container enxergá-las.
+#
+# O BACKEND NÃO RECEBE HOSTNAME. Cada frontend já faz proxy de `/api/` para
+# `backend:3001` pelo próprio Nginx — publicar a API direto só criaria mais uma
+# origem para manter no CORS e mais superfície para atacar.
+
+services:
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: telahub-tunnel-prod
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      - TUNNEL_TOKEN=${TUNNEL_TOKEN}
+    networks:
+      - telahub_net
+
+networks:
+  telahub_net:
+    external: true

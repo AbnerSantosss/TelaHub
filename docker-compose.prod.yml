@@ -1,0 +1,112 @@
+# Stack NOVA do painel — instalação limpa, em paralelo à antiga.
+#
+# Arquivo separado do `docker-compose.yml` de propósito: aquele é o que a stack
+# `telahub-novo` (a que está no ar hoje) puxa do Git. Mexer nele mudaria o
+# deploy antigo junto — e o ponto deste aqui é justamente ser independente.
+#
+# ─── O que muda em relação ao antigo ──────────────────────────────────────────
+# 1. NENHUMA porta publicada. Quem expõe é o `cloudflared` de `infra/tunnel-
+#    compose.yml`, que roda na mesma rede e alcança os containers pelo NOME.
+#    É isso que permite as duas stacks coexistirem: sem porta publicada, não há
+#    conflito com as 3025/3027 que a antiga ocupa.
+# 2. Banco NOVO E VAZIO. O volume é próprio desta stack, então nada da base
+#    antiga vem junto — é uma instalação limpa. A base antiga continua intacta
+#    no volume dela, servindo a stack antiga.
+# 3. Sem pgAdmin. O antigo estava publicado na 5053, um administrador de banco
+#    aberto na internet. Para operar o banco: `docker exec -it <db> psql`.
+#
+# ─── Variáveis obrigatórias (Portainer) ───────────────────────────────────────
+#   POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB
+#   JWT_SECRET        openssl rand -base64 48   (mín. 32 caracteres)
+#   ADMIN_EMAIL, ADMIN_PASSWORD                 (mín. 12 caracteres)
+# Como o banco nasce vazio, não existe admin: sem ADMIN_* o seed aborta e o
+# container não sobe. É proposital — ver `backend/prisma/seed-prod.js`.
+
+services:
+  db:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - telahub_net
+    healthcheck:
+      # Substitui o `sleep 5` do compose antigo, que era um chute: o backend
+      # espera o banco aceitar conexão de verdade.
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}']
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}?schema=public
+      - JWT_SECRET=${JWT_SECRET}
+      - PORT=3001
+      # Origens EXATAS: a comparação é por igualdade, então barra final a mais
+      # ou domínio parcial derruba a comunicação do painel com a API.
+      - CORS_ORIGINS=${CORS_ORIGINS:-https://painel.proxserverabner.site,https://checkout.proxserverabner.site}
+      - APP_URL=${APP_URL:-https://painel.proxserverabner.site}
+      # Saltos até o backend: Cloudflare Tunnel → Nginx → backend = 2.
+      # Com 1, o rate limit de login agrupa todos os visitantes num contador só.
+      - TRUST_PROXY=${TRUST_PROXY:-2}
+      - ADMIN_EMAIL=${ADMIN_EMAIL}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - ADMIN_NAME=${ADMIN_NAME:-Administrador}
+      - ADMIN_PASSWORD_RESET=${ADMIN_PASSWORD_RESET:-false}
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - uploads_data:/app/uploads
+    networks:
+      - telahub_net
+    # Sequência de boot. A ORDEM IMPORTA:
+    #   1. db push         — aplica o schema
+    #   2. backfill-tenant — vincula registros pré-existentes a uma organização.
+    #                        Num banco novo não faz nada; é idempotente e fica
+    #                        aqui para o dia em que esta stack não for mais nova.
+    #   3. seed-plans      — catálogo de planos (o seed-prod depende do `loja`)
+    #   4. seed-prod       — admin, display demo e assinatura
+    # Encadeado com `&&`: se o seed falhar por falta de ADMIN_PASSWORD, o
+    # container NÃO sobe. É melhor do que subir sem admin.
+    command: >
+      sh -c "npx prisma db push --skip-generate &&
+      npx tsx prisma/backfill-tenant-scope.ts &&
+      npx tsx prisma/seed-plans.ts &&
+      node prisma/seed-prod.js &&
+      npm start"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # Rota relativa: o Nginx desta imagem faz o proxy de /api para o backend.
+        - VITE_API_URL=/api
+        # Os outros dois apps vivem em domínios próprios. São lidos em tempo de
+        # BUILD — configurá-los só como variável da stack não teria efeito.
+        - VITE_SITE_URL=${VITE_SITE_URL:-https://vendas.proxserverabner.site}
+        - VITE_CHECKOUT_URL=${VITE_CHECKOUT_URL:-https://checkout.proxserverabner.site}
+    restart: unless-stopped
+    networks:
+      - telahub_net
+
+networks:
+  # Compartilhada com as stacks do site, do checkout e do túnel.
+  # Criada uma única vez:  docker network create telahub_net
+  telahub_net:
+    external: true
+
+volumes:
+  pgdata:
+  uploads_data:
