@@ -12,7 +12,10 @@ services:
       args:
         - VITE_CHECKOUT_URL=${VITE_CHECKOUT_URL:-https://checkout.proxserverabner.site}
         - VITE_APP_URL=${VITE_APP_URL:-https://telahub.proxserverabner.site}
-    image: ghcr.io/abnersantosss/telahub-site:${IMAGE_TAG:-latest}
+    # Sem `image:` de propósito. O Portainer roda `docker compose pull` antes de
+    # subir a stack; com um `image:` apontando para o GHCR (privado), o pull
+    # falha com "unauthorized" e o deploy nem chega a buildar. Sem ele, o compose
+    # nomeia a imagem como <stack>_<serviço> e constrói localmente.
     container_name: site-telas-display
     restart: unless-stopped
     ports:
