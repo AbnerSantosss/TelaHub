@@ -43,3 +43,19 @@ docker-compose.dev.yml
 # testada não é a imagem que vai para produção — uma release de patch de
 # qualquer dependência transitiva entra sozinha, sem ninguém aprovar.
 # É também o que permite trocar `npm install` por `npm ci` no Dockerfile.
+
+# Base de conhecimento interna (wiki + fontes brutas) — NÃO versionar.
+#
+# Este repositório é PÚBLICO. A wiki contém análise de concorrentes, preços,
+# unit economics, estratégia comercial e um catálogo detalhado das falhas de
+# segurança já ocorridas no projeto — inclusive quais credenciais estiveram
+# expostas e ainda não foram rotacionadas. Nada disso é código, e publicar
+# junto entrega o mapa de ataque com o produto.
+#
+# A wiki vive no vault do Obsidian, localmente. Se um dia precisar ser
+# versionada, que seja num repositório PRIVADO separado.
+#
+# ⚠️ Estes arquivos JÁ estiveram publicados. Ignorar daqui em diante não apaga
+# o histórico do Git — o conteúdo antigo segue acessível em commits anteriores.
+wiki/
+raw/
