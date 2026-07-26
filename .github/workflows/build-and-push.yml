@@ -54,8 +54,8 @@ jobs:
             ${{ env.REGISTRY }}/${{ env.OWNER }}/${{ env.IMAGE }}:latest
             ${{ env.REGISTRY }}/${{ env.OWNER }}/${{ env.IMAGE }}:${{ github.sha }}
           build-args: |
-            VITE_CHECKOUT_URL=https://checkout.telahub.com.br
-            VITE_APP_URL=https://app.telahub.com.br
+            VITE_CHECKOUT_URL=https://checkout.proxserverabner.site
+            VITE_APP_URL=https://telahub.proxserverabner.site
           cache-from: type=gha
           cache-to: type=gha,mode=max
 

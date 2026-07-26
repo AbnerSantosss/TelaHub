@@ -26,8 +26,8 @@
  * comprar. Errar para o lado de produção é o modo de falha barato: em
  * desenvolvimento o `.env.development` sobrescreve para localhost.
  */
-const DEFAULT_CHECKOUT_URL = 'https://checkout.telahub.com.br';
-const DEFAULT_APP_URL = 'https://app.telahub.com.br';
+const DEFAULT_CHECKOUT_URL = 'https://checkout.proxserverabner.site';
+const DEFAULT_APP_URL = 'https://telahub.proxserverabner.site';
 
 const env = typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env : {};
 

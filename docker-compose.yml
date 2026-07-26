@@ -1,14 +1,17 @@
 # Stack de PRODUÇÃO do site de vendas (LP pública, estática, servida por Nginx).
 #
-# Sem porta publicada e sem `build:` — quem expõe é o Cloudflare Tunnel, e a
-# imagem vem pronta do GHCR. Ver o comentário longo em
-# `App-Projeto/docker-compose.yml` para o porquê das duas regras.
+# A porta publicada é exigida pelo túnel, que roda no HOST e aponta para
+# `localhost:42938`. A imagem vem pronta do GHCR — ver o comentário longo em
+# `App-Projeto/docker-compose.yml`.
 
 services:
   frontend:
     image: ghcr.io/abnersantosss/telahub-site:${IMAGE_TAG:-latest}
     container_name: site-telas-display
     restart: unless-stopped
+    ports:
+      # sitetelahub.proxserverabner.site -> localhost:42938 (rota do túnel)
+      - "42938:80"
     networks:
       - telahub_net
     healthcheck:
