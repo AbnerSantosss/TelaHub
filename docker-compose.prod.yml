@@ -1,0 +1,30 @@
+# Stack NOVA do site de vendas, em paralelo à antiga.
+#
+# Arquivo separado do `docker-compose.yml`, que é o usado pela stack antiga.
+# Sem porta publicada: quem expõe é o `cloudflared` da stack `telahub-tunnel`,
+# que roda na mesma rede e alcança este container pelo nome `site`.
+
+services:
+  site:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # Lidos em tempo de BUILD pelo Vite — defini-los como variável de
+        # ambiente da stack não teria efeito nenhum sobre o bundle.
+        - VITE_CHECKOUT_URL=${VITE_CHECKOUT_URL:-https://checkout.proxserverabner.site}
+        - VITE_APP_URL=${VITE_APP_URL:-https://painel.proxserverabner.site}
+    container_name: telahub-site-prod
+    restart: unless-stopped
+    networks:
+      - telahub_net
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+networks:
+  telahub_net:
+    external: true
