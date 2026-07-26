@@ -23,9 +23,13 @@ import {
   updateMyEmail,
   changeMyPassword,
   updateMyName,
-  forgotPassword
+  forgotPassword,
+  getOrganizations,
+  getSubscription
 } from '../services/storage';
-import { Display, User, Device } from '../types';
+import { Display, User, Device, Organization, SubscriptionState } from '../types';
+import { isApiError, getApiErrorMessage, setActiveOrganizationId } from '../libs/api';
+import { checkoutUrl } from '../libs/external-urls';
 import { MediaLibrary } from './MediaLibrary';
 import { toast } from 'sonner';
 import { motion } from 'motion/react';
@@ -35,7 +39,9 @@ import { Button } from './ui/button';
 import { TopBar } from './dashboard/TopBar';
 import { ModuleNav } from './dashboard/ModuleNav';
 import { DeviceChips } from './dashboard/DeviceChips';
+import { OrganizationSelector } from './dashboard/OrganizationSelector';
 import { DisplayGrid } from './dashboard/DisplayGrid';
+import { SubscriptionBanner } from './dashboard/SubscriptionBanner';
 
 // Decomposed Modals
 import { CreateDisplayModal } from './dashboard/modals/CreateDisplayModal';
@@ -47,9 +53,18 @@ import { DisplaySettingsModal } from './dashboard/modals/DisplaySettingsModal';
 import { RenameDisplayModal } from './dashboard/modals/RenameDisplayModal';
 import { ConfirmDeleteModal } from './dashboard/modals/ConfirmDeleteModal';
 
+const SELECTED_ORG_STORAGE_KEY = 'selectedOrgId';
+
 const Dashboard: React.FC = () => {
   const [displays, setDisplays] = useState<Display[]>([]);
   const [devices, setDevices] = useState<Device[]>([]);
+  const [organizations, setOrganizations] = useState<Organization[]>([]);
+  // Preferência de visualização apenas — o escopo de tenant é garantido pelo
+  // servidor. Só é aplicada depois de validada contra a lista da API.
+  const [selectedOrgId, setSelectedOrgId] = useState<string | null>(
+    () => localStorage.getItem(SELECTED_ORG_STORAGE_KEY)
+  );
+  const [subscription, setSubscription] = useState<SubscriptionState | null>(null);
   const [usersList, setUsersList] = useState<User[]>([]);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
 
@@ -221,17 +236,49 @@ const Dashboard: React.FC = () => {
   const refreshData = async () => {
     setLoading(true);
     try {
-      const [displaysData, devicesData, user, smtpStatus] = await Promise.all([
+      const [displaysData, devicesData, user, smtpStatus, organizationsData, subscriptionData] = await Promise.all([
         getDisplays(),
         getDevices(),
         getCurrentUser(),
         getSmtpStatus(),
+        getOrganizations(),
+        // Nunca rejeita: devolve null se o endpoint de billing não existir ainda.
+        getSubscription(),
       ]);
 
       setDisplays(displaysData);
       setDevices(devicesData);
       setCurrentUser(user);
       setSmtpConfigured(smtpStatus.configured);
+      setOrganizations(organizationsData);
+      setSubscription(subscriptionData);
+
+      // Valida a preferência salva contra as organizações que a API devolveu.
+      // Um id que não está mais na lista (troca de conta na mesma máquina,
+      // perda de acesso) é descartado em vez de aplicado.
+      setSelectedOrgId((previous) => {
+        // Com uma única organização acessível não há o que escolher: fixa o
+        // escopo nela. O seletor fica oculto neste caso, então sem isto o
+        // `master` ficava permanentemente sem tenant — e toda operação que
+        // exige escopo (upload de mídia, por exemplo) era recusada.
+        if (organizationsData.length === 1) {
+          const onlyOrgId = organizationsData[0].id;
+          setActiveOrganizationId(onlyOrgId);
+          return onlyOrgId;
+        }
+
+        if (!previous) {
+          setActiveOrganizationId(null);
+          return null;
+        }
+        const stillAccessible = organizationsData.some((org) => org.id === previous);
+        if (stillAccessible && organizationsData.length > 1) {
+          setActiveOrganizationId(previous);
+          return previous;
+        }
+        setActiveOrganizationId(null);
+        return null;
+      });
 
       const users = await getUsers();
       setUsersList(users);
@@ -259,6 +306,68 @@ const Dashboard: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
+  const handleSelectOrg = (organizationId: string | null) => {
+    // Aceita apenas ids presentes na lista devolvida pela API.
+    const isKnown = !organizationId || organizations.some((org) => org.id === organizationId);
+    const nextId = isKnown ? organizationId : null;
+
+    setSelectedOrgId(nextId);
+    // Persiste a preferência E passa o escopo ao cliente de API, que o envia
+    // como `X-Organization-Id` nas próximas requisições.
+    setActiveOrganizationId(nextId);
+  };
+
+  // O seletor só faz sentido com mais de uma organização acessível (role master
+  // ou cliente multi-loja). Com uma só, o seletor é ruído e não há o que filtrar.
+  const hasMultipleOrganizations = organizations.length > 1;
+
+  // Filtro puramente VISUAL. A segurança/isolamento de tenant é responsabilidade
+  // do servidor: `GET /api/displays` já devolve apenas os dados da organização
+  // do usuário autenticado.
+  const visibleDisplays = hasMultipleOrganizations && selectedOrgId
+    ? displays.filter((d) => d.organizationId === selectedOrgId)
+    : displays;
+
+  /**
+   * Quem chega aqui estourou a quota do plano e quer contratar. O destino é o
+   * checkout, não a página de preços: o checkout registra a sessão desde o
+   * primeiro passo, então uma contratação que ficar pelo meio vira abandono
+   * mensurável e recuperável — na página de preços ela seria invisível.
+   *
+   * Sem `planCode`: quem está aqui ainda não escolheu o plano, e o checkout
+   * abre justamente no passo de escolha.
+   */
+  const handleChoosePlan = () => {
+    window.location.href = checkoutUrl();
+  };
+
+  /**
+   * Traduz erros de ação (criar tela / vincular TV / convidar usuário) em toast.
+   * 402 = assinatura inválida, 403 = quota do plano estourada. Nos dois casos
+   * a mensagem da API tem prioridade sobre qualquer texto nosso.
+   */
+  const notifyActionError = (error: unknown, fallback: string) => {
+    const message = getApiErrorMessage(error, fallback);
+
+    if (isApiError(error) && error.status === 402) {
+      toast.error(message, {
+        duration: 10000,
+        action: { label: 'Escolher plano', onClick: handleChoosePlan },
+      });
+      return;
+    }
+
+    if (isApiError(error) && error.status === 403) {
+      toast.error(message, {
+        duration: 8000,
+        action: { label: 'Ver planos', onClick: handleChoosePlan },
+      });
+      return;
+    }
+
+    toast.error(message);
+  };
+
   // --- Auth Handlers ---
   const handleLogout = async () => {
     await logout();
@@ -272,20 +381,16 @@ const Dashboard: React.FC = () => {
 
     setLoading(true);
     try {
-      const success = await linkDevice(linkCode, selectedDisplayId, linkName);
-      if (success) {
-        toast.success('Dispositivo vinculado com sucesso!');
-        setIsLinkModalOpen(false);
-        setLinkCode('');
-        setLinkName('');
-        setSelectedDisplayId('');
-        await refreshData();
-      } else {
-        toast.error('Código inválido ou dispositivo não encontrado.');
-      }
+      await linkDevice(linkCode, selectedDisplayId, linkName);
+      toast.success('Dispositivo vinculado com sucesso!');
+      setIsLinkModalOpen(false);
+      setLinkCode('');
+      setLinkName('');
+      setSelectedDisplayId('');
+      await refreshData();
     } catch (error) {
       console.error("Erro ao vincular dispositivo:", error);
-      toast.error('Erro ao vincular dispositivo.');
+      notifyActionError(error, 'Código inválido ou dispositivo não encontrado.');
     } finally {
       setLoading(false);
     }
@@ -349,7 +454,7 @@ const Dashboard: React.FC = () => {
       await refreshData();
     } catch (error) {
       console.error("Dashboard: Erro ao criar tela:", error);
-      toast.error("Erro ao criar tela. Verifique a conexão.");
+      notifyActionError(error, 'Erro ao criar tela. Verifique a conexão.');
       setLoading(false);
     }
   };
@@ -495,8 +600,8 @@ const Dashboard: React.FC = () => {
       setInviteEmail('');
       setInviteRole('user');
       toast.success(`Convite enviado com sucesso para ${savedEmail}`);
-    } catch (err: any) {
-      toast.error(err.message || 'Erro desconhecido ao enviar convite. Tente novamente.');
+    } catch (err) {
+      notifyActionError(err, 'Erro desconhecido ao enviar convite. Tente novamente.');
     } finally {
       setUserActionLoading(false);
     }
@@ -644,6 +749,11 @@ const Dashboard: React.FC = () => {
             onRefresh={refreshData}
             onLogout={handleLogout}
           />
+
+          {/* Estado da assinatura — não renderiza nada se o endpoint de billing
+              estiver indisponível (backend paralelo ainda não no ar). */}
+          <SubscriptionBanner subscription={subscription} onChoosePlan={handleChoosePlan} />
+
           <ModuleNav
             currentUser={currentUser}
             onOpenMediaLibrary={() => setIsMediaLibraryOpen(true)}
@@ -651,19 +761,31 @@ const Dashboard: React.FC = () => {
             onOpenEmailSettings={openSettingsModal}
           />
 
-          {/* STATUS BAR — dispositivos vinculados */}
+          {/* STATUS BAR — organização selecionada + dispositivos vinculados */}
           <div className="flex items-center gap-3 flex-wrap mb-6 px-1">
-            {devices.filter(d => d.status === 'linked').length > 0 && (
-              <>
-                <DeviceChips devices={devices} displays={displays} />
-              </>
+            {hasMultipleOrganizations && (
+              <OrganizationSelector
+                organizations={organizations}
+                selectedOrgId={selectedOrgId}
+                onChange={handleSelectOrg}
+              />
+            )}
+            {devices.filter(d => d.status === 'linked').length > 0 ? (
+              <DeviceChips devices={devices} displays={displays} />
+            ) : !loading && (
+              <button
+                onClick={() => setIsLinkModalOpen(true)}
+                className="text-[11px] font-medium text-slate-500 hover:text-[#0ea5e9] transition-colors"
+              >
+                Nenhuma TV pareada ainda — clique aqui para parear a primeira
+              </button>
             )}
           </div>
         </motion.div>
 
         {/* DISPLAY GRID */}
         <DisplayGrid
-          displays={displays}
+          displays={visibleDisplays}
           devices={devices}
           loading={loading}
           copiedId={copiedId}

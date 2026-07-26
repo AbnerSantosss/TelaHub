@@ -4,6 +4,7 @@ import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { getCurrentUser } from './services/storage';
 import { Loader2 } from 'lucide-react';
 import { Toaster } from './components/ui/sonner';
+import { pricingUrl } from './libs/external-urls';
 
 // Lazy load screen components to improve initial load time
 const Dashboard = React.lazy(() => import('./components/Dashboard'));
@@ -11,9 +12,33 @@ const Editor = React.lazy(() => import('./components/Editor'));
 const Scheduler = React.lazy(() => import('./components/Scheduler'));
 const Player = React.lazy(() => import('./components/Player'));
 const Login = React.lazy(() => import('./components/Login'));
+const Signup = React.lazy(() => import('./components/Signup'));
 const ForgotPassword = React.lazy(() => import('./components/ForgotPassword'));
 const ResetPassword = React.lazy(() => import('./components/ResetPassword'));
-const Landing = React.lazy(() => import('./components/Landing'));
+const Reports = React.lazy(() => import('./components/Reports'));
+
+/**
+ * `/vendas` era uma SEGUNDA landing page, mantida aqui dentro em paralelo ao
+ * site público (`Site/site-telas`) — com tabela de preços própria, o que fazia
+ * o preço divergir do catálogo real a cada reajuste. Preço divergente em página
+ * pública é problema de CDC (arts. 30 e 37), não só de manutenção.
+ *
+ * A página foi removida e a rota virou redirecionamento: o site público é
+ * pré-renderizado (SSR) e é ele que ranqueia, então ele é a única landing. A
+ * rota sobrevive porque links antigos para `#/vendas` ainda circulam.
+ */
+const VendasRedirect: React.FC = () => {
+  useEffect(() => {
+    window.location.replace(pricingUrl());
+  }, []);
+
+  return (
+    <div className="flex h-screen w-full items-center justify-center bg-slate-950 text-slate-400">
+      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+      Redirecionando para os planos…
+    </div>
+  );
+};
 
 // Componente para Proteger Rotas
 const ProtectedRoute = ({ children }: { children?: React.ReactNode }) => {
@@ -69,9 +94,10 @@ const App: React.FC = () => {
         }>
           <Routes>
             <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/vendas" element={<Landing />} />
+            <Route path="/vendas" element={<VendasRedirect />} />
             
             {/* Rotas Protegidas */}
             <Route path="/" element={
@@ -89,7 +115,12 @@ const App: React.FC = () => {
                 <Scheduler />
               </ProtectedRoute>
             } />
-            
+            <Route path="/reports" element={
+              <ProtectedRoute>
+                <Reports />
+              </ProtectedRoute>
+            } />
+
             {/* Rota Pública (Player não precisa de login para funcionar na TV) */}
             <Route path="/player" element={<Player />} />
             <Route path="/player/:slug" element={<Player />} />
