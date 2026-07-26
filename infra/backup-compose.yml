@@ -1,0 +1,89 @@
+# Backup automático do Postgres — stack independente.
+#
+# Fica FORA da stack do banco de propósito: assim subir, mexer ou derrubar o
+# backup nunca exige redeployar o que está no ar, e um erro aqui não derruba o
+# produto. O container só se conecta à rede do banco e lê dele.
+#
+# ─── Por que isto existe ──────────────────────────────────────────────────────
+# Até agora não havia backup nenhum. O volume do Postgres era o único lugar onde
+# os dados dos clientes existiam — e o boot do backend roda `prisma db push`,
+# que resolve divergência de schema APAGANDO o que sobra. Um restart às 3h da
+# manhã com o schema divergente bastaria para perder tudo, sem nada de onde
+# restaurar.
+#
+# ─── Qual stack este backup protege ───────────────────────────────────────────
+# Aponte `DB_NETWORK` para a rede da stack que você quer proteger:
+#   telahub-novo_display_network  → stack antiga (a que está no ar hoje)
+#   telahub_net                   → stack nova (telahub-prod)
+# Para proteger as duas, suba esta stack duas vezes com nomes diferentes.
+#
+# ─── Restauração (TESTE ISTO, não confie sem testar) ──────────────────────────
+#   docker run --rm -i --network <rede> -e PGPASSWORD=<senha> postgres:15-alpine \
+#     psql -h db -U <usuario> -d <banco> < dump.sql
+#
+# Backup que nunca foi restaurado é esperança, não backup. Faça o teste uma vez
+# contra um banco descartável antes de precisar dele de verdade.
+
+services:
+  backup:
+    image: postgres:15-alpine
+    container_name: ${BACKUP_NAME:-telahub-backup}
+    restart: unless-stopped
+    environment:
+      # `db` é o nome do serviço do Postgres dentro da rede escolhida.
+      - PGHOST=${PGHOST:-db}
+      - PGUSER=${POSTGRES_USER}
+      - PGPASSWORD=${POSTGRES_PASSWORD}
+      - PGDATABASE=${POSTGRES_DB}
+      # Dias de retenção. 14 cobre o caso comum: perceber o problema depois de
+      # uma ou duas semanas ainda dá para voltar.
+      - RETENTION_DAYS=${RETENTION_DAYS:-14}
+      # Intervalo entre dumps, em segundos. 86400 = 24h.
+      - INTERVAL_SECONDS=${INTERVAL_SECONDS:-86400}
+    volumes:
+      - backups:/backups
+    networks:
+      - db_net
+    # Faz um dump IMEDIATAMENTE ao subir — sem isso, o primeiro backup só
+    # existiria 24h depois, e o dia mais arriscado é justamente hoje.
+    #
+    # `pg_dump -Fc` (formato custom, comprimido) em vez de SQL puro: restaura
+    # com pg_restore, permite restaurar tabela por tabela, e ocupa menos.
+    #
+    # `set -e` no dump NÃO é usado de propósito: se um dump falhar, o container
+    # deve continuar tentando amanhã em vez de morrer e parar de fazer backup.
+    entrypoint:
+      - sh
+      - -c
+      - |
+        echo "[backup] iniciado — destino /backups, retenção $${RETENTION_DAYS}d, intervalo $${INTERVAL_SECONDS}s"
+        while true; do
+          STAMP=$$(date +%Y%m%d-%H%M%S)
+          FILE="/backups/$${PGDATABASE}-$${STAMP}.dump"
+          echo "[backup] $${STAMP} — iniciando pg_dump de $${PGDATABASE}@$${PGHOST}"
+          if pg_dump -Fc -f "$${FILE}"; then
+            SIZE=$$(du -h "$${FILE}" | cut -f1)
+            echo "[backup] OK: $${FILE} ($${SIZE})"
+            # Só limpa antigos DEPOIS de um dump bem-sucedido: se o dump falhar,
+            # é melhor manter backups velhos do que ficar sem nenhum.
+            find /backups -name "*.dump" -type f -mtime +$${RETENTION_DAYS} -delete
+          else
+            echo "[backup] FALHOU — os backups anteriores foram mantidos"
+            rm -f "$${FILE}"
+          fi
+          sleep "$${INTERVAL_SECONDS}"
+        done
+
+volumes:
+  # Volume próprio, separado do volume de dados do Postgres. Se o volume do
+  # banco for perdido ou corrompido, este continua intacto.
+  #
+  # ⚠️ Isto ainda é backup LOCAL: protege contra corrupção do banco, container
+  # apagado e deploy ruim — NÃO protege contra perda da VPS inteira. O próximo
+  # passo é copiar estes arquivos para fora (R2/S3), o que exige credenciais.
+  backups:
+
+networks:
+  db_net:
+    external: true
+    name: ${DB_NETWORK:-telahub-novo_display_network}
