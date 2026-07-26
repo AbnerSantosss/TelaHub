@@ -6,6 +6,12 @@
 
 services:
   frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - VITE_CHECKOUT_URL=${VITE_CHECKOUT_URL:-https://checkout.proxserverabner.site}
+        - VITE_APP_URL=${VITE_APP_URL:-https://telahub.proxserverabner.site}
     image: ghcr.io/abnersantosss/telahub-site:${IMAGE_TAG:-latest}
     container_name: site-telas-display
     restart: unless-stopped
