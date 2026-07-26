@@ -43,7 +43,10 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    image: ghcr.io/abnersantosss/telahub-backend:${IMAGE_TAG:-latest}
+    # Sem `image:` de propósito. O Portainer roda `docker compose pull` antes de
+    # subir a stack; com um `image:` apontando para o GHCR (privado), o pull
+    # falha com "unauthorized" e o deploy nem chega a buildar. Sem ele, o compose
+    # nomeia a imagem como <stack>_<serviço> e constrói localmente.
     restart: unless-stopped
     ports:
       # Exigida pelo túnel (roda no host). Ver o comentário no topo do arquivo.
@@ -106,7 +109,6 @@ services:
         # Os outros dois apps vivem em domínios próprios (ver external-urls.ts).
         - VITE_SITE_URL=${VITE_SITE_URL:-https://sitetelahub.proxserverabner.site}
         - VITE_CHECKOUT_URL=${VITE_CHECKOUT_URL:-https://checkout.proxserverabner.site}
-    image: ghcr.io/abnersantosss/telahub-frontend:${IMAGE_TAG:-latest}
     restart: unless-stopped
     ports:
       # telahub.proxserverabner.site -> 192.168.3.16:3025 (rota do túnel)
