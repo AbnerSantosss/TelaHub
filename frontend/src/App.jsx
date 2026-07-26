@@ -9,6 +9,17 @@ import Pricing from './components/Pricing';
 import CtaStrip from './components/CtaStrip';
 import Footer from './components/Footer';
 import LeadModal from './components/LeadModal';
+import ConsentBanner from './components/ConsentBanner';
+import { trackEvent } from './lib/tracking';
+import { conversionDestination } from './lib/funnel';
+
+/** Código do plano → nome exibido. Os eventos de analytics usam o nome. */
+const PLAN_LABELS = {
+  gratis: 'Grátis',
+  loja: 'Loja',
+  rede: 'Rede',
+  enterprise: 'Enterprise',
+};
 
 
 
@@ -19,7 +30,7 @@ function App() {
   const [activeTab, setActiveTab] = useState('cond');
   const [activeDock, setActiveDock] = useState('home');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState('Starter');
+  const [selectedPlan, setSelectedPlan] = useState('Grátis');
   const [lastSyncTime, setLastSyncTime] = useState(3);
   
   // Leads Registration Form State
@@ -108,11 +119,38 @@ function App() {
     }
   };
 
-  // Open Lead Registration Modal prefilled with selected plan
-  const triggerConversionModal = (planName) => {
-    setSelectedPlan(planName);
-    setSubmitStatus({ loading: false, success: false, error: null });
-    setIsModalOpen(true);
+  /**
+   * Ponto único de conversão da página.
+   *
+   * Funil híbrido: `gratis` vai para o cadastro (sem cartão, como o FAQ desta
+   * página promete), `loja`/`rede` vão para o checkout com o plano sugerido, e
+   * `enterprise` — que não tem preço público — cai no modal de contato.
+   *
+   * O `trackEvent` dispara ANTES de navegar: sair da página cancela requisição
+   * em voo, e um clique que não é medido é uma venda que some do funil.
+   */
+  const startConversion = (planCode, ctaLocation = 'unknown', ctaLabel = planCode, screens) => {
+    const planName = PLAN_LABELS[planCode] || planCode;
+    trackEvent('cta_click', { cta_location: ctaLocation, cta_label: ctaLabel, plan_selected: planName });
+
+    const destination = conversionDestination(planCode, screens);
+
+    if (!destination) {
+      // Enterprise: contratação por proposta, não self-service.
+      setSelectedPlan(planName);
+      setSubmitStatus({ loading: false, success: false, error: null });
+      setIsModalOpen(true);
+      trackEvent('modal_open', { modal_name: 'lead_capture', plan_selected: planName });
+      return;
+    }
+
+    trackEvent('begin_checkout', {
+      plan_selected: planName,
+      cta_location: ctaLocation,
+      destination: planCode === 'gratis' ? 'signup' : 'checkout',
+    });
+
+    window.location.href = destination;
   };
 
   // Handle Lead Form Submission (Client-side — integrate with Formspree/Zapier/Webhook later)
@@ -131,6 +169,15 @@ function App() {
     // - EmailJS, Google Forms, etc.
     setTimeout(() => {
       setSubmitStatus({ loading: false, success: true, error: null });
+
+      trackEvent('generate_lead', {
+        event_id: crypto.randomUUID(),
+        plan_selected: selectedPlan,
+        lead_company: formCompany || undefined,
+        value: 0,
+        currency: 'BRL'
+      });
+
       setFormName('');
       setFormEmail('');
       setFormCompany('');
@@ -140,18 +187,21 @@ function App() {
 
   return (
     <>
+      {/* 0. Consent banner (LGPD/GDPR) — decide antes de qualquer tag de marketing/analytics disparar */}
+      <ConsentBanner />
+
       {/* 1. Touch-Interactive particles background */}
       <NetworkCanvas />
 
       {/* 2. Top navigation header */}
       <Navbar 
         scrollToSection={scrollToSection} 
-        triggerConversionModal={triggerConversionModal} 
+        startConversion={startConversion} 
       />
 
       {/* 3. Hero section (includes DashboardMockup inside) */}
       <Hero 
-        triggerConversionModal={triggerConversionModal}
+        startConversion={startConversion}
         scrollToSection={scrollToSection}
         telemetry={telemetry}
         lastSyncTime={lastSyncTime}
@@ -171,17 +221,17 @@ function App() {
       />
 
       {/* 7. Pricing section */}
-      <Pricing triggerConversionModal={triggerConversionModal} />
+      <Pricing startConversion={startConversion} />
 
       {/* 8. Conversion action strip */}
-      <CtaStrip triggerConversionModal={triggerConversionModal} />
+      <CtaStrip startConversion={startConversion} />
 
       {/* 9 & 10. Footer and mobile bottom navigation dock */}
       <Footer 
         scrollToSection={scrollToSection}
         setActiveTab={setActiveTab}
         activeDock={activeDock}
-        triggerConversionModal={triggerConversionModal}
+        startConversion={startConversion}
       />
 
       {/* 11. Lead capture conversion modal */}

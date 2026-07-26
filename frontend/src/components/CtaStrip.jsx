@@ -1,4 +1,4 @@
-const CtaStrip = ({ triggerConversionModal }) => {
+const CtaStrip = ({ startConversion }) => {
   return (
     <div className="cta-strip">
       <div className="container">
@@ -7,16 +7,16 @@ const CtaStrip = ({ triggerConversionModal }) => {
           Daqui a 5 minutos, sua primeira tela pode estar no ar.<br /><span style={{ color: 'rgba(255,255,255,0.75)' }}>Ou você pode continuar procurando o pen-drive.</span>
         </h2>
         <p className="reveal" style={{ marginTop: '16px', marginBottom: '32px' }}>
-          Crie a conta. Monte o conteúdo. Gere o código. Conecte a TV. Sem instalador, sem técnico, sem enrolação.
+          Crie a conta. Escolha um modelo. Gere o código. Digite na TV. Quatro passos, nenhum instalador, nenhum técnico — e a próxima oferta você troca do celular, em 30 segundos.
         </p>
         
         <div className="cta-strip-actions reveal">
-          <button 
-            onClick={() => triggerConversionModal('Starter')} 
-            className="btn btn-primary" 
+          <button
+            onClick={() => startConversion('gratis', 'cta_strip', 'Quero ativar minha tela grátis')}
+            className="btn btn-primary"
             style={{ fontSize: '1rem', padding: '14px 32px', background: '#FFFFFF', color: '#0ea5e9' }}
           >
-            Quero ativar minha tela agora
+            Quero ativar minha tela grátis
             <svg 
               xmlns="http://www.w3.org/2000/svg" 
               viewBox="0 0 24 24" 
@@ -31,16 +31,18 @@ const CtaStrip = ({ triggerConversionModal }) => {
               <polyline points="12 5 19 12 12 19" />
             </svg>
           </button>
-          <button 
-            onClick={() => triggerConversionModal('Enterprise')} 
-            className="btn btn-ghost" 
+          <button
+            onClick={() => startConversion('enterprise', 'cta_strip', 'Falar com especialista')}
+            className="btn btn-ghost"
             style={{ fontSize: '1rem', padding: '14px 32px', borderColor: 'rgba(255,255,255,0.35)', color: '#FFFFFF' }}
           >
             Falar com especialista
           </button>
         </div>
         <p style={{ marginTop: '20px', fontSize: '0.8rem', color: 'rgba(255,255,255,0.55)' }}>
-          Teste grátis por 14 dias · Pareamento em 2 min · Cancele quando quiser
+          {/* Antes dizia "Teste grátis por 14 dias", contradizendo os "7 dias" da Hero.
+              Prazo de teste só volta aqui depois de definida a oferta oficial. */}
+          Primeira tela grátis para sempre · Sem cartão · Pareamento em 2 min · Garantia de 7 dias
         </p>
       </div>
     </div>

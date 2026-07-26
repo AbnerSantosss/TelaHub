@@ -1,15 +1,24 @@
+# Stack de PRODUÇÃO do site de vendas (LP pública, estática, servida por Nginx).
+#
+# Sem porta publicada e sem `build:` — quem expõe é o Cloudflare Tunnel, e a
+# imagem vem pronta do GHCR. Ver o comentário longo em
+# `App-Projeto/docker-compose.yml` para o porquê das duas regras.
+
 services:
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
+    image: ghcr.io/abnersantosss/telahub-site:${IMAGE_TAG:-latest}
     container_name: site-telas-display
-    ports:
-      - "42938:80"
     restart: unless-stopped
+    networks:
+      - telahub_net
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/"]
       interval: 30s
       timeout: 5s
       retries: 3
       start_period: 10s
+
+networks:
+  # Criada uma única vez na VPS:  docker network create telahub_net
+  telahub_net:
+    external: true

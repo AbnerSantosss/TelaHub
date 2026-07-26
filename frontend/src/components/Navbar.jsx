@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-const Navbar = ({ scrollToSection, triggerConversionModal }) => {
+const Navbar = ({ scrollToSection, startConversion }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const handleNavClick = (selector, name) => {
@@ -48,22 +48,12 @@ const Navbar = ({ scrollToSection, triggerConversionModal }) => {
           <li>
             <button onClick={() => scrollToSection('#precos', 'precos')}>Preços</button>
           </li>
-          <li>
-            <a href="#" onClick={(e) => e.preventDefault()} style={{ color: 'var(--text-secondary)' }}>Documentação</a>
-          </li>
         </ul>
-        
+
         <div className="nav-cta">
-          <button 
-            onClick={() => triggerConversionModal('Starter')} 
-            className="btn btn-ghost" 
-            style={{ padding: '8px 16px', fontSize: '0.85rem' }}
-          >
-            Entrar
-          </button>
-          <button 
-            onClick={() => triggerConversionModal('Starter')} 
-            className="btn btn-primary" 
+          <button
+            onClick={() => startConversion('gratis', 'navbar', 'Começar grátis')}
+            className="btn btn-primary"
             style={{ padding: '8px 18px', fontSize: '0.85rem' }}
           >
             Começar grátis
@@ -108,21 +98,11 @@ const Navbar = ({ scrollToSection, triggerConversionModal }) => {
             <li>
               <button onClick={() => handleNavClick('#precos', 'precos')}>Preços</button>
             </li>
-            <li>
-              <a href="#" onClick={(e) => { e.preventDefault(); setIsMenuOpen(false); }}>Documentação</a>
-            </li>
           </ul>
-          
+
           <div className="mobile-nav-cta">
-            <button 
-              onClick={() => { triggerConversionModal('Starter'); setIsMenuOpen(false); }} 
-              className="btn btn-ghost"
-              style={{ width: '100%', padding: '14px', fontSize: '0.95rem' }}
-            >
-              Entrar
-            </button>
-            <button 
-              onClick={() => { triggerConversionModal('Starter'); setIsMenuOpen(false); }} 
+            <button
+              onClick={() => { startConversion('gratis', 'navbar_mobile', 'Começar grátis'); setIsMenuOpen(false); }}
               className="btn btn-primary"
               style={{ width: '100%', padding: '14px', fontSize: '0.95rem' }}
             >

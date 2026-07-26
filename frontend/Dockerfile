@@ -14,6 +14,16 @@ RUN npm ci --production=false
 # Copy source code
 COPY . .
 
+# Destinos do funil (checkout e painel). O Vite resolve `VITE_*` em tempo de
+# BUILD e embute o valor no bundle — trocar o domínio exige rebuild da imagem,
+# não basta mudar a variável no Portainer.
+#
+# Sem estes args valem os defaults de produção de `src/lib/funnel.js`.
+ARG VITE_CHECKOUT_URL
+ARG VITE_APP_URL
+ENV VITE_CHECKOUT_URL=$VITE_CHECKOUT_URL
+ENV VITE_APP_URL=$VITE_APP_URL
+
 # Build the production bundle
 RUN npm run build
 

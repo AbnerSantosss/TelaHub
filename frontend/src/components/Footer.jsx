@@ -1,4 +1,4 @@
-const Footer = ({ scrollToSection, setActiveTab, activeDock, triggerConversionModal }) => {
+const Footer = ({ scrollToSection, setActiveTab, activeDock, startConversion }) => {
   return (
     <>
       <footer>
@@ -57,9 +57,15 @@ const Footer = ({ scrollToSection, setActiveTab, activeDock, triggerConversionMo
               <div className="footer-col">
                 <h4>Termos & Legal</h4>
                 <ul>
+                  {/* PENDÊNCIA REAL, não cosmética: estes links estão mortos
+                      (href="#" + preventDefault). Como este site captura lead
+                      (LeadModal) e usa cookies de campanha, a LGPD exige uma
+                      política de privacidade acessível de verdade, com canal de
+                      contato do titular. Enquanto as páginas não existirem, o
+                      site coleta dado pessoal sem informar o titular.
+                      "Políticas de SLA" foi removido: não há SLA contratado. */}
                   <li><a href="#" onClick={(e) => e.preventDefault()}>Privacidade</a></li>
                   <li><a href="#" onClick={(e) => e.preventDefault()}>Termos de Uso</a></li>
-                  <li><a href="#" onClick={(e) => e.preventDefault()}>Políticas de SLA</a></li>
                   <li><a href="#" onClick={(e) => e.preventDefault()}>Suporte Geral</a></li>
                 </ul>
               </div>
@@ -136,9 +142,9 @@ const Footer = ({ scrollToSection, setActiveTab, activeDock, triggerConversionMo
           Planos
         </button>
         
-        <button 
-          className="mobile-dock-cta" 
-          onClick={() => triggerConversionModal('Business')}
+        <button
+          className="mobile-dock-cta"
+          onClick={() => startConversion('gratis', 'mobile_dock', 'Grátis')}
         >
           <svg 
             xmlns="http://www.w3.org/2000/svg" 

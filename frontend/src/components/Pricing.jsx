@@ -1,6 +1,108 @@
 import { useState } from 'react';
 
-const Pricing = ({ triggerConversionModal }) => {
+/**
+ * Catálogo de planos — espelho de `backend/prisma/seed-plans.ts`.
+ *
+ * O modelo é **cobrança por tela ativa**, em real. Não existe pacote fechado de
+ * "até N telas": nos planos pagos o número de telas é ilimitado e o que cresce
+ * é a fatura. A única trava de tela no catálogo é o plano Grátis (1 tela).
+ *
+ * `powerbi` é feature do plano Rede para cima — por isso os widgets de BI só
+ * aparecem a partir dele.
+ */
+const plans = [
+  {
+    code: 'gratis',
+    name: 'Grátis',
+    price: '0',
+    period: '/mês',
+    priceNote: '1 tela, para sempre',
+    description: 'Para tirar do papel hoje. Uma tela no ar, sem cartão de crédito e sem prazo para expirar.',
+    features: [
+      '1 tela conectada para sempre',
+      'Editor visual de arrastar e soltar',
+      'Fotos, GIFs e textos',
+      // Degustação de vídeo: 7 dias contados da criação da conta, aplicada de
+      // verdade no servidor (`FREE_VIDEO_TRIAL_DAYS` em entitlement.service.ts).
+      // O prazo aqui e o do backend precisam bater — é oferta vinculante (CDC).
+      'Vídeos liberados nos 7 primeiros dias',
+      // NÃO escrever "cache offline failsafe" aqui: não existe persistência
+      // offline (só cache por versão/ETag), e o FAQ desta mesma página declara
+      // isso. Bullet e FAQ se contradizendo é exatamente o que os arts. 30 e 37
+      // do CDC transformam em publicidade enganosa.
+      'Atualização em tempo real na tela',
+      'Alerta por e-mail se a tela cair',
+    ],
+    cta: 'Começar grátis',
+  },
+  {
+    code: 'loja',
+    name: 'Loja',
+    price: '49',
+    period: '/tela/mês',
+    priceNote: 'a partir de 1 tela',
+    description: 'Para quem já depende da tela no dia a dia. Telas ilimitadas — você paga só pelas que estiverem ativas.',
+    features: [
+      'Telas ilimitadas (paga por tela ativa)',
+      'Vídeos em loop e YouTube, sem prazo',
+      'Até 3 usuários na equipe',
+      'Avisos rápidos em todas as telas',
+      'Relatórios de exibição',
+      'Trilha de auditoria de alterações',
+    ],
+    cta: 'Assinar o Loja',
+    // Telas com que o checkout abre. É só sugestão: quem calcula o valor é o
+    // servidor, no PATCH da sessão.
+    checkoutScreens: 1,
+  },
+  {
+    code: 'rede',
+    name: 'Rede',
+    price: '39',
+    period: '/tela/mês',
+    priceNote: 'mínimo de 5 telas na fatura',
+    featured: true,
+    // "Mais Escolhido" não pode voltar: não há base de clientes para sustentar
+    // superlativo de venda. "Recomendado" é escolha editorial nossa, e isso é
+    // legítimo dizer.
+    tag: 'Recomendado',
+    description: 'Menor preço por tela em troca de um piso de 5 telas. É aqui que entram os painéis de indicador e as integrações.',
+    features: [
+      'Tudo do plano Loja',
+      'Power BI, Airtable e planilhas na TV',
+      'Google Docs, Office e PDF na tela',
+      'Agendamento avançado por horário',
+      'API externa e múltiplas unidades',
+      'Até 15 usuários na equipe',
+    ],
+    cta: 'Assinar o Rede',
+    // Abre no piso de telas cobradas do plano — abrir em 1 mostraria um valor
+    // menor do que a fatura mínima real, que é o tipo de surpresa que derruba a
+    // conversão no passo seguinte.
+    checkoutScreens: 5,
+  },
+  {
+    code: 'enterprise',
+    name: 'Enterprise',
+    price: null,
+    period: '',
+    priceNote: 'proposta sob medida',
+    description: 'Para redes e franquias que precisam da plataforma com a própria marca e contrato formal.',
+    features: [
+      'Tudo do plano Rede',
+      'Usuários ilimitados',
+      // White label, SSO e SLA NÃO estão implementados. Só podem aparecer aqui
+      // marcados como escopo a contratar — como recurso pronto, seriam promessa
+      // vinculante (CDC arts. 30 e 37).
+      'Marca própria no painel — sob escopo de projeto',
+      'Login único (SSO) — sob escopo de projeto',
+      'SLA e gerente dedicado — definidos em contrato',
+    ],
+    cta: 'Falar com Comercial',
+  },
+];
+
+const Pricing = ({ startConversion }) => {
   const [openFaq, setOpenFaq] = useState(null);
 
   const faqs = [
@@ -22,7 +124,37 @@ const Pricing = ({ triggerConversionModal }) => {
     {
       id: 4,
       question: "O que acontece se a internet da minha loja cair?",
-      answer: "O TelaHub possui resiliência failsafe com cache offline. Isso significa que todas as imagens, vídeos, cardápios e informativos são baixados e salvos localmente na memória do seu display. Se a conexão cair, a programação continua rodando normalmente. Sem telas pretas ou mensagens de erro."
+      // A redação anterior afirmava que as mídias eram baixadas para a memória
+      // do display e que a programação continuava rodando na queda de internet.
+      // Isso NÃO existe no produto: o player só tem cache por versão/ETag. Como
+      // os arts. 30 e 37 do CDC fazem a publicidade vincular o contrato, a
+      // promessa foi substituída pelo comportamento real. Só volte a prometer
+      // operação offline quando a persistência real existir (US-039 no Kanban).
+      answer: "Enquanto a tela está ligada e exibindo, uma queda breve de conexão não interrompe o que já está no ar: o player segue com o conteúdo que carregou e volta a sincronizar sozinho quando a internet retorna. Sendo direto sobre o limite atual, ainda não há armazenamento offline completo — se o aparelho for reiniciado sem internet, ele não carrega a programação. Está no nosso roteiro, e preferimos avisar agora a te surpreender na loja. Em compensação, se uma tela parar de responder você recebe um aviso por e-mail em vez de descobrir dias depois."
+    },
+    {
+      id: 5,
+      question: "Tem contrato de fidelidade? Como faço para cancelar?",
+      answer: "Não existe fidelidade, multa nem carência. É mês a mês: você cancela pelo próprio painel quando quiser e continua usando até o fim do período já pago. Além disso, por lei (art. 49 do Código de Defesa do Consumidor) você tem 7 dias para desistir e receber o valor de volta — e nós honramos isso sem pedir explicação."
+    },
+    {
+      id: 6,
+      question: "Não tenho tempo nem equipe de marketing. Quem monta minha primeira tela?",
+      answer: "Nós montamos com você. Você entra no plano, chama no WhatsApp e um especialista configura a primeira tela junto com você, usando as fotos e os preços que você já tem. Depois disso, trocar uma oferta leva cerca de 30 segundos pelo celular — é escolher o modelo, trocar a imagem e publicar."
+    },
+    {
+      id: 7,
+      question: "Meu concorrente da esquina vai ver o que eu anuncio. Meus dados ficam seguros?",
+      answer: "Cada empresa opera em um ambiente isolado: seu conteúdo, suas telas e seus usuários só são acessíveis por quem você convidar. Ninguém de outra empresa enxerga sua programação, seus preços ou suas mídias, e nenhum funcionário seu vê dados de outro cliente. Tratamos dados pessoais conforme a LGPD e o consentimento de cookies do site é negado por padrão até você aceitar."
+    },
+    {
+      // Divulgação obrigatória: a degustação de vídeo é oferta vinculante (arts.
+      // 30 e 31 do CDC), então o que acontece no 8º dia precisa estar escrito
+      // ANTES da contratação — e precisa descrever o comportamento real do
+      // sistema (gate na publicação, não na exibição).
+      id: 8,
+      question: "No plano Grátis, o que acontece com meus vídeos depois dos 7 dias?",
+      answer: "Nos 7 primeiros dias você publica vídeo à vontade, para ver funcionando na TV da sua loja antes de decidir. Depois desse prazo, o que muda é a publicação: você não consegue mais salvar uma tela nova com vídeo, e o editor avisa na hora. O que já estava publicado continua tocando — não apagamos seu conteúdo e não deixamos a tela em branco no meio do expediente. Para voltar a publicar vídeos, o plano Loja libera sem prazo. Imagens, GIFs e textos seguem ilimitados no Grátis, para sempre."
     }
   ];
 
@@ -35,7 +167,7 @@ const Pricing = ({ triggerConversionModal }) => {
       <div className="container">
         {/* Price Anchor Header */}
         <div className="precos-header" style={{ textAlign: 'center', marginBottom: '56px' }}>
-          <div className="label reveal" style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10B981', borderColor: 'rgba(16, 185, 129, 0.25)', borderRadius: '99px' }}>
+          <div className="label reveal" style={{ background: 'rgba(14, 165, 233, 0.1)', color: '#0ea5e9', borderColor: 'rgba(14, 165, 233, 0.25)', borderRadius: '99px' }}>
             Investimento Inteligente
           </div>
           <h2 id="precos-heading" className="reveal" style={{ fontSize: 'clamp(1.8rem, 3vw, 2.5rem)', fontWeight: '800', lineHeight: '1.2', maxWidth: '780px', marginLeft: 'auto', marginRight: 'auto', marginBottom: '20px' }}>
@@ -46,126 +178,155 @@ const Pricing = ({ triggerConversionModal }) => {
           </p>
         </div>
 
-        {/* Pricing Cards Grid */}
+        {/*
+          Bloco de ancoragem de preço. Os números externos foram verificados em
+          julho/2026 e devem ser reconferidos antes de cada campanha:
+            - Playtix (BR): kit básico monitor profissional 43" + player + CMS a
+              partir de R$ 3.500 — playtix.com.br/digital-signage-sinalizacao-digital-guia
+            - Yodeck: plano Basic US$ 8/tela/mês (Premium subiu de US$ 11 para
+              US$ 12 em 01/04/2026) — checkthat.ai/brands/yodeck/pricing
+            - ScreenCloud: US$ 20–30/tela/mês, plano Pro com mínimo de 5 telas
+              — cast-hub.com/digital-signage-cost-per-screen
+          Os valores por tela do TelaHub são derivados dos próprios planos abaixo
+          (R$ 69 ÷ 2 telas e R$ 149 ÷ 6 telas). Se o preço dos planos mudar,
+          ATUALIZE estes dois números junto.
+        */}
+        <div className="reveal" style={{
+          background: 'var(--bg-card)',
+          border: '1px solid var(--border)',
+          borderRadius: '16px',
+          padding: '32px',
+          maxWidth: '880px',
+          margin: '0 auto 56px',
+        }}>
+          <p style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '20px', textAlign: 'center' }}>
+            Compare antes de decidir
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: '20px' }}>
+            <div style={{ padding: '20px', background: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border)' }}>
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '8px' }}>Kit tradicional no Brasil</p>
+              <p style={{ fontSize: '1.6rem', fontWeight: '800', color: 'var(--text-primary)', lineHeight: '1.1', marginBottom: '8px' }}>R$ 3.500</p>
+              <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: '1.5', margin: 0 }}>
+                de entrada, por ponto: monitor profissional, player e licença — antes da primeira oferta ir ao ar.
+              </p>
+            </div>
+            <div style={{ padding: '20px', background: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border)' }}>
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '8px' }}>Plataformas de fora</p>
+              <p style={{ fontSize: '1.6rem', fontWeight: '800', color: 'var(--text-primary)', lineHeight: '1.1', marginBottom: '8px' }}>US$ 8 a 30</p>
+              <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: '1.5', margin: 0 }}>
+                por tela/mês, cobrado em dólar. As intermediárias só vendem a partir de 5 telas, e o suporte não fala português.
+              </p>
+            </div>
+            <div style={{ padding: '20px', background: 'rgba(14, 165, 233, 0.07)', borderRadius: '12px', border: '1px solid rgba(14, 165, 233, 0.3)' }}>
+              <p style={{ fontSize: '0.8rem', color: '#38bdf8', fontWeight: '700', marginBottom: '8px' }}>TelaHub</p>
+              <p style={{ fontSize: '1.6rem', fontWeight: '800', color: 'var(--text-primary)', lineHeight: '1.1', marginBottom: '8px' }}>R$ 0 a 49<span style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-muted)' }}> /tela</span></p>
+              <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: '1.5', margin: 0 }}>
+                a 1ª tela é grátis para sempre; depois R$ 49 por tela ativa (R$ 39 acima de 5). Em real, sem hardware para comprar — na TV que já está na sua parede.
+              </p>
+            </div>
+          </div>
+          {/*
+            Declaração de posicionamento no formato Onliness Statement (Marty
+            Neumeier, "Zag"): um diferencial só é real se couber numa frase de
+            contraste com as alternativas concretas do mercado. O contraste aqui
+            é factual (dólar / mínimo de 5 telas / hardware de entrada) e NÃO um
+            "somos os únicos" — reivindicar unicidade exigiria varrer antes os
+            players brasileiros (Pricefy, RDS, Megamidia, Playtix).
+          */}
+          <p style={{ fontSize: '0.95rem', color: 'var(--text-primary)', textAlign: 'center', marginTop: '24px', marginBottom: '10px', lineHeight: '1.6', fontWeight: '600' }}>
+            O kit tradicional pede R$ 3.500 de hardware antes da primeira oferta ir ao ar. As plataformas de fora cobram em dólar
+            e as intermediárias só vendem a partir de 5 telas. No TelaHub a primeira tela é grátis para sempre, na TV que já está
+            na sua parede — e o piso de 5 telas só existe se você quiser o desconto do plano Rede.
+          </p>
+          <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', textAlign: 'center', marginTop: 0, marginBottom: 0, lineHeight: '1.5' }}>
+            Você já pagou pela TV. Já paga a internet. O que falta custa menos que uma tinta de impressora por mês.
+          </p>
+        </div>
+
+        {/*
+          Grade de planos — ESPELHA `backend/prisma/seed-plans.ts` (PLAN_CATALOG).
+          Modelo real: cobrança POR TELA ATIVA, em real. `maxDevices` é ilimitado
+          nos planos pagos de propósito (quem limita a expansão é a fatura, não
+          uma trava no software); só o plano `gratis` trava em 1 tela.
+          Ao mexer em preço/limite/feature aqui, mexa no seed também — os dois
+          precisam contar a mesma história.
+        */}
         <div className="precos-grid" style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
           gap: '24px',
           alignItems: 'stretch',
           marginBottom: '56px'
         }}>
-          {/* Starter Plan */}
-          <div className="preco-card reveal" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', padding: '36px 28px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-            <div>
-              <p className="plan-name" style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px' }}>Starter</p>
-              <div className="plan-price" style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginBottom: '16px' }}>
-                <span className="plan-currency" style={{ fontSize: '1.2rem', fontWeight: '700', color: 'var(--text-primary)' }}>R$</span>
-                <span className="plan-amount" style={{ fontSize: '3rem', fontWeight: '800', color: 'var(--text-primary)', letterSpacing: '-0.04em', lineHeight: '1' }}>69</span>
-                <span className="plan-period" style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>/mês</span>
-              </div>
-              <p className="plan-description" style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: '1.5', marginBottom: '24px' }}>
-                Para pequenos negócios. Consultórios, lojas de bairro e condomínios. 2 telas já eliminam impressos e comunicam com máxima eficiência.
-              </p>
-              <div className="plan-divider" style={{ height: '1px', background: 'var(--border)', marginBottom: '24px' }}></div>
-              
-              <ul className="plan-features" style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '32px', padding: 0, listStyle: 'none' }}>
-                <li className="plan-feature" style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.88rem', color: 'var(--text-secondary)' }}>
-                  <span className="plan-check" style={{ width: '18px', height: '18px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.25)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981', fontSize: '0.65rem', fontWeight: 'bold' }}>✓</span>
-                  <span>Até 2 telas conectadas</span>
-                </li>
-                <li className="plan-feature" style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.88rem', color: 'var(--text-secondary)' }}>
-                  <span className="plan-check" style={{ width: '18px', height: '18px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.25)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981', fontSize: '0.65rem', fontWeight: 'bold' }}>✓</span>
-                  <span>Editor visual de arrastar e soltar</span>
-                </li>
-                <li className="plan-feature" style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.88rem', color: 'var(--text-secondary)' }}>
-                  <span className="plan-check" style={{ width: '18px', height: '18px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.25)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981', fontSize: '0.65rem', fontWeight: 'bold' }}>✓</span>
-                  <span>Fotos, GIFs e vídeos em loop</span>
-                </li>
-                <li className="plan-feature" style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.88rem', color: 'var(--text-secondary)' }}>
-                  <span className="plan-check" style={{ width: '18px', height: '18px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.25)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981', fontSize: '0.65rem', fontWeight: 'bold' }}>✓</span>
-                  <span>Cache offline failsafe inteligente</span>
-                </li>
-              </ul>
-            </div>
-            <button onClick={() => triggerConversionModal('Starter')} className="btn btn-plan btn-plan-outline" style={{ width: '100%', padding: '12px 0', fontSize: '0.9rem' }}>
-              Quero modernizar minhas telas
-            </button>
-          </div>
+          {plans.map((plan) => (
+            <div
+              key={plan.code}
+              className={`preco-card reveal${plan.featured ? ' preco-card-featured' : ''}`}
+              style={{
+                background: plan.featured ? 'rgba(14, 165, 233, 0.05)' : 'var(--bg-card)',
+                border: plan.featured ? '2px solid #0ea5e9' : '1px solid var(--border)',
+                borderRadius: '16px',
+                padding: '36px 28px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                position: 'relative',
+                boxShadow: plan.featured ? '0 12px 32px rgba(14, 165, 233, 0.1)' : 'none',
+              }}
+            >
+              {plan.tag && (
+                <span className="featured-tag" style={{ position: 'absolute', top: '16px', right: '16px', background: '#0ea5e9', color: '#FFFFFF', fontSize: '0.65rem', fontWeight: '700', padding: '4px 10px', borderRadius: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  {plan.tag}
+                </span>
+              )}
+              <div>
+                <p className={`plan-name${plan.featured ? ' featured' : ''}`} style={{ fontSize: '0.8rem', fontWeight: '700', color: plan.featured ? '#38bdf8' : 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px' }}>
+                  {plan.name}
+                </p>
 
-          {/* Business Plan (Featured) */}
-          <div className="preco-card preco-card-featured reveal" style={{ background: 'rgba(14, 165, 233, 0.05)', border: '2px solid #0ea5e9', borderRadius: '16px', padding: '36px 28px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', position: 'relative', boxShadow: '0 12px 32px rgba(14, 165, 233, 0.1)' }}>
-            <span className="featured-tag" style={{ position: 'absolute', top: '16px', right: '16px', background: '#0ea5e9', color: '#FFFFFF', fontSize: '0.65rem', fontWeight: '700', padding: '4px 10px', borderRadius: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Mais Escolhido</span>
-            <div>
-              <p className="plan-name featured" style={{ fontSize: '0.8rem', fontWeight: '700', color: '#38bdf8', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px' }}>Business</p>
-              <div className="plan-price" style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginBottom: '16px' }}>
-                <span className="plan-currency" style={{ fontSize: '1.2rem', fontWeight: '700', color: 'var(--text-primary)' }}>R$</span>
-                <span className="plan-amount" style={{ fontSize: '3rem', fontWeight: '800', color: 'var(--text-primary)', letterSpacing: '-0.04em', lineHeight: '1' }}>149</span>
-                <span className="plan-period" style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>/mês</span>
-              </div>
-              <p className="plan-description" style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: '1.5', marginBottom: '24px' }}>
-                Para empresas em crescimento e condomínios. Múltiplos pontos de comunicação, suporte prioritário e integrações em tempo real.
-              </p>
-              <div className="plan-divider" style={{ height: '1px', background: 'var(--border)', marginBottom: '24px' }}></div>
-              
-              <ul className="plan-features" style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '32px', padding: 0, listStyle: 'none' }}>
-                <li className="plan-feature" style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.88rem', color: '#E2E8F0', fontWeight: '600' }}>
-                  <span className="plan-check" style={{ width: '18px', height: '18px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.25)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981', fontSize: '0.65rem', fontWeight: 'bold' }}>✓</span>
-                  <span>Até 6 telas conectadas</span>
-                </li>
-                <li className="plan-feature" style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.88rem', color: 'var(--text-secondary)' }}>
-                  <span className="plan-check" style={{ width: '18px', height: '18px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.25)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981', fontSize: '0.65rem', fontWeight: 'bold' }}>✓</span>
-                  <span>Tudo do plano Starter</span>
-                </li>
-                <li className="plan-feature" style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.88rem', color: 'var(--text-secondary)' }}>
-                  <span className="plan-check" style={{ width: '18px', height: '18px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.25)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981', fontSize: '0.65rem', fontWeight: 'bold' }}>✓</span>
-                  <span>Recurso de avisos rápidos (Broadcast)</span>
-                </li>
-                <li className="plan-feature" style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.88rem', color: 'var(--text-secondary)' }}>
-                  <span className="plan-check" style={{ width: '18px', height: '18px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.25)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981', fontSize: '0.65rem', fontWeight: 'bold' }}>✓</span>
-                  <span>Suporte Prioritário por WhatsApp com SLA</span>
-                </li>
-              </ul>
-            </div>
-            <button onClick={() => triggerConversionModal('Business')} className="btn btn-plan btn-plan-featured" style={{ width: '100%', padding: '12px 0', fontSize: '0.9rem', background: '#0ea5e9', color: '#FFFFFF', fontWeight: '700' }}>
-              Quero modernizar minhas telas
-            </button>
-          </div>
+                <div className="plan-price" style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginBottom: '4px' }}>
+                  {plan.price === null ? (
+                    <span className="plan-consult" style={{ fontSize: '1.8rem', fontWeight: '800', color: 'var(--text-primary)', letterSpacing: '-0.02em', lineHeight: '1' }}>Sob consulta</span>
+                  ) : (
+                    <>
+                      <span className="plan-currency" style={{ fontSize: '1.2rem', fontWeight: '700', color: 'var(--text-primary)' }}>R$</span>
+                      <span className="plan-amount" style={{ fontSize: '3rem', fontWeight: '800', color: 'var(--text-primary)', letterSpacing: '-0.04em', lineHeight: '1' }}>{plan.price}</span>
+                      <span className="plan-period" style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{plan.period}</span>
+                    </>
+                  )}
+                </div>
+                <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '16px', minHeight: '18px' }}>
+                  {plan.priceNote}
+                </p>
 
-          {/* Enterprise Plan */}
-          <div className="preco-card reveal" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', padding: '36px 28px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-            <div>
-              <p className="plan-name" style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px' }}>Enterprise</p>
-              <div className="plan-price" style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginBottom: '16px' }}>
-                <span className="plan-consult" style={{ fontSize: '1.8rem', fontWeight: '800', color: 'var(--text-primary)', letterSpacing: '-0.02em', lineHeight: '1' }}>Sob consulta</span>
+                <p className="plan-description" style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: '1.5', marginBottom: '24px' }}>
+                  {plan.description}
+                </p>
+                <div className="plan-divider" style={{ height: '1px', background: 'var(--border)', marginBottom: '24px' }}></div>
+
+                <ul className="plan-features" style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '32px', padding: 0, listStyle: 'none' }}>
+                  {plan.features.map((feature) => (
+                    <li key={feature} className="plan-feature" style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.88rem', color: 'var(--text-secondary)' }}>
+                      <span className="plan-check" style={{ width: '18px', height: '18px', flex: '0 0 18px', background: 'rgba(14, 165, 233, 0.1)', border: '1px solid rgba(14, 165, 233, 0.25)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0ea5e9', fontSize: '0.65rem', fontWeight: 'bold' }}>✓</span>
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
-              <p className="plan-description" style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: '1.5', marginBottom: '24px' }}>
-                Para grandes redes e franquias com mais de 10 telas. White Label completo com sua marca, APIs dedicadas e SLA personalizado.
-              </p>
-              <div className="plan-divider" style={{ height: '1px', background: 'var(--border)', marginBottom: '24px' }}></div>
-              
-              <ul className="plan-features" style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '32px', padding: 0, listStyle: 'none' }}>
-                <li className="plan-feature" style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.88rem', color: 'var(--text-secondary)' }}>
-                  <span className="plan-check" style={{ width: '18px', height: '18px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.25)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981', fontSize: '0.65rem', fontWeight: 'bold' }}>✓</span>
-                  <span>Mais de 10 telas conectadas</span>
-                </li>
-                <li className="plan-feature" style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.88rem', color: 'var(--text-secondary)' }}>
-                  <span className="plan-check" style={{ width: '18px', height: '18px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.25)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981', fontSize: '0.65rem', fontWeight: 'bold' }}>✓</span>
-                  <span>White Label completo (Sua marca no painel)</span>
-                </li>
-                <li className="plan-feature" style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.88rem', color: 'var(--text-secondary)' }}>
-                  <span className="plan-check" style={{ width: '18px', height: '18px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.25)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981', fontSize: '0.65rem', fontWeight: 'bold' }}>✓</span>
-                  <span>Gerente de contas dedicado por WhatsApp</span>
-                </li>
-                <li className="plan-feature" style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.88rem', color: 'var(--text-secondary)' }}>
-                  <span className="plan-check" style={{ width: '18px', height: '18px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.25)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981', fontSize: '0.65rem', fontWeight: 'bold' }}>✓</span>
-                  <span>SLA contratual robusto</span>
-                </li>
-              </ul>
+              <button
+                onClick={() => startConversion(plan.code, 'pricing', plan.cta, plan.checkoutScreens)}
+                className={`btn btn-plan ${plan.featured ? 'btn-plan-featured' : 'btn-plan-outline'}`}
+                style={{
+                  width: '100%',
+                  padding: '12px 0',
+                  fontSize: '0.9rem',
+                  ...(plan.featured ? { background: '#0ea5e9', color: '#FFFFFF', fontWeight: '700' } : {}),
+                }}
+              >
+                {plan.cta}
+              </button>
             </div>
-            <button onClick={() => triggerConversionModal('Enterprise')} className="btn btn-plan btn-plan-outline" style={{ width: '100%', padding: '12px 0', fontSize: '0.9rem' }}>
-              Falar com Comercial
-            </button>
-          </div>
+          ))}
         </div>
 
         {/* 7-Day Guarantee Banner */}
@@ -187,9 +348,9 @@ const Pricing = ({ triggerConversionModal }) => {
         }}>
           <div style={{ fontSize: '3rem', margin: 0, opacity: 0.9 }}>🛡️</div>
           <div>
-            <h3 style={{ fontSize: '1.2rem', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '8px' }}>Garantia de Risco Zero e Teste Sem Compromisso</h3>
+            <h3 style={{ fontSize: '1.2rem', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '8px' }}>O risco é todo nosso, não seu</h3>
             <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: '1.6', margin: 0, maxWidth: '600px' }}>
-              Oferecemos <strong>7 dias de garantia incondicional</strong>. Faça o pareamento do TelaHub nas Smart TVs do seu estabelecimento hoje. Se você não achar a plataforma extremamente simples e profissional, nós devolvemos cada centavo do seu investimento, sem perguntas.
+              <strong>7 dias de garantia incondicional</strong>, como manda o art. 49 do Código de Defesa do Consumidor — e sem burocracia da nossa parte. Pareie o TelaHub nas TVs do seu estabelecimento hoje. Se achar difícil, feio ou desnecessário, você pede o dinheiro de volta e recebe cada centavo, sem precisar justificar. Sem fidelidade e sem multa de cancelamento.
             </p>
           </div>
         </div>
@@ -197,7 +358,7 @@ const Pricing = ({ triggerConversionModal }) => {
         {/* FAQ Accordion Section */}
         <div style={{ borderTop: '1px solid var(--border)', paddingTop: '72px', maxWidth: '820px', marginLeft: 'auto', marginRight: 'auto' }}>
           <div style={{ textAlign: 'center', marginBottom: '48px' }}>
-            <div className="label reveal" style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10B981', borderColor: 'rgba(16, 185, 129, 0.25)', borderRadius: '99px' }}>Perguntas Frequentes</div>
+            <div className="label reveal" style={{ background: 'rgba(14, 165, 233, 0.1)', color: '#0ea5e9', borderColor: 'rgba(14, 165, 233, 0.25)', borderRadius: '99px' }}>Perguntas Frequentes</div>
             <h2 style={{ fontSize: 'clamp(1.5rem, 2.5vw, 2.2rem)', fontWeight: '800', marginTop: '12px' }}>Dúvidas frequentes de empresários</h2>
           </div>
 
@@ -261,8 +422,8 @@ const Pricing = ({ triggerConversionModal }) => {
                 gap: '8px',
                 padding: '14px 28px',
                 fontSize: '0.95rem',
-                border: '1px solid #10B981',
-                color: '#10B981',
+                border: '1px solid #0ea5e9',
+                color: '#0ea5e9',
                 fontWeight: '700',
                 background: 'transparent'
               }}
