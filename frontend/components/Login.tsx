@@ -417,8 +417,23 @@ const Login: React.FC = () => {
                 Acesso Master (Dev)
               </Button>
             </form>
+
+            <p className="text-center text-xs text-muted-foreground mt-5 pt-5 border-t border-border/60">
+              Ainda não tem conta?{' '}
+              <button
+                type="button"
+                onClick={() => navigate('/signup')}
+                className="font-bold text-sky-400 hover:text-sky-300 underline underline-offset-2 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/50"
+              >
+                Criar conta
+              </button>
+              {/* Oferta freemium — espelha o Signup. Não é trial: sem prazo. */}
+              <span className="block text-[11px] text-slate-400 mt-1">
+                1 tela grátis para sempre, sem cartão de crédito
+              </span>
+            </p>
           </div>
-          
+
           <div className="text-center space-y-2 lg:hidden">
             <p className="text-muted-foreground text-[11px] font-mono uppercase tracking-widest">
               &copy; {new Date().getFullYear()} TelaHub System v2.0

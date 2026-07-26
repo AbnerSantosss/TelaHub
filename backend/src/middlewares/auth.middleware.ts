@@ -9,6 +9,8 @@ declare global {
         id: string;
         email: string;
         role: string;
+        /** Escopo de tenant do usuário. Nulo apenas para o role `master`. */
+        organizationId: string | null;
       };
     }
   }

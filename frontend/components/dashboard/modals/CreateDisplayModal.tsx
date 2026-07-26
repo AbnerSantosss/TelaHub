@@ -57,9 +57,9 @@ export const CreateDisplayModal: React.FC<CreateDisplayModalProps> = ({
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent showCloseButton={false} className="sm:max-w-md max-w-md">
         <div className="flex items-center justify-between p-5 border-b border-white/10">
-          <h2 className="font-bold text-lg flex items-center gap-2" style={{ color: 'var(--color-text)' }}>
+          <DialogTitle className="font-bold text-lg flex items-center gap-2" style={{ color: 'var(--color-text)' }}>
             <Plus className="text-[#38bdf8]" size={20} /> Nova Tela
-          </h2>
+          </DialogTitle>
           <DialogClose asChild>
             <Button variant="ghost" size="icon" className="size-8 rounded-lg" style={{ color: 'var(--color-text-muted)' }}>
               <X size={18} />

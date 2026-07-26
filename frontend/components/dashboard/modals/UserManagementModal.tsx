@@ -67,9 +67,9 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent showCloseButton={false} className="sm:max-w-2xl max-w-2xl flex flex-col max-h-[90vh]">
         <div className="flex items-center justify-between p-5 border-b border-white/10">
-          <h2 className="font-bold text-lg flex items-center gap-2" style={{ color: 'var(--color-text)' }}>
+          <DialogTitle className="font-bold text-lg flex items-center gap-2" style={{ color: 'var(--color-text)' }}>
             <UsersIcon className="text-emerald-400" size={20} /> Gestão de Usuários
-          </h2>
+          </DialogTitle>
           <DialogClose asChild>
             <Button variant="ghost" size="icon" className="size-8 rounded-lg" style={{ color: 'var(--color-text-muted)' }}>
               <X size={18} />

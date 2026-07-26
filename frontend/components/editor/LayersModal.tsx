@@ -6,6 +6,7 @@ import {
   BarChart3, Code2, Database, Trash2, GripVertical 
 } from 'lucide-react';
 import { Display, Page, WidgetType } from '../../types';
+import { useModalA11y } from '../../hooks/useModalA11y';
 
 interface LayersModalProps {
   showLayersModal: boolean;
@@ -32,6 +33,7 @@ export const LayersModal: React.FC<LayersModalProps> = ({
 }) => {
   const [draggedLayerId, setDraggedLayerId] = useState<string | null>(null);
   const [dragOverLayerId, setDragOverLayerId] = useState<string | null>(null);
+  const modalRef = useModalA11y(showLayersModal, () => setShowLayersModal(false));
 
   if (!showLayersModal) return null;
 
@@ -154,7 +156,7 @@ export const LayersModal: React.FC<LayersModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-slate-900 border border-slate-700 p-6 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[85vh]">
+      <div ref={modalRef} role="dialog" aria-modal="true" className="bg-slate-900 border border-slate-700 p-6 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[85vh]">
         <div className="flex items-center justify-between border-b border-slate-800 pb-4 mb-4">
           <h3 className="text-sm font-bold text-white flex items-center gap-2 uppercase tracking-wider">
             <Layers className="text-sky-500" size={16} /> Camadas da Cena ({activePage.layout.length})

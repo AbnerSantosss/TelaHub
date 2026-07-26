@@ -32,9 +32,9 @@ export const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent showCloseButton={false} className="sm:max-w-md max-w-md">
         <div className="flex items-center justify-between p-5 border-b border-white/10">
-          <h2 className="font-bold text-lg flex items-center gap-2 text-[#f87171]">
+          <DialogTitle className="font-bold text-lg flex items-center gap-2 text-[#f87171]">
             <AlertTriangle className="text-[#f87171]" size={20} /> {title}
-          </h2>
+          </DialogTitle>
           <DialogClose asChild>
             <Button variant="ghost" size="icon" className="size-8 rounded-lg" style={{ color: 'var(--color-text-muted)' }}>
               <X size={18} />

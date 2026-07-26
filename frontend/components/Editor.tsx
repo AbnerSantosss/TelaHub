@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Loader2, MonitorPlay, X, CheckCircle2 } from 'lucide-react';
-import { getDisplays, saveDisplay } from '../services/storage';
-import { Display, Page, WidgetType, LayoutItem } from '../types';
+import { toast } from 'sonner';
+import { useModalA11y } from '../hooks/useModalA11y';
+import { getDisplays, getDevices, saveDisplay } from '../services/storage';
+import { Display, Page, WidgetType, LayoutItem, Device } from '../types';
 
 import { WidgetLibrary } from './editor/WidgetLibrary';
 import { PropertiesPanel } from './editor/PropertiesPanel';
@@ -10,6 +12,7 @@ import { Canvas } from './editor/Canvas';
 import { Toolbar } from './editor/Toolbar';
 import { SceneTabs } from './editor/SceneTabs';
 import { LayersModal } from './editor/LayersModal';
+import { PublishConfirmModal } from './editor/PublishConfirmModal';
 import { MediaLibrary } from './MediaLibrary';
 
 const GRID_COLS = 48;
@@ -35,6 +38,8 @@ const Editor: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [display, setDisplay] = useState<Display | null>(null);
+  const [linkedDevices, setLinkedDevices] = useState<Device[]>([]);
+  const [showPublishConfirm, setShowPublishConfirm] = useState(false);
   const [activePageIdx, setActivePageIdx] = useState(0);
   const [selectedWidget, setSelectedWidget] = useState<string | null>(null);
   const [showToast, setShowToast] = useState(false);
@@ -54,6 +59,10 @@ const Editor: React.FC = () => {
 
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const bgAnimModalRef = useModalA11y(showBgAnimModal, () => setShowBgAnimModal(false));
+  const clearSceneModalRef = useModalA11y(isClearingScene, () => setIsClearingScene(false));
+  const sceneDeleteModalRef = useModalA11y(pageToDelete !== null, () => setPageToDelete(null));
+
   useEffect(() => {
     const fetchData = async () => {
       const displays = await getDisplays();
@@ -63,6 +72,9 @@ const Editor: React.FC = () => {
       } else {
         navigate('/');
       }
+
+      const devices = await getDevices();
+      setLinkedDevices(devices.filter(d => d.status === 'linked' && d.display_id === id && d.online));
     };
     fetchData();
   }, [id, navigate]);
@@ -92,17 +104,26 @@ const Editor: React.FC = () => {
 
   const activePage = display.pages[activePageIdx];
 
-  const handleSave = async () => {
+  const performSave = async () => {
     setIsSaving(true);
     try {
       await saveDisplay(display);
       setShowToast(true);
       setTimeout(() => setShowToast(false), 3000);
     } catch (e) {
-      alert('Erro ao salvar.');
+      toast.error('Não foi possível salvar a cena. Verifique sua conexão e tente novamente.');
     } finally {
       setIsSaving(false);
+      setShowPublishConfirm(false);
     }
+  };
+
+  const handleSave = async () => {
+    if (linkedDevices.length > 0) {
+      setShowPublishConfirm(true);
+      return;
+    }
+    await performSave();
   };
 
   const handleLayoutChange = (layout: any[]) => {
@@ -294,7 +315,7 @@ const Editor: React.FC = () => {
 
   const removePage = (idx: number) => {
     if (display.pages.length <= 1) {
-      alert("É necessário ter pelo menos uma cena.");
+      toast.error('É necessário ter pelo menos uma cena.');
       return;
     }
     setPageToDelete(idx);
@@ -357,7 +378,7 @@ const Editor: React.FC = () => {
       {/* Background Animation Selection Modal */}
       {showBgAnimModal && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-slate-900 border border-slate-700 p-6 rounded-xl shadow-2xl max-w-2xl w-full mx-4 animate-in zoom-in-95 duration-200 max-h-[80vh] overflow-y-auto">
+          <div ref={bgAnimModalRef} role="dialog" aria-modal="true" className="bg-slate-900 border border-slate-700 p-6 rounded-xl shadow-2xl max-w-2xl w-full mx-4 animate-in zoom-in-95 duration-200 max-h-[80vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-bold text-white flex items-center gap-2">
                 <MonitorPlay className="text-cyan-500" /> Escolher Fundo Animado
@@ -424,7 +445,7 @@ const Editor: React.FC = () => {
       {/* Delete Confirmation Modal */}
       {isClearingScene && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-slate-900 border border-slate-700 p-6 rounded-xl shadow-2xl max-w-sm w-full mx-4 animate-in zoom-in-95 duration-200">
+          <div ref={clearSceneModalRef} role="dialog" aria-modal="true" className="bg-slate-900 border border-slate-700 p-6 rounded-xl shadow-2xl max-w-sm w-full mx-4 animate-in zoom-in-95 duration-200">
             <h3 className="text-lg font-bold text-white mb-2">Limpar Todos os Widgets?</h3>
             <p className="text-slate-400 text-sm mb-6">Todos os widgets desta cena serão removidos permanentemente. Esta ação não pode ser desfeita.</p>
             <div className="flex justify-end gap-3">
@@ -458,10 +479,20 @@ const Editor: React.FC = () => {
         removeWidget={removeWidget}
       />
 
+      {/* Publish Confirm Modal */}
+      <PublishConfirmModal
+        open={showPublishConfirm}
+        onClose={() => setShowPublishConfirm(false)}
+        onConfirm={performSave}
+        displayName={display.name}
+        screenCount={linkedDevices.length}
+        loading={isSaving}
+      />
+
       {/* Scene Delete Modal */}
       {pageToDelete !== null && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-slate-900 border border-slate-700 p-6 rounded-xl shadow-2xl max-w-sm w-full mx-4 animate-in zoom-in-95 duration-200">
+          <div ref={sceneDeleteModalRef} role="dialog" aria-modal="true" className="bg-slate-900 border border-slate-700 p-6 rounded-xl shadow-2xl max-w-sm w-full mx-4 animate-in zoom-in-95 duration-200">
             <h3 className="text-lg font-bold text-white mb-2">Excluir Cena {pageToDelete + 1}?</h3>
             <p className="text-slate-400 text-sm mb-6">Esta ação não pode ser desfeita. Todos os widgets desta cena serão perdidos.</p>
             <div className="flex justify-end gap-3">

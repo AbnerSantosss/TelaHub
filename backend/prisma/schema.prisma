@@ -16,26 +16,63 @@ model User {
   role      String    @default("user")
   createdAt DateTime  @default(now())
   lastLogin DateTime?
+
+  // Escopo de tenant. Nulo apenas para o role `master` (proprietário da
+  // plataforma), que opera acima das organizações.
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+
+  @@index([organizationId])
+}
+
+model Organization {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now())
+
+  displays         Display[]
+  users            User[]
+  devices          Device[]
+  broadcasts       Broadcast[]
+  auditLogs        AuditLog[]
+  subscription     Subscription?
+  checkoutSessions CheckoutSession[]
 }
 
 model Display {
-  id         String   @id @default(uuid())
-  name       String
-  slug       String   @unique
-  pages      String
-  coverImage String?
-  updatedAt  DateTime @updatedAt
-  devices    Device[]
+  id             String        @id @default(uuid())
+  name           String
+  slug           String        @unique
+  pages          String
+  coverImage     String?
+  updatedAt      DateTime      @updatedAt
+  devices        Device[]
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+
+  @@index([organizationId])
 }
 
 model Device {
-  id          String   @id @default(uuid())
-  pairingCode String?  @unique
-  displayId   String?
-  display     Display? @relation(fields: [displayId], references: [id], onDelete: SetNull)
-  status      String   @default("pending")
-  lastSeen    DateTime @default(now())
-  name        String?
+  id            String    @id @default(uuid())
+  pairingCode   String?   @unique
+  displayId     String?
+  display       Display?  @relation(fields: [displayId], references: [id], onDelete: SetNull)
+  status        String    @default("pending")
+  lastSeen      DateTime  @default(now())
+  lastAlertedAt DateTime?
+  name          String?
+
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+
+  // Quando o device passou a contar como "tela ativa" para fins de cobrança.
+  activatedAt DateTime?
+
+  // Histórico de online/offline, base do cálculo de disponibilidade.
+  statusChanges DeviceStatusChange[]
+
+  @@index([organizationId])
 }
 
 model Broadcast {
@@ -49,6 +86,11 @@ model Broadcast {
   active      Boolean  @default(true)
   createdAt   DateTime @default(now())
   createdBy   String?
+
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+
+  @@index([organizationId])
 }
 
 model Setting {
@@ -64,4 +106,223 @@ model PasswordReset {
   expiresAt DateTime
   used      Boolean  @default(false)
   createdAt DateTime @default(now())
+}
+
+// ─── Cobrança / planos ───────────────────────────────────────────────────────
+
+model Plan {
+  id   String @id @default(uuid())
+  // gratis | loja | rede | enterprise.
+  // `trial` é código legado: o plano de entrada era um teste de 14 dias e virou
+  // freemium sem prazo em 2026-07-25. A linha `trial` permanece no banco com
+  // `active: false` (fora de `GET /api/plans`) só para preservar as FKs
+  // históricas; as assinaturas dela foram remanejadas para `gratis`.
+  code String @unique
+  name String
+
+  // Preço por tela ativa, em centavos de BRL. 0 = plano sem cobrança (trial).
+  pricePerScreenCents Int @default(0)
+  minScreens          Int @default(1)
+
+  // Limites. `null` = ilimitado.
+  maxDevices       Int?
+  maxUsers         Int?
+  maxOrganizations Int?
+
+  // JSON array de feature flags liberadas (ex.: ["powerbi","api","white-label"]).
+  features String @default("[]")
+
+  active Boolean @default(true)
+
+  subscriptions Subscription[]
+}
+
+model Subscription {
+  id             String       @id @default(uuid())
+  organizationId String       @unique
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  planId         String
+  plan           Plan         @relation(fields: [planId], references: [id])
+
+  // trialing | active | past_due | canceled
+  status           String    @default("trialing")
+  trialEndsAt      DateTime?
+  currentPeriodEnd DateTime?
+
+  // Integração com gateway (asaas | stripe | manual). Nulo enquanto em trial.
+  gateway               String?
+  gatewayCustomerId     String?
+  gatewaySubscriptionId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+}
+
+// ─── Auditoria ───────────────────────────────────────────────────────────────
+
+model AuditLog {
+  id             String        @id @default(uuid())
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  userId         String?
+  userEmail      String?
+  action         String // ex.: display.publish, device.link, user.invite
+  entityType     String
+  entityId       String?
+  metadata       String? // JSON livre
+  createdAt      DateTime      @default(now())
+
+  @@index([organizationId, createdAt])
+}
+
+// ─── Checkout ────────────────────────────────────────────────────────────────
+//
+// Modelo do funil de contratação, no espírito de um checkout transparente
+// brasileiro: uma sessão é criada na PRIMEIRA visita (antes de qualquer dado
+// pessoal) e vai sendo enriquecida a cada passo. É isso que permite medir
+// "checkout iniciado" e "abandono" — sem a sessão persistida desde o início,
+// abandono é invisível por definição.
+//
+// LGPD: a sessão guarda dado pessoal de quem ainda NÃO é cliente. Por isso tem
+// `expiresAt` e o job de limpeza: sessão abandonada e não convertida não deve
+// virar base de dados eterna. Ver wiki/tecnico/seguranca-e-conformidade-tecnica.
+
+model CheckoutSession {
+  id String @id @default(uuid())
+
+  // Identificador público usado na URL do checkout. Não usar o `id` interno:
+  // este é o valor que circula em link de recuperação de abandono.
+  publicToken String @unique
+
+  // started | identified | payment_pending | paid | abandoned | expired
+  status String @default("started")
+
+  // O que está sendo contratado. `planCode` referencia `Plan.code` (não FK,
+  // para a sessão sobreviver a mudança de catálogo e preservar o histórico).
+  planCode    String?
+  screens     Int     @default(1)
+  // Valor congelado no momento do passo — o preço do catálogo pode mudar depois.
+  amountCents Int     @default(0)
+
+  // Dados do lead. Todos opcionais: a sessão nasce antes do formulário.
+  name        String?
+  email       String?
+  phone       String?
+  document    String? // CPF ou CNPJ
+  companyName String?
+
+  // Preenchido quando a sessão converte e a conta passa a existir.
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+
+  // Atribuição de campanha (o site já captura UTM/click ids no `tracking.js`).
+  utmSource   String?
+  utmMedium   String?
+  utmCampaign String?
+  utmContent  String?
+  utmTerm     String?
+  referrer    String?
+
+  // Contexto técnico, útil para antifraude e para depurar abandono.
+  userAgent String?
+  ipHash    String? // hash, não o IP cru — minimização de dado (LGPD)
+
+  // Marcos do funil. Separados do `updatedAt` porque cada um responde a uma
+  // pergunta diferente do relatório.
+  startedAt    DateTime  @default(now())
+  lastSeenAt   DateTime  @default(now())
+  identifiedAt DateTime?
+  paymentAt    DateTime?
+  paidAt       DateTime?
+  abandonedAt  DateTime?
+
+  // Recuperação de abandono: quando o contato foi feito e por qual canal.
+  recoveryNotifiedAt DateTime?
+  recoveryChannel    String?
+
+  expiresAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  events CheckoutEvent[]
+
+  @@index([status, startedAt])
+  @@index([email])
+  @@index([organizationId])
+}
+
+model CheckoutEvent {
+  id        String          @id @default(uuid())
+  sessionId String
+  session   CheckoutSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  // view | plan_selected | screens_changed | identify | payment_selected |
+  // submit | paid | abandoned | recovered
+  type      String
+  metadata  String? // JSON livre
+  createdAt DateTime @default(now())
+
+  // ─── Entrega do evento (padrão outbox) ─────────────────────────────────────
+  //
+  // O checkout GRAVA o evento; ele não chama o app. Um despachante lê os
+  // pendentes e entrega aos tratadores do domínio (provisionar conta, e-mail,
+  // auditoria). Assim o checkout não precisa saber o que acontece depois, e
+  // somar um consumidor novo não mexe em quem produz.
+  //
+  // Gravar o evento na MESMA transação da mudança de estado é o ponto do
+  // padrão: ou os dois acontecem, ou nenhum. Entrega por HTTP no meio da
+  // transação perderia evento sempre que a rede falhasse.
+  //
+  // pending | delivered | failed | skipped
+  dispatchStatus    String    @default("pending")
+  dispatchAttempts  Int       @default(0)
+  dispatchedAt      DateTime?
+  // Quando tentar de novo (backoff). Nulo = pode tentar já.
+  nextAttemptAt     DateTime?
+  lastDispatchError String?
+
+  @@index([sessionId, createdAt])
+  @@index([type, createdAt])
+  // Fila do despachante: pega os pendentes na ordem em que aconteceram.
+  @@index([dispatchStatus, nextAttemptAt, createdAt])
+}
+
+// ─── Histórico de disponibilidade das telas ──────────────────────────────────
+//
+// O painel hoje só sabe se a tela está online AGORA. Sem histórico de
+// transição, não há como calcular disponibilidade num período — e foi por não
+// medir isso que a promessa de "SLA 99,9%" precisou sair da página de vendas.
+//
+// Com as transições registradas dá para calcular, por tela e por loja
+// (Sommerville, cap. 10-11):
+//   MTTF = média do tempo em que ficou online (Mean Time To Failure)
+//   MTTR = média do tempo em que ficou offline (Mean Time To Repair)
+//   Disponibilidade = MTTF / (MTTF + MTTR)
+//
+// Referência: `7 - EngenhariaSoftware/wiki/confiabilidade/dependabilidade.md`.
+
+model DeviceStatusChange {
+  id       String @id @default(uuid())
+  deviceId String
+  device   Device @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  // Desnormalizado de propósito: o relatório é sempre por loja e por período,
+  // e o device pode trocar de organização ou ser apagado depois.
+  organizationId String?
+
+  // online | offline
+  status    String
+  changedAt DateTime @default(now())
+
+  // Duração do estado ANTERIOR, em milissegundos, fechada nesta transição.
+  // Guardar aqui evita parear linhas a cada consulta de relatório — o cálculo
+  // de MTTF/MTTR vira uma agregação simples.
+  previousStatusMs BigInt?
+
+  @@index([deviceId, changedAt])
+  @@index([organizationId, changedAt])
+  @@index([status, changedAt])
 }

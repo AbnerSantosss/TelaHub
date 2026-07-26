@@ -1,0 +1,19 @@
+// tsconfig usado apenas por `npm run build`.
+//
+// Por que existe: o CI roda `npm run build` antes de `npm test`. Enquanto os
+// testes eram compilados para `dist/`, o vitest coletava DUAS cópias de cada
+// suíte (a de `src/` e a de `dist/`), e as de `dist` falhavam — derrubando a
+// execução inteira mesmo com todos os testes de verdade passando. Além disso,
+// não há motivo para arquivos de teste irem para a imagem de produção.
+//
+// O `tsconfig.json` da raiz continua incluindo os testes, para que o editor e o
+// `tsc --noEmit` sigam checando tipos neles.
+{
+  "extends": "./tsconfig.json",
+  "exclude": [
+    "node_modules",
+    "dist",
+    "src/**/__tests__/**",
+    "src/**/*.test.ts"
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": { "title": "TelaHub / Display de Vendas", "subtitle": "Arquitetura Docker", "output": "telahub.html" },
+  "layout": { "mode": "grid", "cols": 4, "origin": [40, 100], "gapX": 60, "gapY": 80, "cellW": 140, "cellH": 60 },
+  "components": [
+    { "id": "users", "type": "external", "label": "Usuários", "sublabel": "Navegador", "row": 0, "col": 0 },
+    { "id": "frontend", "type": "frontend", "label": "Frontend", "sublabel": "React + Nginx (:3025)", "row": 0, "col": 1 },
+    { "id": "backend", "type": "backend", "label": "Backend API", "sublabel": "Node.js + Prisma (:3027)", "row": 0, "col": 2 },
+    { "id": "db", "type": "database", "label": "PostgreSQL", "sublabel": "15-alpine", "row": 0, "col": 3 },
+    { "id": "pgadmin", "type": "frontend", "label": "pgAdmin", "sublabel": "DB Admin UI (:5053)", "row": 1, "col": 3 },
+    { "id": "admin", "type": "external", "label": "Administrador", "sublabel": "Manutenção", "row": 1, "col": 0 }
+  ],
+  "boundaries": [
+    { "kind": "region", "label": "Docker Compose: display_network", "wraps": ["frontend", "backend", "db", "pgadmin"] }
+  ],
+  "connections": [
+    { "from": "users", "to": "frontend", "label": "HTTP", "variant": "emphasis" },
+    { "from": "frontend", "to": "backend", "label": "/api proxy", "variant": "emphasis" },
+    { "from": "backend", "to": "db", "label": "SQL", "variant": "emphasis" },
+    { "from": "admin", "to": "pgadmin", "label": "HTTP", "variant": "dashed", "route": "straight" },
+    { "from": "pgadmin", "to": "db", "label": "SQL", "route": "straight" }
+  ],
+  "cards": []
+}

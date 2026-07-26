@@ -16,7 +16,7 @@ export const DeviceChips: React.FC<DeviceChipsProps> = ({ devices, displays }) =
     <div className="flex items-center gap-1.5 flex-wrap">
       <span className="text-[9px] uppercase tracking-widest font-bold text-slate-600 mr-0.5">TVs:</span>
       {linked.map(device => {
-        const isOnline = (Date.now() - device.last_seen) < 60000;
+        const isOnline = device.online;
         const linkedDisplay = displays.find(d => d.id === device.display_id);
 
         return (

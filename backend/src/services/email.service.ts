@@ -251,6 +251,74 @@ function getResetPasswordTemplate(resetUrl: string): string {
 }
 
 // ==============================================================================
+// TEMPLATE: BOAS-VINDAS (cadastro por conta própria)
+// ==============================================================================
+function getWelcomeTemplate(name: string, companyName: string): string {
+  const content = `
+    <h2 style="margin:0 0 8px;color:${COLORS.textPrimary};font-size:20px;font-weight:700;">
+      👋 Bem-vindo ao TelaHub, ${name}!
+    </h2>
+    <p style="margin:0 0 20px;color:${COLORS.textSecondary};font-size:14px;line-height:1.7;">
+      A conta de <strong style="color:${COLORS.textPrimary};">${companyName}</strong> já está ativa.
+      Você começa com <strong style="color:${COLORS.textPrimary};">1 tela gratuita, sem prazo e sem cartão de crédito</strong>.
+    </p>
+
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${COLORS.bgDark};border-radius:12px;border:1px solid ${COLORS.bgCardAlt};margin-bottom:20px;">
+      <tr>
+        <td style="padding:18px 24px;">
+          <p style="margin:0 0 10px;color:${COLORS.textMuted};font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;">
+            Primeiros passos
+          </p>
+          <p style="margin:0 0 6px;color:${COLORS.textSecondary};font-size:14px;line-height:1.7;">
+            1. Crie seu primeiro display e monte a cena no editor.
+          </p>
+          <p style="margin:0 0 6px;color:${COLORS.textSecondary};font-size:14px;line-height:1.7;">
+            2. Abra o player na TV e pareie usando o código exibido na tela.
+          </p>
+          <p style="margin:0;color:${COLORS.textSecondary};font-size:14px;line-height:1.7;">
+            3. Pronto: se a tela cair, você recebe um aviso por e-mail.
+          </p>
+        </td>
+      </tr>
+    </table>
+
+    <p style="margin:0;color:${COLORS.textMuted};font-size:13px;line-height:1.7;">
+      Quando quiser ligar a segunda tela, a cobrança começa a partir dela e proporcional ao período —
+      nunca retroativa sobre a tela que já estava no ar.
+    </p>
+
+    ${emailButton('Acessar o painel', LOGIN_URL)}
+  `;
+  return emailLayout(content);
+}
+
+// ==============================================================================
+// TEMPLATE: DEVICE OFFLINE
+// ==============================================================================
+function getDeviceOfflineTemplate(deviceName: string): string {
+  const content = `
+    <h2 style="margin:0 0 8px;color:${COLORS.textPrimary};font-size:20px;font-weight:700;">
+      📴 Tela desconectada
+    </h2>
+    <p style="margin:0 0 24px;color:${COLORS.textSecondary};font-size:14px;line-height:1.7;">
+      A tela <strong style="color:${COLORS.textPrimary};">${deviceName}</strong> parou de enviar sinal
+      (heartbeat) há mais tempo do que o esperado e pode estar desligada, sem internet ou com falha.
+    </p>
+
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${COLORS.amberBg};border:1px solid ${COLORS.amberBorder};border-radius:10px;margin-bottom:4px;">
+      <tr>
+        <td style="padding:14px 18px;">
+          <p style="margin:0;color:${COLORS.amber};font-size:12px;font-weight:600;line-height:1.5;">
+            ⚠️ Verifique a tela fisicamente ou no painel de saúde de dispositivos assim que possível.
+          </p>
+        </td>
+      </tr>
+    </table>
+  `;
+  return emailLayout(content);
+}
+
+// ==============================================================================
 // ENVIO DE E-MAILS
 // ==============================================================================
 
@@ -289,6 +357,50 @@ export async function sendInviteEmail(to: string, password: string): Promise<voi
     from: `"TelaHub" <${smtp!.user}>`,
     to,
     subject: '🎉 Você foi convidado para o TelaHub!',
+    html,
+    attachments: getLogoAttachment(),
+  });
+}
+
+/**
+ * Envia o e-mail de boas-vindas de quem se cadastrou por conta própria
+ * (`POST /api/signup`). Diferente do convite, aqui a pessoa já escolheu a
+ * própria senha — não há credencial a transmitir.
+ */
+export async function sendWelcomeEmail(to: string, name: string, companyName: string): Promise<void> {
+  const transporter = await createTransporter();
+  if (!transporter) {
+    throw new Error('Provedor de e-mail não configurado. Configure nas Configurações do sistema.');
+  }
+
+  const smtp = await settingsService.getSmtpConfig();
+  const html = getWelcomeTemplate(name, companyName);
+
+  await transporter.sendMail({
+    from: `"TelaHub" <${smtp!.user}>`,
+    to,
+    subject: '👋 Sua conta TelaHub está pronta',
+    html,
+    attachments: getLogoAttachment(),
+  });
+}
+
+/**
+ * Envia o alerta de dispositivo offline por tempo prolongado para um administrador.
+ */
+export async function sendDeviceOfflineAlertEmail(to: string, deviceName: string): Promise<void> {
+  const transporter = await createTransporter();
+  if (!transporter) {
+    throw new Error('Provedor de e-mail não configurado. Configure nas Configurações do sistema.');
+  }
+
+  const smtp = await settingsService.getSmtpConfig();
+  const html = getDeviceOfflineTemplate(deviceName);
+
+  await transporter.sendMail({
+    from: `"TelaHub" <${smtp!.user}>`,
+    to,
+    subject: `📴 Tela offline — ${deviceName}`,
     html,
     attachments: getLogoAttachment(),
   });

@@ -5,6 +5,7 @@ import { motion } from 'motion/react';
 import { staggerGrid, cardItem } from '../../libs/motion';
 import { Monitor, Plus } from 'lucide-react';
 import { Button } from '../ui/button';
+import { EmptyState } from './EmptyState';
 
 interface DisplayGridProps {
   displays: Display[];
@@ -51,7 +52,7 @@ export const DisplayGrid: React.FC<DisplayGridProps> = ({
   const isDisplayOnline = (display: Display) =>
     devices
       .filter(d => d.display_id === display.id)
-      .some(d => (Date.now() - d.last_seen) < 60000);
+      .some(d => d.online);
 
   // --- Filter ---
   const filtered = displays.filter(d => {
@@ -211,19 +212,21 @@ export const DisplayGrid: React.FC<DisplayGridProps> = ({
 
         {/* Empty state */}
         {sorted.length === 0 && !loading && (
-          <div className="col-span-full py-16 text-center border border-dashed rounded-2xl" style={{ borderColor: 'var(--color-border)', background: 'var(--color-surface)' }}>
-            <Monitor size={48} className="mx-auto mb-4" style={{ color: 'rgba(255,255,255,0.15)' }} />
-            {displays.length === 0 ? (
-              <>
-                <p className="mb-6" style={{ color: 'var(--color-text-muted)' }}>Você ainda não tem telas configuradas.</p>
-                <Button onClick={onCreateFirstDisplay} variant="brand">
-                  Criar primeira tela
-                </Button>
-              </>
-            ) : (
-              <p style={{ color: 'var(--color-text-muted)' }}>Nenhuma tela corresponde ao filtro selecionado.</p>
-            )}
-          </div>
+          displays.length === 0 ? (
+            <EmptyState
+              className="col-span-full"
+              icon={Monitor}
+              message="Você ainda não tem telas configuradas. Crie sua primeira tela para começar a exibir conteúdo."
+              actionLabel="Criar primeira tela"
+              onAction={onCreateFirstDisplay}
+            />
+          ) : (
+            <EmptyState
+              className="col-span-full"
+              icon={Monitor}
+              message="Nenhuma tela corresponde ao filtro selecionado."
+            />
+          )
         )}
       </motion.div>
     </div>

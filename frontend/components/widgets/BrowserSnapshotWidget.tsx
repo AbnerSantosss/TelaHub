@@ -16,6 +16,7 @@ import {
 } from 'recharts';
 import { motion, AnimatePresence } from 'motion/react';
 import { getAlignmentClasses } from '../Player';
+import { IframeWithSkeleton } from './IframeWithSkeleton';
 
 // Import Recharts parts to make sure they are accessible (recharts does not default export AreaChart sometimes)
 // If Recharts has specific issues, importing them directly as named works in Vite.
@@ -50,11 +51,12 @@ export const BrowserSnapshotWidget: React.FC<{ data: any }> = ({ data }) => {
       </div>
       {/* Iframe em escala */}
       <div className="flex-1 bg-white relative overflow-hidden">
-        <iframe 
-          src={url} 
+        <IframeWithSkeleton
+          src={url}
           className="absolute inset-0 w-full h-full border-none"
           title="Browser snapshot"
           sandbox="allow-scripts allow-same-origin allow-popups"
+          errorMessage="Não foi possível carregar esta página."
         />
         <div className="absolute inset-0 bg-transparent pointer-events-none" />
       </div>

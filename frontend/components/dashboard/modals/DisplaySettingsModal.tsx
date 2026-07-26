@@ -1,8 +1,9 @@
 import React from 'react';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogClose 
+import {
+  Dialog,
+  DialogContent,
+  DialogClose,
+  DialogTitle
 } from '../../ui/dialog';
 import { Button } from '../../ui/button';
 import { 
@@ -61,9 +62,9 @@ export const DisplaySettingsModal: React.FC<DisplaySettingsModalProps> = ({
       >
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b border-white/10">
-          <h2 className="font-bold text-lg flex items-center gap-2" style={{ color: 'var(--color-text)' }}>
+          <DialogTitle className="font-bold text-lg flex items-center gap-2" style={{ color: 'var(--color-text)' }}>
             <Settings className="text-[#38bdf8]" size={20} /> Configurações — {display.name}
-          </h2>
+          </DialogTitle>
           <DialogClose asChild>
             <Button variant="ghost" size="icon" className="size-8 rounded-lg" style={{ color: 'var(--color-text-muted)' }}>
               <X size={18} />

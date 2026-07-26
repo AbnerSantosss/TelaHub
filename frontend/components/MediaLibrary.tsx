@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { listMedia, deleteMedia, uploadMedia, MediaFile } from '../services/storage';
 import { Trash2, Upload, FileImage, FileVideo, File, Loader2, X, ExternalLink, Copy, CheckSquare, Square, CheckCircle2 } from 'lucide-react';
 import { useAutoAnimate } from '@formkit/auto-animate/react';
+import { useModalA11y } from '../hooks/useModalA11y';
 
 export const MediaLibrary: React.FC<{ 
   onClose: () => void;
@@ -16,6 +17,8 @@ export const MediaLibrary: React.FC<{
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' | 'info' } | null>(null);
   const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
   const [isSelectionMode, setIsSelectionMode] = useState(false);
+  const modalRef = useModalA11y(true, onClose);
+  const deleteModalRef = useModalA11y(filesToDelete !== null, () => setFilesToDelete(null));
 
   const fetchMedia = async () => {
     setLoading(true);
@@ -128,7 +131,7 @@ export const MediaLibrary: React.FC<{
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-      <div className="bg-slate-900 border border-slate-700 rounded-2xl shadow-[0_0_50px_rgba(34,211,238,0.25)] w-full max-w-5xl h-[80vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200">
+      <div ref={modalRef} role="dialog" aria-modal="true" className="bg-slate-900 border border-slate-700 rounded-2xl shadow-[0_0_50px_rgba(34,211,238,0.25)] w-full max-w-5xl h-[80vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200">
         
         <div className="p-6 border-b border-slate-800 flex justify-between items-center bg-slate-900/50">
           <h3 className="font-bold text-xl text-slate-100 flex items-center gap-2">
@@ -302,7 +305,7 @@ export const MediaLibrary: React.FC<{
       {/* Delete Confirmation Modal */}
       {filesToDelete && (
         <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-          <div className="bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200">
+          <div ref={deleteModalRef} role="dialog" aria-modal="true" className="bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200">
             <div className="p-6 text-center">
               <div className="w-16 h-16 bg-rose-500/10 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Trash2 size={32} />

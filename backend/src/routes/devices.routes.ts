@@ -1,14 +1,19 @@
 import { Router, Request, Response } from 'express';
 import { authMiddleware } from '../middlewares/auth.middleware';
+import { requireTenant } from '../middlewares/tenant.middleware';
+import { requireActiveSubscription, enforceQuota } from '../middlewares/quota.middleware';
+import { validateBody } from '../middlewares/validate.middleware';
+import { registerDeviceSchema, linkDeviceSchema, updateDeviceDisplaySchema } from '../schemas/devices.schema';
 import { deviceService } from '../services/device.service';
 import { sseService } from '../services/sse.service';
+import { auditService } from '../services/audit.service';
 
 const router = Router();
 
-// GET /api/devices
-router.get('/', authMiddleware, async (req: Request, res: Response): Promise<void> => {
+// GET /api/devices — só os devices do tenant
+router.get('/', authMiddleware, requireTenant, async (req: Request, res: Response): Promise<void> => {
   try {
-    const devices = await deviceService.getAll();
+    const devices = await deviceService.getAll(req.tenantId);
     res.json(
       devices.map((d) => ({
         id: d.id,
@@ -16,6 +21,7 @@ router.get('/', authMiddleware, async (req: Request, res: Response): Promise<voi
         display_id: d.displayId,
         status: d.status,
         last_seen: d.lastSeen.getTime(),
+        online: deviceService.isOnline(d.lastSeen),
         name: d.name,
       }))
     );
@@ -25,15 +31,21 @@ router.get('/', authMiddleware, async (req: Request, res: Response): Promise<voi
   }
 });
 
-// POST /api/devices/register (PÚBLICO — dispositivo se registra)
-router.post('/register', async (req: Request, res: Response): Promise<void> => {
+// GET /api/devices/health — painel de saúde do tenant: contagem online/offline
+router.get('/health', authMiddleware, requireTenant, async (req: Request, res: Response): Promise<void> => {
+  try {
+    const summary = await deviceService.getHealthSummary(req.tenantId);
+    res.json(summary);
+  } catch (error: any) {
+    console.error('Erro ao agregar saúde dos dispositivos:', error);
+    res.status(500).json({ error: 'Erro ao agregar saúde dos dispositivos.' });
+  }
+});
+
+// POST /api/devices/register (PÚBLICO — dispositivo se registra; ainda sem tenant)
+router.post('/register', validateBody(registerDeviceSchema), async (req: Request, res: Response): Promise<void> => {
   try {
     const { deviceId, code } = req.body;
-
-    if (!deviceId || !code) {
-      res.status(400).json({ error: 'deviceId e code são obrigatórios.' });
-      return;
-    }
 
     await deviceService.register(deviceId, code);
     res.json({ message: 'Dispositivo registrado.' });
@@ -43,7 +55,7 @@ router.post('/register', async (req: Request, res: Response): Promise<void> => {
   }
 });
 
-// GET /api/devices/:id/status (PÚBLICO — dispositivo verifica seu status)
+// GET /api/devices/:id/status (PÚBLICO — dispositivo verifica o SEU status)
 router.get('/:id/status', async (req: Request, res: Response): Promise<void> => {
   try {
     const device = await deviceService.getStatus(req.params.id as string);
@@ -67,30 +79,41 @@ router.get('/:id/status', async (req: Request, res: Response): Promise<void> => 
   }
 });
 
-// GET /api/devices/player/:id/live — Conexão SSE em tempo real (Player Pareado)
+// GET /api/devices/player/:id/live — Conexão SSE em tempo real (Player Pareado, PÚBLICO)
 router.get('/player/:id/live', (req: Request, res: Response): void => {
   sseService.addClient('device', req.params.id as string, res);
 });
 
-// POST /api/devices/link
-router.post('/link', authMiddleware, async (req: Request, res: Response): Promise<void> => {
+// POST /api/devices/link — vincula device pendente a um display DO TENANT
+// Parear um device é o que cria uma "tela ativa" — é aqui que a quota de
+// telas do plano é cobrada. Leitura e heartbeat seguem livres de propósito:
+// assinatura vencida bloqueia criar/editar, nunca derruba tela já no ar.
+router.post('/link', authMiddleware, requireTenant, requireActiveSubscription, enforceQuota('device'), validateBody(linkDeviceSchema), async (req: Request, res: Response): Promise<void> => {
   try {
     const { code, displayId, name } = req.body;
 
-    if (!code || !displayId) {
-      res.status(400).json({ error: 'Código e displayId são obrigatórios.' });
+    const result = await deviceService.link(code, displayId, name, req.tenantId);
+
+    if (result === 'display-not-found') {
+      // Display de outro tenant (ou inexistente) — 404 sem distinguir os casos.
+      res.status(404).json({ error: 'Display não encontrado.' });
       return;
     }
 
-    const device = await deviceService.link(code, displayId, name);
-
-    if (!device) {
+    if (!result) {
       res.status(404).json({ error: 'Dispositivo não encontrado ou já vinculado.' });
       return;
     }
 
+    void auditService.logFromRequest(req, {
+      action: 'device.link',
+      entityType: 'device',
+      entityId: result.device.id,
+      metadata: { displayId, name: name ?? null },
+    });
+
     // Notificar dispositivo via SSE em tempo real
-    sseService.notifyDeviceUpdate(device.id).catch(err => {
+    sseService.notifyDeviceUpdate(result.device.id).catch(err => {
       console.error('Erro ao notificar pareamento de device via SSE:', err);
     });
 
@@ -101,7 +124,7 @@ router.post('/link', authMiddleware, async (req: Request, res: Response): Promis
   }
 });
 
-// PATCH /api/devices/:id/heartbeat (PÚBLICO)
+// PATCH /api/devices/:id/heartbeat (PÚBLICO — a TV bate o próprio id)
 router.patch('/:id/heartbeat', async (req: Request, res: Response): Promise<void> => {
   try {
     await deviceService.heartbeat(req.params.id as string);
@@ -113,17 +136,17 @@ router.patch('/:id/heartbeat', async (req: Request, res: Response): Promise<void
 });
 
 // PATCH /api/devices/:id/display (AUTENTICADO — reatribuir display de um dispositivo)
-router.patch('/:id/display', authMiddleware, async (req: Request, res: Response): Promise<void> => {
+router.patch('/:id/display', authMiddleware, requireTenant, validateBody(updateDeviceDisplaySchema), async (req: Request, res: Response): Promise<void> => {
   try {
     const { displayId } = req.body;
 
-    if (!displayId) {
-      res.status(400).json({ error: 'displayId é obrigatório.' });
+    const updated = await deviceService.updateDisplayIdScoped(req.params.id as string, displayId, req.tenantId);
+
+    if (!updated) {
+      res.status(404).json({ error: 'Dispositivo ou display não encontrado.' });
       return;
     }
 
-    await deviceService.updateDisplayId(req.params.id as string, displayId);
-    
     // Notificar dispositivo sobre reatribuição de display via SSE
     sseService.notifyDeviceUpdate(req.params.id as string).catch(err => {
       console.error('Erro ao notificar reatribuição de display via SSE:', err);
@@ -136,13 +159,25 @@ router.patch('/:id/display', authMiddleware, async (req: Request, res: Response)
   }
 });
 
-// DELETE /api/devices/:id
-router.delete('/:id', authMiddleware, async (req: Request, res: Response): Promise<void> => {
+// DELETE /api/devices/:id — 404 se for de outro tenant
+router.delete('/:id', authMiddleware, requireTenant, async (req: Request, res: Response): Promise<void> => {
   try {
-    await deviceService.unlink(req.params.id as string);
-    
+    const id = req.params.id as string;
+    const deleted = await deviceService.unlinkScoped(id, req.tenantId);
+
+    if (!deleted) {
+      res.status(404).json({ error: 'Dispositivo não encontrado.' });
+      return;
+    }
+
+    void auditService.logFromRequest(req, {
+      action: 'device.delete',
+      entityType: 'device',
+      entityId: id,
+    });
+
     // Notificar dispositivo sobre desvinculação/remoção via SSE
-    sseService.notifyDeviceUpdate(req.params.id as string).catch(err => {
+    sseService.notifyDeviceUpdate(id).catch(err => {
       console.error('Erro ao notificar remoção de dispositivo via SSE:', err);
     });
 

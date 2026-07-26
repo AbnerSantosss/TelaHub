@@ -1,11 +1,12 @@
 import { Router, Request, Response } from 'express';
 import { userService } from '../services/user.service';
 import { authMiddleware } from '../middlewares/auth.middleware';
+import { authRateLimit } from '../middlewares/rate-limit.middleware';
 
 const router = Router();
 
 // POST /api/auth/login
-router.post('/login', async (req: Request, res: Response): Promise<void> => {
+router.post('/login', authRateLimit, async (req: Request, res: Response): Promise<void> => {
   try {
     const { email, password } = req.body;
 
@@ -44,6 +45,9 @@ router.get('/me', authMiddleware, async (req: Request, res: Response): Promise<v
       name: user.name,
       email: user.email,
       role: user.role,
+      // O frontend precisa saber o tenant do usuário: `null` só acontece no
+      // role `master`, que opera acima das organizações.
+      organizationId: user.organizationId ?? null,
     });
   } catch (error: any) {
     console.error('Erro ao buscar usuário:', error);

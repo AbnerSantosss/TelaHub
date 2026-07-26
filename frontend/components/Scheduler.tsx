@@ -10,6 +10,7 @@ import {
   ClipboardList, Utensils, TrendingUp, Camera, FileText, BookOpen, Code2,
   Database, Upload, Info, CheckCircle2, MonitorPlay, Move
 } from 'lucide-react';
+import { toast } from 'sonner';
 import { getBroadcasts, saveBroadcast, deleteBroadcast, getDisplays, getCurrentUser, saveDisplay, getDevices } from '../services/storage';
 import { Broadcast, Display, Page, User, WidgetType, LayoutItem, Device } from '../types';
 import SceneEditor from './SceneEditor';
@@ -210,7 +211,7 @@ const Scheduler: React.FC = () => {
       setBroadcastToDelete(null);
     } catch (error) {
       console.error(error);
-      alert('Erro ao excluir programação.');
+      toast.error('Erro ao excluir programação.');
     } finally {
       setLoading(false);
     }
@@ -218,17 +219,17 @@ const Scheduler: React.FC = () => {
 
   const handleSave = async () => {
     if (!currentBroadcast?.name || !currentBroadcast?.start_time) {
-      alert('Por favor, preencha todos os campos obrigatórios.');
+      toast.error('Por favor, preencha todos os campos obrigatórios.');
       return;
     }
 
     if (!currentBroadcast.is_permanent && !currentBroadcast.end_time) {
-      alert('Por favor, defina um horário de término ou marque como permanente.');
+      toast.error('Por favor, defina um horário de término ou marque como permanente.');
       return;
     }
 
     if (currentBroadcast.display_ids?.length === 0) {
-      alert('Selecione pelo menos uma tela para exibição.');
+      toast.error('Selecione pelo menos uma tela para exibição.');
       return;
     }
 
@@ -287,7 +288,7 @@ const Scheduler: React.FC = () => {
       setCurrentBroadcast(null);
     } catch (error) {
       console.error(error);
-      alert('Erro ao salvar programação.');
+      toast.error('Erro ao salvar programação.');
     } finally {
       setLoading(false);
     }

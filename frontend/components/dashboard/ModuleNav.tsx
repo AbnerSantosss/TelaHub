@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, FileImage, Users as UsersIcon, Settings } from 'lucide-react';
+import { Calendar, FileImage, Users as UsersIcon, Settings, BarChart3 } from 'lucide-react';
 import { User } from '../../types';
 import { Button } from '../ui/button';
 
@@ -74,6 +74,15 @@ export const ModuleNav: React.FC<ModuleNavProps> = ({
       >
         <UsersIcon size={14} />
         <span className="hidden min-[681px]:inline">Usuários</span>
+      </Button>
+
+      <Button
+        variant="ghost"
+        onClick={() => navigate('/reports')}
+        className={getNavItemClass(isRouteActive('#/reports'))}
+      >
+        <BarChart3 size={14} className={isRouteActive('#/reports') ? 'text-[#0ea5e9]' : ''} />
+        <span className="hidden min-[681px]:inline">Relatórios</span>
       </Button>
 
       {(currentUser?.role === 'admin' || currentUser?.role === 'master') && (

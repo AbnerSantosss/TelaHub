@@ -16,6 +16,7 @@ import {
 } from 'recharts';
 import { motion, AnimatePresence } from 'motion/react';
 import { getAlignmentClasses } from '../Player';
+import { IframeWithSkeleton } from './IframeWithSkeleton';
 
 // Import Recharts parts to make sure they are accessible (recharts does not default export AreaChart sometimes)
 // If Recharts has specific issues, importing them directly as named works in Vite.
@@ -32,11 +33,12 @@ export const PowerBIWidget: React.FC<{ data: any }> = ({ data }) => {
       </div>
       <div className="flex-1 bg-slate-950 relative">
         {embedUrl ? (
-          <iframe 
-            src={embedUrl} 
+          <IframeWithSkeleton
+            src={embedUrl}
             className="w-full h-full border-none"
             title="Power BI Dashboard Embed"
             allowFullScreen
+            errorMessage="Não foi possível carregar o painel do Power BI."
           />
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-500 text-sm gap-2">

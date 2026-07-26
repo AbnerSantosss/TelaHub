@@ -14,6 +14,9 @@
     "declarationMap": true,
     "sourceMap": true
   },
+  // Inclui os testes de propósito: este é o tsconfig do editor e do
+  // `tsc --noEmit`, então erro de tipo em teste também precisa aparecer.
+  // O build de produção usa `tsconfig.build.json`, que os exclui.
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
 }

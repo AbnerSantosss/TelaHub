@@ -1,14 +1,37 @@
 import prisma from '../lib/prisma';
+import type { TenantScope } from './display.repository';
+
+const PUBLIC_USER_SELECT = {
+  id: true,
+  username: true,
+  name: true,
+  email: true,
+  role: true,
+  lastLogin: true,
+  organizationId: true,
+} as const;
 
 export class UserRepository {
-  async findAll() {
+  /**
+   * Lista usuários. Com `organizationId`, restringe ao tenant.
+   *
+   * Sem argumento continua listando todos — usado por rotinas de plataforma
+   * (job de alerta), nunca diretamente por uma rota de tenant.
+   */
+  async findAll(organizationId?: TenantScope) {
     return prisma.user.findMany({
-      select: { id: true, username: true, name: true, email: true, role: true, lastLogin: true },
+      where: organizationId ? { organizationId } : {},
+      select: PUBLIC_USER_SELECT,
     });
   }
 
   async findById(id: string) {
     return prisma.user.findUnique({ where: { id } });
+  }
+
+  /** Busca escopada: retorna null se o usuário for de outro tenant. */
+  async findByIdScoped(id: string, organizationId?: TenantScope) {
+    return prisma.user.findFirst({ where: { id, ...(organizationId ? { organizationId } : {}) } });
   }
 
   async findByEmail(email: string) {
@@ -19,8 +42,22 @@ export class UserRepository {
     return prisma.user.findUnique({ where: { username } });
   }
 
-  async create(data: { username: string; email: string; password: string; role: string }) {
-    return prisma.user.create({ data });
+  async create(data: {
+    username: string;
+    email: string;
+    password: string;
+    role: string;
+    organizationId?: string | null;
+  }) {
+    return prisma.user.create({
+      data: {
+        username: data.username,
+        email: data.email,
+        password: data.password,
+        role: data.role,
+        organizationId: data.organizationId ?? null,
+      },
+    });
   }
 
   async delete(id: string) {

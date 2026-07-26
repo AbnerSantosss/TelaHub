@@ -7,116 +7,447 @@ kanban-plugin: board
 ## Backlog
 
 - [ ] **EPIC A — Confiabilidade de Armazenamento de Mídia** #epic/armazenamento
-- [ ] **US-001** — Como admin, quero que uploads de mídia sejam persistidos no Cloudflare R2 por padrão em produção, para não haver risco de perda de arquivos em reinícios de container. #epic/armazenamento
-	- DADO um ambiente de produção, QUANDO o backend sobe sem variáveis de R2 configuradas, ENTÃO o processo deve falhar no boot com mensagem clara (não cair silenciosamente para disco local).
-	- DADO R2 configurado, QUANDO um usuário faz upload de mídia, ENTÃO o arquivo deve ser gravado no bucket e a URL pública retornada deve apontar para o R2.
-	- [ ] Tornar variáveis de ambiente do R2 obrigatórias em produção (`NODE_ENV=production`)
-	- [ ] Adicionar validação de boot que falha com erro claro se R2 ausente em produção
-	- [ ] Documentar variáveis de R2 no `README`/`.env.example`
-- [ ] **US-002** — Como admin, quero migrar os arquivos já enviados via disco local para o R2, para não perder mídia existente ao ativar o modo R2. #epic/armazenamento
-	- DADO arquivos existentes em `uploads/` local, QUANDO o script de migração roda, ENTÃO todos os arquivos devem aparecer no bucket R2 com os mesmos nomes/paths.
-	- DADO a migração concluída, QUANDO um `Display` referencia uma mídia antiga, ENTÃO a URL deve resolver corretamente pelo R2.
-	- [ ] Escrever script de migração disco → R2
+- [ ] **EPIC B — Segurança de API** #epic/seguranca
+- [ ] **EPIC D — UX do Editor e Dashboard** #epic/ux
+- [ ] **EPIC F — Observabilidade** #epic/observabilidade
+- [ ] **EPIC E — Deploy e CI/CD** #epic/infra
+- [ ] **EPIC C — Hierarquia Multi-loja** #epic/multi-tenant
+- [ ] **EPIC G — Isolamento Multi-tenant** #epic/multi-tenant
+- [ ] **EPIC H — Cobrança e Planos** #epic/comercial
+- [ ] **EPIC I — Auto-atendimento e Onboarding** #epic/comercial
+- [ ] **EPIC J — Conformidade da Landing e Comunicação** #epic/comercial
+- [ ] **EPIC K — Auditoria e Rastreabilidade** #epic/observabilidade
+- [ ] **EPIC L — Validação Comercial** #epic/comercial
+	- 🎯 Meta do épico: 50 clientes pagantes. Nada iniciado — todas as US abaixo estão no Backlog.
+- [ ] **EPIC M — Conformidade Fiscal e Contratual Brasileira** #epic/legal
+	- 🎯 Obrigações legais para faturar SaaS por assinatura no Brasil: NFS-e/ISS (LC 116/2003), direito de arrependimento (CDC art. 49) e LGPD na posição de operador. Base: deep research de mercado/legal de 2026-07-25.
+- [ ] **EPIC N — Confiabilidade do Player** #epic/player
+	- 🎯 A pesquisa aponta "confiabilidade e operação offline" como um dos **3 pilares de decisão de compra** do pequeno varejista brasileiro (ao lado de facilidade de uso e baixo custo de hardware). Lacuna de produto, não de marketing.
+- [ ] #epic/comercial **US-029** — Como dono de produto, quero integração com gateway de pagamento (Asaas ou Iugu), para converter assinatura em receita de fato.
+	- 📌 Hoje `POST /api/billing/checkout` responde **501** honesto: existe plano e assinatura, não existe cobrança. **Sem esta US não há receita** — é o que separa "tem plano" de "tem cliente pagando".
+	- 📌 Decisão do dono: **adiado para um segundo ciclo** (mantido no Backlog de propósito, não é esquecimento).
+	- 📌 Achados da pesquisa de mercado (2026-07-25): **boleto e Pix recorrente são essenciais** no B2B brasileiro — cartão isolado derruba a conversão, porque o financeiro do pequeno varejo prefere boleto/Pix a limite de cartão corporativo. Recomendação: **Asaas ou Iugu** (Asaas: boleto R$ 1,99–2,99, Pix 0,99%, régua de cobrança multicanal; Iugu: boleto R$ 1,50–2,50, Pix 1,00%, motor de assinaturas e split). Ambos **exigem CNPJ ativo** — contas em CPF são bloqueadas ou têm limites severos. **A escolha do gateway continua aberta.**
+	- **DADO** um cliente no plano `gratis`, **QUANDO** ele conclui o checkout no gateway, **ENTÃO** o webhook deve marcar a `Subscription` como ativa no plano pago contratado.
+	- **DADO** um pagamento recusado ou assinatura cancelada no gateway, **QUANDO** o webhook chega, **ENTÃO** a assinatura deve voltar a estado inadimplente e as rotas protegidas devem responder 402.
+	- **DADO** um cliente que escolhe boleto ou Pix recorrente, **QUANDO** o checkout é gerado, **ENTÃO** os três meios (boleto, Pix e cartão) devem estar disponíveis, não só cartão.
+	- [ ] Escolher gateway (Asaas x Iugu) e registrar a decisão, incluindo taxas de boleto/Pix comparadas
+	- [ ] Garantir CNPJ ativo cadastrado no gateway antes da primeira cobrança
+	- [ ] Implementar `POST /api/billing/checkout` real substituindo o 501
+	- [ ] Implementar webhook idempotente de status de assinatura
+	- [ ] Testes de webhook (ativação, recusa, cancelamento)
+- [ ] #epic/observabilidade **US-030** — Como admin, quero consultar o log de auditoria pela interface, para investigar quem publicou/apagou o que sem precisar de acesso ao banco.
+	- 📌 Hoje o `AuditLog` só grava (US-028); não há tela de consulta.
+	- **DADO** eventos gravados no `AuditLog`, **QUANDO** o admin abre a tela de auditoria, **ENTÃO** deve ver os eventos da própria organização paginados, com ator, ação, recurso e data.
+	- **DADO** um filtro por ação ou por usuário, **QUANDO** aplicado, **ENTÃO** a listagem deve refletir apenas os eventos correspondentes.
+	- [ ] Criar endpoint de listagem paginada com escopo de tenant
+	- [ ] Criar view de auditoria no Dashboard
+- [ ] #epic/comercial **US-031** — Como dono de produto, quero rodar o Sean Ellis Test com os 20 primeiros usuários, para medir sinal de Product-Market Fit antes de escalar aquisição.
+	- **DADO** 20 usuários que já usaram o produto por pelo menos uma semana, **QUANDO** a pesquisa "como você se sentiria se não pudesse mais usar o TelaHub?" é aplicada, **ENTÃO** o resultado deve ser tabulado e o percentual de "muito decepcionado" registrado.
+	- **DADO** o resultado tabulado, **QUANDO** o percentual de "muito decepcionado" for ≥ 40%, **ENTÃO** considera-se sinal de PMF; abaixo disso, o achado deve virar backlog de produto.
+	- [ ] Escrever o questionário (pergunta principal + segmentação por perfil)
+	- [ ] Aplicar com os primeiros 20 usuários
+	- [ ] Tabular e registrar o percentual e os motivos citados
+- [ ] #epic/comercial **US-032** — Como dono de produto, quero usar a landing como smoke test de conversão, para saber se a proposta de valor está clara antes de investir em tráfego.
+	- **DADO** a landing publicada com CTA para `/signup`, **QUANDO** houver volume mínimo de visitas medido, **ENTÃO** a taxa visita → signup deve ser calculada e registrada.
+	- **DADO** a taxa medida, **QUANDO** ela for > 3%, **ENTÃO** a proposta é considerada validada; **QUANDO** for < 0,3%, **ENTÃO** a proposta é considerada confusa e a landing deve entrar em reescrita.
+	- [ ] Instrumentar analytics de visita e de conclusão de signup
+	- [ ] Definir volume mínimo de amostra antes de decidir
+	- [ ] Registrar resultado e decisão
+- [ ] #epic/comercial **US-033** — Como dono de produto, quero escolher e validar um único nicho vertical antes de abrir para todos, para concentrar mensagem, casos de uso e canal de aquisição.
+	- 📌 **Decisão consciente e adiada** (2026-07-25): o dono decidiu **não escolher a vertical agora** — "depende do cliente, definimos depois". Não é pendência esquecida; a escolha fica em aberto até haver clientes reais para observar.
+	- 📌 Faixa de ticket por vertical levantada na deep research de mercado brasileiro (R$/tela/mês), para a decisão futura já ter o dado ao lado: **Food service R$ 40–90** (adoção muito alta, decide o dono/gerente de operações) · **Farmácias R$ 50–100** (decide o diretor comercial/compras) · **Óticas R$ 50–110** (decide o proprietário) · **Supermercados de bairro R$ 45–95** · **Academias R$ 30–70** · **Clínicas R$ 40–85** · **Franquias R$ 35–80** · **Autopeças R$ 35–75**.
+	- **DADO** os segmentos candidatos levantados, **QUANDO** a escolha é feita, **ENTÃO** deve haver um nicho único documentado com critérios (ticket, dor, acesso ao canal) e não uma lista de "todos os varejos".
+	- **DADO** o nicho escolhido, **QUANDO** 10 conversas de descoberta forem feitas nele, **ENTÃO** a decisão de manter ou trocar de nicho deve ser registrada com base nas respostas.
+	- [ ] Levantar e comparar segmentos candidatos
+	- [ ] Documentar o nicho escolhido e o porquê
+	- [ ] Rodar 10 conversas de descoberta no nicho
+- [ ] #epic/comercial **US-034** — Como dono de produto, quero um rodapé "feito com TelaHub" nas telas do plano de entrada, removível no plano superior, para criar um growth loop a partir da própria base instalada.
+	- **DADO** uma organização no plano de entrada, **QUANDO** um display é exibido no Player, **ENTÃO** deve aparecer o rodapé "feito com TelaHub" com link rastreável.
+	- **DADO** uma organização em plano superior, **QUANDO** a opção de remover o rodapé é acionada, **ENTÃO** o rodapé deve desaparecer do Player daquela organização.
+	- [ ] Implementar o rodapé no Player condicionado ao plano
+	- [ ] Permitir remoção no plano superior
+	- [ ] Rastrear cliques originados no rodapé
+- [ ] #epic/comercial **US-035** — Como dono de produto, quero SEO de marca (branded) para o nome TelaHub e para os termos de categoria, para capturar quem já ouviu falar do produto ou busca a categoria.
+	- **DADO** uma busca pelo nome da marca, **QUANDO** o resultado é verificado, **ENTÃO** a landing oficial deve aparecer na primeira posição orgânica.
+	- **DADO** os termos de categoria priorizados, **QUANDO** o conteúdo é publicado, **ENTÃO** deve existir pelo menos uma página indexada por termo, com título e meta description próprios.
+	- [ ] Definir lista de termos (marca + categoria)
+	- [ ] Ajustar title/meta/estrutura semântica da landing
+	- [ ] Verificar indexação e posição
+- [ ] #epic/legal **US-036** — Como dono de produto, quero emissão automatizada de NFS-e a cada ciclo de assinatura, para faturar dentro da lei sem trabalho manual por cliente.
+	- 📌 SaaS no Brasil é licenciamento de uso de software: incide **ISS municipal de 2% a 5% da receita bruta** conforme o município da sede fiscal (LC 116/2003), e cada ciclo de cobrança obriga emitir **NFS-e contra o CNPJ/CPF do cliente**. Emissão manual é inviável em escala — exige integração com emissor/API de prefeitura. **Bloqueador de faturamento legal, não item cosmético.**
+	- 🚧 Depende de CNPJ ativo, definição do município de sede e da escolha do emissor/prefeitura — decisão fora do ambiente de código.
+	- **DADO** um ciclo de assinatura paga liquidado, **QUANDO** o pagamento é confirmado, **ENTÃO** uma NFS-e deve ser emitida automaticamente contra o CNPJ/CPF do cliente e o número/link da nota ficar registrado na cobrança.
+	- **DADO** uma falha na API do emissor/prefeitura, **QUANDO** a emissão não conclui, **ENTÃO** a cobrança deve ficar marcada como "nota pendente" com retentativa, sem perder o registro fiscal e sem quebrar o fluxo de pagamento.
+	- **DADO** a alíquota de ISS do município de sede, **QUANDO** a nota é emitida, **ENTÃO** o valor do imposto deve ser calculado sobre a receita bruta do ciclo dentro da faixa de 2% a 5%.
+	- [ ] Definir município de sede, alíquota de ISS aplicável e emissor de NFS-e (API própria da prefeitura x emissor terceirizado)
+	- [ ] Modelar dados fiscais do cliente (CNPJ/CPF, razão social, endereço, código de serviço)
+	- [ ] Integrar a emissão ao ciclo de cobrança com retentativa idempotente
+	- [ ] Testes: emissão em ciclo pago, falha do emissor com nota pendente e não-duplicação de nota
+- [ ] #epic/legal **US-037** — Como cliente recém-assinante, quero exercer o direito de arrependimento em 7 dias com devolução integral, para poder desistir da contratação como o CDC me garante.
+	- 📌 **CDC art. 49**: 7 dias de arrependimento com devolução integral do que foi pago, contados do pagamento inicial ou da ativação da conta. Os tribunais estendem o CDC a microempresas e pequenos comércios por hipossuficiência técnica. Precisa existir **no fluxo de cancelamento do produto**, não só no texto da landing.
+	- **DADO** uma assinatura paga há 7 dias ou menos, **QUANDO** o cliente pede cancelamento, **ENTÃO** o sistema deve reconhecer o direito de arrependimento e registrar reembolso integral do valor pago, sem multa nem retenção proporcional.
+	- **DADO** uma assinatura paga há mais de 7 dias, **QUANDO** o cliente pede cancelamento, **ENTÃO** o cancelamento deve ocorrer pelas regras normais de encerramento de ciclo, com a diferença explicada na tela.
+	- **DADO** o fluxo de cancelamento aberto, **QUANDO** o cliente o percorre, **ENTÃO** o prazo de arrependimento e a data-limite dele devem estar visíveis, não escondidos em termos.
+	- [ ] Implementar cálculo da janela de 7 dias a partir do pagamento/ativação
+	- [ ] Criar fluxo de cancelamento com reembolso integral dentro da janela
+	- [ ] Refletir o direito no texto do fluxo (não apenas nos termos de uso)
+	- [ ] Testes: cancelamento no dia 1, no dia 7 e no dia 8
+- [ ] #epic/legal **US-038** — Como dono de produto, quero a estrutura de LGPD como operador de dados formalizada, para poder assinar contrato com lojista sem assumir responsabilidade que é dele.
+	- 📌 Papéis definidos pela pesquisa: **o TelaHub é operador** (trata dados conforme instrução) e **o lojista é controlador** (decide quais dados de funcionários e clientes vão para a tela). O contrato precisa separar isso explicitamente.
+	- 📌 Regime de **agente de tratamento de pequeno porte** (Resolução CD/ANPD nº 02/2022): dispensa de DPO nomeado desde que exista **canal digital de privacidade**, prazos em dobro (titular em 15 dias, 30 com o alívio da resolução) e **notificação de incidente em 6 dias úteis** (contra 3 do regime comum).
+	- **DADO** um novo cliente contratando a plataforma, **QUANDO** ele aceita os termos, **ENTÃO** deve haver termo de tratamento de dados separando TelaHub como operador e lojista como controlador, versionado e com aceite registrado.
+	- **DADO** um titular de dados que envia uma requisição pelo canal de privacidade, **QUANDO** o pedido é registrado, **ENTÃO** deve haver prazo controlado de resposta de 15 dias (até 30 pelo regime de pequeno porte) e trilha do atendimento.
+	- **DADO** um incidente de segurança relevante, **QUANDO** ele é identificado, **ENTÃO** deve existir procedimento documentado de notificação à ANPD e aos controladores afetados em até 6 dias úteis.
+	- [ ] Redigir termo de tratamento de dados (operador x controlador) e publicá-lo com versionamento e aceite
+	- [ ] Criar canal digital de privacidade em substituição ao DPO nomeado
+	- [ ] Montar o RoPA mapeando o tráfego de dados pessoais da coleta ao descarte
+	- [ ] Definir procedimento de atendimento a titular (15/30 dias) e de notificação de incidente (6 dias úteis)
+- [ ] #epic/player **US-039** — Como lojista, quero que a tela volte a exibir a cena mesmo se o dispositivo reiniciar sem internet, para não ficar com tela preta quando a rede da loja cai.
+	- 📌 Hoje o Player tem apenas **cache por versão/ETag**: se o dispositivo reiniciar sem rede, não há conteúdo persistido para carregar e a tela não sobe. A pesquisa aponta "confiabilidade e operação offline" como um dos **3 pilares de decisão de compra** do pequeno varejista — é lacuna de **produto** que **custa venda**, não item de marketing.
+	- **DADO** um display já exibido ao menos uma vez, **QUANDO** o dispositivo é reiniciado **sem nenhuma conexão com a internet**, **ENTÃO** a última cena publicada deve voltar a ser exibida a partir do armazenamento local.
+	- **DADO** uma mídia pesada (vídeo/imagem) usada na cena, **QUANDO** o download local conclui, **ENTÃO** a exibição offline deve usar o arquivo local, sem depender de requisição de rede.
+	- **DADO** o dispositivo offline com cena local e uma nova versão publicada no servidor, **QUANDO** a rede volta, **ENTÃO** a nova versão deve substituir a local sem piscar tela preta.
+	- [ ] Persistir cena e manifest localmente (não só cache HTTP por ETag)
+	- [ ] Baixar e versionar as mídias da cena em armazenamento local do dispositivo
+	- [ ] Carregar a cena persistida no boot antes de qualquer chamada de rede
+	- [ ] Teste de reinício com rede desligada comprovando que a cena volta a exibir
+- [ ] #epic/player **US-040** — Como lojista, quero que o player se recupere sozinho de travamentos, para que a tela pública nunca exiba a interface do Fire Stick com anúncios.
+	- 📌 A pesquisa documenta que players BYOD de consumo (Fire TV Stick, caixas Android TV/Google TV) sofrem estrangulamento térmico e travamentos sob operação 24/7, e que **ao travar expõem a interface doméstica do aparelho com recomendações e anúncios na tela pública** — dano de imagem além do custo de visita técnica presencial (MTTR alto).
+	- **DADO** o app do player travado ou fechado, **QUANDO** o watchdog detecta a ausência de renderização/heartbeat local, **ENTÃO** o player deve ser reiniciado automaticamente sem intervenção presencial.
+	- **DADO** o dispositivo reiniciado por queda de energia, **QUANDO** o sistema sobe, **ENTÃO** o player deve iniciar em primeiro plano automaticamente, sem passar pela tela inicial do aparelho.
+	- **DADO** um dispositivo que reiniciou sozinho, **QUANDO** ele volta a se comunicar, **ENTÃO** o evento de auto-recuperação deve ficar registrado para o admin ver que aquela tela está instável.
+	- [ ] Implementar watchdog/auto-restart do player e auto-start no boot
+	- [ ] Registrar e expor eventos de auto-recuperação por dispositivo
+	- [ ] Publicar orientação de hardware recomendado (limites do BYOD de consumo em 24/7)
+- [ ] #epic/comercial **US-041** — Como lojista, quero que ao adicionar a 2ª tela eu seja cobrado só da 2ª em diante e proporcional ao período, para não ser punido financeiramente por crescer.
+	- 📌 **Diferencial deliberado contra a reclamação nº 1 dos clientes do Yodeck**: lá, ao conectar a segunda tela, o benefício grátis é revogado e **todas** as telas passam a ser faturadas retroativamente. No TelaHub a cobrança **nunca é retroativa** — a 1ª tela continua grátis para sempre.
+	- **DADO** uma organização no plano `gratis` com 1 tela, **QUANDO** ela adiciona a 2ª tela no meio do ciclo, **ENTÃO** a fatura deve cobrar apenas a 2ª tela, proporcional aos dias restantes do período, e nunca períodos já encerrados.
+	- **DADO** uma organização que adiciona telas ao longo do ciclo, **QUANDO** a fatura é gerada, **ENTÃO** a 1ª tela deve permanecer com valor zero e nenhum valor retroativo deve aparecer.
+	- [ ] Implementar cálculo pro rata por tela a partir da data de ativação
+	- [ ] Garantir a 1ª tela sempre gratuita, independentemente do total de telas
+	- [ ] **Teste automatizado** provando ausência de cobrança retroativa (não basta comentário de código)
+- [ ] #epic/comercial **US-042** — Como dono de produto, quero a fatura calculada por tela ativa respeitando o mínimo do plano, para cobrar exatamente o que está em uso sem furos de dados.
+	- 📌 `Device.activatedAt` **existe no schema mas nada garante seu preenchimento** no pareamento — sem essa data não há como calcular proporcional nem auditar a fatura. Plano Rede tem `minScreens` = 5 (US-022).
+	- **DADO** um device pareado, **QUANDO** o pareamento conclui, **ENTÃO** `activatedAt` deve ser preenchido obrigatoriamente com a data/hora da ativação.
+	- **DADO** uma organização no plano Rede com 3 telas ativas, **QUANDO** a fatura é calculada, **ENTÃO** deve cobrar o mínimo de 5 telas do plano, e não 3.
+	- **DADO** uma organização com telas ativadas e desativadas no mesmo ciclo, **QUANDO** a fatura é calculada, **ENTÃO** o valor deve refletir o período ativo de cada tela.
+	- [ ] Preencher e validar `Device.activatedAt` no fluxo de pareamento (incluindo backfill dos devices existentes)
+	- [ ] Implementar cálculo de fatura por tela ativa com `minScreens` do plano
+	- [ ] Testes de fatura: abaixo do mínimo, acima do mínimo e telas ativadas no meio do ciclo
+- [ ] #epic/comercial **US-043** — Como dono de produto, quero fixar tarifa única sem add-on como política de produto declarada, para que o cliente não descubra taxas extras depois de assinar.
+	- 📌 O **4º grupo de atrito** do setor é empilhamento de taxas extras: o OptiSigns cobra **USD 25/mês por videowall** e **USD 10/mês por domínio próprio**; a Yodeck cobra feeds de terceiros por tela. O cliente percebe cobrança em recursos que deveriam vir incluídos, o que anula a vantagem do preço de entrada e motiva migração para preço *flat*.
+	- **DADO** a política de preços do TelaHub, **QUANDO** ela é documentada, **ENTÃO** deve declarar que todo recurso do produto está incluído no preço por tela, sem add-on recorrente por funcionalidade.
+	- **DADO** a tabela de preços da landing e o catálogo da US-022, **QUANDO** auditados, **ENTÃO** não deve existir nenhum item cobrado à parte por recurso, e a ausência de taxas extras deve estar dita explicitamente ao cliente.
+	- [ ] Registrar "tarifa única, sem add-on por recurso" como decisão de produto
+	- [ ] Refletir a política na comunicação da landing e na tabela de planos
+	- [ ] Auditar o catálogo de planos para garantir que nenhum recurso está tarifado à parte
+- [ ] #epic/comercial **US-044** — Como lojista de plano de entrada, quero papéis de acesso e log de auditoria já inclusos no meu plano, para não precisar compartilhar uma credencial genérica com a equipe.
+	- 📌 O **2º grupo de atrito** do setor é *feature-gating* de governança: ScreenCloud, Yodeck e OptiSigns trancam SSO, SCIM, RBAC e log de auditoria no Enterprise caro, o que leva equipes a **compartilhar credencial administrativa genérica** — aumentando risco de vazamento e de publicação indevida na tela. O TelaHub acabou de ganhar `AuditLog` (US-028): incluir governança nos planos de entrada é diferencial de baixo custo.
+	- **DADO** uma organização no plano de entrada, **QUANDO** ela cadastra usuários, **ENTÃO** deve poder atribuir papéis distintos (ex.: admin e operador) sem precisar de plano superior.
+	- **DADO** uma organização no plano de entrada, **QUANDO** o admin abre a tela de auditoria, **ENTÃO** deve ver os eventos da própria organização, sem bloqueio por plano.
+	- [ ] Definir os papéis mínimos inclusos em todos os planos e o que fica de fato no Enterprise
+	- [ ] Liberar auditoria (US-028/US-030) e papéis nos planos de entrada, sem gate de plano
+	- [ ] Refletir "governança inclusa em todos os planos" na comunicação como diferencial
+- [ ] #epic/comercial **US-045** — Como dono de produto, quero validar um canal de parceiros instaladores, para adquirir clientes organicamente por quem já está dentro da loja instalando a TV.
+	- 📌 A pesquisa aponta esse canal como estratégia forte de aquisição orgânica para SaaS *bootstrapped*: a maior barreira do pequeno varejo é a **instalação física do display**, e eletricistas, técnicos de CFTV e integradores locais já estão lá fazendo suporte e cabeamento. Modelo: eles recomendam/embutem a licença no pacote de serviço e recebem **comissão recorrente** sobre o LTV gerado — reduz CAC.
+	- **DADO** o canal desenhado, **QUANDO** a proposta de parceria é definida, **ENTÃO** deve haver regra de comissão recorrente, forma de atribuição da indicação e material de apoio ao parceiro.
+	- **DADO** a proposta pronta, **QUANDO** ela é apresentada a pelo menos 5 instaladores/técnicos locais, **ENTÃO** o resultado (aceites, recusas e objeções) deve ser registrado e a decisão de manter ou descartar o canal tomada com base nisso.
+	- [ ] Desenhar o modelo de comissão recorrente e a atribuição de indicação
+	- [ ] Abordar pelo menos 5 instaladores/técnicos de CFTV locais
+	- [ ] Registrar objeções e decidir se o canal segue
+- [ ] #epic/comercial **US-046** — Como dono de produto, quero que os recursos exclusivos de plano sejam bloqueados no servidor, para não entregar de graça o que está anunciado como pago.
+	- 📌 **Lacuna estrutural confirmada por grep (2026-07-25)**: `hasFeature()` existe em `backend/src/services/plan.service.ts:53` e tem teste (`services/__tests__/subscription.test.ts:157`), mas **nenhuma rota e nenhum serviço o chamam** — as únicas ocorrências fora da definição são o próprio teste e o `.d.ts` compilado em `dist/`. Quota funciona (`enforceQuota` limita nº de telas e usuários); **feature de plano é decorativa**.
+	- 📌 Consequência comercial: as páginas de venda anunciam Power BI, Airtable, Docs e PDF como recursos do plano Rede e hoje uma conta no plano Grátis usa tudo sem impedimento. O risco é **invertido** em relação ao habitual — não é enganar o cliente, é **entregar de graça o que deveria ser pago** e depois gerar atrito ao retirar de quem já usa. Ver [[modelo-comercial-e-precificacao]] e [[canais-de-venda-e-landings]].
+	- 📌 O gate precisa ser **no servidor**: esconder o widget no editor seria burlável por chamada direta à API.
+	- 📌 Pré-requisito da US-043 e da decisão pendente de vídeo no plano Grátis (registrada na US-022): sem gate, mover recurso de plano é só texto na página.
+	- **DADO** uma organização no plano `gratis`, **QUANDO** ela tenta criar ou publicar uma cena com widget de Power BI, Airtable, Google/Office Docs ou PDF, **ENTÃO** a API deve responder **403** citando o recurso e o plano necessário — independentemente do que a UI exibe.
+	- **DADO** uma organização em plano que inclui o recurso, **QUANDO** faz a mesma requisição, **ENTÃO** ela deve ser aceita normalmente.
+	- **DADO** a suíte de testes, **QUANDO** ela roda, **ENTÃO** deve haver **teste automatizado** provando o 403 por chamada direta à API, sem passar pelo frontend.
+	- [ ] Mapear quais features do catálogo (`seed-plans.ts`) correspondem a quais widgets e rotas
+	- [ ] Aplicar `hasFeature()` como middleware nas rotas de escrita/publicação afetadas
+	- [ ] Refletir o bloqueio na UI (aviso de upgrade) sem depender dela como gate
+	- [ ] Testes de 403 por chamada direta à API para cada feature paga
+- [ ] #epic/comercial **US-047** — Como visitante que clicou em "Assinar", quero chegar a um caminho real de contratação, para não clicar num botão que não faz nada.
+	- 📌 **Urgente — o site está no ar.** As landings têm três planos pagos com CTA de assinatura, mas `POST /api/billing/checkout` responde **501** de propósito (`backend/src/routes/billing.routes.ts:174`, comportamento coberto por teste). O clique morre.
+	- 📌 Paliativo até a **US-029** (gateway) existir: o CTA deve levar ao canal comercial, não a um endpoint 501. Depende da **US-049** (endereço de e-mail real).
+	- ⚠️ *Não confirmado neste repositório*: os botões "Assinar" foram reportados em `Site/site-telas`, que **não existe** nesta árvore (grep em 2026-07-25). Em `frontend/components/Landing.tsx` os CTAs pagos apontam para `/signup` e o do Enterprise para `mailto:`. Confirmar em qual repositório/artefato está a landing com CTA de assinatura antes de executar.
+	- **DADO** a landing publicada com planos pagos, **QUANDO** o visitante clica no CTA de assinatura, **ENTÃO** ele deve chegar a um canal de contratação que responde, nunca a um endpoint 501 nem a um link morto.
+	- **DADO** o gateway ainda não integrado, **QUANDO** a página é auditada, **ENTÃO** nenhum elemento deve prometer contratação self-service imediata.
+	- [ ] Localizar o artefato real da landing com CTA "Assinar" e inventariar os botões
+	- [ ] Redirecionar os CTAs pagos para o canal comercial enquanto a US-029 não entra
+	- [ ] Reverter para checkout real quando a US-029 for concluída
+- [ ] #epic/legal **US-048** — Como visitante que deixa meus dados no site, quero acessar a política de privacidade e os termos de uso, para saber quem trata meus dados e para quê.
+	- 📌 **Obrigação de LGPD, não item estético**: o site captura lead (`LeadModal`) e usa cookies de campanha, e os links de política de privacidade e de termos estão mortos. Hoje **coleta dado pessoal sem informar o titular** — e o site já está publicado, o que torna esta entrega mais urgente que a US-038.
+	- 📌 Relação com a **US-038**: lá o TelaHub é **operador** perante o lojista; aqui é **controlador** dos dados do visitante do próprio site. São entregas distintas. Ver [[canais-de-venda-e-landings]] e [[seguranca-e-conformidade-tecnica]].
+	- ⚠️ *Não confirmado neste repositório*: `Site/site-telas` e `LeadModal` não existem nesta árvore (grep em 2026-07-25). Confirmar o repositório do site antes de executar.
+	- **DADO** o site publicado com captação de lead, **QUANDO** o visitante abre o formulário, **ENTÃO** deve haver link funcional para a política de privacidade informando finalidade, base legal, retenção e canal do titular.
+	- **DADO** o rodapé do site, **QUANDO** os links de política e de termos são clicados, **ENTÃO** devem abrir páginas publicadas, não âncoras vazias.
+	- **DADO** o uso de cookies de campanha, **QUANDO** o visitante chega, **ENTÃO** ele deve ser informado do uso e da finalidade.
+	- [ ] Redigir e publicar política de privacidade (finalidade, base legal, retenção, direitos do titular, canal)
+	- [ ] Redigir e publicar termos de uso do site
+	- [ ] Ligar os links do rodapé e do `LeadModal` às páginas publicadas
+	- [ ] Informar o uso de cookies de campanha
+- [ ] #epic/comercial **US-049** — Como responsável pelo produto, quero um endereço de e-mail comercial que exista de verdade e seja monitorado, para não publicar um canal de contato inventado.
+	- 📌 Confirmado no código: `frontend/components/Landing.tsx:59` define `EMAIL_VENDAS = 'comercial@telahub.com.br'`, com aviso no próprio arquivo de que o endereço foi criado só para não deixar link morto e **não deve ser publicado sem confirmação**. É o único ponto do arquivo onde ele aparece — trocar ali resolve.
+	- 🚧 Bloqueado: depende de criar/confirmar a caixa no provedor de e-mail do domínio — ação fora do ambiente de código. **Bloqueia publicação** e é pré-requisito da US-047.
+	- **DADO** o CTA "Falar com vendas", **QUANDO** o visitante o aciona, **ENTÃO** o endereço de destino deve ser uma caixa existente e monitorada por alguém.
+	- [ ] Criar/confirmar a caixa comercial no domínio e definir quem a monitora
+	- [ ] Atualizar `EMAIL_VENDAS` na landing com o endereço confirmado
+	- [ ] Remover o aviso de "endereço não confirmado" do código depois da confirmação
+- [ ] #epic/comercial **US-050** — Como responsável pelo produto, quero que a conformidade da copy seja verificada no artefato construído, para que claim removido não volte sozinho na próxima build.
+	- 📌 **Achado de processo**: os mesmos claims falsos removidos na US-026 **voltaram duas vezes**, reintroduzidos por agentes sem supervisão. Verificar o fonte não basta — a checagem precisa rodar sobre o `dist/` publicado (`grep` no artefato), porque é ele que o visitante lê.
+	- **DADO** uma lista versionada de termos proibidos (white label, SSO/SAML/LDAP, 2FA, domínio personalizado, SLA 99,9%, player Android TV nativo, cache offline real, depoimento fabricado, selo "MAIS VENDIDO", preço riscado), **QUANDO** o build de produção é gerado, **ENTÃO** a verificação deve rodar sobre o `dist/` e falhar a publicação se algum termo aparecer fora de exceção autorizada.
+	- **DADO** um claim legitimamente novo, **QUANDO** ele é adicionado, **ENTÃO** a lista de exceções deve ser alterada explicitamente, com registro de quem autorizou.
+	- [ ] Manter a lista de termos proibidos versionada junto do site
+	- [ ] Adicionar verificação automatizada sobre o `dist/` no pipeline de build/CI
+	- [ ] Documentar que auditoria de copy se valida no artefato, não no fonte
+
+
+## Em Análise (4 · 3 bloqueadas 🚧)
+
+- [ ] #epic/armazenamento **US-002** — Como admin, quero migrar os arquivos já enviados via disco local para o R2, para não perder mídia existente ao ativar o modo R2.
+	- **DADO** arquivos existentes em `uploads/` local, **QUANDO** o script de migração roda, **ENTÃO** todos os arquivos devem aparecer no bucket R2 com os mesmos nomes/paths.
+	- **DADO** a migração concluída, **QUANDO** um `Display` referencia uma mídia antiga, **ENTÃO** a URL deve resolver corretamente pelo R2.
+	- 🚧 Bloqueado: requer execução manual em ambiente de homologação real — não pode ser concluído remotamente.
+	- [x] Escrever script de migração disco → R2
 	- [ ] Rodar em ambiente de homologação e validar contagem de arquivos
 	- [ ] Atualizar referências de URL no banco, se necessário
-- [ ] **EPIC B — Segurança de API** #epic/seguranca
-- [ ] **US-003** — Como responsável técnico, quero rate limiting nas rotas de autenticação, para mitigar ataques de força bruta contra login/reset de senha. #epic/seguranca
-	- DADO um IP fazendo mais de N tentativas de login em M minutos, QUANDO o limite é excedido, ENTÃO a API deve responder 429 e bloquear novas tentativas temporariamente.
-	- [ ] Escolher e instalar middleware de rate limiting (ex.: `express-rate-limit`)
-	- [ ] Aplicar limite em `/auth/login`, `/auth/forgot-password`, `/auth/reset-password`
-	- [ ] Adicionar teste de integração simulando excesso de tentativas
-- [ ] **US-004** — Como responsável técnico, quero sanitização/validação de entrada nas rotas de displays/devices/broadcasts, para reduzir risco de injeção e dados malformados persistidos. #epic/seguranca
-	- DADO um payload inválido ou malicioso em qualquer rota de escrita, QUANDO a requisição chega, ENTÃO deve ser rejeitada com 400 antes de tocar o banco.
-	- [ ] Definir schemas de validação (ex.: Zod) para os payloads de escrita
-	- [ ] Aplicar middleware de validação em `displays`, `devices`, `broadcasts`, `users`
-	- [ ] Cobrir com testes de payload inválido
-- [ ] **EPIC C — Hierarquia Multi-loja** #epic/multi-tenant
-- [ ] **US-005** — Como dono de produto, quero um modelo de dados de Organização/Loja agrupando Displays, para viabilizar relatórios e gestão multi-cliente num único deploy. #epic/multi-tenant
-	- DADO o novo modelo `Organization`, QUANDO um `Display` é criado, ENTÃO ele deve pertencer a uma Organização.
-	- DADO displays existentes sem organização, QUANDO a migração roda, ENTÃO todos devem ser atribuídos a uma organização padrão sem perda de dados.
-	- [ ] Modelar `Organization` no `schema.prisma` e relação com `Display`
-	- [ ] Escrever migração de dados com organização padrão para displays existentes
-	- [ ] Atualizar rotas de backend para filtrar por organização
-- [ ] **US-006** — Como admin, quero filtrar/agrupar Displays por loja no Dashboard, para gerenciar múltiplas unidades sem confusão visual. #epic/multi-tenant
-	- DADO múltiplas organizações/lojas cadastradas, QUANDO o admin abre o Dashboard, ENTÃO deve haver um seletor/filtro de loja que reflete na grade de displays.
-	- [ ] Adicionar seletor de organização no `TopBar`/`ModuleNav`
-	- [ ] Filtrar `DisplayGrid` pela organização selecionada
-	- [ ] Persistir a última seleção do usuário (localStorage)
-- [ ] **EPIC D — UX do Editor e Dashboard** #epic/ux
-- [ ] **US-007** — Como usuário do Editor, quero receber feedback de erro consistente (toast) em vez de `alert()` nativo ao salvar uma cena, para ter uma experiência visualmente coerente com o restante do app. #epic/ux
-	- DADO um erro ao salvar, QUANDO `handleSave` falha, ENTÃO deve aparecer um toast (`sonner`) com mensagem clara da causa, não um `alert()` do navegador.
-	- [ ] Substituir `alert('Erro ao salvar.')` por toast de erro em `Editor.tsx`
-	- [ ] Revisar mensagem seguindo os "3 I's" de microcopy (informativa, clara, sem culpar o usuário)
-	- [ ] Auditar o restante do app por outros usos de `alert()` nativo
-- [ ] **US-008** — Como usuário novo, quero ver estados vazios com orientação clara quando não há displays/dispositivos cadastrados, para saber o próximo passo sem depender de memorização. #epic/ux
-	- DADO nenhum display cadastrado, QUANDO o Dashboard carrega, ENTÃO deve exibir uma mensagem de estado vazio com call-to-action para criar o primeiro display.
-	- [ ] Criar componente de empty state reutilizável
-	- [ ] Aplicar em `DisplayGrid` (sem displays) e `DeviceChips` (sem dispositivos pareados)
-	- [ ] Revisar microcopy do empty state
-- [ ] **US-009** — Como usuário que navega por teclado, quero que os modais do Dashboard e Editor tenham foco e navegação acessíveis, para conseguir usar o produto sem mouse. #epic/ux
-	- DADO um modal aberto (criar display, pairing, camadas), QUANDO o usuário pressiona Tab, ENTÃO o foco deve ficar preso dentro do modal e `Esc` deve fechá-lo.
-	- [ ] Auditar todos os modais quanto a focus trap e tecla `Esc`
-	- [ ] Corrigir ordem de tabulação onde necessário
-	- [ ] Validar com leitor de tela básico (NVDA) nos fluxos principais
-- [ ] **US-010** — Como editor de cenas, quero uma confirmação antes de publicar/sobrescrever uma cena já ativa numa tela, para evitar publicar algo errado por engano. #epic/ux
-	- DADO uma cena já publicada num display, QUANDO o usuário clica em salvar/publicar, ENTÃO deve aparecer uma confirmação explícita antes de sobrescrever o conteúdo ao vivo.
-	- [ ] Adicionar modal de confirmação antes de publicar
-	- [ ] Incluir preview resumido do que será publicado
-- [ ] **EPIC E — Deploy e CI/CD** #epic/infra
-- [ ] **US-011** — Como responsável técnico, quero um pipeline de CI/CD com ambiente de staging, para validar mudanças antes de ir para produção. #epic/infra
-	- DADO um PR aberto contra `main`, QUANDO o CI roda, ENTÃO build/testes devem rodar automaticamente e bloquear merge se falharem.
-	- [ ] Configurar pipeline de CI (build + testes) para PRs
+- [ ] #epic/infra **US-011** — Como responsável técnico, quero um pipeline de CI/CD com ambiente de staging, para validar mudanças antes de ir para produção.
+	- 📌 Fluxo de deploy atual: push no GitHub → pull manual/automático via Portainer na VPS → roteamento de acesso via Cloudflare Tunnel.
+	- 🚧 Bloqueado: requer acesso manual à VPS/Portainer/Cloudflare — não pode ser concluído remotamente.
+	- **DADO** um PR aberto contra `main`, **QUANDO** o CI roda, **ENTÃO** build/testes devem rodar automaticamente e bloquear merge se falharem.
+	- 📌 Correção entregue no ciclo de prontidão comercial: criado `backend/tsconfig.build.json` separado do `tsconfig.json`. O CI rodava `build` antes de `test` e o vitest passava a coletar os testes **compilados em `dist/`**, derrubando a suíte inteira mesmo com todos os testes reais passando. Falta code review desta correção.
+	- [x] Configurar pipeline de CI (build + testes) para PRs (`.github/workflows/ci.yml`)
 	- [ ] Provisionar ambiente de staging separado de produção
-	- [ ] Documentar fluxo de promoção staging → produção
-- [ ] **US-012** — Como responsável técnico, quero gestão de segredos por ambiente, para não depender de `.env` copiados manualmente entre dev/staging/produção. #epic/infra
-	- DADO um novo ambiente provisionado, QUANDO a aplicação sobe, ENTÃO os segredos devem vir de um cofre/gestor central, não de arquivo versionado ou copiado manualmente.
-	- [ ] Escolher solução de gestão de segredos compatível com a infra atual (Portainer/Cloudflare Tunnel)
+	- [x] Documentar fluxo de promoção staging → produção (`DEPLOY.md`)
+- [ ] #epic/infra **US-012** — Como responsável técnico, quero gestão de segredos por ambiente, para não depender de `.env` copiados manualmente entre dev/staging/produção.
+	- 🚧 Bloqueado: requer acesso manual ao Portainer da VPS — não pode ser concluído remotamente.
+	- **DADO** um novo ambiente provisionado, **QUANDO** a aplicação sobe, **ENTÃO** os segredos devem vir de um cofre/gestor central, não de arquivo versionado ou copiado manualmente.
+	- [x] Escolher solução de gestão de segredos compatível com a infra atual (Portainer/Cloudflare Tunnel) — decisão documentada em `SECRETS.md`
 	- [ ] Migrar segredos sensíveis (JWT_SECRET, SMTP, R2) para o cofre escolhido
-- [ ] **EPIC F — Observabilidade** #epic/observabilidade
-- [ ] **US-013** — Como admin, quero um painel de saúde dos dispositivos (heartbeat), para saber rapidamente quais telas estão online/offline. #epic/observabilidade
-	- DADO dispositivos pareados, QUANDO o admin abre o painel de saúde, ENTÃO cada dispositivo deve mostrar status (online/offline) baseado no `lastSeen`.
-	- [ ] Criar endpoint agregando status de todos os `Device` por `lastSeen`
-	- [ ] Criar view no Dashboard com indicador visual online/offline
-- [ ] **US-014** — Como admin, quero ser alertado quando um display fica offline por muito tempo, para agir antes que o cliente perceba a tela apagada. #epic/observabilidade
-	- DADO um device sem heartbeat há mais de X minutos, QUANDO o limite é ultrapassado, ENTÃO um alerta (e-mail ou notificação in-app) deve ser disparado.
-	- [ ] Definir job periódico de verificação de heartbeat
-	- [ ] Implementar notificação (reaproveitar Nodemailer existente)
-- [ ] **US-015 (card de teste — pode remover)** — Como usuário do sistema, quero ver este card de exemplo no quadro, para confirmar que a integração entre o Claude Code e o plugin Kanban do Obsidian está funcionando corretamente. #epic/ux #teste
-	- DADO este card de teste, QUANDO o arquivo é aberto no Obsidian com o plugin Kanban ativo, ENTÃO ele deve aparecer como um card normal na coluna Backlog.
-	- [ ] Confirmar visualmente no Obsidian que o card apareceu na coluna Backlog
-	- [ ] Remover este card de teste depois da confirmação
-
-## Em Análise (3)
 
 
+## Em Desenvolvimento (12 · 8 em uso)
 
-## Em Desenvolvimento (2)
+- [ ] #epic/multi-tenant **US-020** — Como operador da plataforma, quero que o SMTP seja da plataforma e que alertas de device offline vão só para os admins da organização dona do device, para não vazar configuração nem notificação entre clientes.
+	- 📌 O `Setting` de SMTP não tinha escopo de organização — era global e editável por qualquer cliente.
+	- ✅ **Código entregue e verificado** no ciclo de prontidão comercial (107 testes passando, type-check limpo no backend e no frontend, builds de produção passando). **Falta code review e validação dos critérios de aceite** — por isso não avançou para Code Review: a coluna está em 4/4.
+	- **DADO** um usuário cliente (não master), **QUANDO** ele tenta ler ou alterar a configuração de SMTP, **ENTÃO** a API deve negar o acesso (rota protegida por `masterMiddleware`).
+	- **DADO** um device da organização B sem heartbeat além do limite, **QUANDO** o alerta é disparado, **ENTÃO** somente os admins de B devem receber o e-mail.
+	- [ ] Mover as rotas de SMTP para trás do `masterMiddleware` e remover a configuração por cliente da UI
+	- [ ] Escopar a consulta de destinatários do alerta de offline pela organização do device
+	- [ ] Testes: cliente recebe 403 em SMTP; alerta não vaza para admins de outro tenant
+- [ ] #epic/multi-tenant **US-021** — Como responsável técnico, quero backfill idempotente do escopo de tenant e testes que provem o vazamento fechado, para migrar a base existente com segurança e evitar regressão futura.
+	- ✅ **Código e suíte de isolamento entregues e verificados** (107 testes passando, type-check e builds limpos). **Falta code review.**
+	- 🚧 Retido em Em Desenvolvimento de propósito: a **execução do backfill na base real** é ação manual fora do ambiente remoto, então a US não conseguiria sair de Code Review de todo modo. Revisar junto quando houver capacidade.
+	- **DADO** a base atual com usuários, devices, broadcasts e mídia sem organização, **QUANDO** `prisma/backfill-tenant-scope.ts` roda, **ENTÃO** todos os registros devem ficar associados a uma organização, sem perda de dados.
+	- **DADO** o backfill já executado, **QUANDO** ele roda novamente, **ENTÃO** o resultado deve ser idêntico (idempotente), sem duplicar nem sobrescrever associações.
+	- **DADO** a suíte de testes de isolamento, **QUANDO** ela roda, **ENTÃO** deve falhar se qualquer rota voltar a expor recurso de outro tenant (tenant A recebe 404 em recurso de B).
+	- [ ] Escrever `prisma/backfill-tenant-scope.ts` idempotente
+	- [ ] Rodar o backfill e registrar contagens antes/depois
+	- [ ] Suíte de testes de isolamento cruzado cobrindo displays, devices, broadcasts, usuários e mídia
+- [ ] #epic/comercial **US-022** — Como dono de produto, quero um catálogo de planos por tela ativa modelado no sistema, para poder cobrar por unidade de valor em vez de por conta.
+	- 📌 Preços **definidos** (base: deep research de mercado de 2026-07-25 — faixa aceita no Brasil é de **R$ 30 a R$ 110 por tela/mês**): **Grátis** — 1 tela grátis para sempre, sem prazo e sem cartão · **Loja R$ 49/tela/mês** · **Rede R$ 39/tela/mês** (mínimo de 5 telas) · **Enterprise** sob consulta.
+	- ✅ **Código entregue e verificado** (107 testes passando, type-check e builds de produção limpos). **Falta code review e validação dos critérios de aceite.**
+	- ⚠️ **DECISÃO NÃO CONFIRMADA PELO DONO** (registrada em 2026-07-25): uma landing foi alterada para **retirar vídeo do plano Grátis** e colocá-lo como primeiro benefício do plano **Loja**. A alteração foi feita por um agente e **não foi possível rastrear a instrução até o usuário**. Não deve virar verdade no catálogo (`seed-plans.ts`) sem confirmação explícita do dono. De qualquer forma **depende da US-046**: sem gate de feature no servidor, mover vídeo de plano é apenas texto na página.
+	- 📌 O plano `trial` de 14 dias foi **substituído** pelo plano `gratis` sem prazo. Nos planos pagos o `maxDevices` passa a ser **ilimitado**: o que limita o uso é a fatura (cobrança por tela ativa), não uma trava de quota.
+	- **DADO** o catálogo cadastrado, **QUANDO** `GET /api/plans` é chamada sem autenticação, **ENTÃO** deve retornar os planos com preço por tela, mínimo de telas e limites de cada plano.
+	- **DADO** uma organização nova, **QUANDO** ela é criada, **ENTÃO** deve receber uma `Subscription` no plano `gratis`, com limite de 1 tela, sem data de expiração e sem exigir cartão.
+	- **DADO** um plano pago consultado no catálogo, **QUANDO** a resposta é lida, **ENTÃO** `maxDevices` deve indicar ilimitado e o plano Rede deve trazer `minScreens` = 5.
+	- [ ] Modelar `Plan` e `Subscription` no `schema.prisma` (`pricePerScreen`, `minScreens`, `maxDevices` ilimitado nos pagos)
+	- [ ] Semear o catálogo de planos (gratis 1 tela sem prazo, Loja R$ 49, Rede R$ 39 com mínimo de 5, Enterprise sob consulta)
+	- [ ] Implementar `GET /api/plans` pública
+- [ ] #epic/comercial **US-025** — Como visitante, quero uma tela de cadastro no app e ver meu plano atual no Dashboard, para conseguir entrar sozinho e saber o que já tenho incluído.
+	- ✅ **Código entregue e verificado**; a parte de frontend do fluxo de cadastro foi exercitada junto da validação manual da US-024 (aplicação rodando de verdade). **Falta code review e o checklist de UX (7 blocos) exigido pela DoD.**
+	- 📌 A comunicação da tela de cadastro e da faixa do Dashboard é **"1 tela grátis para sempre"**, não mais "14 dias grátis" (decisão de precificação registrada na US-022).
+	- **DADO** a rota `/signup` no frontend, **QUANDO** o visitante preenche o formulário com dados válidos, **ENTÃO** deve ser autenticado e cair no Dashboard da organização recém-criada.
+	- **DADO** a tela de login, **QUANDO** ela é aberta, **ENTÃO** deve haver link para `/signup`; e na tela de signup, link recíproco para o login.
+	- **DADO** uma organização no plano `gratis`, **QUANDO** o Dashboard carrega, **ENTÃO** deve exibir faixa informando "1 tela grátis para sempre" com o uso atual de telas — sem contagem regressiva nem menção a expiração.
+	- [ ] Criar tela `/signup` consumindo `POST /api/signup` com a mensagem de 1 tela grátis para sempre
+	- [ ] Links recíprocos entre login e signup
+	- [ ] Faixa de status de plano/uso de telas no Dashboard (sem contador de trial)
+- [ ] #epic/comercial **US-026** — Como responsável pelo produto, quero remover da landing toda funcionalidade que não existe, para não expor a empresa a publicidade enganosa (art. 37 do CDC).
+	- ✅ **Remoção executada e verificada** no fonte da landing (`frontend/components/Landing.tsx`): itens de white label, SSO/SAML/LDAP e 2FA aparecem hoje apenas no Enterprise, marcados como "sob escopo de projeto", com nota explícita de que não estão disponíveis na plataforma.
+	- ⚠️ **Reincidência conhecida**: os mesmos claims removidos **voltaram duas vezes**, reintroduzidos por agentes sem supervisão. Enquanto a **US-050** não existir (verificação no `dist/`), esta US **não pode ser considerada estável** mesmo depois do review — auditar no artefato construído antes de qualquer publicação.
+	- **DADO** a landing publicada, **QUANDO** ela é auditada contra o que o produto realmente faz, **ENTÃO** não deve haver menção a white label, SSO/SAML/LDAP, 2FA, domínio personalizado, SLA 99,9%, player Android TV nativo nem cache offline real.
+	- **DADO** a seção de prova social e preços, **QUANDO** auditada, **ENTÃO** o depoimento fabricado, o selo "MAIS VENDIDO" e o preço riscado fictício devem ter sido removidos.
+	- [ ] Auditar item por item as alegações da landing contra o código entregue
+	- [ ] Remover as funcionalidades inexistentes do texto e das tabelas de plano
+	- [ ] Remover depoimento fabricado, selo "MAIS VENDIDO" e preço riscado fictício
+- [ ] #epic/comercial **US-027** — Como responsável pelo produto, quero reposicionar a landing de "mais barato" para visibilidade operacional, com preço por tela e CTA para o signup, para atrair pelo valor e não pelo desconto.
+	- ✅ **Código entregue e verificado**: preços por tela centralizados em constantes (`PRECOS`, `OFERTA_GRATIS` em `Landing.tsx`) coerentes com o catálogo da US-022 (Grátis 1 tela para sempre · Loja R$ 49 · Rede R$ 39 com mínimo de 5 · Enterprise sob consulta), CTAs dos planos self-service apontando para `/signup`. **Falta code review.**
+	- 🚧 Pendências que impedem a conclusão, hoje isoladas como cards próprios: **US-049** (e-mail comercial inventado no CTA do Enterprise) e **US-047** (CTA de assinatura sem checkout).
+	- **DADO** a nova landing, **QUANDO** um visitante lê a dobra principal, **ENTÃO** a promessa deve ser de visibilidade operacional das telas, sem comparação de preço como argumento central.
+	- **DADO** a seção de preços, **QUANDO** exibida, **ENTÃO** deve apresentar valores por tela ativa coerentes com o catálogo da US-022 e sinalizar que são provisórios até a pesquisa de mercado.
+	- **DADO** qualquer CTA principal da landing, **QUANDO** clicado, **ENTÃO** deve levar para `/signup` (trial sem cartão).
+	- [ ] Reescrever dobra principal e blocos de valor com o novo posicionamento
+	- [ ] Reprecificar a tabela por tela ativa
+	- [ ] Apontar todos os CTAs para `/signup`
+- [ ] #epic/observabilidade **US-028** — Como admin, quero que ações sensíveis fiquem registradas em log de auditoria, para poder rastrear quem publicou, apagou ou pareou o que.
+	- **DADO** as ações `display.publish`, `display.delete`, `device.link` e `user.invite`, **QUANDO** executadas, **ENTÃO** deve ser gravado um `AuditLog` com ator, organização, ação, recurso e data.
+	- **DADO** uma falha ao gravar o log, **QUANDO** a ação principal já foi concluída, **ENTÃO** a operação do usuário não deve falhar (auditoria à prova de falha, apenas registra o erro).
+	- [ ] Modelar `AuditLog` no `schema.prisma`
+	- [ ] Criar `audit.service.ts` à prova de falha
+	- [ ] Instrumentar as ações sensíveis (publish, delete, link, invite e afins)
+	- [ ] Testes de gravação e de falha silenciosa
+- [ ] #epic/seguranca **US-051** — Como responsável técnico, quero as correções de endurecimento de segurança revisadas e registradas, para que o que já foi corrigido não regrida silenciosamente.
+	- ✅ **Código entregue e verificado** (107 testes passando, type-check limpo no backend e no frontend, builds de produção passando). Não é trabalho por fazer, é **trabalho por revisar** — aguarda vaga em Code Review, que está em 4/4. Ver [[seguranca-e-conformidade-tecnica]].
+	- 📌 Entregue: **guarda de boot do `JWT_SECRET`** (`backend/src/services/auth.service.ts`). Havia fallback público versionado no repositório — em produção sem a variável, qualquer um forjaria token de `master`. O boot passa a abortar se o segredo estiver ausente, se for igual ao padrão de dev ou se tiver menos de 32 caracteres; coberto por `services/__tests__/auth.security.test.ts`.
+	- 📌 Entregue: **`TRUST_PROXY`** (`backend/src/server.ts:51`). Sem ele, atrás do Cloudflare Tunnel `req.ip` era o IP do proxy em toda requisição, e o rate limit agrupava **todos** os visitantes num contador único: não protegia contra força bruta e derrubava todos juntos. Há aviso de boot em produção quando a variável não está definida.
+	- 📌 Entregue: **whitelist de MIME *e* extensão no upload** (`backend/src/routes/media.routes.ts:62-107`). MIME sozinho é falsificável — um `.html` disfarçado de `image/png`, servido por `express.static('/uploads')` na **mesma origem do painel**, era XSS armazenado. Coberto por `routes/__tests__/media.upload-security.test.ts`.
+	- 📌 Entregue: **resolução silenciosa de colisão de slug** (`backend/src/services/display.service.ts:165-206`). O `slug` é único global porque alimenta a URL pública do Player; devolver erro de colisão revelaria a um cliente que aquele slug já existe em outro — enumeração entre tenants.
+	- 📌 Entregue: **separação `backend/tsconfig.build.json`** — registrada também na US-011, onde está o card de CI.
+	- **DADO** as cinco correções acima, **QUANDO** passarem por code review, **ENTÃO** cada uma deve ter teste automatizado associado ou justificativa registrada de por que não tem.
+	- **DADO** a guarda de boot do `JWT_SECRET`, **QUANDO** o backend sobe em produção sem a variável, **ENTÃO** o processo deve abortar com mensagem clara em vez de aceitar o segredo público de desenvolvimento.
+	- [ ] Code review das cinco correções
+	- [ ] Confirmar cobertura de teste item por item (JWT_SECRET, upload, rate limit atrás de proxy, colisão de slug)
+	- [ ] Registrar as decisões em [[seguranca-e-conformidade-tecnica]]
+
+
+## Code Review (4 · 4 em uso — no limite)
+
+- [ ] #epic/multi-tenant **US-018** — Como cliente do SaaS, quero que a API só me devolva e só me deixe alterar dados da minha própria organização, para que meus displays não fiquem visíveis para outros clientes do mesmo deploy.
+	- 📌 Regressão de segurança encontrada na análise de prontidão comercial: `GET /api/displays` (`backend/src/routes/displays.routes.ts:11`) devolvia displays de todos os clientes e o filtro por organização era client-side (`frontend/components/Dashboard.tsx:278`). `User` não tinha `organizationId`.
+	- ✅ **Código entregue e verificado** (107 testes passando, type-check limpo no backend e no frontend, builds de produção passando). **Puxado para Code Review por ser o card de maior risco do lote**: uma falha de revisão aqui volta a expor dados entre clientes.
+	- ⚠️ **DoD não cumprida**: falta code review e validação dos critérios de aceite. Não avançar para Concluído sem isso.
+	- **DADO** dois clientes (tenant A e tenant B) no mesmo deploy, **QUANDO** um usuário de A chama `GET /api/displays`, **ENTÃO** a resposta deve conter apenas displays de A, sem depender de filtro no frontend.
+	- **DADO** um usuário de A autenticado, **QUANDO** ele acessa por id um display, device, broadcast, organização ou usuário de B, **ENTÃO** a API deve responder 404 (sem revelar existência do recurso).
+	- **DADO** um `POST` com `organizationId` de outro tenant no corpo, **QUANDO** a requisição é processada, **ENTÃO** o `organizationId` do corpo deve ser ignorado e o do tenant autenticado forçado.
+	- [ ] Adicionar `organizationId` em `User` no `schema.prisma` e incluir a organização no payload do JWT
+	- [ ] Criar middleware de tenant que resolve a organização do request
+	- [ ] Aplicar filtro de organização em todas as leituras/escritas de displays, devices, broadcasts, organizações e usuários
+	- [ ] Remover o filtro client-side de organização do `Dashboard`
+- [ ] #epic/multi-tenant **US-019** — Como cliente do SaaS, quero que minha mídia fique isolada por organização no armazenamento, para que ninguém de outro cliente consiga acessar meus arquivos.
+	- ✅ **Código entregue e verificado** (suíte de 107 testes passando, incluindo testes de segurança de upload). **Puxado para Code Review pelo mesmo critério da US-018**: path traversal e vazamento de mídia entre clientes são risco alto se o review falhar.
+	- ⚠️ **DoD não cumprida**: falta code review e validação dos critérios de aceite.
+	- **DADO** um upload feito por um usuário de A, **QUANDO** o arquivo é gravado, **ENTÃO** a chave no armazenamento deve ser prefixada pela organização de A.
+	- **DADO** uma chave manipulada com `../` ou prefixo de outra organização, **QUANDO** a requisição de leitura/exclusão chega, **ENTÃO** deve ser rejeitada (path traversal bloqueado) sem tocar o armazenamento.
+	- **DADO** arquivos legados gravados antes do prefixo, **QUANDO** um display os referencia, **ENTÃO** devem continuar resolvendo normalmente.
+	- [ ] Prefixar chaves de mídia por organização na escrita
+	- [ ] Validar/normalizar chave na leitura e exclusão (bloqueio de path traversal)
+	- [ ] Manter compatibilidade de leitura para chaves legadas sem prefixo
+	- [ ] Testes de acesso cruzado a mídia entre tenants
+- [ ] #epic/comercial **US-023** — Como operador da plataforma, quero que assinatura inativa e estouro de quota bloqueiem o uso, para que o produto só entregue valor a quem está adimplente e dentro do plano.
+	- ✅ **Código entregue e verificado rodando a aplicação de verdade** — o bloqueio de quota foi exercitado na aplicação em execução, não só em teste automatizado. **Foi esse o critério de puxada**: validação end-to-end real.
+	- ⚠️ **DoD não cumprida**: falta code review e registro da validação dos critérios de aceite.
+	- ⚠️ Escopo adjacente **não coberto** por esta US: quota limita nº de telas e usuários, mas **feature de plano não é aplicada em lugar nenhum** — tratado na **US-046**.
+	- **DADO** uma organização com assinatura expirada ou inativa, **QUANDO** ela chama uma rota protegida, **ENTÃO** `requireActiveSubscription` deve responder **402**.
+	- **DADO** uma organização no limite de telas ou de usuários do plano, **QUANDO** tenta cadastrar um device ou usuário adicional, **ENTÃO** `enforceQuota` deve responder **403** com mensagem indicando o limite atingido.
+	- **DADO** um cliente autenticado, **QUANDO** chama `GET /api/billing/subscription`, **ENTÃO** deve receber o plano atual, o uso corrente (telas/usuários) e os dias restantes de trial.
+	- **DADO** um pedido de troca para um plano menor que o uso atual, **QUANDO** processado, **ENTÃO** o downgrade deve ser recusado explicando o excedente.
+	- [ ] Implementar `requireActiveSubscription` (402) e `enforceQuota` (403) por device/usuário/organização
+	- [ ] Implementar `GET /api/billing/subscription` com uso e dias de trial
+	- [ ] Implementar troca de plano com recusa de downgrade que estoure o uso
+	- [ ] Testes de 402, 403 e de downgrade recusado
+- [ ] #epic/comercial **US-024** — Como visitante, quero criar minha conta sozinho pela API, para começar a usar o produto com 1 tela grátis sem depender de cadastro manual pelo time.
+	- 📌 A comunicação deixou de ser "14 dias grátis" e passou a ser **"1 tela grátis para sempre"** (decisão de precificação registrada na US-022).
+	- ✅ **Código entregue e verificado rodando a aplicação de verdade** — o fluxo de cadastro foi validado com a aplicação em execução, não só em teste. **Mesmo critério de puxada da US-023.**
+	- ⚠️ **DoD não cumprida**: falta code review e registro da validação dos critérios de aceite.
+	- **DADO** um e-mail novo, **QUANDO** `POST /api/signup` é chamada, **ENTÃO** organização + usuário admin + assinatura no plano `gratis` (1 tela, sem prazo) devem ser criados numa única transação (tudo ou nada).
+	- **DADO** um e-mail já cadastrado, **QUANDO** o signup é tentado, **ENTÃO** a API deve responder **409** sem criar nada.
+	- **DADO** falha no envio do e-mail de boas-vindas, **QUANDO** o signup é processado, **ENTÃO** a conta deve ser criada de todo modo (envio não bloqueante).
+	- **DADO** muitas tentativas do mesmo IP, **QUANDO** o limite é excedido, **ENTÃO** a rota deve responder 429 (rate limit).
+	- [ ] Implementar `POST /api/signup` transacional com rate limit
+	- [ ] E-mail de boas-vindas não bloqueante
+	- [ ] Testes: sucesso, 409 de duplicado, rollback de transação e 429
 
 
 
-## Code Review (2)
+## Teste (4)
 
 
 
-## Teste (2)
+## Concluído (13)
 
-
-
-## Concluído
-
+- [x] #epic/multi-tenant **US-017** — Como admin multi-loja, quero ver relatórios agregados de status/uso dos displays por loja/região, para monitorar a operação sem precisar abrir display a display.
+	- **DADO** múltiplas organizações/lojas cadastradas com displays associados, **QUANDO** o admin abre a tela de relatórios, **ENTÃO** deve ver contagem de displays online/offline agrupada por loja.
+	- **DADO** um filtro de período aplicado, **QUANDO** os dados são recalculados, **ENTÃO** os números agregados devem refletir apenas aquele período.
+	- [x] Definir escopo mínimo do relatório (métricas: online/offline, uso de broadcasts)
+	- [x] Criar endpoint de agregação por Organização/Loja (`GET /api/organizations/:id/report`)
+	- [x] Criar view de relatório no Dashboard (`Reports.tsx`, rota `/reports`)
+	- ⚠️ *Nota de escopo (revisada na análise de prontidão comercial): a agregação por loja foi entregue, mas sem escopo de tenant no servidor — os números podiam somar dados de organizações de outros clientes. O isolamento é tratado na US-018/US-021; esta US permanece concluída apenas quanto ao relatório em si.*
+- [x] #epic/multi-tenant **US-005** — Como dono de produto, quero um modelo de dados de Organização/Loja agrupando Displays, para viabilizar relatórios e gestão multi-cliente num único deploy.
+	- **DADO** o novo modelo `Organization`, **QUANDO** um `Display` é criado, **ENTÃO** ele deve pertencer a uma Organização.
+	- **DADO** displays existentes sem organização, **QUANDO** a migração roda, **ENTÃO** todos devem ser atribuídos a uma organização padrão sem perda de dados.
+	- [x] Modelar `Organization` no `schema.prisma` e relação com `Display`
+	- [x] Escrever migração de dados com organização padrão para displays existentes (`prisma/backfill-default-organization.ts`, rodado — 3 displays existentes atribuídos à "Loja Padrão")
+	- [x] Atualizar rotas de backend para filtrar por organização (`GET /api/organizations`, `POST /api/organizations`, `organizationId` em `POST /api/displays`)
+	- ⚠️ *Nota de escopo (revisada na análise de prontidão comercial): o que foi entregue aqui é **agrupamento**, não **isolamento**. `User` não tinha `organizationId`; `Device`, `Broadcast`, mídia e o `Setting` de SMTP não tinham escopo de organização; `GET /api/displays` (`backend/src/routes/displays.routes.ts:11`) devolvia displays de todos os clientes. O modelo de dados de Organização continua válido; o isolamento de segurança foi endereçado nas US-018 a US-021 (EPIC G).*
+- [x] #epic/multi-tenant **US-006** — Como admin, quero filtrar/agrupar Displays por loja no Dashboard, para gerenciar múltiplas unidades sem confusão visual.
+	- **DADO** múltiplas organizações/lojas cadastradas, **QUANDO** o admin abre o Dashboard, **ENTÃO** deve haver um seletor/filtro de loja que reflete na grade de displays.
+	- [x] Adicionar seletor de organização no `TopBar`/`ModuleNav` (`OrganizationSelector.tsx`)
+	- [x] Filtrar `DisplayGrid` pela organização selecionada
+	- [x] Persistir a última seleção do usuário (localStorage)
+	- ⚠️ *Nota de escopo (revisada na análise de prontidão comercial): o seletor filtrava **client-side** (`frontend/components/Dashboard.tsx:278`) sobre uma lista que vinha com displays de todos os clientes — é conveniência visual, não separação de dados. O filtro passou a ser server-side na US-018; esta US permanece concluída apenas quanto ao agrupamento na UI.*
+- [x] #epic/ux **US-009** — Como usuário que navega por teclado, quero que os modais do Dashboard e Editor tenham foco e navegação acessíveis, para conseguir usar o produto sem mouse.
+	- **DADO** um modal aberto (criar display, pairing, camadas), **QUANDO** o usuário pressiona Tab, **ENTÃO** o foco deve ficar preso dentro do modal e `Esc` deve fechá-lo.
+	- [x] Auditar todos os modais quanto a focus trap e tecla `Esc` (modais via `Dialog`/Radix já tinham isso embutido; 5 modais "brutos" sem Radix — `Editor.tsx` (3), `LayersModal.tsx`, `MediaLibrary.tsx` (2) — não tinham)
+	- [x] Corrigir ordem de tabulação onde necessário (`hooks/useModalA11y.ts`: focus trap + foco inicial + Esc, aplicado nos 5 modais brutos)
+	- 🚧 *Validação com leitor de tela (NVDA) aceita como dívida técnica documentada — requer máquina física com NVDA instalado; não bloqueia esta entrega.*
+- [x] #epic/ux **US-016** — Como usuário do Player/Editor, quero ver um indicador de carregamento consistente enquanto widgets pesados carregam, para não achar que a tela travou.
+	- **DADO** um Display ou Editor carregando widgets pesados (Power BI, PDF, vídeo), **QUANDO** o conteúdo ainda não está pronto, **ENTÃO** deve aparecer um skeleton/spinner consistente com o design system.
+	- **DADO** um widget que falha ao carregar, **QUANDO** o timeout é atingido, **ENTÃO** deve exibir um estado de erro amigável em vez de tela em branco.
+	- [x] Auditar todos os tipos de widget quanto a estados de loading/erro (6 widgets com iframe de rede: PowerBI, PDF, GoogleDocs, OfficeDocs, Airtable, BrowserSnapshot — `EmbedHtmlWidget` usa `srcDoc` local, sem rede, não se aplica)
+	- [x] Criar componente de skeleton/loading reutilizável seguindo o design system (`IframeWithSkeleton.tsx`, timeout de 15s)
+	- [x] Aplicar no Player e no Editor (grid de widgets) — os 6 widgets renderizam nos dois contextos
+- [x] #epic/ux **US-007** — Como usuário do Editor, quero receber feedback de erro consistente (toast) em vez de `alert()` nativo ao salvar uma cena, para ter uma experiência visualmente coerente com o restante do app.
+	- **DADO** um erro ao salvar, **QUANDO** `handleSave` falha, **ENTÃO** deve aparecer um toast (`sonner`) com mensagem clara da causa, não um `alert()` do navegador.
+	- [x] Substituir `alert('Erro ao salvar.')` por toast de erro em `Editor.tsx`
+	- [x] Revisar mensagem seguindo os "3 I's" de microcopy (informativa, clara, sem culpar o usuário)
+	- [x] Auditar o restante do app por outros usos de `alert()` nativo (encontrados e migrados: `Editor.tsx` + 5 em `Scheduler.tsx`)
+- [x] #epic/ux **US-008** — Como usuário novo, quero ver estados vazios com orientação clara quando não há displays/dispositivos cadastrados, para saber o próximo passo sem depender de memorização.
+	- **DADO** nenhum display cadastrado, **QUANDO** o Dashboard carrega, **ENTÃO** deve exibir uma mensagem de estado vazio com call-to-action para criar o primeiro display.
+	- [x] Criar componente de empty state reutilizável (`EmptyState.tsx`)
+	- [x] Aplicar em `DisplayGrid` (sem displays) e `DeviceChips` (sem dispositivos pareados)
+	- [x] Revisar microcopy do empty state
+- [x] #epic/ux **US-010** — Como editor de cenas, quero uma confirmação antes de publicar/sobrescrever uma cena já ativa numa tela, para evitar publicar algo errado por engano.
+	- **DADO** uma cena já publicada num display, **QUANDO** o usuário clica em salvar/publicar, **ENTÃO** deve aparecer uma confirmação explícita antes de sobrescrever o conteúdo ao vivo.
+	- [x] Adicionar modal de confirmação antes de publicar
+	- [x] Incluir preview resumido do que será publicado
+- [x] #epic/observabilidade **US-014** — Como admin, quero ser alertado quando um display fica offline por muito tempo, para agir antes que o cliente perceba a tela apagada.
+	- **DADO** um device sem heartbeat há mais de X minutos, **QUANDO** o limite é ultrapassado, **ENTÃO** um alerta (e-mail ou notificação in-app) deve ser disparado.
+	- [x] Definir job periódico de verificação de heartbeat
+	- [x] Implementar notificação (reaproveitar Nodemailer existente)
+- [x] #epic/seguranca **US-004** — Como responsável técnico, quero sanitização/validação de entrada nas rotas de displays/devices/broadcasts, para reduzir risco de injeção e dados malformados persistidos.
+	- **DADO** um payload inválido ou malicioso em qualquer rota de escrita, **QUANDO** a requisição chega, **ENTÃO** deve ser rejeitada com 400 antes de tocar o banco.
+	- [x] Definir schemas de validação (ex.: Zod) para os payloads de escrita
+	- [x] Aplicar middleware de validação em `displays`, `devices`, `broadcasts`, `users`
+	- [x] Cobrir com testes de payload inválido
+- [x] #epic/observabilidade **US-013** — Como admin, quero um painel de saúde dos dispositivos (heartbeat), para saber rapidamente quais telas estão online/offline.
+	- **DADO** dispositivos pareados, **QUANDO** o admin abre o painel de saúde, **ENTÃO** cada dispositivo deve mostrar status (online/offline) baseado no `lastSeen`.
+	- [x] Criar endpoint agregando status de todos os `Device` por `lastSeen`
+	- [x] Criar view no Dashboard com indicador visual online/offline
+- [x] #epic/armazenamento **US-001** — Como admin, quero que uploads de mídia sejam persistidos no Cloudflare R2 por padrão em produção, para não haver risco de perda de arquivos em reinícios de container.
+	- **DADO** um ambiente de produção, **QUANDO** o backend sobe sem variáveis de R2 configuradas, **ENTÃO** o processo deve falhar no boot com mensagem clara (não cair silenciosamente para disco local).
+	- **DADO** R2 configurado, **QUANDO** um usuário faz upload de mídia, **ENTÃO** o arquivo deve ser gravado no bucket e a URL pública retornada deve apontar para o R2.
+	- [x] Tornar variáveis de ambiente do R2 obrigatórias em produção (`NODE_ENV=production`)
+	- [x] Adicionar validação de boot que falha com erro claro se R2 ausente em produção
+	- [x] Documentar variáveis de R2 no `README`/`.env.example`
+- [x] #epic/seguranca **US-003** — Como responsável técnico, quero rate limiting nas rotas de autenticação, para mitigar ataques de força bruta contra login/reset de senha.
+	- **DADO** um IP fazendo mais de N tentativas de login em M minutos, **QUANDO** o limite é excedido, **ENTÃO** a API deve responder 429 e bloquear novas tentativas temporariamente.
+	- [x] Escolher e instalar middleware de rate limiting (ex.: `express-rate-limit`)
+	- [x] Aplicar limite em `/auth/login`, `/auth/forgot-password`, `/auth/reset-password`
+	- [x] Adicionar teste de integração simulando excesso de tentativas
 
 
 ## ℹ️ Políticas do Quadro
 
-- [ ] **WIP (Work In Progress)** — Cada coluna ativa tem um limite máximo de itens simultâneos (mostrado entre parênteses no título da coluna). Heurística inicial de Anderson: `WIP = nº de pessoas no time × 2`. Ninguém deve mover um card para uma coluna que já está no limite — termine ou puxe (pull) algo daquela coluna antes.
-- [ ] **Sistema pull** — Um item só avança para a próxima coluna quando há capacidade livre nela; ninguém "empurra" trabalho para frente.
-- [ ] **Definition of Ready (DoR)** — Uma User Story só entra em "Em Análise" se: tem critérios de aceite em Gherkin escritos, dependências conhecidas, e é pequena o suficiente para ser estimável (INVEST).
-- [ ] **Definition of Done (DoD)** — Uma US só vai para "Concluído" se: código revisado (Code Review), testes passando, critérios de aceite validados manualmente, e — quando aplicável — checklist de UX (7 blocos: responsividade, tipografia, acessibilidade, heurísticas, performance percebida, consistência de design system, microcopy) revisado.
-- [ ] **Métricas de fluxo** — Acompanhar Lead Time, Cycle Time e Throughput periodicamente; usar como sinal para reduzir WIP se o Lead Time estiver crescendo (Lei de Little: Lead Time = WIP ÷ Throughput).
+**Legenda:** 🚧 = bloqueio que exige ação manual fora do ambiente remoto (não é falta de trabalho, é dependência externa) · 📌 = contexto/fluxo de referência · ℹ️ = seção informativa (não é etapa de trabalho)
+- **WIP (Work In Progress)** — Cada coluna ativa tem um limite máximo de itens simultâneos (mostrado entre parênteses no título da coluna). Heurística inicial de Anderson: `WIP = nº de pessoas no time × 2`. Ninguém deve mover um card para uma coluna que já está no limite — termine ou puxe (pull) algo daquela coluna antes.
+- **Revisão de limites de WIP (corrida de prontidão comercial)** — Os limites originais (2 nas colunas ativas) pressupunham 1 pessoa executando sozinha. A capacidade real hoje é **1 pessoa orquestrando + até 6 agentes trabalhando em paralelo**, o que dá `N = 6` na heurística de Anderson e `WIP = 12` em "Em Desenvolvimento"; as colunas de verificação ("Em Análise", "Code Review", "Teste") ficam na metade (4), porque a revisão continua dependendo da única pessoa do time. Limites vigentes: Em Análise 4 · Em Desenvolvimento 12 · Code Review 4 · Teste 4. Optou-se por corrigir os limites em vez de esconder no Backlog trabalho que já está em execução — o quadro precisa mostrar o estado real do sistema, não uma ficção confortável.
+- **⚠️ Este WIP alto é excepcional e temporário** — Pela Lei de Little (`Lead Time = WIP ÷ Throughput`), 12 itens simultâneos tendem a inflar o Lead Time e a empilhar fila em "Code Review"/"Teste", que continuam gargalo de uma pessoa. Assim que a onda de prontidão comercial (EPICs G–J) for concluída, os limites devem voltar para 2/2/2 nas colunas ativas.
+- **⚠️ Gargalo materializado em Code Review (2026-07-25)** — O ciclo de execução dos EPICs G–J terminou com **código entregue e verificado** (107 testes, type-check e builds limpos), mas **nenhuma linha revisada**. Code Review encheu na primeira puxada (4/4) e **6 cards com código pronto ficaram retidos em "Em Desenvolvimento"** (US-020, US-021, US-022, US-025, US-026, US-027 e US-051) esperando vaga. É exatamente o efeito previsto pela Lei de Little com WIP alto: o trabalho não para de ser produzido, para de ser **aceito**. Enquanto isso, "entregue" ≠ "concluído" — a DoD exige review, e nenhum card foi movido para Concluído por conta disso.
+- **⚠️ Lacuna conhecida (DoR)** — Nenhuma US deste quadro tem estimativa, incluindo as US-018 a US-035. Isso viola parcialmente a Definition of Ready (o "E" de estimável no INVEST) e impede calcular Throughput e Lead Time de forma confiável. Pendência em aberto: definir a unidade de estimativa antes de reduzir o WIP de volta.
+- **Sistema pull** — Um item só avança para a próxima coluna quando há capacidade livre nela; ninguém "empurra" trabalho para frente.
+- **Definition of Ready (DoR)** — Uma User Story só entra em "Em Análise" se: tem critérios de aceite em Gherkin escritos, dependências conhecidas, e é pequena o suficiente para ser estimável (INVEST).
+- **Definition of Done (DoD)** — Uma US só vai para "Concluído" se: código revisado (Code Review), testes passando, critérios de aceite validados manualmente, e — quando aplicável — checklist de UX (7 blocos: responsividade, tipografia, acessibilidade, heurísticas, performance percebida, consistência de design system, microcopy) revisado.
+- **Métricas de fluxo** — Acompanhar Lead Time, Cycle Time e Throughput periodicamente; usar como sinal para reduzir WIP se o Lead Time estiver crescendo (Lei de Little: Lead Time = WIP ÷ Throughput).
+
+
 
 
 %% kanban:settings
 ```
-{"kanban-plugin":"board","list-collapse":[false,false,false,false,false,false,false]}
+{"kanban-plugin":"board","list-collapse":[false,false,false,false,false,false,false],"show-checkboxes":true,"tag-colors":[{"tagKey":"#epic/armazenamento","color":"#ffffff","backgroundColor":"#1e3a8a"},{"tagKey":"#epic/seguranca","color":"#ffffff","backgroundColor":"#7f1d1d"},{"tagKey":"#epic/ux","color":"#ffffff","backgroundColor":"#581c87"},{"tagKey":"#epic/observabilidade","color":"#ffffff","backgroundColor":"#134e4a"},{"tagKey":"#epic/infra","color":"#ffffff","backgroundColor":"#78350f"},{"tagKey":"#epic/multi-tenant","color":"#ffffff","backgroundColor":"#14532d"},{"tagKey":"#epic/comercial","color":"#ffffff","backgroundColor":"#831843"},{"tagKey":"#epic/legal","color":"#ffffff","backgroundColor":"#3730a3"},{"tagKey":"#epic/player","color":"#ffffff","backgroundColor":"#164e63"}]}
 ```
 %%

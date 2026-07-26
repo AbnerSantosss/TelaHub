@@ -1,12 +1,12 @@
 import { Router, Request, Response } from 'express';
-import { authMiddleware, adminMiddleware } from '../middlewares/auth.middleware';
+import { authMiddleware, masterMiddleware } from '../middlewares/auth.middleware';
 import { settingsService } from '../services/settings.service';
 import { testSmtpConnection } from '../services/email.service';
 
 const router = Router();
 
-// GET /api/settings/smtp (admin only — retorna configurações de SMTP)
-router.get('/smtp', authMiddleware, adminMiddleware, async (req: Request, res: Response): Promise<void> => {
+// GET /api/settings/smtp (MASTER only — SMTP é da plataforma, não do tenant — retorna configurações de SMTP)
+router.get('/smtp', authMiddleware, masterMiddleware, async (req: Request, res: Response): Promise<void> => {
   try {
     const smtp = await settingsService.getSmtpConfig();
     res.json({
@@ -20,8 +20,8 @@ router.get('/smtp', authMiddleware, adminMiddleware, async (req: Request, res: R
   }
 });
 
-// POST /api/settings/smtp (admin only — salva configurações de SMTP)
-router.post('/smtp', authMiddleware, adminMiddleware, async (req: Request, res: Response): Promise<void> => {
+// POST /api/settings/smtp (MASTER only — SMTP é da plataforma, não do tenant — salva configurações de SMTP)
+router.post('/smtp', authMiddleware, masterMiddleware, async (req: Request, res: Response): Promise<void> => {
   try {
     const { smtp_user, smtp_pass } = req.body;
 
@@ -54,8 +54,8 @@ router.post('/smtp', authMiddleware, adminMiddleware, async (req: Request, res: 
   }
 });
 
-// POST /api/settings/smtp/test (admin only — testa conexão SMTP)
-router.post('/smtp/test', authMiddleware, adminMiddleware, async (req: Request, res: Response): Promise<void> => {
+// POST /api/settings/smtp/test (MASTER only — testa conexão SMTP)
+router.post('/smtp/test', authMiddleware, masterMiddleware, async (req: Request, res: Response): Promise<void> => {
   try {
     const result = await testSmtpConnection();
     if (result.ok) {

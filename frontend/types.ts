@@ -218,7 +218,9 @@ export interface Device {
   display_id: string | null;
   status: 'pending' | 'linked';
   last_seen: number;
+  online: boolean;
   name?: string;
+  organizationId?: string | null;
 }
 
 export interface Display {
@@ -229,6 +231,96 @@ export interface Display {
   updatedAt: number;
   coverImage?: string;
   orientation?: 'horizontal' | 'vertical';
+  organizationId?: string | null;
+}
+
+export interface Organization {
+  id: string;
+  name: string;
+  createdAt: string;
+}
+
+// ==============================================================================
+// BILLING / SaaS
+// ==============================================================================
+
+export type PlanInterval = 'month' | 'year';
+
+/** Plano comercial devolvido por `GET /api/plans` (rota pública). */
+export interface Plan {
+  id: string;
+  name: string;
+  slug?: string;
+  /** Preço em centavos (0 = gratuito/trial). */
+  priceCents: number;
+  currency?: string;
+  interval?: PlanInterval;
+  /** Limites do plano — `null` significa ilimitado. */
+  maxDisplays?: number | null;
+  maxDevices?: number | null;
+  maxUsers?: number | null;
+  maxOrganizations?: number | null;
+  features?: string[];
+}
+
+export type SubscriptionStatus =
+  | 'trialing'
+  | 'active'
+  | 'past_due'
+  | 'canceled'
+  | 'expired';
+
+/** Consumo atual da organização, para comparar com os limites do plano. */
+export interface SubscriptionUsage {
+  displays: number;
+  devices: number;
+  users: number;
+  organizations?: number;
+}
+
+export interface Subscription {
+  id: string;
+  organizationId: string;
+  status: SubscriptionStatus;
+  /** Plano associado. Pode vir ausente se o backend só mandar `planId`. */
+  plan?: Plan | null;
+  planId?: string;
+  planName?: string;
+  trialEndsAt?: string | null;
+  currentPeriodEnd?: string | null;
+  createdAt?: string;
+  canceledAt?: string | null;
+}
+
+/** Resposta de `GET /api/billing/subscription`. */
+export interface SubscriptionState {
+  subscription: Subscription;
+  usage: SubscriptionUsage;
+  /** Dias restantes de trial. `null`/ausente quando não está em trial. */
+  trialDaysRemaining?: number | null;
+}
+
+/** Corpo enviado para `POST /api/signup`. */
+export interface SignupPayload {
+  companyName: string;
+  name: string;
+  email: string;
+  password: string;
+}
+
+/** Resposta de `POST /api/signup` — mesmo formato do login. */
+export interface SignupResponse {
+  token: string;
+  user: User;
+}
+
+export interface OrganizationReport {
+  organizationId: string;
+  displaysCount: number;
+  devicesOnline: number;
+  devicesOffline: number;
+  broadcastsCount: number;
+  period: { startDate: string | null; endDate: string | null };
 }
 
 export interface User {
@@ -238,6 +330,8 @@ export interface User {
   email?: string; // Novo campo para login robusto
   role: 'master' | 'admin' | 'user';
   lastLogin?: string | null; // null = nunca acessou
+  /** Organização (tenant) à qual o usuário pertence. `master` opera acima dos tenants. */
+  organizationId?: string | null;
   // Senha removida da interface frontend por segurança
 }
 
@@ -253,4 +347,5 @@ export interface Broadcast {
   created_at: number;
   created_by?: string;
   orientation?: 'horizontal' | 'vertical';
+  organizationId?: string | null;
 }

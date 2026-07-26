@@ -29,7 +29,7 @@ export const TopBar: React.FC<TopBarProps> = ({
   const onlineDisplays = displays.filter(display =>
     devices
       .filter(d => d.display_id === display.id)
-      .some(d => (Date.now() - d.last_seen) < 60000)
+      .some(d => d.online)
   ).length;
 
   const offlineDisplays = totalDisplays - onlineDisplays;

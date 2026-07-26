@@ -1,4 +1,5 @@
 import { userRepository } from '../repositories/user.repository';
+import { TenantScope } from '../repositories/display.repository';
 import { hashPassword, comparePassword, generateToken } from './auth.service';
 import { testSmtpConnection, sendInviteEmail, sendResetPasswordEmail } from './email.service';
 import prisma from '../lib/prisma';
@@ -30,6 +31,7 @@ export class UserService {
       id: user.id,
       email: user.email,
       role: user.role,
+      organizationId: user.organizationId ?? null,
     });
 
     return {
@@ -40,16 +42,23 @@ export class UserService {
         name: user.name,
         email: user.email,
         role: user.role,
+        organizationId: user.organizationId ?? null,
       },
     };
   }
 
-  async getAll() {
-    return userRepository.findAll();
+  /** Lista usuários do tenant (`null` = todos, só master). */
+  async getAll(tenantId?: TenantScope) {
+    return userRepository.findAll(tenantId);
   }
 
   async getById(id: string) {
     return userRepository.findById(id);
+  }
+
+  /** Busca escopada: null quando o usuário é de outro tenant. */
+  async getByIdScoped(id: string, tenantId: TenantScope) {
+    return userRepository.findByIdScoped(id, tenantId);
   }
 
   /** Gera uma senha aleatória legível de 8 caracteres */
@@ -64,8 +73,11 @@ export class UserService {
 
   /**
    * Cria um novo usuário via convite por e-mail.
+   *
+   * O convidado HERDA o `organizationId` de quem convidou (`tenantId`) — não é
+   * possível convidar alguém para outra organização.
    */
-  async inviteUser(email: string, role: string = 'user') {
+  async inviteUser(email: string, role: string = 'user', tenantId: TenantScope = null) {
     // 1. Validar SMTP antes de tudo
     const smtpCheck = await testSmtpConnection();
     if (!smtpCheck.ok) {
@@ -87,6 +99,7 @@ export class UserService {
       email,
       password: hashedPwd,
       role: role || 'user',
+      organizationId: tenantId ?? null,
     });
 
     // 5. Enviar convite por e-mail
@@ -97,14 +110,15 @@ export class UserService {
       username: user.username,
       email: user.email,
       role: user.role,
+      organizationId: user.organizationId,
     };
   }
 
   /**
    * Reenvia o convite para um usuário existente com uma nova senha.
    */
-  async resendInvite(userId: string) {
-    const user = await userRepository.findById(userId);
+  async resendInvite(userId: string, tenantId: TenantScope = null) {
+    const user = await userRepository.findByIdScoped(userId, tenantId);
     if (!user) throw new Error('Usuário não encontrado.');
 
     // Validar SMTP
@@ -196,8 +210,8 @@ export class UserService {
   /**
    * Admin envia email de redefinição para um usuário específico.
    */
-  async adminSendPasswordReset(userId: string) {
-    const user = await userRepository.findById(userId);
+  async adminSendPasswordReset(userId: string, tenantId: TenantScope = null) {
+    const user = await userRepository.findByIdScoped(userId, tenantId);
     if (!user) throw new Error('Usuário não encontrado.');
 
     return this.requestPasswordReset(user.email);
@@ -284,6 +298,27 @@ export class UserService {
 
   async delete(id: string) {
     return userRepository.delete(id);
+  }
+
+  /**
+   * Delete escopado por tenant.
+   *
+   * - `'not-found'` → usuário inexistente ou de outra organização (404);
+   * - `'forbidden-master'` → tentativa de deletar o proprietário da plataforma;
+   * - `'deleted'` → removido.
+   */
+  async deleteScoped(
+    id: string,
+    tenantId: TenantScope
+  ): Promise<'not-found' | 'forbidden-master' | 'deleted'> {
+    const user = await userRepository.findByIdScoped(id, tenantId);
+    if (!user) return 'not-found';
+    // O master é o proprietário da plataforma: nunca pode ser removido por uma
+    // rota de tenant (nem por outro master).
+    if (user.role === 'master') return 'forbidden-master';
+
+    await userRepository.delete(id);
+    return 'deleted';
   }
 }
 
