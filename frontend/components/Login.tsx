@@ -37,6 +37,17 @@ export const LogoHub: React.FC<{ className?: string; size?: number }> = ({ class
   );
 };
 
+// Atalho de login master usado só na máquina de desenvolvimento.
+//
+// As credenciais vêm de `frontend/.env` (não versionado) e o botão só é
+// renderizado quando `import.meta.env.DEV` é verdadeiro — o Vite substitui essa
+// expressão por `false` no `npm run build`, então o bloco inteiro é eliminado do
+// bundle de produção. Deixar e-mail e senha de um usuário `master` escritos no
+// código publicava a credencial para qualquer visitante que abrisse o JS.
+const DEV_MASTER_EMAIL = import.meta.env.VITE_DEV_MASTER_EMAIL as string | undefined;
+const DEV_MASTER_PASSWORD = import.meta.env.VITE_DEV_MASTER_PASSWORD as string | undefined;
+const SHOW_DEV_LOGIN = import.meta.env.DEV && !!DEV_MASTER_EMAIL && !!DEV_MASTER_PASSWORD;
+
 const Login: React.FC = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -390,32 +401,34 @@ const Login: React.FC = () => {
                 {loading ? 'ENTRANDO...' : 'ACESSAR SISTEMA'}
               </Button>
 
-              <Button 
-                type="button" 
-                onClick={async () => {
-                  setUsername('binho_captiva@hotmail.com');
-                  setPassword('mudar@123');
-                  setLoading(true);
-                  setError('');
-                  try {
-                    const user = await login('binho_captiva@hotmail.com', 'mudar@123');
-                    if (user) {
-                      navigate('/');
-                    } else {
-                      setError('Login realizado, mas perfil de usuário não encontrado.');
+              {SHOW_DEV_LOGIN && (
+                <Button
+                  type="button"
+                  onClick={async () => {
+                    setUsername(DEV_MASTER_EMAIL!);
+                    setPassword(DEV_MASTER_PASSWORD!);
+                    setLoading(true);
+                    setError('');
+                    try {
+                      const user = await login(DEV_MASTER_EMAIL!, DEV_MASTER_PASSWORD!);
+                      if (user) {
+                        navigate('/');
+                      } else {
+                        setError('Login realizado, mas perfil de usuário não encontrado.');
+                      }
+                    } catch (e: any) {
+                      setError(e.message || 'Erro ao realizar login master.');
+                    } finally {
+                      setLoading(false);
                     }
-                  } catch (e: any) {
-                    setError(e.message || 'Erro ao realizar login master.');
-                  } finally {
-                    setLoading(false);
-                  }
-                }}
-                disabled={loading}
-                variant="outline"
-                className="w-full py-5 rounded-xl text-xs tracking-wider active:scale-[0.98] transition-all hover:bg-sky-500/10 hover:text-sky-400 border border-sky-500/20 text-sky-400 uppercase font-bold"
-              >
-                Acesso Master (Dev)
-              </Button>
+                  }}
+                  disabled={loading}
+                  variant="outline"
+                  className="w-full py-5 rounded-xl text-xs tracking-wider active:scale-[0.98] transition-all hover:bg-sky-500/10 hover:text-sky-400 border border-sky-500/20 text-sky-400 uppercase font-bold"
+                >
+                  Acesso Master (Dev)
+                </Button>
+              )}
             </form>
 
             <p className="text-center text-xs text-muted-foreground mt-5 pt-5 border-t border-border/60">

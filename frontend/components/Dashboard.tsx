@@ -20,6 +20,8 @@ import {
   saveSmtpSettings,
   testSmtpConnection,
   getSmtpStatus,
+  getEmailProviders,
+  type EmailProvider,
   updateMyEmail,
   changeMyPassword,
   updateMyName,
@@ -93,8 +95,16 @@ const Dashboard: React.FC = () => {
   const [inviteRole, setInviteRole] = useState<'user' | 'admin'>('user');
 
   // SMTP Settings States
+  const [smtpProviders, setSmtpProviders] = useState<EmailProvider[]>([]);
+  const [smtpProvider, setSmtpProvider] = useState('gmail');
+  const [smtpHost, setSmtpHost] = useState('');
+  const [smtpPort, setSmtpPort] = useState(587);
+  const [smtpSecure, setSmtpSecure] = useState(false);
   const [smtpUser, setSmtpUser] = useState('');
   const [smtpPass, setSmtpPass] = useState('');
+  const [smtpFromEmail, setSmtpFromEmail] = useState('');
+  const [smtpFromName, setSmtpFromName] = useState('TelaHub');
+  const [smtpSource, setSmtpSource] = useState<'banco' | 'ambiente' | null>(null);
   const [smtpConfigured, setSmtpConfigured] = useState(false);
   const [smtpHasSavedPass, setSmtpHasSavedPass] = useState(false);
   const [smtpTestResult, setSmtpTestResult] = useState<{ ok: boolean; message: string } | null>(null);
@@ -635,8 +645,18 @@ const Dashboard: React.FC = () => {
     setSmtpLoading(true);
     setSmtpTestResult(null);
     try {
-      const cfg = await getSmtpSettings();
+      // O catálogo vem junto: é ele que define host/porta ao trocar de provedor,
+      // então a interface não pode montar o seletor antes de tê-lo.
+      const [cfg, providers] = await Promise.all([getSmtpSettings(), getEmailProviders()]);
+      setSmtpProviders(providers);
+      setSmtpProvider(cfg.smtp_provider || 'gmail');
+      setSmtpHost(cfg.smtp_host || '');
+      setSmtpPort(cfg.smtp_port || 587);
+      setSmtpSecure(!!cfg.smtp_secure);
       setSmtpUser(cfg.smtp_user || '');
+      setSmtpFromEmail(cfg.smtp_from_email || '');
+      setSmtpFromName(cfg.smtp_from_name || 'TelaHub');
+      setSmtpSource(cfg.source);
       if (cfg.smtp_pass === '••••••••') {
         setSmtpPass('');
         setSmtpHasSavedPass(true);
@@ -651,24 +671,56 @@ const Dashboard: React.FC = () => {
     }
   };
 
+  /** Aplica o preset ao trocar de provedor, preservando o que o operador digitou. */
+  const handleSelectProvider = (id: string) => {
+    setSmtpProvider(id);
+    const preset = smtpProviders.find((p) => p.id === id);
+    if (!preset) return;
+    setSmtpHost(preset.host);
+    setSmtpPort(preset.port);
+    setSmtpSecure(preset.secure);
+    // SendGrid e Resend autenticam com um usuário fixo; preenchê-lo evita o erro
+    // de digitar o e-mail ali e receber recusa de autenticação sem explicação.
+    if (preset.fixedUser) setSmtpUser(preset.fixedUser);
+  };
+
   const handleSaveSmtp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!smtpUser) {
-      toast.error('Preencha o e-mail.');
+      toast.error('Preencha o usuário de autenticação.');
       return;
     }
     if (!smtpPass && !smtpHasSavedPass) {
-      toast.error('Preencha a senha de aplicativo.');
+      toast.error('Preencha a senha ou chave de API.');
+      return;
+    }
+    const preset = smtpProviders.find((p) => p.id === smtpProvider);
+    if (!smtpHost && !preset?.host) {
+      toast.error('Informe o servidor SMTP (host).');
+      return;
+    }
+    if (preset?.fixedUser && !smtpFromEmail) {
+      toast.error(`${preset.label} autentica com usuário fixo — informe o e-mail remetente.`);
       return;
     }
     setSmtpLoading(true);
     try {
       const passToSend = smtpPass || (smtpHasSavedPass ? '__KEEP_CURRENT__' : '');
-      await saveSmtpSettings(smtpUser.trim(), passToSend);
+      await saveSmtpSettings({
+        smtp_provider: smtpProvider,
+        smtp_host: smtpHost || preset?.host || '',
+        smtp_port: smtpPort,
+        smtp_secure: smtpSecure,
+        smtp_user: smtpUser.trim(),
+        smtp_pass: passToSend,
+        smtp_from_email: (smtpFromEmail || (preset?.fixedUser ? '' : smtpUser)).trim(),
+        smtp_from_name: smtpFromName.trim() || 'TelaHub',
+      });
       setSmtpTestResult(null);
       toast.success('Configurações SMTP salvas com sucesso!');
       setSmtpConfigured(true);
       setSmtpHasSavedPass(true);
+      setSmtpSource('banco');
     } catch (err: any) {
       toast.error('Erro ao salvar: ' + err.message);
     } finally {
@@ -860,10 +912,24 @@ const Dashboard: React.FC = () => {
       <EmailSettingsModal
         open={isSettingsModalOpen}
         onClose={() => setIsSettingsModalOpen(false)}
+        providers={smtpProviders}
+        provider={smtpProvider}
+        onSelectProvider={handleSelectProvider}
+        smtpHost={smtpHost}
+        setSmtpHost={setSmtpHost}
+        smtpPort={smtpPort}
+        setSmtpPort={setSmtpPort}
+        smtpSecure={smtpSecure}
+        setSmtpSecure={setSmtpSecure}
         smtpUser={smtpUser}
         setSmtpUser={setSmtpUser}
         smtpPass={smtpPass}
         setSmtpPass={setSmtpPass}
+        smtpFromEmail={smtpFromEmail}
+        setSmtpFromEmail={setSmtpFromEmail}
+        smtpFromName={smtpFromName}
+        setSmtpFromName={setSmtpFromName}
+        smtpSource={smtpSource}
         smtpHasSavedPass={smtpHasSavedPass}
         smtpTestResult={smtpTestResult}
         smtpLoading={smtpLoading}

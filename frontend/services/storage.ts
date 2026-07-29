@@ -116,21 +116,68 @@ export const updateMyName = async (name: string): Promise<{ message: string; use
 // ==============================================================================
 
 export interface SmtpConfig {
+  smtp_provider: string;
+  smtp_host: string;
+  smtp_port: number;
+  smtp_secure: boolean;
   smtp_user: string;
   smtp_pass: string;
+  smtp_from_email: string;
+  smtp_from_name: string;
   configured: boolean;
+  /** 'ambiente' = padrão de fábrica (variáveis SMTP_*); 'banco' = configurado no painel. */
+  source: 'banco' | 'ambiente' | null;
 }
+
+/** Preset de provedor servido por `GET /settings/smtp/providers`. */
+export interface EmailProvider {
+  id: string;
+  label: string;
+  kind: 'caixa' | 'transacional' | 'manual';
+  host: string;
+  port: number;
+  secure: boolean;
+  userHint: string;
+  passHint: string;
+  fixedUser?: string;
+  credentialsUrl?: string;
+  warning?: string;
+}
+
+const EMPTY_SMTP: SmtpConfig = {
+  smtp_provider: 'gmail',
+  smtp_host: '',
+  smtp_port: 587,
+  smtp_secure: false,
+  smtp_user: '',
+  smtp_pass: '',
+  smtp_from_email: '',
+  smtp_from_name: 'TelaHub',
+  configured: false,
+  source: null,
+};
 
 export const getSmtpSettings = async (): Promise<SmtpConfig> => {
   try {
     return await api.get<SmtpConfig>('/settings/smtp');
   } catch {
-    return { smtp_user: '', smtp_pass: '', configured: false };
+    return { ...EMPTY_SMTP };
   }
 };
 
-export const saveSmtpSettings = async (smtp_user: string, smtp_pass: string): Promise<void> => {
-  await api.post('/settings/smtp', { smtp_user, smtp_pass });
+export const getEmailProviders = async (): Promise<EmailProvider[]> => {
+  try {
+    const data = await api.get<{ providers: EmailProvider[] }>('/settings/smtp/providers');
+    return data.providers || [];
+  } catch {
+    return [];
+  }
+};
+
+export type SmtpPayload = Omit<SmtpConfig, 'configured' | 'source'>;
+
+export const saveSmtpSettings = async (payload: SmtpPayload): Promise<void> => {
+  await api.post('/settings/smtp', payload);
 };
 
 export const testSmtpConnection = async (): Promise<{ ok: boolean; error?: string; message?: string }> => {

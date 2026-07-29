@@ -23,6 +23,17 @@ Quando o usuário adicionar um arquivo em `raw/` (ou colar um conteúdo) e pedir
    `## [YYYY-MM-DD] <tipo> | <resumo curto>`
    onde `<tipo>` é um de: `ingest`, `setup`, `query`, `lint`.
 
+## Workflow: atualizar a wiki a cada modificação do projeto (obrigatório)
+
+Decisão do dono em 2026-07-29: **a wiki não é atualizada só quando chega fonte nova em `raw/`** — ela acompanha o código. Sempre que uma sessão alterar o projeto (código, schema, config, deploy, conteúdo de página de vendas), antes de encerrar:
+
+1. Identificar qual(is) página(s) de `wiki/` o trabalho contradiz ou completa — normalmente `tecnico/arquitetura-e-entidades` (domínio, rotas), `tecnico/seguranca-e-conformidade-tecnica` (classe de falha nova), `tecnico/deploy-e-infraestrutura` (infra, dev local) ou as de `negocio/` (preço, oferta, copy).
+2. Atualizar a página **e o campo `atualizado:`** do frontmatter.
+3. Registrar uma entrada em `wiki/log.md` descrevendo o que mudou e **por quê** — a decisão, não só o diff.
+4. Atualizar `wiki/index.md` se surgiu página nova ou se a descrição de uma delas ficou desatualizada.
+
+Escrever o **raciocínio e a armadilha**, não o changelog: o valor da wiki está em impedir que o mesmo erro se repita daqui a seis meses. Correção de rumo (algo que a wiki afirmava e não era verdade) tem prioridade sobre acréscimo — registre explicitamente que o registro anterior estava errado, como já foi feito com "multi-loja concluído".
+
 ## Workflow: query (responder perguntas usando a wiki)
 
 1. Ler `wiki/index.md` primeiro para localizar páginas relevantes.

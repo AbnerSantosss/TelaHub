@@ -19,19 +19,34 @@ function getLogoBase64(): string {
 }
 
 /**
- * Cria um transporter do nodemailer usando credenciais do banco de dados.
+ * Cria um transporter do nodemailer a partir da configuração em uso — a do
+ * banco, se o `master` configurou pelo painel; senão a do ambiente.
+ *
+ * Antes de 2026-07-29 isto era `service: 'gmail'` fixo, o que amarrava a
+ * plataforma inteira a um provedor: mudar de e-mail exigia mudar código.
  */
 async function createTransporter(): Promise<nodemailer.Transporter | null> {
   const smtp = await settingsService.getSmtpConfig();
-  if (!smtp) return null;
+  if (!smtp || !smtp.host) return null;
 
   return nodemailer.createTransport({
-    service: 'gmail',
+    host: smtp.host,
+    port: smtp.port,
+    secure: smtp.secure,
     auth: {
       user: smtp.user,
       pass: smtp.pass,
     },
   });
+}
+
+/**
+ * Remetente exibido. Não é sempre o usuário da autenticação: SendGrid autentica
+ * com o usuário literal `apikey` e o Resend com `resend` — usar isso no `from`
+ * geraria um remetente inválido e a mensagem seria recusada.
+ */
+function formatFrom(smtp: { fromName: string; fromEmail: string }): string {
+  return `"${smtp.fromName}" <${smtp.fromEmail}>`;
 }
 
 /**
@@ -354,7 +369,7 @@ export async function sendInviteEmail(to: string, password: string): Promise<voi
   const html = getInviteTemplate(to, password);
 
   await transporter.sendMail({
-    from: `"TelaHub" <${smtp!.user}>`,
+    from: formatFrom(smtp!),
     to,
     subject: '🎉 Você foi convidado para o TelaHub!',
     html,
@@ -377,7 +392,7 @@ export async function sendWelcomeEmail(to: string, name: string, companyName: st
   const html = getWelcomeTemplate(name, companyName);
 
   await transporter.sendMail({
-    from: `"TelaHub" <${smtp!.user}>`,
+    from: formatFrom(smtp!),
     to,
     subject: '👋 Sua conta TelaHub está pronta',
     html,
@@ -398,7 +413,7 @@ export async function sendDeviceOfflineAlertEmail(to: string, deviceName: string
   const html = getDeviceOfflineTemplate(deviceName);
 
   await transporter.sendMail({
-    from: `"TelaHub" <${smtp!.user}>`,
+    from: formatFrom(smtp!),
     to,
     subject: `📴 Tela offline — ${deviceName}`,
     html,
@@ -420,7 +435,7 @@ export async function sendResetPasswordEmail(to: string, token: string): Promise
   const html = getResetPasswordTemplate(resetUrl);
 
   await transporter.sendMail({
-    from: `"TelaHub" <${smtp!.user}>`,
+    from: formatFrom(smtp!),
     to,
     subject: '🔐 Redefinição de Senha — TelaHub',
     html,

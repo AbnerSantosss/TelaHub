@@ -158,6 +158,17 @@ CORS_ORIGINS=http://localhost:5173,http://localhost:3000
 # Admin padrão
 ADMIN_EMAIL=${adminEmail}
 ADMIN_PASSWORD=${adminPass}
+
+# E-mail transacional — padrão da instalação (o painel pode substituir).
+# Valores vêm do .env da raiz; sem eles, o sistema sobe sem envio de e-mail.
+SMTP_PROVIDER=${rootEnv.SMTP_PROVIDER || 'gmail'}
+SMTP_HOST=${rootEnv.SMTP_HOST || 'smtp.gmail.com'}
+SMTP_PORT=${rootEnv.SMTP_PORT || '587'}
+SMTP_SECURE=${rootEnv.SMTP_SECURE || 'false'}
+SMTP_USER=${rootEnv.SMTP_USER || ''}
+SMTP_PASS=${rootEnv.SMTP_PASS || ''}
+SMTP_FROM_EMAIL=${rootEnv.SMTP_FROM_EMAIL || rootEnv.SMTP_USER || ''}
+SMTP_FROM_NAME=${rootEnv.SMTP_FROM_NAME || 'TelaHub'}
 `;
 
   if (fs.existsSync(backendEnvPath)) {
@@ -168,8 +179,20 @@ ADMIN_PASSWORD=${adminPass}
 
   // 4. Criar frontend/.env
   const frontendEnvPath = path.join(ROOT, 'frontend', '.env');
+  // O atalho "Acesso Master (Dev)" da tela de login lê estas duas variáveis.
+  // Elas ficam aqui, e não no código, porque `frontend/.env` não é versionado:
+  // credencial de usuário `master` escrita no componente vai inteira para o
+  // bundle e fica legível para qualquer visitante do site publicado.
+  const devMasterEmail = rootEnv.DEV_MASTER_EMAIL || adminEmail;
+  const devMasterPassword = rootEnv.DEV_MASTER_PASSWORD || adminPass;
+
   const frontendEnvContent = `# Gerado automaticamente por: node setup-dev.js
 VITE_API_URL=http://localhost:3001/api
+
+# Atalho "Acesso Master (Dev)" da tela de login.
+# Só tem efeito em \`npm run dev\`; o botão não existe no build de produção.
+VITE_DEV_MASTER_EMAIL=${devMasterEmail}
+VITE_DEV_MASTER_PASSWORD=${devMasterPassword}
 `;
 
   if (fs.existsSync(frontendEnvPath)) {

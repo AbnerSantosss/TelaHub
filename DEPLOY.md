@@ -57,6 +57,31 @@ Os passos 2 e 3 dependem de `tsx`, presente na imagem porque o Dockerfile copia 
 
 `POST /api/billing/checkout` responde **501** de propósito: não há gateway integrado. As assinaturas ficam em `active` (herdadas) ou `active` no plano grátis (contas novas), e nada transiciona para `past_due` sozinho. Enquanto isso não existir, o sistema controla quota e mostra plano, mas não cobra ninguém.
 
+## E-mail transacional (2026-07-29) — variáveis novas na stack
+
+O envio deixou de ser fixo em Gmail. O provedor padrão da instalação vem das
+variáveis abaixo; o que o `master` salvar em Configurações de E-mail fica no
+banco e **tem precedência** sobre elas.
+
+| Variável | Obrigatória | Observação |
+|---|---|---|
+| `SMTP_USER` | sim, para haver envio | Usuário de autenticação |
+| `SMTP_PASS` | sim, para haver envio | Senha de app / chave de API |
+| `SMTP_PROVIDER` | não (padrão `gmail`) | Define host, porta e criptografia pelo catálogo |
+| `SMTP_HOST` / `SMTP_PORT` / `SMTP_SECURE` | não | Só com `custom` ou região alternativa (Mailgun EU, SES fora de us-east-1) |
+| `SMTP_FROM_EMAIL` | só em SendGrid/Resend | Nesses, o usuário é a palavra fixa `apikey`/`resend` e não serve de remetente |
+| `SMTP_FROM_NAME` | não (padrão `TelaHub`) | Nome exibido |
+
+**Nenhuma delas derruba o boot se faltar** — sem `SMTP_USER`/`SMTP_PASS` o
+sistema sobe e apenas não envia e-mail. Isso é deliberado, e é o oposto do que
+aconteceu com `ADMIN_PASSWORD` no incidente de 2026-07-26: variável nova que
+*exige* valor é mudança incompatível para todo ambiente já existente.
+
+Instalações que já tinham SMTP configurado pelo painel **não precisam de nada**:
+a configuração antiga (só usuário e senha) continua sendo lida como Gmail.
+
+Configure no Portainer, em "Environment variables" da stack — nunca no código.
+
 ## Pendências (não automatizáveis remotamente)
 
 - **Ambiente de staging separado de produção**: exige provisionar um novo stack/container na VPS (ou um segundo Portainer environment) e um subdomínio próprio no Cloudflare Tunnel. Requer acesso direto à VPS/Portainer/Cloudflare — não foi executado nesta sessão, apenas planejado aqui.

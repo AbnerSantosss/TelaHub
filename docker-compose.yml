@@ -27,6 +27,19 @@ services:
       - PORT=3001
       - CORS_ORIGINS=${CORS_ORIGINS:-*}
       - APP_URL=${APP_URL:-http://localhost:3025}
+      # E-mail transacional — padrão da instalação. Sem estas variáveis o
+      # sistema sobe normalmente e apenas não envia e-mail; o que o `master`
+      # salvar em Configurações de E-mail fica no banco e tem precedência.
+      # Precisam estar declaradas AQUI: variável cadastrada na stack do
+      # Portainer não chega ao container se o compose não a repassar.
+      - SMTP_PROVIDER=${SMTP_PROVIDER:-gmail}
+      - SMTP_USER=${SMTP_USER:-}
+      - SMTP_PASS=${SMTP_PASS:-}
+      - SMTP_HOST=${SMTP_HOST:-}
+      - SMTP_PORT=${SMTP_PORT:-}
+      - SMTP_SECURE=${SMTP_SECURE:-}
+      - SMTP_FROM_EMAIL=${SMTP_FROM_EMAIL:-}
+      - SMTP_FROM_NAME=${SMTP_FROM_NAME:-TelaHub}
     depends_on:
       - db
     volumes:
