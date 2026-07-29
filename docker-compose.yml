@@ -27,6 +27,15 @@ services:
       - PORT=3001
       - CORS_ORIGINS=${CORS_ORIGINS:-*}
       - APP_URL=${APP_URL:-http://localhost:3025}
+      # Admin do painel. Numa instalação que já tem admin, o seed IGNORA estas
+      # variáveis — é o que impede uma atualização de reescrever a senha (e o
+      # que derrubou a produção em 2026-07-26 quando o seed as exigia).
+      # Para rotacionar de propósito: ADMIN_PASSWORD_RESET=true em um deploy, e
+      # de volta para false no seguinte. Ver SECRETS.md.
+      - ADMIN_EMAIL=${ADMIN_EMAIL:-}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-}
+      - ADMIN_NAME=${ADMIN_NAME:-Administrador}
+      - ADMIN_PASSWORD_RESET=${ADMIN_PASSWORD_RESET:-false}
       # E-mail transacional — padrão da instalação. Sem estas variáveis o
       # sistema sobe normalmente e apenas não envia e-mail; o que o `master`
       # salvar em Configurações de E-mail fica no banco e tem precedência.
