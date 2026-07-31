@@ -234,28 +234,23 @@ body::before {
 }
 
 /* Parede de telas (ScreenWall.jsx).
-   A máscara é o que separa "ambiente" de "ruído": sem ela a grade regular de
-   retângulos claros atrás do texto lê como esqueleto de carregamento, e a
-   página parece que não terminou de abrir. Com a elipse central transparente,
-   a parede vive nas bordas e a coluna de leitura fica limpa. */
+
+   O desvanecimento no centro (para a parede não virar esqueleto de
+   carregamento atrás do texto) é feito NO DESENHO, dentro do componente — e
+   não com `mask-image` aqui, como foi tentado primeiro.
+
+   Motivo: máscara sobre um canvas FIXO de viewport inteira obriga o navegador
+   a recompor a página toda a cada quadro. O sintoma foi concreto: a captura de
+   tela do renderizador passou a estourar o tempo limite e devolver quadro em
+   branco com a página normal no DOM. Se a captura sofre, a rolagem em máquina
+   modesta sofre igual. Multiplicar o alfa por célula custa uma conta por
+   retângulo e não cria camada nenhuma. */
 #network-canvas {
   position: fixed;
   top: 0; left: 0;
   width: 100vw; height: 100vh;
   pointer-events: none;
   z-index: 0;
-  -webkit-mask-image: radial-gradient(
-    68% 58% at 50% 42%,
-    transparent 0%,
-    transparent 38%,
-    #000 100%
-  );
-  mask-image: radial-gradient(
-    68% 58% at 50% 42%,
-    transparent 0%,
-    transparent 38%,
-    #000 100%
-  );
 }
 
 /* Em telas estreitas o conteúdo ocupa a largura inteira: não sobra borda para

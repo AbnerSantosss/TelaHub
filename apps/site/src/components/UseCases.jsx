@@ -305,53 +305,26 @@ const UseCases = ({ activeTab, setActiveTab, telemetry }) => {
           )}
         </div>
 
-        {/* Testimonials Section - Prova Social */}
-        <div style={{ marginTop: '72px', borderTop: '1px solid var(--border)', paddingTop: '56px' }}>
-          <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-            <h2 style={{ fontSize: 'clamp(1.5rem, 2.5vw, 2.2rem)', fontWeight: '800', marginBottom: '12px', color: 'var(--text-primary)' }}>
-              Quem já usa o TelaHub para modernizar suas telas...
-            </h2>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '1rem', maxWidth: '520px', marginLeft: 'auto', marginRight: 'auto' }}>
-              Veja como empresários reais aboliram o pen-drive e transformaram o visual das suas recepções em minutos.
-            </p>
-          </div>
+        {/* Prova social REMOVIDA em 2026-07-31 — pela terceira vez.
 
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))',
-            gap: '24px'
-          }}>
-            {/* Testimonial 1 */}
-            <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '12px', padding: '32px 28px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div aria-label="Avaliação 5 de 5 estrelas" style={{ display: 'flex', gap: '4px', color: '#D97706', fontSize: '1.2rem' }}>★★★★★</div>
-              <p style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', lineHeight: '1.6', fontStyle: 'italic', margin: 0 }}>
-                "Eu perdia horas toda semana gravando vídeos em pendrives para colocar na TV da recepção. Com o TelaHub, eu atualizo a grade de aulas e os avisos de feriado direto de casa, em dois minutos. A recepção da academia ficou com cara de rede gigante."
-              </p>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '8px' }}>
-                <div style={{ width: '36px', height: '36px', background: 'var(--cyan-dim)', border: '1px solid rgba(14,165,233,0.35)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', color: 'var(--cyan-soft)', fontSize: '0.9rem' }}>RA</div>
-                <div>
-                  <h4 style={{ fontSize: '0.9rem', fontWeight: '700', color: 'var(--text-primary)', margin: 0 }}>Rodrigo Alencar</h4>
-                  <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Proprietário da FitLife Academia</span>
-                </div>
-              </div>
-            </div>
+            Havia aqui dois depoimentos com nome e sobrenome ("Rodrigo Alencar,
+            Proprietário da FitLife Academia"), duas avaliações ★★★★★ e o título
+            "Quem já usa o TelaHub..." com o subtítulo "Veja como empresários
+            REAIS aboliram o pen-drive".
 
-            {/* Testimonial 2 */}
-            <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '12px', padding: '32px 28px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div aria-label="Avaliação 5 de 5 estrelas" style={{ display: 'flex', gap: '4px', color: '#D97706', fontSize: '1.2rem' }}>★★★★★</div>
-              <p style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', lineHeight: '1.6', fontStyle: 'italic', margin: 0 }}>
-                "As TVs da minha clínica ficavam desligadas ou passando canais abertos que não interessavam a ninguém. Hoje, nós exibimos os vídeos dos nossos procedimentos estéticos, dicas de saúde e comunicados em loop automático. Nossos clientes elogiam a modernidade."
-              </p>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '8px' }}>
-                <div style={{ width: '36px', height: '36px', background: 'var(--cyan-dim)', border: '1px solid rgba(14,165,233,0.35)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', color: 'var(--cyan-soft)', fontSize: '0.9rem' }}>MC</div>
-                <div>
-                  <h4 style={{ fontSize: '0.9rem', fontWeight: '700', color: 'var(--text-primary)', margin: 0 }}>Dra. Mariana Costa</h4>
-                  <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Diretora da OdontoClean</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+            Nada disso existe: o produto não tem base de clientes. Depoimento e
+            nota inventados não são licença poética de marketing — o art. 30 do
+            CDC faz a publicidade VINCULAR o contrato e o art. 37 tipifica a
+            enganosa, e o comprador do TelaHub (dono de loja sem TI) é o perfil
+            que os tribunais brasileiros protegem mesmo em relação B2B.
+
+            Isto já tinha sido removido duas vezes antes e voltou nas duas.
+            Registrado em wiki/negocio/canais-de-venda-e-landings §3 e §7.
+
+            Quando houver cliente de verdade que autorize por escrito, isto pode
+            voltar — com o nome real e o resultado que a pessoa realmente teve.
+            Até lá, o lugar da prova social é a lista de capacidades
+            verificáveis, que já existe na página. */}
       </div>
     </section>
   );

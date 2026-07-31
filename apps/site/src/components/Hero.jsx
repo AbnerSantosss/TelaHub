@@ -69,6 +69,37 @@ const Hero = ({
  
           <div className="hero-visual animate-in">
             <DashboardMockup telemetry={telemetry} lastSyncTime={lastSyncTime} startConversion={startConversion} />
+            {/*
+              Legenda obrigatória, acrescentada em 2026-07-31.
+
+              O mockup mostra "99,7% uptime médio", "4/6 online" e nomes de
+              display — todos inventados, vindos do estado `telemetry` fixo em
+              App.jsx. Número de uptime é exatamente um dos claims que a wiki
+              lista como proibidos (canais-de-venda-e-landings §7), e sem
+              legenda a ilustração é lida como painel real de cliente real:
+              publicidade enganosa por omissão (CDC arts. 30 e 37).
+
+              A landing interna já tinha recebido esta mesma legenda antes de
+              ser apagada; o site externo nunca recebeu. Se um dia o mockup
+              passar a exibir dados reais, é esta linha que sai — não o
+              contrário.
+            */}
+            {/* Alinhada à DIREITA de propósito. O badge flutuante "Atualização
+                enviada" é absoluto e ocupa o canto inferior ESQUERDO; centrada,
+                a legenda passava por dentro dele e saía ilegível — e legenda de
+                conformidade encoberta vale o mesmo que legenda ausente. */}
+            <p style={{
+              position: 'relative',
+              zIndex: 2,
+              marginTop: '18px',
+              paddingRight: '4px',
+              fontSize: '0.72rem',
+              color: 'var(--text-muted)',
+              textAlign: 'right',
+              lineHeight: 1.5,
+            }}>
+              Ilustração da interface, com dados de exemplo.
+            </p>
           </div>
         </div>
  

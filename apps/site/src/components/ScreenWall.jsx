@@ -83,11 +83,25 @@ const ScreenWall = () => {
 
           const largura = passo * (0.5 + r * 0.16);
           const altura = largura * 0.62; // proporção de tela, não quadrado
+          const x = c * passo + (passo - largura) / 2;
+          const y = l * passo + (passo - altura) / 2;
+
+          // Desvanecimento em direção ao centro: a coluna de leitura fica
+          // limpa e a parede vive nas bordas. Feito aqui, e não com máscara
+          // CSS, porque máscara sobre canvas fixo recompõe a página inteira a
+          // cada quadro (ver o comentário de #network-canvas em index.css).
+          const dx = (x + largura / 2 - larguraCss / 2) / (larguraCss * 0.5);
+          const dy = (y + altura / 2 - alturaCss * 0.42) / (alturaCss * 0.5);
+          const distancia = Math.sqrt(dx * dx + dy * dy);
+          const borda = Math.min(1, Math.max(0, (distancia - 0.62) / 0.5));
+          if (borda <= 0.02) continue; // célula central: nem entra na lista
+
           telas.push({
-            x: c * passo + (passo - largura) / 2,
-            y: l * passo + (passo - altura) / 2,
+            x,
+            y,
             largura,
             altura,
+            borda,
             base: 0.028 + r * 0.038,
             // Fase própria: as telas não atualizam todas no mesmo instante.
             fase: ruido(l, c),
@@ -109,7 +123,7 @@ const ScreenWall = () => {
         const alcance = 190;
         const aceso = distancia < alcance ? (1 - distancia / alcance) ** 2 : 0;
 
-        const opacidade = tela.base + aceso * 0.13;
+        const opacidade = (tela.base + aceso * 0.13) * tela.borda;
 
         // Corpo da tela.
         ctx.beginPath();
@@ -128,7 +142,7 @@ const ScreenWall = () => {
           ctx.beginPath();
           ctx.moveTo(tela.x + 2, y);
           ctx.lineTo(tela.x + tela.largura - 2, y);
-          ctx.strokeStyle = `rgba(56, 189, 248, ${aceso * 0.22})`;
+          ctx.strokeStyle = `rgba(56, 189, 248, ${aceso * 0.22 * tela.borda})`;
           ctx.lineWidth = 2;
           ctx.stroke();
         }
