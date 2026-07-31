@@ -1,0 +1,88 @@
+@import "tailwindcss";
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Tokens do app de checkout. A justificativa de cada escolha está em DESIGN.md
+   — leia antes de mudar qualquer valor daqui.
+
+   Resumo: estrutura e padrões vêm das referências do admin do Yampi enviadas
+   pelo dono; a paleta e as fontes são as do TelaHub, para o produto não parecer
+   de outra empresa. Tema claro de propósito: aqui se lê dinheiro e dado de lead.
+   ───────────────────────────────────────────────────────────────────────────── */
+
+@theme {
+  --font-sans: 'Exo 2', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  /* Superfícies — fundo levemente quente, não branco puro, para não brilhar. */
+  --color-app: #f6f5f2;
+  --color-surface: #ffffff;
+  --color-nav: #17181b;
+  --color-line: #e4e3de;
+
+  /* Texto */
+  --color-ink: #16181d;
+  --color-ink-muted: #5b6472;
+  --color-ink-subtle: #8b93a4;
+
+  /* Ação e estados. Cor de status é semântica: o mesmo estado usa a mesma cor
+     no chip de filtro, no badge da linha e no gráfico. */
+  --color-accent: #0ea5e9;
+  --color-success: #16a34a;
+  --color-warning: #d97706;
+  --color-danger: #dc2626;
+  --color-info: #7c3aed;
+}
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-app);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Dinheiro, contadores e identificadores. O numeral tabular impede o valor de
+   "pular" quando a quantidade de telas muda — é o número que a pessoa está
+   olhando no momento de decidir pagar. */
+.money,
+.tnum {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
+
+/* Eyebrow / rótulo de campo, como nas referências. */
+.eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-ink-subtle);
+}
+
+/* Piso de acessibilidade — não depende de decisão estética. */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
