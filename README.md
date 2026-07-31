@@ -66,10 +66,22 @@ npm install
 npm run dev     # http://localhost:3030
 ```
 
-O Vite faz proxy de `/api` para `http://localhost:3001`, então **o backend do
-App precisa estar rodando**. E a origem `http://localhost:3030` precisa estar em
-`CORS_ORIGINS` no `.env` do backend — a validação de origem é por igualdade, não
-por prefixo.
+O Vite faz proxy de `/api` para o backend do App, que **precisa estar rodando**.
+O alvo padrão é `http://localhost:3002`, que é a `PORT` do `.env` do backend.
+Se o seu backend estiver em outra porta:
+
+```bash
+BACKEND_PORT=3001 npm run dev      # ou BACKEND_URL=http://localhost:3001
+```
+
+> Este proxy apontava para `3001` fixo enquanto o backend usava `3002`. Quando
+> a 3001 está ocupada por outro dev server, o proxy acha a SPA errada e devolve
+> HTML com status 200 no lugar do JSON — e o checkout falha com *"este link não
+> existe mais"*, mensagem que não tem relação com a causa. Se vir esse erro,
+> confira a porta antes de procurar bug no código.
+
+A origem `http://localhost:3030` precisa estar em `CORS_ORIGINS` no `.env` do
+backend — a validação de origem é por igualdade, não por prefixo.
 
 ```bash
 npm run lint    # tsc --noEmit

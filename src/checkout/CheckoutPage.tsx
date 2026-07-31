@@ -236,9 +236,18 @@ const CheckoutPage = () => {
         <h1 className="text-xl font-extrabold tracking-tight text-ink sm:text-2xl">
           Contratar o TelaHub
         </h1>
+        {/*
+          O subtítulo acompanha o que a página REALMENTE faz. Antes ele era
+          fixo em "a cobrança não está integrada", e ao ligar o pagamento
+          passou a contradizer o passo 3 logo abaixo, que cobra. Página que se
+          contradiz sobre cobrança é o caso que os arts. 30 e 37 do CDC
+          alcançam — e é a mesma armadilha que já custou retrabalho na landing.
+          Derivar do `canPayOnline` mantém os dois em acordo por construção.
+        */}
         <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-ink-muted">
-          Três passos. A cobrança automática ainda não está integrada, então nada é debitado nesta
-          tela: ao concluir, nosso time comercial fecha a contratação com você.
+          {checkout.canPayOnline
+            ? 'Três passos: identificação, plano e pagamento. O acesso ao painel é liberado assim que o pagamento é confirmado.'
+            : 'Três passos. A cobrança automática ainda não está integrada, então nada é debitado nesta tela: ao concluir, nosso time comercial fecha a contratação com você.'}
         </p>
 
         <div className="mt-6 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
@@ -306,7 +315,11 @@ const CheckoutPage = () => {
           uma contratação feita pela internet.{' '}
           <span className="flex items-center gap-1.5 pt-1">
             <RefreshCw aria-hidden="true" size={11} />
-            Nenhuma cobrança automática é feita nesta tela.
+            {checkout.simulatedPayment
+              ? 'Ambiente de demonstração: nenhum valor é cobrado de verdade.'
+              : checkout.canPayOnline
+                ? 'A cobrança é mensal e por tela ativa, renovada automaticamente.'
+                : 'Nenhuma cobrança automática é feita nesta tela.'}
           </span>
         </p>
       </footer>

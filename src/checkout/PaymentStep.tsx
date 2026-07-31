@@ -33,8 +33,16 @@ import { Notice, PrimaryButton, SecondaryButton, TextField } from './primitives'
 import type { CheckoutController } from './useCheckout';
 import type { PaymentMethod } from '../lib/session';
 
-/** Mesmo endereço comercial usado na landing do produto. */
-const SALES_EMAIL = 'comercial@telahub.com.br';
+/**
+ * Canal comercial real, confirmado pelo dono em 2026-07-31.
+ *
+ * O endereço anterior (`comercial@telahub.com.br`) era INVENTADO — existia só
+ * para não deixar link morto, e a wiki o registrava como bloqueador de
+ * publicação. Um CTA que aponta para caixa inexistente perde o lead em
+ * silêncio, o que é pior do que não ter o botão. Regra ao mexer aqui: só entra
+ * endereço que alguém de fato lê.
+ */
+const SALES_EMAIL = 'binho_captiva@hotmail.com';
 
 interface MethodCard {
   id: PaymentMethod | 'boleto';

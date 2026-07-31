@@ -10,10 +10,23 @@ export default defineConfig({
     port: 3030,
     host: '0.0.0.0',
     proxy: {
-      // Em dev o backend roda em 3001. Em produção o Nginx faz o proxy de /api,
-      // então o cliente sempre chama caminho relativo (ver src/lib/api.ts).
+      // Em produção o Nginx faz o proxy de /api e o cliente sempre chama
+      // caminho relativo (ver src/lib/api.ts). Em dev, quem faz esse papel é
+      // este proxy.
+      //
+      // A porta virou configurável porque o valor fixo estava ERRADO e o
+      // sintoma não denunciava a causa: aqui dizia 3001, enquanto o `.env` do
+      // backend define `PORT=3002`. Quando a 3001 está ocupada por outro dev
+      // server (o do painel usa essa faixa), o proxy encontra a SPA errada e
+      // devolve HTML com status 200 no lugar do JSON da API — o checkout
+      // falha com "este link não existe mais", que não tem relação nenhuma
+      // com o problema real.
+      //
+      // Ajuste `BACKEND_PORT` (ou `BACKEND_URL` inteiro) para casar com o
+      // backend que você está rodando.
       '/api': {
-        target: 'http://localhost:3001',
+        target:
+          process.env.BACKEND_URL ?? `http://localhost:${process.env.BACKEND_PORT ?? '3002'}`,
         changeOrigin: true,
       },
     },
