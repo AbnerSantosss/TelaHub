@@ -1,20 +1,22 @@
 # TelaHub — Checkout
 
-Checkout de contratação e painel do funil de vendas. **Repositório próprio**,
-publicado de forma independente do painel e do site de vendas.
+Checkout de contratação e painel do funil de vendas. Vive em `apps/checkout` do
+monorepo, e é **publicado de forma independente** do painel e do site de vendas.
 
 - `/c` e `/c/:token` — checkout do comprador, anônimo
 - `/admin` — painel do funil (checkouts iniciados, abandono, contratações)
 
-## Como isso se encaixa nos três projetos
+## Como isso se encaixa nos quatro apps
 
-| Projeto | Repositório | O que é | Backend |
+| App | Pasta | O que é | Backend |
 |---|---|---|---|
-| Site de vendas | `site-telas` | landing pública | nenhum |
-| **Checkout** | **este** | contratação + funil | consome o do App |
-| Painel (App) | `TelaHub` | produto + API + banco | dono do domínio |
+| Site de vendas | `apps/site` | landing pública (SSR) | nenhum |
+| **Checkout** | **`apps/checkout`** | contratação + funil | consome a API |
+| Painel | `apps/painel` | produto (SPA) | consome a API |
+| API | `apps/api` | domínio + banco | é o dono |
 
-Os três são **publicados separadamente**. O que eles compartilham é a API.
+Um repositório, **quatro deploys separados**. O que eles compartilham é a API —
+e agora também o histórico e o CI. Ver ADR-002.
 
 ## Decisão de arquitetura (ADR-001)
 
@@ -58,6 +60,68 @@ A operação é de uma pessoa, numa VPS única com Portainer, sem staging.
 
 Fonte: `Especialistas/7 - EngenhariaSoftware/wiki/design/estilos-arquiteturais.md`
 e `design-arquitetural.md` (Sommerville, cap. 6).
+
+---
+
+## Decisão de arquitetura (ADR-002) — repositório único, deploys separados
+
+**Status:** aceito · **Data:** 2026-07-31 · **Revisa parcialmente:** ADR-001
+
+### Contexto
+
+O ADR-001 decidiu "frontends separados, backend único" e, na prática, isso foi
+implementado como **três repositórios git separados** (`TelaHub`,
+`TelaHub-Checkout`, `site-telas`). Essas são duas decisões diferentes que foram
+tomadas como se fossem uma só, e a segunda não foi examinada.
+
+O custo apareceu:
+
+1. Uma correção de conformidade foi aplicada **na landing errada** — o trabalho
+   foi feito e revisado antes de alguém notar que o texto reclamado estava no
+   outro repositório (registrado em `wiki/negocio/canais-de-venda-e-landings`).
+2. A tabela de preços do site tinha **os números escritos à mão**, enquanto o
+   preço cobrado vinha de `GET /api/plans`. Duas fontes de verdade para o mesmo
+   número, em repositórios que não compartilhavam nem CI nem PR. Preço anunciado
+   vincula o contrato (CDC art. 30) e divergir dele é publicidade enganosa
+   (art. 37): a duplicata era exposição jurídica, não preferência de estilo.
+3. Mudança que atravessa dois apps (rota nova na API + consumo no checkout)
+   exigia dois PRs sem relação entre si, sem forma de revisar o conjunto.
+
+### Decisão
+
+**Um repositório, quatro deploys.** Os apps passam a viver em `apps/api`,
+`apps/painel`, `apps/checkout` e `apps/site` do repositório `TelaHub`. Nada muda
+na topologia de publicação: seguem sendo imagens distintas no GHCR, stacks
+distintas no Portainer, domínios distintos.
+
+O histórico dos dois repositórios importados foi preservado via `git subtree`
+(10 commits do checkout, 36 do site).
+
+### Alternativas consideradas
+
+- **Manter três repositórios e sincronizar preço por script** — resolveria o
+  item 2, mas não o 1 nem o 3, e acrescentaria um mecanismo a manter.
+- **Unificar também os builds** (uma aplicação só, com a landing como rota do
+  painel) — foi o que existia até 2026-07-25 e foi desfeito por bons motivos: o
+  site é pré-renderizado porque é ele que ranqueia, e o painel é uma SPA pesada
+  (editor de cenas, player, gráficos). Servir os dois do mesmo bundle faria o
+  visitante da landing baixar o editor e destruiria o SEO que o SSR existe para
+  ganhar.
+- **npm workspaces** com `node_modules` içado para a raiz — quebraria a
+  resolução do engine do Prisma e o `npm ci` de dentro de cada Dockerfile, que
+  copia só a pasta do seu app. Cada app segue com lockfile próprio.
+
+### Consequências
+
+- (+) PR atômico para mudança que atravessa apps; um CI só
+- (+) "Onde fica a landing do TelaHub?" passa a ter uma resposta só
+- (+) Preço com fonte única (`apps/site/scripts/fetch-plans.mjs`)
+- (−) O CI precisa de **filtro por pasta**: sem ele, uma vírgula na copy do site
+  recriaria os containers da API em produção. Está em `build-and-push.yml`
+- (−) `git log -- apps/checkout` não mostra os commits importados sem
+  `--full-history`; eles estão no segundo pai do commit de importação
+- (−) A troca exige repontar cada stack do Portainer para o repositório novo —
+  ver `DEPLOY.md`
 
 ## Desenvolvimento
 

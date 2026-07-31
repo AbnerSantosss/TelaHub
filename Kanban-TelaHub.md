@@ -279,7 +279,23 @@ kanban-plugin: board
 	- [ ] Documentar que auditoria de copy se valida no artefato, não no fonte
 
 
-## Em Análise (4 · 4 em uso — no limite · 3 bloqueadas 🚧)
+## Em Análise (4 · 6 em uso — ACIMA DO LIMITE · 5 bloqueadas 🚧)
+
+- [ ] #epic/infra **INFRA-M02** — Como dono, quero as três stacks do Portainer apontando para o monorepo, para que o deploy volte a acompanhar o código.
+	- **DADO** o monorepo em `main`, **QUANDO** um push toca `apps/checkout`, **ENTÃO** a stack do checkout é recriada com a imagem nova.
+	- [ ] Cadastrar `PORTAINER_WEBHOOK_CHECKOUT` no repositório `TelaHub` (copiar do repo `TelaHub-Checkout`)
+	- [ ] Cadastrar `PORTAINER_WEBHOOK_SITE` no repositório `TelaHub` (copiar do repo `site-telas`)
+	- [ ] Repontar a stack do site para `apps/site/docker-compose.prod.yml` e **confirmar no ar**
+	- [ ] Repontar a stack do checkout para `apps/checkout/docker-compose.prod.yml` e **confirmar no ar**
+	- [ ] Repontar a stack do painel (os `context:` viraram `./apps/...`) e **confirmar no ar**
+	- [ ] Só depois das três validadas: arquivar os repositórios antigos (**não apagar** — são o rollback)
+	- 🚧 *Bloqueia-se sozinha em acesso manual: exige GitHub Settings e Portainer, fora do alcance de qualquer sessão de código. Uma stack por vez — não há staging, e repontar as três juntas derruba tudo se o caminho do compose estiver errado.*
+
+- [ ] #epic/infra **INFRA-M03** — Como dono, quero saber qual domínio do painel é o correto, para que o link do site não leve a lugar nenhum.
+	- **DADO** o funil do site, **QUANDO** o visitante clica para entrar no painel, **ENTÃO** ele chega ao painel real.
+	- [ ] Decidir entre `telahub.proxserverabner.site` (valor do workflow) e `painel.proxserverabner.site` (valor do `docker-compose.prod.yml`)
+	- [ ] Alinhar `VITE_APP_URL` nos dois lugares e rebuildar o site (é variável de BUILD)
+	- 🚧 *Divergência encontrada na migração e mantida como estava de propósito: trocar valor de produção no escuro é pior que registrar a dúvida. Um dos dois está errado hoje.*
 
 - [ ] #epic/comercial **US-052** — Como responsável técnico, quero um contrato de provedor de pagamento com uma implementação simulada selecionável por ambiente, para exercitar o funil de compra inteiro sem entregar acesso pago de graça em produção.
 	- 📌 **Puxada para "Em Análise" por ser a única vaga livre da coluna (4/4 depois desta) e por ser a costura que destrava toda a EPIC O.** As outras três US desta coluna estão 🚧 bloqueadas por ação manual fora do ambiente remoto, então a capacidade real de análise estava ociosa. **Nada entrou em "Em Desenvolvimento"**: a coluna tem 8 cards com código pronto e não revisado, e Code Review está em 4/4.
@@ -447,7 +463,20 @@ kanban-plugin: board
 
 
 
-## Concluído (13)
+## Concluído (14)
+
+- [x] #epic/infra **US-M01** — Como mantenedor, quero os três repositórios do TelaHub num monorepo, para que uma mudança que atravessa apps caiba num PR só e o preço anunciado não possa divergir do cobrado.
+	- **DADO** os apps em `apps/api`, `apps/painel`, `apps/checkout` e `apps/site`, **QUANDO** o CI roda, **ENTÃO** cada app é lintado e buildado no seu próprio job.
+	- **DADO** um commit que toca só `apps/site`, **QUANDO** o `build-and-push` roda, **ENTÃO** só a imagem do site é publicada e só o webhook da stack do site é disparado.
+	- **DADO** a API no ar, **QUANDO** o site é buildado, **ENTÃO** os preços do HTML pré-renderizado vêm de `GET /api/plans`.
+	- [x] Importar `TelaHub-Checkout` e `site-telas` via `git subtree`, preservando histórico (10 + 36 commits)
+	- [x] Mover `backend/` → `apps/api` e `frontend/` → `apps/painel`
+	- [x] Corrigir caminhos (composes, `ci.yml`, `setup-dev.js`, `check-env.js`, `.gitignore`, `.dockerignore`)
+	- [x] Unificar o CI num workflow com filtro por pasta e webhook por stack
+	- [x] Eliminar os preços escritos à mão do site (`fetch-plans.mjs` + `src/data/catalogo.js`)
+	- [x] Registrar ADR-002 e atualizar wiki, `DEPLOY.md` e este quadro
+	- ⚠️ *A suíte da API não pôde rodar nesta sessão (Docker Desktop parado, sem Postgres). Build, typecheck e lint passam nos quatro apps; as 79 falhas de teste são todas erro de conexão com `localhost:5433`, nenhuma de asserção. O CI tem Postgres próprio.*
+	- ⚠️ *A troca só se completa com as tarefas manuais de INFRA-M02 — até lá, produção segue rodando dos repositórios antigos.*
 
 - [x] #epic/multi-tenant **US-017** — Como admin multi-loja, quero ver relatórios agregados de status/uso dos displays por loja/região, para monitorar a operação sem precisar abrir display a display.
 	- **DADO** múltiplas organizações/lojas cadastradas com displays associados, **QUANDO** o admin abre a tela de relatórios, **ENTÃO** deve ver contagem de displays online/offline agrupada por loja.

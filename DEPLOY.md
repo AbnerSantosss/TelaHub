@@ -13,12 +13,72 @@ Não há ambiente de staging provisionado hoje — todo push em `main` vai, no p
 
 ## CI (GitHub Actions)
 
-Todo PR contra `main` (e todo push em `main`) roda `.github/workflows/ci.yml`:
+Todo PR contra `main` (e todo push em `main`) roda `.github/workflows/ci.yml`, com um job por app:
 
-- **backend**: sobe um Postgres efêmero, `prisma db push`, `npm run build` (type-check) e `npm test` (Vitest).
-- **frontend**: `npm run lint` (type-check) e `npm run build`.
+- **api**: sobe um Postgres efêmero, `prisma db push`, seed de planos, `npm run typecheck`, `npm run build` e `npm test` (Vitest).
+- **painel**: `npm run lint` (type-check) e `npm run build`.
+- **checkout**: `npm run lint` (type-check) e `npm run build`.
+- **site**: `npm run lint` (ESLint) e `npm run build` (inclui SSR + pré-render).
 
 Isso bloqueia merge/deploy se o build ou os testes falharem — mas **não substitui** o pull no Portainer, que continua manual/automático conforme já configurado na VPS.
+
+## Migração para monorepo (2026-07-31) — LEIA ANTES DO PRÓXIMO DEPLOY
+
+Os três repositórios (`TelaHub`, `TelaHub-Checkout`, `site-telas`) viraram um só.
+O código agora vive em `apps/api`, `apps/painel`, `apps/checkout` e `apps/site`.
+A justificativa está no ADR-002, em `apps/checkout/README.md`.
+
+**O que NÃO mudou** (de propósito, para o deploy não virar um segundo problema):
+nomes das imagens no GHCR, nomes dos serviços Docker, portas, domínios e a
+topologia de stacks. Continuam sendo três stacks independentes.
+
+**O que mudou e exige ação manual.** Nada disso pode ser feito por script a
+partir daqui — depende de acesso ao GitHub e ao Portainer:
+
+1. **Secrets de webhook no repositório `TelaHub`** (Settings → Secrets → Actions).
+   Antes cada repositório tinha um `PORTAINER_WEBHOOK`. Agora são três, porque
+   um workflow só precisa saber qual stack recriar:
+
+   | Secret | Stack |
+   |---|---|
+   | `PORTAINER_WEBHOOK` | painel (api + painel) — já existe |
+   | `PORTAINER_WEBHOOK_CHECKOUT` | checkout — copiar do repo `TelaHub-Checkout` |
+   | `PORTAINER_WEBHOOK_SITE` | site — copiar do repo `site-telas` |
+
+   Secret ausente = o passo é pulado com aviso e o deploy daquela stack é
+   manual. É de propósito: webhook errado recria a stack errada, o que é pior
+   que não recriar nenhuma.
+
+2. **Repontar cada stack no Portainer** para o repositório `TelaHub`, ajustando
+   o caminho do compose:
+
+   | Stack | Compose antes | Compose agora |
+   |---|---|---|
+   | painel | `docker-compose.prod.yml` (repo `TelaHub`) | igual — só os `context:` mudaram para `./apps/...` |
+   | checkout | `docker-compose.prod.yml` (repo `TelaHub-Checkout`) | `apps/checkout/docker-compose.prod.yml` |
+   | site | `docker-compose.prod.yml` (repo `site-telas`) | `apps/site/docker-compose.prod.yml` |
+
+3. **Faça uma stack por vez, e confirme o site no ar antes da seguinte.** Não há
+   staging: se as três forem repontadas juntas e algo estiver errado no caminho
+   do compose, cai tudo ao mesmo tempo.
+
+**Rollback.** Os três repositórios antigos continuam existindo, intactos, com a
+tag `pre-monorepo-2026-07-31` no último commit anterior à migração. Reverter é
+repontar a stack de volta para o repositório antigo — não exige desfazer nada no
+monorepo. **Não apague os repositórios antigos** até as três stacks estarem
+rodando do monorepo e validadas.
+
+### Preço do site agora vem da API
+
+`apps/site` não tem mais preço escrito à mão. O build roda
+`scripts/fetch-plans.mjs`, que busca `GET /api/plans` e grava
+`src/data/planos.json`. Duas consequências para o deploy:
+
+- Se a API estiver fora do ar durante o build, o script **avisa e usa o snapshot
+  versionado** em vez de falhar. Um reajuste publicado com a API fora sai com o
+  preço antigo — confira o log do build ao publicar mudança de preço.
+- O alvo padrão é `https://telahub.proxserverabner.site/api`. Para apontar para
+  outro ambiente: `PLANS_API_URL=... npm run build`.
 
 ## Promoção para produção (estado atual, sem staging)
 
