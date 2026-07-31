@@ -1,9 +1,10 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
-// O convite com as credenciais é fire-and-forget; o teste não envia e-mail.
-const sendInviteEmail = vi.fn(async () => {});
+// O e-mail de compra com as credenciais é fire-and-forget; o teste não envia.
+const sendPurchaseConfirmationEmail = vi.fn(async () => {});
 vi.mock('../email.service', () => ({
-  sendInviteEmail: (...args: unknown[]) => sendInviteEmail(...(args as [])),
+  sendPurchaseConfirmationEmail: (...args: unknown[]) =>
+    sendPurchaseConfirmationEmail(...(args as [])),
 }));
 
 import prisma from '../../lib/prisma';
@@ -54,7 +55,7 @@ async function reloadSession(id: string) {
 }
 
 beforeEach(() => {
-  sendInviteEmail.mockClear();
+  sendPurchaseConfirmationEmail.mockClear();
 });
 
 let plan: { id: string };
@@ -115,7 +116,20 @@ describe('paidHandler — provisionamento', () => {
     expect(logs).toHaveLength(1);
 
     // Credenciais saem por e-mail, fora da transação.
-    expect(sendInviteEmail).toHaveBeenCalledTimes(1);
+    expect(sendPurchaseConfirmationEmail).toHaveBeenCalledTimes(1);
+
+    // O e-mail é de COMPRA, não o convite genérico: precisa carregar o que foi
+    // contratado. Sem esta asserção, trocar de volta para um convite sem plano
+    // nem valor passaria despercebido.
+    const [to, payload] = sendPurchaseConfirmationEmail.mock.calls[0] as unknown as [
+      string,
+      { planName: string; screens: number; amountCents: number; password: string; simulated: boolean },
+    ];
+    expect(to).toBe(ctx.session.email);
+    expect(payload.planName).toBeTruthy();
+    expect(payload.screens).toBe(ctx.session.screens);
+    expect(payload.amountCents).toBe(ctx.session.amountCents);
+    expect(payload.password).toBeTruthy();
   });
 
   it('idempotência: processar o mesmo evento duas vezes não duplica nada', async () => {
@@ -145,7 +159,7 @@ describe('paidHandler — provisionamento', () => {
     ).toBe(1);
 
     // Só o primeiro provisionamento manda credenciais.
-    expect(sendInviteEmail).toHaveBeenCalledTimes(1);
+    expect(sendPurchaseConfirmationEmail).toHaveBeenCalledTimes(1);
   });
 
   it('reaproveita a conta quando o e-mail já pertence a um usuário', async () => {
@@ -174,7 +188,7 @@ describe('paidHandler — provisionamento', () => {
 
     const subscription = await prisma.subscription.findUnique({ where: { organizationId: org.id } });
     expect(subscription!.planId).toBe(plan.id);
-    expect(sendInviteEmail).not.toHaveBeenCalled();
+    expect(sendPurchaseConfirmationEmail).not.toHaveBeenCalled();
   });
 
   it('sessão sem plano/e-mail não provisiona nada e não fica girando na fila', async () => {

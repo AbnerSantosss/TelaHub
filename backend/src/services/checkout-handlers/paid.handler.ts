@@ -3,7 +3,8 @@ import crypto from 'crypto';
 import prisma from '../../lib/prisma';
 import { hashPassword } from '../auth.service';
 import { planService } from '../plan.service';
-import { sendInviteEmail } from '../email.service';
+import { sendPurchaseConfirmationEmail } from '../email.service';
+import { simulatedProvider } from '../payment-providers';
 import type { CheckoutEventContext, CheckoutEventHandler } from './index';
 import { auditOnce } from './shared';
 
@@ -88,7 +89,7 @@ export const paidHandler: CheckoutEventHandler = {
     // Já existe conta para este e-mail: não se cria uma segunda. Vincula a
     // sessão e garante que a assinatura reflita o plano contratado.
     if (existingUser?.organizationId) {
-      await ensureSubscription(existingUser.organizationId, plan.id);
+      await ensureSubscription(existingUser.organizationId, plan.id, current.paymentProvider ?? null);
       await prisma.checkoutSession.update({
         where: { id: current.id },
         data: { organizationId: existingUser.organizationId },
@@ -102,6 +103,7 @@ export const paidHandler: CheckoutEventHandler = {
           planCode: current.planCode,
           screens: current.screens,
           amountCents: current.amountCents,
+          paymentProvider: current.paymentProvider,
           reusedExistingAccount: true,
         },
       });
@@ -134,8 +136,21 @@ export const paidHandler: CheckoutEventHandler = {
       });
 
       // 3. Assinatura do plano efetivamente contratado (e pago).
+      //
+      // `gateway` recebe QUEM processou o pagamento — inclusive `simulado`.
+      // Isso não é telemetria: é a única coisa que separa, no banco, uma
+      // assinatura que gerou receita de uma que nasceu de demonstração. Sem
+      // esse campo preenchido, a primeira conciliação financeira e a emissão
+      // de NFS-e tratariam contas simuladas como clientes pagantes — emitindo
+      // nota fiscal contra quem nunca pagou.
       await tx.subscription.create({
-        data: { organizationId: organization.id, planId: plan.id, status: 'active', trialEndsAt: null },
+        data: {
+          organizationId: organization.id,
+          planId: plan.id,
+          status: 'active',
+          trialEndsAt: null,
+          gateway: current.paymentProvider ?? null,
+        },
       });
 
       await tx.checkoutSession.update({
@@ -157,13 +172,27 @@ export const paidHandler: CheckoutEventHandler = {
         planCode: current.planCode,
         screens: current.screens,
         amountCents: current.amountCents,
+        paymentProvider: current.paymentProvider,
         reusedExistingAccount: false,
       },
     });
 
     // Não bloqueante: SMTP fora do ar não pode desfazer um provisionamento que
     // já está no banco, nem fazer o evento voltar para a fila.
-    void sendInviteEmail(email, tempPassword).catch((err: unknown) => {
+    //
+    // É o e-mail de COMPRA, não o de convite genérico: quem acabou de pagar
+    // precisa ver o que contratou (plano, telas, valor) junto das credenciais.
+    // O `simulated` viaja até aqui porque o e-mail é obrigado a dizer quando
+    // nada foi cobrado — um comprovante que mostra valor sem essa ressalva
+    // afirma uma cobrança que não existiu.
+    void sendPurchaseConfirmationEmail(email, {
+      name: current.name!.trim(),
+      planName: plan.name,
+      screens: current.screens,
+      amountCents: current.amountCents,
+      password: tempPassword,
+      simulated: current.paymentProvider === simulatedProvider.key,
+    }).catch((err: unknown) => {
       console.warn(
         '[checkout-handlers/paid] conta provisionada, mas o e-mail de credenciais falhou:',
         err instanceof Error ? err.message : err
@@ -173,19 +202,26 @@ export const paidHandler: CheckoutEventHandler = {
 };
 
 /** Cria a assinatura da organização apenas se ainda não houver uma. */
-async function ensureSubscription(organizationId: string, planId: string): Promise<void> {
+async function ensureSubscription(
+  organizationId: string,
+  planId: string,
+  gateway: string | null
+): Promise<void> {
   const existing = await prisma.subscription.findUnique({
     where: { organizationId },
     select: { id: true },
   });
 
   if (existing) {
-    await prisma.subscription.update({ where: { organizationId }, data: { planId, status: 'active' } });
+    await prisma.subscription.update({
+      where: { organizationId },
+      data: { planId, status: 'active', gateway },
+    });
     return;
   }
 
   await prisma.subscription.create({
-    data: { organizationId, planId, status: 'active', trialEndsAt: null },
+    data: { organizationId, planId, status: 'active', trialEndsAt: null, gateway },
   });
 }
 

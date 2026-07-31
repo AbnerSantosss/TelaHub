@@ -4,10 +4,17 @@ import rateLimit from 'express-rate-limit';
 import { validateBody } from '../middlewares/validate.middleware';
 import {
   createCheckoutSessionSchema,
+  startPaymentSchema,
   submitCheckoutSessionSchema,
   updateCheckoutSessionSchema,
 } from '../schemas/checkout.schema';
 import { CheckoutError, checkoutService } from '../services/checkout.service';
+import { paymentService } from '../services/payment.service';
+import {
+  OFFERED_METHODS,
+  PaymentConfigError,
+  resolveProvider,
+} from '../services/payment-providers';
 
 const router = Router();
 
@@ -42,6 +49,14 @@ export const checkoutSessionRateLimit = rateLimit({
 function handleError(error: unknown, res: Response, context: string): void {
   if (error instanceof CheckoutError) {
     res.status(error.status).json({ error: error.message, code: error.code });
+    return;
+  }
+  // Configuração de pagamento inválida é erro do OPERADOR, não do visitante —
+  // 503 com a mensagem, para o front distinguir "tente de novo" de "está
+  // errado aqui e vai continuar errado até alguém arrumar".
+  if (error instanceof PaymentConfigError) {
+    console.error(`Configuração de pagamento inválida (${context}):`, error.message);
+    res.status(503).json({ error: error.message, code: 'payment_provider_unavailable' });
     return;
   }
   console.error(`Erro no checkout (${context}):`, error);
@@ -135,6 +150,107 @@ router.post(
       res.json(result);
     } catch (error) {
       handleError(error, res, 'finalizar sessão');
+    }
+  }
+);
+
+/**
+ * GET /api/checkout/payment-config — o que a tela de pagamento pode oferecer.
+ *
+ * O front NÃO decide isso sozinho: se ele desenhasse os métodos por conta
+ * própria, mostraria Pix num provedor que não faz Pix. E `simulated` precisa
+ * vir do servidor porque é o servidor que sabe qual provedor está ativo — um
+ * aviso de "pagamento simulado" que o front decidisse sozinho seria a primeira
+ * coisa a ficar desatualizada quando o gateway real entrasse.
+ */
+router.get('/payment-config', checkoutSessionRateLimit, (_req: Request, res: Response): void => {
+  try {
+    const provider = resolveProvider();
+    res.json({
+      provider: provider.key,
+      providerLabel: provider.label,
+      simulated: provider.simulated,
+      methods: OFFERED_METHODS.filter((method) => provider.methods.includes(method)),
+    });
+  } catch (error) {
+    handleError(error, res, 'configuração de pagamento');
+  }
+});
+
+/**
+ * POST /api/checkout/sessions/:publicToken/pay — inicia a cobrança.
+ *
+ * Cartão aprova de forma síncrona (devolve `paid: true`); Pix volta `pending`
+ * com o QR, e a confirmação chega depois — pelo webhook do provedor real ou,
+ * no simulado, pela rota abaixo.
+ */
+router.post(
+  '/sessions/:publicToken/pay',
+  checkoutSessionRateLimit,
+  validateBody(startPaymentSchema),
+  async (req: Request, res: Response): Promise<void> => {
+    try {
+      const result = await paymentService.startPayment(req.params.publicToken as string, req.body);
+      res.json(result);
+    } catch (error) {
+      handleError(error, res, 'iniciar pagamento');
+    }
+  }
+);
+
+/**
+ * POST /api/checkout/sessions/:publicToken/simulate-payment — confirma um
+ * pagamento SIMULADO (o "eu paguei o Pix" da demonstração).
+ *
+ * ⚠️ ESTA ROTA LIBERA ACESSO PAGO SEM COBRAR NADA. Ela existe só enquanto o
+ * gateway real não existe, e por isso tem duas travas:
+ *
+ *   1. **Só responde se o provedor ativo for simulado.** Com um gateway real
+ *      configurado, ela devolve 404 — deixa de existir para o mundo. Não basta
+ *      "não usar": uma rota assim precisa sumir sozinha quando o dinheiro
+ *      passar a ser de verdade, senão vira a porta dos fundos do produto.
+ *   2. A própria seleção do provedor simulado já é bloqueada em produção
+ *      (`resolveProvider`), então em produção esta rota é inalcançável por
+ *      construção, não por disciplina.
+ *
+ * Quando o gateway entrar, o substituto é `POST /api/billing/webhook`, com
+ * verificação de assinatura do provedor, chamando a MESMA
+ * `paymentService.confirmPayment`.
+ */
+router.post(
+  '/sessions/:publicToken/simulate-payment',
+  checkoutSessionRateLimit,
+  async (req: Request, res: Response): Promise<void> => {
+    try {
+      const provider = resolveProvider();
+
+      if (!provider.simulated) {
+        res.status(404).json({
+          error: 'Rota indisponível: o provedor de pagamento ativo é real.',
+          code: 'not_found',
+        });
+        return;
+      }
+
+      const session = await checkoutService.getPublicSession(req.params.publicToken as string);
+
+      const outcome = await paymentService.confirmPayment({
+        publicToken: req.params.publicToken as string,
+        providerKey: provider.key,
+        providerChargeId: `sim_manual_${Date.now()}`,
+        raw: { confirmedBy: 'simulate-payment-route' },
+      });
+
+      res.json({
+        ...outcome,
+        planCode: session.planCode,
+        message: outcome.alreadyPaid
+          ? 'Esta contratação já estava paga.'
+          : 'Pagamento SIMULADO confirmado. Nenhum valor foi cobrado. ' +
+            'A conta está sendo liberada e as credenciais vão para o e-mail informado.',
+      });
+    } catch (error) {
+      handleError(error, res, 'simular pagamento');
     }
   }
 );

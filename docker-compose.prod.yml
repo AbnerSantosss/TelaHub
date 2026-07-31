@@ -78,6 +78,16 @@ services:
       - SMTP_SECURE=${SMTP_SECURE:-}
       - SMTP_FROM_EMAIL=${SMTP_FROM_EMAIL:-}
       - SMTP_FROM_NAME=${SMTP_FROM_NAME:-TelaHub}
+      # Pagamento. Declarados aqui porque variável NÃO declarada no compose não
+      # chega ao container por mais que se cadastre no Portainer — mesma
+      # armadilha que já deixou ADMIN_*/SMTP_* sem efeito nesta stack.
+      #
+      # Sem `ALLOW_SIMULATED_PAYMENTS=true`, o backend com PAYMENT_PROVIDER
+      # simulado ABORTA o boot em produção, de propósito: ele libera plano pago
+      # sem cobrar. Um container que não sobe é visível; um checkout que dá
+      # acesso de graça, não.
+      - PAYMENT_PROVIDER=${PAYMENT_PROVIDER:-simulado}
+      - ALLOW_SIMULATED_PAYMENTS=${ALLOW_SIMULATED_PAYMENTS:-}
     depends_on:
       db:
         condition: service_healthy

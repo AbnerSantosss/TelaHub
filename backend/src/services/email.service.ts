@@ -308,6 +308,163 @@ function getWelcomeTemplate(name: string, companyName: string): string {
 }
 
 // ==============================================================================
+// TEMPLATE: CONFIRMAÇÃO DE CONTRATAÇÃO (pós-checkout)
+// ==============================================================================
+
+/**
+ * Formata centavos em Real. O checkout trabalha em centavos (inteiro) para não
+ * arrastar erro de ponto flutuante; a conversão para exibição acontece só aqui.
+ */
+function formatBRL(amountCents: number): string {
+  return (amountCents / 100).toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+    minimumFractionDigits: 2,
+  });
+}
+
+/**
+ * E-mail de quem acabou de comprar. Acumula dois papéis que o convite genérico
+ * não cobria: é o **comprovante** da contratação (plano, telas, valor) e a
+ * **credencial** de primeiro acesso.
+ *
+ * Regras de conteúdo (arts. 30 e 37 do CDC — oferta vincula, publicidade
+ * enganosa é infração): nada aqui pode prometer o que o produto não entrega.
+ * Sem "suporte 24/7", sem SLA, sem garantia de uptime. Só o que é verificável:
+ * acesso liberado, o que foi contratado, como entrar e o direito de
+ * arrependimento de 7 dias do art. 49, que já é praticado de fato.
+ */
+function getPurchaseTemplate(
+  email: string,
+  name: string,
+  planName: string,
+  screens: number,
+  amountCents: number,
+  password: string,
+  simulated: boolean
+): string {
+  // O aviso de simulação fica colado ao valor, e não no rodapé, de propósito:
+  // um comprovante que exibe "R$ 245,00/mês" sem dizer que nada foi cobrado
+  // afirma uma cobrança inexistente. O bloco tem que ser lido junto do número.
+  const simulatedWarning = simulated
+    ? `
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${COLORS.amberBg};border:1px solid ${COLORS.amberBorder};border-radius:10px;margin-bottom:20px;">
+      <tr>
+        <td style="padding:16px 18px;">
+          <p style="margin:0 0 6px;color:${COLORS.amber};font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:1px;">
+            ⚠️ Pagamento simulado
+          </p>
+          <p style="margin:0;color:${COLORS.amber};font-size:12px;font-weight:600;line-height:1.6;">
+            Este foi um pagamento <strong>SIMULADO</strong>, usado para testes.
+            <strong>Nenhum valor foi cobrado</strong> e nenhuma cobrança será feita no seu cartão.
+            Este e-mail não é um comprovante de pagamento.
+          </p>
+        </td>
+      </tr>
+    </table>
+  `
+    : '';
+
+  const content = `
+    <h2 style="margin:0 0 8px;color:${COLORS.textPrimary};font-size:20px;font-weight:700;">
+      ✅ Contratação confirmada, ${name}!
+    </h2>
+    <p style="margin:0 0 24px;color:${COLORS.textSecondary};font-size:14px;line-height:1.7;">
+      Seu acesso ao TelaHub já está liberado. Abaixo está o resumo do que foi contratado
+      e as credenciais para o primeiro acesso.
+    </p>
+
+    <!-- Resumo da contratação -->
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${COLORS.bgDark};border-radius:12px;border:1px solid ${COLORS.bgCardAlt};overflow:hidden;margin-bottom:20px;">
+      <tr>
+        <td style="padding:18px 24px;border-bottom:1px solid ${COLORS.bgCardAlt};">
+          <p style="margin:0 0 4px;color:${COLORS.textMuted};font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;">
+            Plano
+          </p>
+          <p style="margin:0;color:${COLORS.textPrimary};font-size:16px;font-weight:700;">
+            ${planName}
+          </p>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding:18px 24px;border-bottom:1px solid ${COLORS.bgCardAlt};">
+          <p style="margin:0 0 4px;color:${COLORS.textMuted};font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;">
+            Telas contratadas
+          </p>
+          <p style="margin:0;color:${COLORS.textPrimary};font-size:16px;font-weight:700;">
+            ${screens} ${screens === 1 ? 'tela' : 'telas'}
+          </p>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding:18px 24px;">
+          <p style="margin:0 0 4px;color:${COLORS.textMuted};font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;">
+            Valor mensal
+          </p>
+          <p style="margin:0;color:${COLORS.cyan};font-size:20px;font-weight:800;">
+            ${formatBRL(amountCents)}<span style="color:${COLORS.textMuted};font-size:13px;font-weight:600;">/mês</span>
+          </p>
+        </td>
+      </tr>
+    </table>
+
+    ${simulatedWarning}
+
+    <!-- Credenciais de acesso -->
+    <p style="margin:0 0 12px;color:${COLORS.textSecondary};font-size:14px;line-height:1.7;">
+      Use estes dados para entrar no painel:
+    </p>
+
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${COLORS.bgDark};border-radius:12px;border:1px solid ${COLORS.bgCardAlt};overflow:hidden;margin-bottom:20px;">
+      <tr>
+        <td style="padding:18px 24px;border-bottom:1px solid ${COLORS.bgCardAlt};">
+          <p style="margin:0 0 4px;color:${COLORS.textMuted};font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;">
+            E-mail de Acesso
+          </p>
+          <p style="margin:0;color:${COLORS.cyan};font-size:16px;font-weight:700;font-family:'Courier New',monospace;">
+            ${email}
+          </p>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding:18px 24px;">
+          <p style="margin:0 0 4px;color:${COLORS.textMuted};font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;">
+            Senha Temporária
+          </p>
+          <p style="margin:0;color:${COLORS.purple};font-size:16px;font-weight:700;font-family:'Courier New',monospace;letter-spacing:2px;">
+            ${password}
+          </p>
+        </td>
+      </tr>
+    </table>
+
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${COLORS.amberBg};border:1px solid ${COLORS.amberBorder};border-radius:10px;margin-bottom:4px;">
+      <tr>
+        <td style="padding:14px 18px;">
+          <p style="margin:0;color:${COLORS.amber};font-size:12px;font-weight:600;line-height:1.5;">
+            ⚠️ Esta senha é temporária. Troque-a no primeiro acesso, em Perfil → Alterar senha.
+          </p>
+        </td>
+      </tr>
+    </table>
+
+    ${emailButton('Acessar o painel →', LOGIN_URL)}
+
+    <p style="margin:24px 0 0;color:${COLORS.borderLight};font-size:11px;line-height:1.6;text-align:center;">
+      Se o botão não funcionar, copie e cole este link no navegador:<br>
+      <a href="${LOGIN_URL}" style="color:${COLORS.cyan};word-break:break-all;font-size:10px;">${LOGIN_URL}</a>
+    </p>
+
+    <p style="margin:20px 0 0;color:${COLORS.textMuted};font-size:12px;line-height:1.7;">
+      Você tem <strong style="color:${COLORS.textSecondary};">7 dias</strong> para desistir da contratação e
+      receber o valor de volta, conforme o art. 49 do Código de Defesa do Consumidor.
+      É só responder este e-mail pedindo o cancelamento.
+    </p>
+  `;
+  return emailLayout(content);
+}
+
+// ==============================================================================
 // TEMPLATE: DEVICE OFFLINE
 // ==============================================================================
 function getDeviceOfflineTemplate(deviceName: string): string {
@@ -416,6 +573,54 @@ export async function sendDeviceOfflineAlertEmail(to: string, deviceName: string
     from: formatFrom(smtp!),
     to,
     subject: `📴 Tela offline — ${deviceName}`,
+    html,
+    attachments: getLogoAttachment(),
+  });
+}
+
+/**
+ * Envia a confirmação de contratação de quem comprou pelo checkout.
+ *
+ * Existe separado de `sendInviteEmail` porque o convite genérico ("você foi
+ * convidado") não menciona compra nenhuma — quem acabou de pagar precisa ver o
+ * que contratou e por quanto, junto da credencial de acesso.
+ *
+ * O assunto muda quando `simulated` é `true`: a pessoa precisa saber que não
+ * houve cobrança já na caixa de entrada, antes mesmo de abrir a mensagem.
+ */
+export async function sendPurchaseConfirmationEmail(
+  to: string,
+  data: {
+    name: string;
+    planName: string;
+    screens: number;
+    amountCents: number;
+    password: string;
+    simulated: boolean;
+  }
+): Promise<void> {
+  const transporter = await createTransporter();
+  if (!transporter) {
+    throw new Error('Provedor de e-mail não configurado. Configure nas Configurações do sistema.');
+  }
+
+  const smtp = await settingsService.getSmtpConfig();
+  const html = getPurchaseTemplate(
+    to,
+    data.name,
+    data.planName,
+    data.screens,
+    data.amountCents,
+    data.password,
+    data.simulated
+  );
+
+  await transporter.sendMail({
+    from: formatFrom(smtp!),
+    to,
+    subject: data.simulated
+      ? '🧪 Simulação de contratação (nenhum valor cobrado) — TelaHub'
+      : '✅ Contratação confirmada — seu acesso ao TelaHub',
     html,
     attachments: getLogoAttachment(),
   });

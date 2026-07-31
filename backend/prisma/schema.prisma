@@ -217,6 +217,18 @@ model CheckoutSession {
   organizationId String?
   organization   Organization? @relation(fields: [organizationId], references: [id])
 
+  // ─── Cobrança ──────────────────────────────────────────────────────────────
+  // Todos anuláveis: a sessão existe muito antes de haver cobrança.
+  //
+  // `paymentProvider` guarda QUEM processou (`simulado` hoje; `asaas`/`stripe`
+  // quando houver gateway real). Registrar isso na própria sessão é o que
+  // permite, depois, distinguir no relatório uma contratação simulada de uma
+  // paga de verdade — sem essa coluna, as duas ficariam indistinguíveis no
+  // histórico e a primeira conciliação financeira seria um pesadelo.
+  paymentMethod    String? // pix | credit_card
+  paymentProvider  String?
+  providerChargeId String?
+
   // Atribuição de campanha (o site já captura UTM/click ids no `tracking.js`).
   utmSource   String?
   utmMedium   String?

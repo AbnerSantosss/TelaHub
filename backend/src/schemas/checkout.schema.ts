@@ -136,6 +136,44 @@ export const submitCheckoutSessionSchema = z.object({
 
 export type SubmitCheckoutSessionInput = z.infer<typeof submitCheckoutSessionSchema>;
 
+/** Métodos efetivamente COBRÁVEIS. Subconjunto de `PAYMENT_METHODS`. */
+export const PAYABLE_METHODS = ['pix', 'credit_card'] as const;
+
+/**
+ * Dados de cartão.
+ *
+ * Note o que NÃO está aqui: nenhum campo é `optional()` com fallback silencioso,
+ * porque cartão incompleto tem que falhar alto. E nada disto é persistido — ver
+ * o comentário em `payment.service.ts::startPayment`.
+ */
+export const cardSchema = z.object({
+  number: z
+    .string()
+    .trim()
+    .transform((value) => value.replace(/\D/g, ''))
+    .refine((digits) => digits.length >= 13 && digits.length <= 19, {
+      message: 'Número de cartão deve ter entre 13 e 19 dígitos.',
+    }),
+  holder: z.string().trim().min(2, 'Informe o nome impresso no cartão.').max(120),
+  expiry: z
+    .string()
+    .trim()
+    .regex(/^(0[1-9]|1[0-2])\/?([0-9]{2}|[0-9]{4})$/, 'Validade inválida (use MM/AA).'),
+  cvv: z.string().trim().regex(/^[0-9]{3,4}$/, 'CVV inválido.'),
+});
+
+export const startPaymentSchema = z
+  .object({
+    method: z.enum(PAYABLE_METHODS, { message: 'Escolha Pix ou cartão de crédito.' }),
+    card: cardSchema.optional(),
+  })
+  .refine((value) => value.method !== 'credit_card' || !!value.card, {
+    message: 'Informe os dados do cartão.',
+    path: ['card'],
+  });
+
+export type StartPaymentInput = z.infer<typeof startPaymentSchema>;
+
 /** Canais pelos quais a recuperação de abandono pode ser feita (registro manual). */
 export const RECOVERY_CHANNELS = ['whatsapp', 'email', 'phone', 'other'] as const;
 

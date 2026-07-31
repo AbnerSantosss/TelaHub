@@ -49,6 +49,10 @@ services:
       - SMTP_SECURE=${SMTP_SECURE:-}
       - SMTP_FROM_EMAIL=${SMTP_FROM_EMAIL:-}
       - SMTP_FROM_NAME=${SMTP_FROM_NAME:-TelaHub}
+      # Pagamento — ver a nota em `docker-compose.prod.yml`. Aqui o padrão
+      # simulado é o esperado: esta stack não é produção.
+      - PAYMENT_PROVIDER=${PAYMENT_PROVIDER:-simulado}
+      - ALLOW_SIMULATED_PAYMENTS=${ALLOW_SIMULATED_PAYMENTS:-}
     depends_on:
       - db
     volumes:
