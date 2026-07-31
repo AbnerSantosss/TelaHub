@@ -11,6 +11,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 import { isApiError } from '../lib/api';
+import { declinedCard, isLuhnValid, randomCard } from '../lib/fake-data';
 import {
   estimateMonthlyCents,
   fetchPlanCatalog,
@@ -20,14 +21,20 @@ import {
 } from '../lib/plans';
 import {
   createSession,
+  fetchPaymentConfig,
   getSession,
   readAttribution,
   readSelectionHint,
   replaceUrlWithToken,
+  simulatePayment,
+  startPayment,
   submitSession,
   updateSession,
   type CheckoutPaymentResult,
   type CheckoutSession,
+  type PaymentConfig,
+  type PaymentMethod,
+  type StartPaymentResult,
   type UpdateSessionInput,
 } from '../lib/session';
 import { localPhoneDigits, maskCnpj, maskCpf, maskPhone, onlyDigits } from './format';
@@ -52,6 +59,100 @@ const SCREENS_DEBOUNCE_MS = 600;
 export interface FocusRequest {
   field: IdentityField;
   nonce: number;
+}
+
+// ─── Cartão ──────────────────────────────────────────────────────────────────
+//
+// O rascunho do cartão mora AQUI, e não dentro do `PaymentStep`, pela mesma
+// razão que a identidade mora aqui: quem dispara a cobrança é o `finish()`, que
+// também é chamado pela barra fixa do rodapé em telas estreitas. Se os campos
+// vivessem no passo, o CTA do rodapé não teria como enviá-los.
+//
+// Nada disto é persistido em lugar nenhum — nem em `localStorage`, nem na
+// sessão do servidor (ver o comentário em `payment.service.ts::startPayment`).
+
+export interface CardDraft {
+  number: string;
+  holder: string;
+  expiry: string;
+  cvv: string;
+}
+
+export type CardField = keyof CardDraft;
+
+export type CardErrors = Partial<Record<CardField, string>>;
+
+export const CARD_FIELD_ORDER: CardField[] = ['number', 'holder', 'expiry', 'cvv'];
+
+const emptyCard = (): CardDraft => ({ number: '', holder: '', expiry: '', cvv: '' });
+
+/** Grupos de 4, até 19 dígitos (o máximo aceito pelo backend). */
+export const maskCardNumber = (value: string): string =>
+  onlyDigits(value)
+    .slice(0, 19)
+    .replace(/(\d{4})(?=\d)/g, '$1 ')
+    .trim();
+
+/** `MM/AA`. A barra é inserida sozinha para o campo aceitar só a digitação. */
+export const maskExpiry = (value: string): string => {
+  const digits = onlyDigits(value).slice(0, 4);
+  if (digits.length <= 2) return digits;
+  return `${digits.slice(0, 2)}/${digits.slice(2)}`;
+};
+
+/**
+ * Validação de cartão do lado do cliente.
+ *
+ * Espelha `cardSchema` do backend de propósito — a régua real continua sendo a
+ * dele; esta aqui só evita uma ida à rede (e uma tentativa de cobrança) para
+ * erro de digitação. O Luhn reusa `isLuhnValid` de `fake-data` em vez de
+ * reimplementar: duas cópias do mesmo algoritmo divergem com o tempo, e a
+ * divergência aqui significaria o gerador de teste produzindo cartão que o
+ * próprio formulário recusa.
+ */
+export function validateCardField(field: CardField, draft: CardDraft): string | undefined {
+  if (field === 'number') {
+    const digits = onlyDigits(draft.number);
+    if (!digits) return 'Informe o número do cartão.';
+    if (digits.length < 13 || digits.length > 19) return 'O número deve ter de 13 a 19 dígitos.';
+    if (!isLuhnValid(digits)) return 'Número de cartão inválido. Confira os dígitos.';
+    return undefined;
+  }
+
+  if (field === 'holder') {
+    const holder = draft.holder.trim();
+    if (holder.length < 2) return 'Informe o nome impresso no cartão.';
+    if (holder.length > 120) return 'Nome muito longo.';
+    return undefined;
+  }
+
+  if (field === 'expiry') {
+    const match = /^(0[1-9]|1[0-2])\/([0-9]{2})$/.exec(draft.expiry.trim());
+    if (!match) return 'Validade inválida (use MM/AA).';
+    const month = Number(match[1]);
+    const year = 2000 + Number(match[2]);
+    const now = new Date();
+    // Cartão vale até o ÚLTIMO dia do mês impresso: comparar com o primeiro dia
+    // do mês seguinte evita recusar um cartão que ainda é válido hoje.
+    const expiresAfter = new Date(year, month, 1);
+    if (expiresAfter <= new Date(now.getFullYear(), now.getMonth(), 1)) {
+      return 'Este cartão está vencido.';
+    }
+    return undefined;
+  }
+
+  const cvv = onlyDigits(draft.cvv);
+  if (cvv.length < 3 || cvv.length > 4) return 'CVV inválido (3 ou 4 dígitos).';
+  return undefined;
+}
+
+function validateCard(draft: CardDraft): CardErrors {
+  const errors: CardErrors = {};
+  for (const field of CARD_FIELD_ORDER) {
+    const error = validateCardField(field, draft);
+    if (error) errors[field] = error;
+  }
+  return errors;
 }
 
 const messageOf = (error: unknown, fallback: string): string => {
@@ -98,6 +199,17 @@ export function useCheckout(routeToken?: string) {
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<CheckoutPaymentResult | null>(null);
 
+  // ─── Pagamento ─────────────────────────────────────────────────────────────
+  const [paymentConfig, setPaymentConfig] = useState<PaymentConfig | null>(null);
+  const [paymentConfigError, setPaymentConfigError] = useState<string | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | null>(null);
+  const [card, setCard] = useState<CardDraft>(emptyCard);
+  const [cardErrors, setCardErrors] = useState<CardErrors>({});
+  const [paying, setPaying] = useState(false);
+  const [confirmingPix, setConfirmingPix] = useState(false);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
+  const [payment, setPayment] = useState<StartPaymentResult | null>(null);
+
   const plans = useMemo(() => catalog?.plans ?? [], [catalog]);
   const selectedPlan = useMemo<Plan | null>(
     () => plans.find((plan) => plan.code === planCode) ?? null,
@@ -124,6 +236,37 @@ export function useCheckout(routeToken?: string) {
       cancelled = true;
     };
   }, [catalogAttempt]);
+
+  // ─── Configuração de pagamento ─────────────────────────────────────────────
+  //
+  // Falhar aqui NÃO derruba o checkout: sem provedor disponível (503) a etapa 3
+  // volta ao caminho antigo — solicitação registrada e contato do comercial.
+  // Bloquear a tela seria transformar uma indisponibilidade de gateway em lead
+  // perdido.
+  useEffect(() => {
+    let cancelled = false;
+
+    fetchPaymentConfig()
+      .then((config) => {
+        if (cancelled) return;
+        setPaymentConfig(config);
+        setPaymentConfigError(null);
+        // Método único (ex.: provedor que só faz Pix) já vem escolhido: um
+        // rádio solitário obrigatório é clique sem decisão.
+        if (config.methods.length === 1) setPaymentMethod(config.methods[0] ?? null);
+      })
+      .catch((error: unknown) => {
+        if (cancelled) return;
+        setPaymentConfig(null);
+        setPaymentConfigError(
+          messageOf(error, 'O pagamento online está indisponível no momento.')
+        );
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // ─── Abertura/criação da sessão ────────────────────────────────────────────
   const bootKeyRef = useRef<string | null>(null);
@@ -428,7 +571,176 @@ export function useCheckout(routeToken?: string) {
     setActiveStep('payment');
   }, [planCode, screens, sendPatch]);
 
+  // ─── Ações de pagamento ────────────────────────────────────────────────────
+
+  /**
+   * Só é possível cobrar quando há provedor ativo COM método oferecido e um
+   * valor cobrável. Plano sob consulta e plano gratuito ficam de fora — o
+   * backend recusaria (`amount_not_payable`), e mostrar um botão "Pagar
+   * R$ 0,00" seria pior do que não mostrar método nenhum.
+   */
+  const canPayOnline =
+    !!paymentConfig &&
+    paymentConfig.methods.length > 0 &&
+    !selectedPlan?.quoteOnly &&
+    !selectedPlan?.free &&
+    (session?.amountCents ?? 0) > 0;
+
+  const selectPaymentMethod = useCallback((method: PaymentMethod) => {
+    setPaymentMethod(method);
+    setPaymentError(null);
+    // Recusa anterior some ao trocar de método: o motivo era do método antigo.
+    setPayment((current) => (current && current.status === 'declined' ? null : current));
+  }, []);
+
+  const setCardField = useCallback((field: CardField, value: string) => {
+    setCard((current) => {
+      if (field === 'number') return { ...current, number: maskCardNumber(value) };
+      if (field === 'expiry') return { ...current, expiry: maskExpiry(value) };
+      if (field === 'cvv') return { ...current, cvv: onlyDigits(value).slice(0, 4) };
+      return { ...current, holder: value };
+    });
+    setCardErrors((current) => (current[field] ? { ...current, [field]: undefined } : current));
+  }, []);
+
+  const blurCardField = useCallback(
+    (field: CardField) => {
+      setCardErrors((current) => ({ ...current, [field]: validateCardField(field, card) }));
+    },
+    [card]
+  );
+
+  /**
+   * Preenche o formulário com um cartão de teste. A tela só oferece isto quando
+   * `paymentConfig.simulated` — com gateway real, um botão desses seria um
+   * convite a tentar cobrança com número inventado.
+   */
+  const fillTestCard = useCallback((kind: 'approved' | 'declined' = 'approved') => {
+    const fake = kind === 'declined' ? declinedCard() : randomCard();
+    setCard({
+      number: maskCardNumber(fake.number),
+      holder: fake.holder,
+      expiry: fake.expiry,
+      cvv: fake.cvv,
+    });
+    setCardErrors({});
+    setPaymentError(null);
+    setPayment(null);
+  }, []);
+
+  /** Limpa o resultado para uma nova tentativa (o caminho da recusa). */
+  const resetPayment = useCallback(() => {
+    setPayment(null);
+    setPaymentError(null);
+  }, []);
+
+  const payWith = useCallback(
+    async (method: PaymentMethod, cardOverride?: CardDraft) => {
+      const token = tokenRef.current;
+      if (!token) return;
+
+      const draft = cardOverride ?? card;
+      if (method === 'credit_card') {
+        const errors = validateCard(draft);
+        setCardErrors(errors);
+        if (CARD_FIELD_ORDER.some((field) => errors[field])) return;
+      }
+
+      // Mesma razão do fluxo antigo: a última mudança de telas em debounce
+      // precisa estar gravada ANTES de cobrar — o valor cobrado é o do
+      // servidor, e ele não pode ficar 600ms atrasado em relação à tela.
+      const flushed = await sendPatch();
+      if (!flushed) return;
+
+      setPaymentError(null);
+      setPaying(true);
+      try {
+        const outcome = await startPayment(token, {
+          method,
+          card:
+            method === 'credit_card'
+              ? {
+                  number: onlyDigits(draft.number),
+                  holder: draft.holder.trim(),
+                  expiry: draft.expiry.trim(),
+                  cvv: onlyDigits(draft.cvv),
+                }
+              : undefined,
+        });
+
+        setPayment(outcome);
+        if (outcome.paid) {
+          setCompleted((current) => ({ ...current, payment: true }));
+          // O rascunho do cartão é descartado assim que deixa de ser
+          // necessário: nada de número de cartão parado na memória da aba.
+          setCard(emptyCard());
+          setCardErrors({});
+        }
+      } catch (error) {
+        if (!handleFatal(error)) {
+          setPaymentError(messageOf(error, 'Não conseguimos processar o pagamento agora.'));
+        }
+      } finally {
+        setPaying(false);
+      }
+    },
+    [card, handleFatal, sendPatch]
+  );
+
+  /** "Eu paguei o Pix" da demonstração. Só existe enquanto o provedor é simulado. */
+  const confirmSimulated = useCallback(async () => {
+    const token = tokenRef.current;
+    if (!token) return;
+
+    setPaymentError(null);
+    setConfirmingPix(true);
+    try {
+      const outcome = await simulatePayment(token);
+      if (!outcome.paid) {
+        setPaymentError(outcome.message);
+        return;
+      }
+      // Mantém o `method`/`provider` do resultado anterior e só promove o
+      // estado — assim a tela de sucesso continua sabendo que veio do Pix.
+      setPayment((current) =>
+        current
+          ? { ...current, status: 'approved', paid: true, pix: null, message: outcome.message }
+          : current
+      );
+      setCompleted((current) => ({ ...current, payment: true }));
+    } catch (error) {
+      if (!handleFatal(error)) {
+        setPaymentError(messageOf(error, 'Não conseguimos confirmar o pagamento simulado.'));
+      }
+    } finally {
+      setConfirmingPix(false);
+    }
+  }, [handleFatal]);
+
   const finish = useCallback(async () => {
+    // Caminho NOVO: existe provedor e o valor é cobrável — a etapa 3 cobra.
+    // `finish` continua sendo o ponto único de conclusão porque a barra fixa do
+    // rodapé (telas estreitas) chama esta função, e não o botão do passo.
+    if (canPayOnline) {
+      if (payment?.paid || paying || confirmingPix) return;
+      if (payment?.status === 'pending') {
+        // Pix já gerado: o próximo passo é confirmar, não gerar outro QR
+        // (dois QRs para a mesma sessão é o jeito mais fácil de alguém pagar
+        // duas vezes). Com provedor real, quem confirma é o banco.
+        if (payment.simulated) await confirmSimulated();
+        else setPaymentError('Estamos aguardando a confirmação do seu Pix pelo banco.');
+        return;
+      }
+      if (!paymentMethod) {
+        setPaymentError('Escolha uma forma de pagamento para continuar.');
+        return;
+      }
+      await payWith(paymentMethod);
+      return;
+    }
+
+    // Caminho ANTIGO (plano sob consulta, gratuito ou gateway indisponível):
+    // registra a solicitação e encaminha ao comercial, sem cobrar nada.
     const token = tokenRef.current;
     if (!token) return;
 
@@ -450,7 +762,17 @@ export function useCheckout(routeToken?: string) {
     } finally {
       setSubmitting(false);
     }
-  }, [handleFatal, sendPatch]);
+  }, [
+    canPayOnline,
+    confirmSimulated,
+    confirmingPix,
+    handleFatal,
+    payWith,
+    payment,
+    paymentMethod,
+    paying,
+    sendPatch,
+  ]);
 
   // ─── Navegação entre passos ────────────────────────────────────────────────
   const editStep = useCallback((step: StepId) => {
@@ -476,6 +798,12 @@ export function useCheckout(routeToken?: string) {
     setSessionError(null);
     setResult(null);
     setSession(null);
+    // Cobrança da sessão antiga não vale para a nova — inclusive o rascunho do
+    // cartão, que não deve sobreviver a uma troca de sessão.
+    setPayment(null);
+    setPaymentError(null);
+    setCard(emptyCard());
+    setCardErrors({});
     setCompleted({ identify: false, plan: false, payment: false });
     setActiveStep('identify');
     setForceCreate(true);
@@ -491,6 +819,27 @@ export function useCheckout(routeToken?: string) {
   /** Durante a ida ao servidor mostra a previsão; depois, o valor dele. */
   const totalCents = amountSyncing ? localCents : serverCents;
 
+  /**
+   * Pagamento online concluído, traduzido para o formato do fluxo antigo.
+   *
+   * Existe por um motivo prático: `CheckoutPage` usa `result` para esconder a
+   * barra fixa do rodapé quando não há mais nada a fazer. Sem este espelho, a
+   * barra continuaria oferecendo "Concluir" depois de a conta já estar
+   * liberada. O `PaymentStep` olha `payment` ANTES de `result`, então quem
+   * desenha a tela de sucesso é sempre o resultado real da cobrança.
+   */
+  const onlineResult: CheckoutPaymentResult | null = payment?.paid
+    ? {
+        status: 'paid',
+        gateway: payment.provider,
+        nextStep: 'acesso-liberado',
+        // `charged` é o que a tela usa para dizer "nada foi cobrado": num
+        // provedor simulado nenhum valor saiu da conta de ninguém.
+        charged: !payment.simulated,
+        message: payment.message,
+      }
+    : null;
+
   return {
     // dados
     catalog,
@@ -503,7 +852,21 @@ export function useCheckout(routeToken?: string) {
     identity,
     identityErrors,
     focusRequest,
-    result,
+    result: result ?? onlineResult,
+
+    // pagamento
+    paymentConfig,
+    paymentConfigError,
+    paymentMethods: paymentConfig?.methods ?? [],
+    simulatedPayment: paymentConfig?.simulated === true,
+    canPayOnline,
+    paymentMethod,
+    card,
+    cardErrors,
+    payment,
+    paymentError,
+    paying,
+    confirmingPix,
 
     // estados de carga/erro
     catalogError,
@@ -542,6 +905,15 @@ export function useCheckout(routeToken?: string) {
     confirmPlan,
     finish,
     planError,
+
+    // ações de pagamento
+    selectPaymentMethod,
+    setCardField,
+    blurCardField,
+    fillTestCard,
+    payWith,
+    confirmSimulated,
+    resetPayment,
   };
 }
 

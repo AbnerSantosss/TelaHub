@@ -4,8 +4,9 @@
 // emitida contra o CNPJ. Quando é CNPJ, a razão social passa a ser obrigatória,
 // porque é o nome que sai na nota.
 import { useEffect, useRef } from 'react';
-import { Building2, Lock, User } from 'lucide-react';
+import { Building2, Lock, User, Wand2 } from 'lucide-react';
 
+import { randomIdentity } from '../lib/fake-data';
 import { PrimaryButton, TextField } from './primitives';
 import type { CheckoutController } from './useCheckout';
 import type { IdentityField } from './validation';
@@ -14,6 +15,19 @@ const KIND_OPTIONS = [
   { kind: 'cpf' as const, label: 'CPF', icon: User, help: 'Pessoa física' },
   { kind: 'cnpj' as const, label: 'CNPJ', icon: Building2, help: 'Empresa (nota contra o CNPJ)' },
 ];
+
+/**
+ * Leitura defensiva da config de pagamento.
+ *
+ * O `paymentConfig.simulated` é a fonte de verdade de "isto é demonstração" para
+ * o resto do app, mas o campo está sendo introduzido no controller em paralelo.
+ * Ler por uma interseção local mantém este arquivo compilando antes e depois
+ * disso, sem precisar alterar `useCheckout.ts` — e o dia em que o campo existir
+ * de verdade, o tipo aqui continua correto (é o mesmo formato).
+ */
+type DemoAwareController = CheckoutController & {
+  paymentConfig?: { simulated?: boolean };
+};
 
 export const IdentificationStep = ({ checkout }: { checkout: CheckoutController }) => {
   const {
@@ -28,6 +42,37 @@ export const IdentificationStep = ({ checkout }: { checkout: CheckoutController 
   } = checkout;
 
   const isCnpj = identity.documentKind === 'cnpj';
+
+  // O atalho de pré-preenchimento só existe fora de produção real: em `vite dev`
+  // ou quando o backend declara que o pagamento é simulado. Nunca deve aparecer
+  // para um comprador de verdade.
+  const { paymentConfig } = checkout as DemoAwareController;
+  // `import.meta.env` só é tipado com `vite/client` nos `types` do tsconfig, e
+  // este projeto declara apenas `node` — daí a leitura por interseção local, que
+  // evita mexer na config do build só por causa deste botão.
+  const viteEnv = (import.meta as ImportMeta & { env?: { DEV?: boolean } }).env;
+  const showFakeFill = viteEnv?.DEV === true || paymentConfig?.simulated === true;
+
+  /**
+   * Preenche o passo com uma identidade fictícia porém válida.
+   *
+   * Usa **o tipo de documento já selecionado** e deliberadamente não chama
+   * `setDocumentKind`: essa função limpa `document` e `companyName`, e como o
+   * estado do React só é aplicado no próximo render, trocar o tipo e escrever o
+   * documento no mesmo handler mascararia o valor com o tipo antigo (CPF com
+   * máscara de CNPJ e vice-versa) — um bug intermitente, que aparece só às vezes.
+   * Respeitando o tipo escolhido pela pessoa, o preenchimento é determinístico.
+   */
+  const fillWithFakeData = (): void => {
+    const fake = randomIdentity(identity.documentKind);
+    setIdentityField('name', fake.name);
+    setIdentityField('email', fake.email);
+    setIdentityField('phone', fake.phone);
+    setIdentityField('document', fake.document);
+    // No fluxo CPF o campo de razão social nem é renderizado — escrever nele
+    // deixaria lixo invisível no rascunho.
+    if (fake.documentKind === 'cnpj') setIdentityField('companyName', fake.companyName);
+  };
 
   const fieldRefs = useRef<Partial<Record<IdentityField, HTMLInputElement | null>>>({});
   const bindRef =
@@ -173,6 +218,21 @@ export const IdentificationStep = ({ checkout }: { checkout: CheckoutController 
       <PrimaryButton type="submit" busy={savingIdentity} busyLabel="Salvando…">
         Continuar
       </PrimaryButton>
+
+      {showFakeFill ? (
+        // `type="button"`: dentro de um `<form>`, um botão sem tipo explícito é
+        // submit — clicar aqui enviaria o passo em vez de preencher.
+        // Fica abaixo do CTA, em borda tracejada e texto secundário, para ler
+        // como ferramenta de bastidor e não competir com "Continuar".
+        <button
+          type="button"
+          onClick={fillWithFakeData}
+          className="flex items-center justify-center gap-2 self-center rounded-lg border border-dashed border-line px-3 py-2 text-xs font-semibold text-ink-muted transition-colors hover:border-ink-subtle hover:text-ink"
+        >
+          <Wand2 aria-hidden="true" size={14} />
+          Preencher com dados de teste
+        </button>
+      ) : null}
     </form>
   );
 };

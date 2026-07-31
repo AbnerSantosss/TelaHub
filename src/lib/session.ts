@@ -163,6 +163,172 @@ export const submitSession = async (
   };
 };
 
+// ───────────────────────────────────────────────────────────────────────────
+// PAGAMENTO
+//
+// O front NÃO decide o que pode ser oferecido: quem manda é
+// `GET /checkout/payment-config`. Se a tela montasse os métodos por conta
+// própria, mostraria Pix num provedor que não faz Pix — e, pior, o aviso de
+// "pagamento simulado" seria a primeira coisa a ficar desatualizada no dia em
+// que o gateway real entrasse. `simulated` vem do servidor por isso.
+// ───────────────────────────────────────────────────────────────────────────
+
+/** Métodos efetivamente cobráveis. Boleto não está aqui de propósito. */
+export type PaymentMethod = 'pix' | 'credit_card';
+
+export interface PaymentConfig {
+  provider: string;
+  providerLabel: string;
+  /** `true` = nenhum valor é cobrado de verdade. A tela precisa dizer isso. */
+  simulated: boolean;
+  methods: PaymentMethod[];
+}
+
+/** Dados do cartão. Trafegam uma vez e não são guardados em lugar nenhum. */
+export interface CardInput {
+  number: string;
+  holder: string;
+  expiry: string;
+  cvv: string;
+}
+
+export interface PixCharge {
+  /** Payload "copia e cola" (BR Code). */
+  copyPaste: string;
+  /** Imagem do QR já pronta, para não precisarmos de biblioteca de QR aqui. */
+  qrCodeDataUri: string;
+  expiresAt: string | null;
+}
+
+export interface CardCharge {
+  brand: string;
+  last4: string;
+}
+
+export interface StartPaymentResult {
+  method: PaymentMethod;
+  provider: string;
+  simulated: boolean;
+  /** `declined` NÃO é erro HTTP: vem 200 e a tela deixa tentar de novo. */
+  status: 'pending' | 'approved' | 'declined';
+  /** `true` quando a conta já foi liberada (cartão aprovado / Pix confirmado). */
+  paid: boolean;
+  pix: PixCharge | null;
+  card: CardCharge | null;
+  declineReason: string | null;
+  message: string;
+}
+
+export interface SimulatePaymentResult {
+  paid: boolean;
+  alreadyPaid: boolean;
+  message: string;
+}
+
+const PAYMENT_METHODS: PaymentMethod[] = ['pix', 'credit_card'];
+
+const CHARGE_STATUSES: StartPaymentResult['status'][] = ['pending', 'approved', 'declined'];
+
+function normalizePaymentConfig(payload: unknown): PaymentConfig {
+  const raw = asRecord(payload);
+  const methods = Array.isArray(raw.methods) ? raw.methods : [];
+
+  return {
+    provider: optionalText(raw.provider) ?? 'desconhecido',
+    providerLabel: optionalText(raw.providerLabel) ?? 'provedor de pagamento',
+    // Só `true` explícito conta como simulado; qualquer outra coisa é tratada
+    // como cobrança REAL. Errar para o lado de "é dinheiro de verdade" é o
+    // único default seguro: o oposto esconderia uma cobrança real do usuário.
+    simulated: raw.simulated === true,
+    // Filtra contra a lista conhecida em vez de confiar no que veio: um método
+    // novo no backend não pode fazer a tela renderizar um card sem formulário.
+    methods: PAYMENT_METHODS.filter((method) => methods.includes(method)),
+  };
+}
+
+/**
+ * O `qrCodeDataUri` vai direto para o `src` de uma `<img>`. Aceitar qualquer
+ * string ali significaria deixar a resposta escolher o esquema da URL
+ * (`javascript:`, um host externo que vaza a visita); por isso só passa data
+ * URI de imagem.
+ */
+const safeImageDataUri = (value: unknown): string | null => {
+  const text = optionalText(value);
+  return text && /^data:image\/(png|jpeg|jpg|gif|webp|svg\+xml);base64,/i.test(text) ? text : null;
+};
+
+function normalizePixCharge(payload: unknown): PixCharge | null {
+  const raw = asRecord(payload);
+  const copyPaste = optionalText(raw.copyPaste);
+  const qrCodeDataUri = safeImageDataUri(raw.qrCodeDataUri);
+  // Sem o "copia e cola" não há Pix pagável — o QR sozinho não é suficiente
+  // (quem paga pelo mesmo aparelho não consegue escanear a própria tela).
+  if (!copyPaste) return null;
+  return { copyPaste, qrCodeDataUri: qrCodeDataUri ?? '', expiresAt: optionalText(raw.expiresAt) };
+}
+
+function normalizeStartPayment(payload: unknown, fallbackMethod: PaymentMethod): StartPaymentResult {
+  const raw = asRecord(payload);
+  const method = PAYMENT_METHODS.find((candidate) => candidate === raw.method) ?? fallbackMethod;
+  const status = CHARGE_STATUSES.find((candidate) => candidate === raw.status) ?? 'pending';
+  const card = asRecord(raw.card);
+
+  return {
+    method,
+    provider: optionalText(raw.provider) ?? 'desconhecido',
+    simulated: raw.simulated === true,
+    status,
+    // `paid` só é verdade se o servidor disser explicitamente. Um `true`
+    // inferido do status abriria a tela de sucesso sem a conta liberada.
+    paid: raw.paid === true,
+    pix: status === 'pending' ? normalizePixCharge(raw.pix) : null,
+    card: optionalText(card.last4)
+      ? { brand: optionalText(card.brand) ?? 'cartão', last4: String(card.last4) }
+      : null,
+    declineReason: optionalText(raw.declineReason),
+    message: optionalText(raw.message) ?? 'Pagamento processado.',
+  };
+}
+
+/** O que a etapa de pagamento pode oferecer, segundo o provedor ativo. */
+export const fetchPaymentConfig = async (): Promise<PaymentConfig> =>
+  normalizePaymentConfig(await api.get<unknown>('/checkout/payment-config'));
+
+/**
+ * Inicia a cobrança. Cartão resolve de forma síncrona (`approved`/`declined`);
+ * Pix volta `pending` com o QR e a confirmação chega depois.
+ */
+export const startPayment = async (
+  publicToken: string,
+  input: { method: PaymentMethod; card?: CardInput }
+): Promise<StartPaymentResult> =>
+  normalizeStartPayment(
+    await api.post<unknown>(
+      `/checkout/sessions/${encodeURIComponent(publicToken)}/pay`,
+      input
+    ),
+    input.method
+  );
+
+/**
+ * Confirma um pagamento SIMULADO (o "eu paguei o Pix" da demonstração).
+ * Esta rota só existe enquanto o provedor ativo for simulado — com gateway
+ * real ela responde 404, de propósito.
+ */
+export const simulatePayment = async (publicToken: string): Promise<SimulatePaymentResult> => {
+  const raw = asRecord(
+    await api.post<unknown>(
+      `/checkout/sessions/${encodeURIComponent(publicToken)}/simulate-payment`
+    )
+  );
+
+  return {
+    paid: raw.paid === true,
+    alreadyPaid: raw.alreadyPaid === true,
+    message: optionalText(raw.message) ?? 'Pagamento simulado confirmado.',
+  };
+};
+
 const UTM_KEYS: Array<[string, keyof Attribution]> = [
   ['utm_source', 'utmSource'],
   ['utm_medium', 'utmMedium'],
