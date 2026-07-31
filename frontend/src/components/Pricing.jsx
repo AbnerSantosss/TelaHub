@@ -102,6 +102,171 @@ const plans = [
   },
 ];
 
+/**
+ * Valores usados pelo simulador de total. São os MESMOS números da grade
+ * `plans` acima e do `seed-plans.ts` do backend — o simulador só multiplica,
+ * não inventa preço. Se o catálogo mudar, atualize aqui, na grade e no seed.
+ */
+const LOJA_POR_TELA = 49;
+const REDE_POR_TELA = 39;
+const REDE_PISO_TELAS = 5;
+
+/**
+ * Simulador "quanto fica por mês para N telas". Existe porque preço por tela
+ * exige uma conta de cabeça — e é exatamente nessa conta que o visitante
+ * abandona. O total exibido é sugestão de leitura da tabela pública; quem
+ * calcula a fatura de verdade é o servidor, no checkout.
+ */
+const PriceSimulator = ({ startConversion }) => {
+  const [screens, setScreens] = useState(3);
+
+  const lojaTotal = screens * LOJA_POR_TELA;
+  const redeBilledScreens = Math.max(screens, REDE_PISO_TELAS);
+  const redeTotal = redeBilledScreens * REDE_POR_TELA;
+  // O plano sugerido é só o mais barato para a quantidade escolhida — critério
+  // aritmético, não selo de popularidade (que não podemos usar).
+  const suggested = screens === 1 ? 'gratis' : (redeTotal < lojaTotal ? 'rede' : 'loja');
+
+  const clamp = (n) => Math.min(50, Math.max(1, n));
+
+  const options = [
+    {
+      code: 'gratis',
+      name: 'Grátis',
+      total: 0,
+      note: screens === 1 ? '1 tela, para sempre' : 'cobre só 1 tela',
+      available: screens === 1,
+      cta: 'Começar grátis',
+    },
+    {
+      code: 'loja',
+      name: 'Loja',
+      total: lojaTotal,
+      note: `${screens} ${screens === 1 ? 'tela' : 'telas'} × R$ ${LOJA_POR_TELA}`,
+      available: true,
+      cta: 'Assinar o Loja',
+    },
+    {
+      code: 'rede',
+      name: 'Rede',
+      total: redeTotal,
+      note: screens < REDE_PISO_TELAS
+        ? `piso de ${REDE_PISO_TELAS} telas × R$ ${REDE_POR_TELA}`
+        : `${screens} telas × R$ ${REDE_POR_TELA}`,
+      available: true,
+      cta: 'Assinar o Rede',
+    },
+  ];
+
+  return (
+    <div className="reveal" style={{
+      background: 'var(--bg-card)',
+      border: '1px solid var(--border)',
+      borderRadius: '16px',
+      padding: '32px',
+      maxWidth: '880px',
+      margin: '0 auto 56px',
+    }}>
+      <p style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '8px', textAlign: 'center' }}>
+        Simule o seu valor
+      </p>
+      <h3 style={{ fontSize: '1.15rem', fontWeight: '800', color: 'var(--text-primary)', textAlign: 'center', marginBottom: '24px' }}>
+        Quantas telas você quer colocar no ar?
+      </h3>
+
+      {/* Stepper de telas */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', marginBottom: '12px' }}>
+        <button
+          type="button"
+          onClick={() => setScreens(s => clamp(s - 1))}
+          aria-label="Menos uma tela"
+          style={{ width: '40px', height: '40px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontSize: '1.2rem', fontWeight: '700', cursor: 'pointer' }}
+        >−</button>
+        <span aria-live="polite" style={{ fontSize: '2rem', fontWeight: '800', color: 'var(--text-primary)', minWidth: '90px', textAlign: 'center' }}>
+          {screens} {screens === 1 ? 'tela' : 'telas'}
+        </span>
+        <button
+          type="button"
+          onClick={() => setScreens(s => clamp(s + 1))}
+          aria-label="Mais uma tela"
+          style={{ width: '40px', height: '40px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontSize: '1.2rem', fontWeight: '700', cursor: 'pointer' }}
+        >+</button>
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginBottom: '28px', flexWrap: 'wrap' }}>
+        {[1, 3, 5, 10].map(n => (
+          <button
+            key={n}
+            type="button"
+            onClick={() => setScreens(n)}
+            style={{
+              padding: '6px 14px',
+              borderRadius: '99px',
+              border: screens === n ? '1px solid #0ea5e9' : '1px solid var(--border)',
+              background: screens === n ? 'rgba(14, 165, 233, 0.1)' : 'transparent',
+              color: screens === n ? '#38bdf8' : 'var(--text-muted)',
+              fontSize: '0.8rem',
+              fontWeight: '600',
+              cursor: 'pointer',
+            }}
+          >{n} {n === 1 ? 'tela' : 'telas'}</button>
+        ))}
+      </div>
+
+      {/* Totais por plano */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
+        {options.map(opt => {
+          const isSuggested = opt.code === suggested;
+          return (
+            <div key={opt.code} style={{
+              padding: '20px',
+              borderRadius: '12px',
+              background: isSuggested ? 'rgba(14, 165, 233, 0.07)' : 'var(--bg-secondary)',
+              border: isSuggested ? '1px solid rgba(14, 165, 233, 0.4)' : '1px solid var(--border)',
+              opacity: opt.available ? 1 : 0.45,
+              position: 'relative',
+              textAlign: 'center',
+            }}>
+              {isSuggested && (
+                <span style={{ position: 'absolute', top: '-10px', left: '50%', transform: 'translateX(-50%)', background: '#0ea5e9', color: '#FFFFFF', fontSize: '0.62rem', fontWeight: '700', padding: '3px 10px', borderRadius: '6px', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>
+                  Menor valor
+                </span>
+              )}
+              <p style={{ fontSize: '0.78rem', fontWeight: '700', color: isSuggested ? '#38bdf8' : 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px' }}>
+                {opt.name}
+              </p>
+              <p style={{ fontSize: '1.7rem', fontWeight: '800', color: 'var(--text-primary)', lineHeight: '1.1', marginBottom: '4px' }}>
+                {opt.available ? `R$ ${opt.total}` : '—'}
+                {opt.available && <span style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-muted)' }}> /mês</span>}
+              </p>
+              <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: opt.available ? '14px' : 0 }}>
+                {opt.note}
+              </p>
+              {opt.available && (
+                <button
+                  type="button"
+                  onClick={() => startConversion(opt.code, 'simulator', opt.cta, opt.code === 'rede' ? redeBilledScreens : screens)}
+                  className={`btn ${isSuggested ? 'btn-plan-featured' : 'btn-plan-outline'}`}
+                  style={{
+                    width: '100%',
+                    padding: '9px 0',
+                    fontSize: '0.82rem',
+                    ...(isSuggested ? { background: '#0ea5e9', color: '#FFFFFF', fontWeight: '700' } : {}),
+                  }}
+                >{opt.cta}</button>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', textAlign: 'center', marginTop: '20px', marginBottom: 0, lineHeight: '1.5' }}>
+        Valores sugeridos a partir da tabela pública acima; a fatura é calculada no checkout pelo número de telas ativas.
+        Sem fidelidade: adicione ou desative telas quando quiser, e o valor do mês seguinte acompanha.
+      </p>
+    </div>
+  );
+};
+
 const Pricing = ({ startConversion }) => {
   const [openFaq, setOpenFaq] = useState(null);
 
@@ -328,6 +493,9 @@ const Pricing = ({ startConversion }) => {
             </div>
           ))}
         </div>
+
+        {/* Simulador de total por nº de telas */}
+        <PriceSimulator startConversion={startConversion} />
 
         {/* 7-Day Guarantee Banner */}
         <div className="reveal" style={{
