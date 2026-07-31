@@ -1,50 +1,183 @@
 @import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap');
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   SISTEMA DE COR — "vitrine acesa"
+   ═══════════════════════════════════════════════════════════════════════════
+
+   Reescrito em 2026-07-31. O sistema anterior era a paleta padrão do Tailwind
+   (slate + sky) aplicada direto, e reprovava em contraste nos pontos que mais
+   importam. Medido, não estimado:
+
+     branco sobre o botão principal (#0ea5e9) ....  2,77:1   ← o CTA da página
+     accent #0ea5e9 usado como texto .............  2,77:1
+     --cyan-soft #0284c7 como texto ..............  4,10:1
+     --text-footer #94a3b8 .......................  2,56:1
+
+   O mínimo da WCAG 2.2 AA para texto normal é 4,5:1. Um CTA que o cliente com
+   catarata, ou qualquer pessoa num celular sob sol, não consegue ler é um
+   problema de conversão antes de ser de acessibilidade.
+
+   ── A ideia ──────────────────────────────────────────────────────────────
+   O produto é uma TELA ACESA dentro de uma loja. A página passa a alternar
+   entre "papel" (fundo claro, leitura longa, alto contraste) e "painel aceso"
+   (blocos escuros onde a tela do produto aparece). O contraste deixa de ser
+   um detalhe de acabamento e vira a própria linguagem visual.
+
+   ── A regra que não pode ser quebrada ────────────────────────────────────
+   O azul da marca existe em DOIS níveis, e eles não são intercambiáveis:
+
+     --brand     #0369A1  — texto, link, ícone e preenchimento de botão.
+                            5,93:1 sobre papel. É o único que pode carregar
+                            texto sobre fundo claro.
+     --brand-lit #38BDF8  — brilho, borda acesa e texto SOBRE painel escuro.
+                            8,62:1 sobre --panel; sobre papel dá 2,3:1 e
+                            NUNCA deve receber texto ali.
+
+   Foi misturar esses dois papéis num token só que produziu o botão ilegível.
+   ═══════════════════════════════════════════════════════════════════════ */
+
 :root {
-  /* ── Backgrounds (Light Mode) ── */
-  --bg-primary:    #ffffff; /* White — Background principal */
-  --bg-secondary:  rgba(255, 255, 255, 0.6); /* Transparente para a animação global */
-  --bg-tertiary:   #f8fafc; /* Slate 50 — para superfícies inset */
-  --bg-card:       #ffffff; /* White — Cards elevados */
-  --bg-card-hover: #f1f5f9;
-  --border:        #e2e8f0; /* Slate 200 — Borda padrão */
-  --border-active: #0ea5e9; /* Sky Blue */
+  /* ── Papel: as superfícies claras ── */
+  --paper:         #ffffff;
+  --paper-2:       #f4f7fb; /* superfície inset, dá profundidade sem sombra */
+  --paper-3:       #e9eff7; /* trilhos, barras de progresso, chips apagados */
 
-  /* ── Cores de Ação ── */
-  --cyan:          #0ea5e9; /* Sky Blue Accent */
-  --cyan-soft:     #0284c7; /* Sky Blue Soft — textos de destaque */
-  --cyan-dim:      rgba(14, 165, 233, 0.1);
-  --cyan-glow:     0 0 20px rgba(14, 165, 233, 0.2);
-  --cyan-hover:    #0284c7; /* Sky Blue Hover */
+  /* ── Tinta: hierarquia de texto sobre papel (todos AA ou AAA) ── */
+  --ink:           #0a1223; /* títulos ............ 18,69:1  AAA */
+  --ink-2:         #33415c; /* corpo .............. 10,24:1  AAA */
+  --ink-3:         #55637d; /* apoio, legenda .....  6,06:1  AA  */
 
-  /* ── Status ── */
-  --emerald:       #0ea5e9; /* Mudado para Azul Padrão */
-  --emerald-dim:   rgba(14, 165, 233, 0.1);
+  /* ── Linhas ── */
+  --line:          #dbe4ef; /* separador decorativo (não delimita componente) */
+  --line-strong:   #7d8ca0; /* limite de componente interativo — 3,43:1, o que
+                               a WCAG 1.4.11 exige para input e botão vazado */
 
-  --slate:         #64748B; /* Cinza Status Offline */
-  --slate-dim:     rgba(100, 116, 139, 0.08);
+  /* ── Marca, em dois níveis (ver a regra acima) ── */
+  --brand:         #0369a1;
+  --brand-hover:   #025584;
+  --brand-lit:     #38bdf8;
+  --brand-wash:    rgba(3, 105, 161, 0.08);
+  --brand-ring:    rgba(3, 105, 161, 0.35);
 
-  /* ── Destrutivo ── */
-  --rose:          #f43f5e;
-  --rose-dim:      rgba(244, 63, 94, 0.1);
+  /* ── Painel aceso: os blocos escuros ── */
+  --panel:         #071426;
+  --panel-2:       #0c1e36;
+  --on-panel:      #e9f0fa; /* 16,10:1 sobre --panel  AAA */
+  --on-panel-2:    #a8bcd6; /*  9,52:1                AAA */
+  --on-panel-3:    #7e93b0; /*  5,88:1                AA  */
+
+  /* ── Semânticos ── */
+  --ok:            #0f7a5a; /* verde escuro o bastante para virar texto */
+  --ok-lit:        #34d399;
+  --warn:          #a35a06;
+  --danger:        #b3261e;
+
+  /* ── Geometria ── */
+  --radius-sm:     8px;
+  --radius-md:     12px;
+  --radius-lg:     16px;
+  --radius-xl:     24px;
 
   /* ── Tipografia ── */
-  --text-primary:  #0f172a; /* Slate 900 — Títulos e headings */
-  --text-secondary:#475569; /* Slate 600 — Subtítulos, labels */
-  --text-muted:    #64748b; /* Slate 500 — Textos de apoio */
-  --text-footer:   #94a3b8; /* Slate 400 — Notas de rodapé */
-
-  /* ── Geometry (Arredondado) ── */
-  --radius-sm:     8px;  /* Inputs, botões */
-  --radius-md:     12px; /* Sub-containers */
-  --radius-lg:     16px; /* Cards principais */
-  --radius-xl:     24px; /* Modais, diálogos */
-
-  /* ── Typography & Motion ── */
   --font: 'Geist', 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
   --font-title: 'Geist', 'Outfit', 'Inter', system-ui, sans-serif;
   --font-mono: 'Geist Mono', 'JetBrains Mono', monospace;
+
+  /* Escala de display. Existe para que o tamanho seja escolhido de uma lista
+     curta, e não digitado a cada componente — foi assim que a página acumulou
+     onze tamanhos de fonte diferentes. */
+  --step--1: clamp(0.80rem, 0.77rem + 0.15vw, 0.88rem);
+  --step-0:  clamp(1.00rem, 0.96rem + 0.20vw, 1.10rem);
+  --step-1:  clamp(1.25rem, 1.15rem + 0.50vw, 1.50rem);
+  --step-2:  clamp(1.60rem, 1.40rem + 1.00vw, 2.10rem);
+  --step-3:  clamp(2.00rem, 1.60rem + 2.00vw, 3.00rem);
+  --step-4:  clamp(2.60rem, 1.90rem + 3.40vw, 4.25rem);
+
   --transition: 0.3s ease-out;
+
+  /* ═════════════════════════════════════════════════════════════════════
+     ALIAS DE COMPATIBILIDADE
+
+     O restante deste arquivo (~1500 linhas) e os componentes usam os nomes
+     antigos. Em vez de reescrever tudo — o que trocaria um problema de cor
+     por um de regressão visual em página que vende — os nomes antigos passam
+     a APONTAR para o sistema novo. Quem escrever componente novo usa os
+     tokens de cima; o que já existe herda a correção de contraste sozinho.
+
+     `--cyan` é o caso que importa: era #0ea5e9 e servia de texto E de fundo
+     de botão, reprovando nos dois papéis. Agora resolve para --brand, que
+     passa nos dois (5,93:1 tanto como texto sobre papel quanto como fundo
+     sob texto branco).
+     ═════════════════════════════════════════════════════════════════════ */
+  --bg-primary:    var(--paper);
+  --bg-secondary:  rgba(255, 255, 255, 0.72);
+  --bg-tertiary:   var(--paper-2);
+  --bg-card:       var(--paper);
+  --bg-card-hover: var(--paper-2);
+  --border:        var(--line);
+  --border-active: var(--brand);
+
+  --cyan:          var(--brand);
+  --cyan-soft:     var(--brand);
+  --cyan-hover:    var(--brand-hover);
+  --cyan-dim:      var(--brand-wash);
+  --cyan-glow:     0 0 0 4px var(--brand-wash);
+
+  --emerald:       var(--brand);
+  --emerald-dim:   var(--brand-wash);
+
+  --slate:         var(--ink-3);
+  --slate-dim:     rgba(85, 99, 125, 0.08);
+
+  --rose:          var(--danger);
+  --rose-dim:      rgba(179, 38, 30, 0.1);
+
+  --text-primary:  var(--ink);
+  --text-secondary:var(--ink-2);
+  --text-muted:    var(--ink-3);
+  /* Era #94a3b8 (2,56:1). Nota de rodapé continua sendo texto: quem lê termo
+     de contratação e política de preço lê exatamente daqui. */
+  --text-footer:   var(--ink-3);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SUPERFÍCIES ESCURAS — remapeamento de escopo
+
+   Três blocos da página são escuros: o rodapé, a faixa final de ação e o modal
+   de captura de lead. Todos os três estavam com texto ILEGÍVEL, e sempre pela
+   mesma causa: a superfície é escura, mas o texto herdava os tokens de tinta
+   feitos para papel. As piores medições da página vinham daqui —
+
+     logotipo no rodapé (preto sobre #111827) ....  1,18:1
+     assinatura da marca .........................  1,73:1
+     aviso de copyright ..........................  2,34:1
+
+   A correção não é caçar cada `color:` — vários vêm de estilo inline no JSX e
+   escapariam. Como variável CSS CASCATEIA, redefinir os tokens de tinta DENTRO
+   do escopo escuro faz cada `var(--text-secondary)` lá dentro resolver sozinho
+   para o valor certo, inclusive nos inline e em componente que ainda nem foi
+   escrito.
+
+   Consequência prática: para criar um bloco escuro novo, basta acrescentá-lo
+   a esta lista de seletores. Nada mais precisa ser tocado.
+   ═══════════════════════════════════════════════════════════════════════════ */
+footer,
+.cta-strip,
+.lead-modal {
+  --text-primary:   var(--on-panel);
+  --text-secondary: var(--on-panel-2);
+  --text-muted:     var(--on-panel-2);
+  --text-footer:    var(--on-panel-3);
+  --border:         rgba(168, 188, 214, 0.18);
+  /* Sobre escuro quem carrega texto é o azul aceso, nunca o --brand. */
+  --cyan:           var(--brand-lit);
+  --cyan-soft:      var(--brand-lit);
+}
+
+/* Exceção: o logotipo do rodapé tem fundo próprio da marca, e ali o azul
+   sólido continua correto por baixo do ícone branco. */
+footer .nav-logo-icon.footer-logo-icon {
+  background: var(--brand);
 }
 
 /* ═══════════════════════════════════════════
@@ -87,25 +220,163 @@ ul {
 /* ═══════════════════════════════════════════
    TECHNICAL GRID BACKGROUND (Swiss Grid)
    ═══════════════════════════════════════════ */
+/* Malha de pontos. Era branco a 3% sobre fundo branco — ou seja, não existia.
+   Agora é tinta a 5%: perceptível como textura, longe de competir com texto. */
 body::before {
   content: '';
   position: fixed;
   inset: 0;
-  background-image: 
-    radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-  background-size: 24px 24px;
+  background-image:
+    radial-gradient(rgba(10, 18, 35, 0.05) 1px, transparent 1px);
+  background-size: 26px 26px;
   pointer-events: none;
   z-index: 0;
-  opacity: 1;
 }
 
+/* Parede de telas (ScreenWall.jsx).
+   A máscara é o que separa "ambiente" de "ruído": sem ela a grade regular de
+   retângulos claros atrás do texto lê como esqueleto de carregamento, e a
+   página parece que não terminou de abrir. Com a elipse central transparente,
+   a parede vive nas bordas e a coluna de leitura fica limpa. */
 #network-canvas {
   position: fixed;
   top: 0; left: 0;
   width: 100vw; height: 100vh;
   pointer-events: none;
   z-index: 0;
-  opacity: 0.6; /* efeito de rede mais visível */
+  -webkit-mask-image: radial-gradient(
+    68% 58% at 50% 42%,
+    transparent 0%,
+    transparent 38%,
+    #000 100%
+  );
+  mask-image: radial-gradient(
+    68% 58% at 50% 42%,
+    transparent 0%,
+    transparent 38%,
+    #000 100%
+  );
+}
+
+/* Em telas estreitas o conteúdo ocupa a largura inteira: não sobra borda para
+   a parede viver, e ela só atrapalharia. */
+@media (max-width: 860px) {
+  #network-canvas { display: none; }
+}
+
+/* ═══════════════════════════════════════════
+   FOCO VISÍVEL
+
+   Não havia estilo de foco na página: quem navega por teclado (e quem usa
+   leitor de tela junto) não tinha como saber onde estava. O anel usa
+   `box-shadow` além da `outline` porque em elemento com `overflow: hidden`
+   ou `border-radius` grande a outline é cortada em alguns navegadores.
+   ═══════════════════════════════════════════ */
+:where(a, button, input, textarea, select, [tabindex]):focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* Sobre painel escuro o azul de texto some — ali o anel é o azul aceso. */
+:where(.cta-strip, .lead-modal, .panel) :where(a, button, input, textarea, select, [tabindex]):focus-visible {
+  outline-color: var(--brand-lit);
+}
+
+/* ═══════════════════════════════════════════
+   REVEAL AO ROLAR — sem depender de CDN
+
+   Antes: `gsap.from('.reveal', { opacity: 0 })` com ScrollTrigger, e o GSAP
+   vindo de dois <script> do cdnjs. Duas formas de a página ficar EM BRANCO:
+
+     1. o CDN não responde (rede corporativa, bloqueador, offline) e os 26
+        elementos `.reveal` ficam presos em opacity 0;
+     2. o GSAP carrega, mas o visitante chega por âncora (`/#precos`, que é
+        exatamente o link que o painel e o checkout usam): o ScrollTrigger de
+        tudo que ficou ACIMA do ponto de chegada nunca dispara, porque esses
+        elementos jamais "entram" pela borda de baixo.
+
+   O caso 2 foi reproduzido: a seção inteira renderizou vazia.
+
+   Numa página que é pré-renderizada justamente para o conteúdo existir sem
+   JavaScript, esconder o conteúdo COM JavaScript desfaz o trabalho. Agora o
+   estado padrão é VISÍVEL e a animação é progressiva: sem JS, sem observer,
+   ou com `prefers-reduced-motion`, o conteúdo simplesmente aparece.
+   ═══════════════════════════════════════════ */
+.reveal {
+  opacity: 1;
+  transform: none;
+}
+
+/* A classe só é adicionada pelo próprio observer, depois de confirmar que ele
+   funciona — ver `useReveal` em src/lib/reveal.js. */
+html.reveal-ready .reveal {
+  opacity: 0;
+  transform: translate3d(0, 22px, 0);
+  transition:
+    opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+
+html.reveal-ready .reveal.is-in {
+  opacity: 1;
+  transform: none;
+  will-change: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.reveal-ready .reveal,
+  html.reveal-ready .reveal.is-in {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* ═══════════════════════════════════════════
+   ENTRADA DO HERÓI
+
+   Em CSS, e não em JavaScript, por um motivo específico: é o primeiro bloco
+   que o visitante vê. Se depender de script, existe uma janela — curta, mas
+   real em 3G — em que o pré-render já pintou o texto e o script ainda não
+   rodou. Animar a partir do CSS elimina a janela.
+
+   `animation-fill-mode: both` guarda o estado inicial durante o `delay`, o
+   que evita o pisca-esconde clássico de conteúdo aparecendo antes da hora.
+   ═══════════════════════════════════════════ */
+@keyframes th-sobe {
+  from { opacity: 0; transform: translate3d(0, 26px, 0); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes th-emerge {
+  from { opacity: 0; transform: translate3d(0, 20px, 0) scale(0.975); }
+  to   { opacity: 1; transform: none; }
+}
+
+.hero-headline,
+.hero-subheadline,
+.hero-actions,
+.hero-mockup,
+.hero-float-badge {
+  animation: th-sobe 0.85s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.hero-headline     { animation-delay: 0.05s; }
+.hero-subheadline  { animation-delay: 0.16s; }
+.hero-actions      { animation-delay: 0.26s; }
+.hero-mockup       { animation: th-emerge 1.05s cubic-bezier(0.22, 1, 0.36, 1) 0.20s both; }
+.hero-float-badge  { animation-delay: 0.5s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-headline,
+  .hero-subheadline,
+  .hero-actions,
+  .hero-mockup,
+  .hero-float-badge {
+    animation: none;
+  }
 }
 
 /* ═══════════════════════════════════════════
@@ -504,12 +775,14 @@ nav {
 .mockup-url {
   margin-left: 10px;
   flex: 1;
+  /* A barra do navegador simulado é escura; o texto herdava tinta de papel
+     (1,74:1). É texto decorativo, mas ilegível também estraga a ilustração. */
+  color: var(--on-panel-2);
   background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--border);
+  border: 1px solid rgba(168, 188, 214, 0.22);
   border-radius: 6px;
   padding: 2px 10px;
   font-size: 0.7rem;
-  color: var(--text-secondary);
 }
 .mockup-body {
   background: var(--bg-primary);
@@ -776,11 +1049,16 @@ nav {
   white-space: nowrap;
 }
 .tab-btn:hover { color: var(--text-primary); }
+/* A aba ativa usava --brand-lit (#38bdf8) como TEXTO sobre um fundo azul a 20%
+   quase branco: 1,99:1. Além de ilegível, o estado selecionado é informação —
+   se ele não se distingue, a pessoa não sabe qual caso de uso está lendo.
+   Agora é o azul sólido carregando texto branco: o selecionado se lê de
+   relance, e não depende só de cor (ganha peso e sombra). */
 .tab-btn.active {
-  background: rgba(14, 165, 233, 0.2);
-  color: #38bdf8;
-  border: 1px solid rgba(14, 165, 233, 0.35);
-  box-shadow: 0 2px 12px rgba(14, 165, 233, 0.1);
+  background: var(--brand);
+  color: #ffffff;
+  border: 1px solid var(--brand);
+  box-shadow: 0 2px 12px rgba(3, 105, 161, 0.28);
 }
 .tab-icon { font-size: 1rem; }
 
@@ -884,11 +1162,13 @@ nav {
   transform: translateX(-50%);
   width: 5px;
   height: 5px;
-  background: #0ea5e9;
+  /* LED aceso sobre a moldura escura da TV: aqui o azul claro é o certo — é
+     luz sobre fundo escuro, o papel de --brand-lit. */
+  background: var(--brand-lit);
   border-radius: 50%;
-  box-shadow: 
-    0 0 6px rgba(14, 165, 233, 0.8),
-    0 0 2px #0ea5e9;
+  box-shadow:
+    0 0 6px rgba(56, 189, 248, 0.8),
+    0 0 2px var(--brand-lit);
 }
 
 .tv-bezel.tv-landscape,
@@ -1093,15 +1373,51 @@ nav {
 /* ═══════════════════════════════════════════
    FOOTER CTA STRIP
    ═══════════════════════════════════════════ */
+/* Era `linear-gradient(#0284c7 → #0ea5e9 → #38bdf8)` com texto branco por cima.
+   No fim claro do gradiente isso dava 1,90:1 — a pior medição da página, e
+   justamente no último pedido de ação antes do rodapé. Um gradiente é um fundo
+   de contraste VARIÁVEL: o texto por cima só é legível na ponta escura, e
+   nenhuma ferramenta automática acusa porque elas amostram uma cor só.
+
+   Virou painel escuro: é onde a ideia de "vitrine acesa" fecha a página, o
+   branco sobe para 16,4:1, e o botão branco com texto azul ganha o destaque
+   que o gradiente diluía. O azul não sumiu — passou a ser luz (o brilho radial
+   e a linha superior), que é o papel de --brand-lit. */
 .cta-strip {
   padding: 96px 0;
   text-align: center;
-  background: linear-gradient(135deg, #0284c7 0%, #0ea5e9 50%, #38bdf8 100%);
-  color: #FFFFFF;
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(120% 140% at 50% 0%, var(--panel-2) 0%, var(--panel) 62%),
+    var(--panel);
+  color: var(--on-panel);
 }
-.cta-strip h2 { max-width: 600px; margin: 0 auto 16px; color: #FFFFFF; }
+
+/* Fio de luz no topo — a borda superior de uma tela acesa. */
+.cta-strip::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--brand-lit) 50%,
+    transparent 100%
+  );
+  opacity: 0.7;
+}
+
+.cta-strip h2 {
+  max-width: 600px;
+  margin: 0 auto 16px;
+  color: var(--on-panel);
+  letter-spacing: -0.02em;
+}
 .cta-strip p {
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--on-panel-2); /* 9,52:1 — era branco a 80%, que sobre o azul
+                               claro do gradiente ficava em 1,6:1 */
   max-width: 480px;
   margin: 0 auto 32px;
   font-size: 1rem;
@@ -1131,8 +1447,12 @@ nav {
 .lead-modal {
   width: 100%;
   max-width: 460px;
-  background: #1e293b;
-  border: 1px solid var(--border);
+  /* Painel escuro do sistema novo. Antes era #1e293b com o texto herdando os
+     tokens de tinta ESCURA (--text-secondary, --text-muted): tinta escura
+     sobre fundo escuro, entre 1,6:1 e 2,2:1. O modal é a captura de lead do
+     Enterprise — o formulário mais caro da página estava ilegível. */
+  background: var(--panel);
+  border: 1px solid rgba(56, 189, 248, 0.22);
   border-radius: var(--radius-lg);
   padding: 36px;
   box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
@@ -1148,18 +1468,18 @@ nav {
   top: 20px; right: 20px;
   background: transparent;
   border: none;
-  color: var(--text-muted);
+  color: var(--on-panel-2);
   cursor: pointer;
   transition: color var(--transition);
   display: flex;
   align-items: center;
   justify-content: center;
 }
-.modal-close:hover { color: var(--text-primary); }
+.modal-close:hover { color: var(--on-panel); }
 .modal-close svg, .modal-close i { width: 20px; height: 20px; }
 
-.lead-modal h3 { font-size: 1.5rem; font-weight: 700; margin-bottom: 8px; }
-.lead-modal p { font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 24px; }
+.lead-modal h3 { font-size: 1.5rem; font-weight: 700; margin-bottom: 8px; color: var(--on-panel); }
+.lead-modal p { font-size: 0.88rem; color: var(--on-panel-2); margin-bottom: 24px; }
 
 .form-group {
   display: flex;
@@ -1175,25 +1495,27 @@ nav {
   color: var(--text-secondary);
 }
 .form-input {
-  background: rgba(17, 24, 39, 0.6);
-  border: 1px solid var(--border);
+  background: rgba(3, 10, 20, 0.55);
+  /* 3:1 contra o painel — o que a WCAG 1.4.11 exige do limite de um campo. */
+  border: 1px solid #6d7f97;
   border-radius: var(--radius-sm);
   padding: 12px 16px;
-  color: #f8fafc;
+  color: var(--on-panel);
   font-family: var(--font);
   font-size: 0.9rem;
   outline: none;
   transition: var(--transition);
 }
 .form-input::placeholder {
-  color: #94a3b8;
+  color: var(--on-panel-3); /* 5,88:1 — dica de preenchimento ainda é texto */
 }
 .form-input:focus {
-  border-color: var(--cyan);
-  background: rgba(17, 24, 39, 0.8);
+  border-color: var(--brand-lit);
+  background: rgba(3, 10, 20, 0.75);
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25);
 }
 .lead-modal .form-group label {
-  color: #cbd5e1;
+  color: var(--on-panel-2);
 }
 
 /* Success lead checkmark card */
@@ -1217,11 +1539,25 @@ nav {
 /* ═══════════════════════════════════════════
    FOOTER
    ═══════════════════════════════════════════ */
+/* O rodapé sempre foi escuro (#111827) mas o texto dentro dele usava a paleta
+   CLARA: #64748B para os links (2,93:1), #475569 para o aviso de copyright
+   (2,34:1) e, no logotipo, a cor herdada de --text-primary — preto sobre
+   quase-preto, 1,18:1. É o mesmo erro do modal de lead: superfície escura
+   herdando tinta de superfície clara.
+
+   Passa a usar os tokens de painel, que existem exatamente para isto. O
+   rodapé é onde moram a política de privacidade, os termos e o CNPJ: texto
+   que precisa ser legível não é opinião de design, é o que torna a
+   informação legalmente disponível. */
 footer {
   padding: 56px 0 36px;
-  background: #111827;
-  color: #94A3B8;
+  background: var(--panel);
+  color: var(--on-panel-2);
 }
+
+/* O logotipo herdava --text-primary (tinta escura) do body. */
+footer .nav-logo,
+footer .nav-logo * { color: var(--on-panel); }
 .footer-inner {
   display: flex;
   align-items: flex-start;
@@ -1236,7 +1572,7 @@ footer {
 .footer-brand p {
   margin-top: 12px;
   font-size: 0.8rem;
-  color: #64748B;
+  color: var(--on-panel-2); /* 9,52:1 — era #64748B, 2,93:1 */
   line-height: 1.6;
 }
 .footer-links { display: flex; gap: 48px; flex-wrap: wrap; }
@@ -1245,14 +1581,14 @@ footer {
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #E2E8F0;
+  color: var(--on-panel);
   margin-bottom: 14px;
 }
 .footer-col ul { display: flex; flex-direction: column; gap: 8px; }
 .footer-col ul li a,
 .footer-col ul li button {
   font-size: 0.85rem;
-  color: #64748B;
+  color: var(--on-panel-2);
   transition: color var(--transition);
   background: none;
   border: none;
@@ -1261,18 +1597,18 @@ footer {
   font-family: var(--font);
 }
 .footer-col ul li a:hover,
-.footer-col ul li button:hover { color: #CBD5E1; }
+.footer-col ul li button:hover { color: var(--on-panel); }
 .footer-bottom {
   margin-top: 40px;
   padding-top: 24px;
-  border-top: 1px solid #1E293B;
+  border-top: 1px solid rgba(168, 188, 214, 0.18);
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 12px;
 }
-.footer-bottom p { font-size: 0.78rem; color: #475569; }
+.footer-bottom p { font-size: 0.78rem; color: var(--on-panel-3); } /* 5,88:1 — era #475569, 2,34:1 */
 
 /* ═══════════════════════════════════════════
    MOBILE-FIRST RESPONSIVENESS

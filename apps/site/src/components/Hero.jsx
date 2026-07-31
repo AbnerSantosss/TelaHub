@@ -11,7 +11,7 @@ const Hero = ({
       <div className="container">
         <div className="hero-inner">
           <div className="hero-content">
-            <div className="label animate-in" style={{ background: 'rgba(14, 165, 233, 0.1)', color: '#0ea5e9', borderColor: 'rgba(14, 165, 233, 0.25)', borderRadius: '99px', fontSize: '12px' }}>
+            <div className="label animate-in" style={{ background: 'var(--brand-wash)', color: 'var(--brand)', borderColor: 'rgba(14, 165, 233, 0.25)', borderRadius: '99px', fontSize: '12px' }}>
               <span style={{ display: 'inline-block', marginRight: '6px' }}>🟢</span>
               {/* "Mais de 200 empresas" foi removido: número não verificado. Prova
                   social só volta aqui com contagem real de clientes (arts. 30 e
@@ -54,7 +54,7 @@ const Hero = ({
                 strokeWidth="2.5" 
                 strokeLinecap="round" 
                 strokeLinejoin="round" 
-                style={{ color: '#0ea5e9', width: 14, height: 14, marginRight: '6px', display: 'inline-block', verticalAlign: 'middle' }}
+                style={{ color: 'var(--brand)', width: 14, height: 14, marginRight: '6px', display: 'inline-block', verticalAlign: 'middle' }}
               >
                 <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
                 <path d="M7 11V7a5 5 0 0 1 10 0v4" />

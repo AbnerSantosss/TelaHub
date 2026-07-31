@@ -3,7 +3,7 @@ const TechArchitecture = () => {
     <section id="argumento" aria-labelledby="argumento-heading">
       <div className="container">
         <div className="argumento-header" style={{ textAlign: 'center', marginBottom: '56px' }}>
-          <div className="label reveal" style={{ background: 'rgba(14, 165, 233, 0.1)', color: '#0ea5e9', borderColor: 'rgba(14, 165, 233, 0.25)', borderRadius: '99px' }}>
+          <div className="label reveal" style={{ background: 'var(--brand-wash)', color: 'var(--brand)', borderColor: 'rgba(14, 165, 233, 0.25)', borderRadius: '99px' }}>
             Simplicidade Extrema
           </div>
           <h2 id="argumento-heading" className="reveal" style={{ fontSize: 'clamp(1.8rem, 3vw, 2.5rem)', fontWeight: '800' }}>
@@ -21,12 +21,12 @@ const TechArchitecture = () => {
         }}>
           {/* Pillar 1: O Fim do Pendrive */}
           <div className="argumento-card reveal" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', padding: '28px' }}>
-            <div className="argumento-icon" style={{ background: 'rgba(14, 165, 233, 0.1)', border: '1px solid rgba(14, 165, 233, 0.25)', width: '44px', height: '44px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyItems: 'center', marginBottom: '20px' }}>
+            <div className="argumento-icon" style={{ background: 'var(--brand-wash)', border: '1px solid rgba(14, 165, 233, 0.25)', width: '44px', height: '44px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyItems: 'center', marginBottom: '20px' }}>
               <svg 
                 xmlns="http://www.w3.org/2000/svg" 
                 viewBox="0 0 24 24" 
                 fill="none" 
-                stroke="#0ea5e9" 
+                stroke="var(--brand)" 
                 strokeWidth="2.2" 
                 strokeLinecap="round" 
                 strokeLinejoin="round" 
@@ -43,12 +43,12 @@ const TechArchitecture = () => {
 
           {/* Pillar 2: Arraste, Solte e Exiba */}
           <div className="argumento-card reveal" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', padding: '28px' }}>
-            <div className="argumento-icon" style={{ background: 'rgba(14, 165, 233, 0.1)', border: '1px solid rgba(14, 165, 233, 0.25)', width: '44px', height: '44px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyItems: 'center', marginBottom: '20px' }}>
+            <div className="argumento-icon" style={{ background: 'var(--brand-wash)', border: '1px solid rgba(14, 165, 233, 0.25)', width: '44px', height: '44px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyItems: 'center', marginBottom: '20px' }}>
               <svg 
                 xmlns="http://www.w3.org/2000/svg" 
                 viewBox="0 0 24 24" 
                 fill="none" 
-                stroke="#0ea5e9" 
+                stroke="var(--brand)" 
                 strokeWidth="2.2" 
                 strokeLinecap="round" 
                 strokeLinejoin="round" 
@@ -68,12 +68,12 @@ const TechArchitecture = () => {
 
           {/* Pillar 3: Fotos e vídeos rodando no automático */}
           <div className="argumento-card reveal" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', padding: '28px' }}>
-            <div className="argumento-icon" style={{ background: 'rgba(14, 165, 233, 0.1)', border: '1px solid rgba(14, 165, 233, 0.25)', width: '44px', height: '44px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyItems: 'center', marginBottom: '20px' }}>
+            <div className="argumento-icon" style={{ background: 'var(--brand-wash)', border: '1px solid rgba(14, 165, 233, 0.25)', width: '44px', height: '44px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyItems: 'center', marginBottom: '20px' }}>
               <svg 
                 xmlns="http://www.w3.org/2000/svg" 
                 viewBox="0 0 24 24" 
                 fill="none" 
-                stroke="#0ea5e9" 
+                stroke="var(--brand)" 
                 strokeWidth="2.2" 
                 strokeLinecap="round" 
                 strokeLinejoin="round" 
@@ -91,12 +91,12 @@ const TechArchitecture = () => {
 
           {/* Pillar 4: Avisos instantâneos */}
           <div className="argumento-card reveal" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', padding: '28px' }}>
-            <div className="argumento-icon" style={{ background: 'rgba(14, 165, 233, 0.1)', border: '1px solid rgba(14, 165, 233, 0.25)', width: '44px', height: '44px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyItems: 'center', marginBottom: '20px' }}>
+            <div className="argumento-icon" style={{ background: 'var(--brand-wash)', border: '1px solid rgba(14, 165, 233, 0.25)', width: '44px', height: '44px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyItems: 'center', marginBottom: '20px' }}>
               <svg 
                 xmlns="http://www.w3.org/2000/svg" 
                 viewBox="0 0 24 24" 
                 fill="none" 
-                stroke="#0ea5e9" 
+                stroke="var(--brand)" 
                 strokeWidth="2.2" 
                 strokeLinecap="round" 
                 strokeLinejoin="round" 

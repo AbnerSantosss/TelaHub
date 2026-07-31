@@ -123,9 +123,21 @@
     })(window,document,'script','dataLayer','GTM-XXXXXXX');</script>
     <!-- End Google Tag Manager -->
 
-    <!-- GSAP: async e não bloqueia o parsing do HTML -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js" defer></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js" defer></script>
+    <!--
+      O GSAP + ScrollTrigger do cdnjs foram REMOVIDOS em 2026-07-31.
+
+      Não por peso (~70 KB de terceiro no caminho crítico, embora isso também
+      conte numa página feita para ranquear), mas porque a montagem tinha duas
+      formas de deixar a página em branco: CDN fora do ar, e chegada por âncora
+      (`/#precos`, o link que o painel e o checkout usam) — nesse caso o
+      ScrollTrigger de tudo que ficava acima do ponto de chegada nunca
+      disparava. A segunda foi reproduzida.
+
+      A animação virou CSS + IntersectionObserver, com o estado padrão VISÍVEL:
+      ver src/lib/reveal.js. Se voltar a precisar de GSAP para algo que CSS não
+      faça, importe como dependência do projeto — não de CDN — e nunca deixe o
+      estado inicial de um elemento de conteúdo depender dele.
+    -->
   </head>
   <body>
     <!-- Google Tag Manager (noscript) -->

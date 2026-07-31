@@ -142,7 +142,7 @@ const UseCases = ({ activeTab, setActiveTab, telemetry }) => {
               <div className="tab-visual">
                 <TvSimulation tabKey="cond" />
                 <div style={{ display: 'flex', gap: 10 }}>
-                  <div style={{ flex: 1, background: 'rgba(14, 165, 233, 0.08)', border: '1px solid rgba(14, 165, 233, 0.2)', borderRadius: 8, padding: 14, fontSize: '0.78rem' }}>
+                  <div style={{ flex: 1, background: 'rgba(14, 165, 233, 0.08)', border: '1px solid var(--brand-ring)', borderRadius: 8, padding: 14, fontSize: '0.78rem' }}>
                     <div style={{ color: 'var(--text-secondary)', marginBottom: 4 }}>Telas ativas</div>
                     <div style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: '0.9rem' }}>
                       {telemetry.onlineCount} / {telemetry.total}
@@ -193,7 +193,7 @@ const UseCases = ({ activeTab, setActiveTab, telemetry }) => {
               <div className="tab-visual">
                 <TvSimulation tabKey="corp" />
                 <div style={{ display: 'flex', gap: 10 }}>
-                  <div style={{ flex: 1, background: 'rgba(14, 165, 233, 0.08)', border: '1px solid rgba(14, 165, 233, 0.2)', borderRadius: 8, padding: 14, fontSize: '0.78rem' }}>
+                  <div style={{ flex: 1, background: 'rgba(14, 165, 233, 0.08)', border: '1px solid var(--brand-ring)', borderRadius: 8, padding: 14, fontSize: '0.78rem' }}>
                     <div style={{ color: 'var(--text-secondary)', marginBottom: 4 }}>Displays</div>
                     <div style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: '0.9rem' }}>12 andares</div>
                   </div>
@@ -242,7 +242,7 @@ const UseCases = ({ activeTab, setActiveTab, telemetry }) => {
               <div className="tab-visual">
                 <TvSimulation tabKey="varejo" />
                 <div style={{ display: 'flex', gap: 10 }}>
-                  <div style={{ flex: 1, background: 'rgba(14, 165, 233, 0.08)', border: '1px solid rgba(14, 165, 233, 0.2)', borderRadius: 8, padding: 14, fontSize: '0.78rem' }}>
+                  <div style={{ flex: 1, background: 'rgba(14, 165, 233, 0.08)', border: '1px solid var(--brand-ring)', borderRadius: 8, padding: 14, fontSize: '0.78rem' }}>
                     <div style={{ color: 'var(--text-secondary)', marginBottom: 4 }}>Economia mensal</div>
                     <div style={{ fontWeight: 700, color: 'var(--cyan)', fontSize: '0.9rem' }}>R$ 1.200+</div>
                   </div>
@@ -291,7 +291,7 @@ const UseCases = ({ activeTab, setActiveTab, telemetry }) => {
               <div className="tab-visual">
                 <TvSimulation tabKey="rh" />
                 <div style={{ display: 'flex', gap: 10 }}>
-                  <div style={{ flex: 1, background: 'rgba(14, 165, 233, 0.08)', border: '1px solid rgba(14, 165, 233, 0.2)', borderRadius: 8, padding: 14, fontSize: '0.78rem' }}>
+                  <div style={{ flex: 1, background: 'rgba(14, 165, 233, 0.08)', border: '1px solid var(--brand-ring)', borderRadius: 8, padding: 14, fontSize: '0.78rem' }}>
                     <div style={{ color: 'var(--text-secondary)', marginBottom: 4 }}>Setores ativos</div>
                     <div style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: '0.9rem' }}>8 TVs</div>
                   </div>

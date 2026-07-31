@@ -14,7 +14,7 @@ const CtaStrip = ({ startConversion }) => {
           <button
             onClick={() => startConversion('gratis', 'cta_strip', 'Quero ativar minha tela grátis')}
             className="btn btn-primary"
-            style={{ fontSize: '1rem', padding: '14px 32px', background: '#FFFFFF', color: '#0ea5e9' }}
+            style={{ fontSize: '1rem', padding: '14px 32px', background: '#FFFFFF', color: 'var(--brand)' }}
           >
             Quero ativar minha tela grátis
             <svg 

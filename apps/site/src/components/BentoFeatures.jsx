@@ -30,7 +30,7 @@ const BentoFeatures = () => {
     <section id="recursos" aria-labelledby="recursos-heading">
       <div className="container">
         <div className="section-header" style={{ textAlign: 'center', marginBottom: '56px' }}>
-          <div className="label reveal" style={{ background: 'rgba(14, 165, 233, 0.1)', color: '#0ea5e9', borderColor: 'rgba(14, 165, 233, 0.25)', borderRadius: '99px' }}>
+          <div className="label reveal" style={{ background: 'var(--brand-wash)', color: 'var(--brand)', borderColor: 'rgba(14, 165, 233, 0.25)', borderRadius: '99px' }}>
             Foco no Dono do Negócio
           </div>
           <h2 id="recursos-heading" className="reveal" style={{ fontSize: 'clamp(1.8rem, 3vw, 2.5rem)', fontWeight: '800' }}>
@@ -61,13 +61,13 @@ const BentoFeatures = () => {
               <div style={{
                 width: '36px',
                 height: '36px',
-                background: 'rgba(14, 165, 233, 0.1)',
+                background: 'var(--brand-wash)',
                 border: '1px solid rgba(14, 165, 233, 0.25)',
                 borderRadius: '50%',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: '#0ea5e9',
+                color: 'var(--brand)',
                 fontSize: '1.1rem',
                 fontWeight: 'bold'
               }}>

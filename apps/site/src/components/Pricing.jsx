@@ -215,9 +215,9 @@ const PriceSimulator = ({ startConversion }) => {
             style={{
               padding: '6px 14px',
               borderRadius: '99px',
-              border: screens === n ? '1px solid #0ea5e9' : '1px solid var(--border)',
-              background: screens === n ? 'rgba(14, 165, 233, 0.1)' : 'transparent',
-              color: screens === n ? '#38bdf8' : 'var(--text-muted)',
+              border: screens === n ? '1px solid var(--brand)' : '1px solid var(--border)',
+              background: screens === n ? 'var(--brand-wash)' : 'transparent',
+              color: screens === n ? 'var(--brand)' : 'var(--text-muted)',
               fontSize: '0.8rem',
               fontWeight: '600',
               cursor: 'pointer',
@@ -234,18 +234,18 @@ const PriceSimulator = ({ startConversion }) => {
             <div key={opt.code} style={{
               padding: '20px',
               borderRadius: '12px',
-              background: isSuggested ? 'rgba(14, 165, 233, 0.07)' : 'var(--bg-secondary)',
+              background: isSuggested ? 'var(--brand-wash)' : 'var(--bg-secondary)',
               border: isSuggested ? '1px solid rgba(14, 165, 233, 0.4)' : '1px solid var(--border)',
               opacity: opt.available ? 1 : 0.45,
               position: 'relative',
               textAlign: 'center',
             }}>
               {isSuggested && (
-                <span style={{ position: 'absolute', top: '-10px', left: '50%', transform: 'translateX(-50%)', background: '#0ea5e9', color: '#FFFFFF', fontSize: '0.62rem', fontWeight: '700', padding: '3px 10px', borderRadius: '6px', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>
+                <span style={{ position: 'absolute', top: '-10px', left: '50%', transform: 'translateX(-50%)', background: 'var(--brand)', color: '#FFFFFF', fontSize: '0.62rem', fontWeight: '700', padding: '3px 10px', borderRadius: '6px', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>
                   Menor valor
                 </span>
               )}
-              <p style={{ fontSize: '0.78rem', fontWeight: '700', color: isSuggested ? '#38bdf8' : 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px' }}>
+              <p style={{ fontSize: '0.78rem', fontWeight: '700', color: isSuggested ? 'var(--brand)' : 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px' }}>
                 {opt.name}
               </p>
               <p style={{ fontSize: '1.7rem', fontWeight: '800', color: 'var(--text-primary)', lineHeight: '1.1', marginBottom: '4px' }}>
@@ -264,7 +264,7 @@ const PriceSimulator = ({ startConversion }) => {
                     width: '100%',
                     padding: '9px 0',
                     fontSize: '0.82rem',
-                    ...(isSuggested ? { background: '#0ea5e9', color: '#FFFFFF', fontWeight: '700' } : {}),
+                    ...(isSuggested ? { background: 'var(--brand)', color: '#FFFFFF', fontWeight: '700' } : {}),
                   }}
                 >{opt.cta}</button>
               )}
@@ -346,7 +346,7 @@ const Pricing = ({ startConversion }) => {
       <div className="container">
         {/* Price Anchor Header */}
         <div className="precos-header" style={{ textAlign: 'center', marginBottom: '56px' }}>
-          <div className="label reveal" style={{ background: 'rgba(14, 165, 233, 0.1)', color: '#0ea5e9', borderColor: 'rgba(14, 165, 233, 0.25)', borderRadius: '99px' }}>
+          <div className="label reveal" style={{ background: 'var(--brand-wash)', color: 'var(--brand)', borderColor: 'rgba(14, 165, 233, 0.25)', borderRadius: '99px' }}>
             Investimento Inteligente
           </div>
           <h2 id="precos-heading" className="reveal" style={{ fontSize: 'clamp(1.8rem, 3vw, 2.5rem)', fontWeight: '800', lineHeight: '1.2', maxWidth: '780px', marginLeft: 'auto', marginRight: 'auto', marginBottom: '20px' }}>
@@ -396,8 +396,8 @@ const Pricing = ({ startConversion }) => {
                 por tela/mês, cobrado em dólar. As intermediárias só vendem a partir de 5 telas, e o suporte não fala português.
               </p>
             </div>
-            <div style={{ padding: '20px', background: 'rgba(14, 165, 233, 0.07)', borderRadius: '12px', border: '1px solid rgba(14, 165, 233, 0.3)' }}>
-              <p style={{ fontSize: '0.8rem', color: '#38bdf8', fontWeight: '700', marginBottom: '8px' }}>TelaHub</p>
+            <div style={{ padding: '20px', background: 'var(--brand-wash)', borderRadius: '12px', border: '1px solid var(--brand-ring)' }}>
+              <p style={{ fontSize: '0.8rem', color: 'var(--brand)', fontWeight: '700', marginBottom: '8px' }}>TelaHub</p>
               <p style={{ fontSize: '1.6rem', fontWeight: '800', color: 'var(--text-primary)', lineHeight: '1.1', marginBottom: '8px' }}>R$ 0 a 49<span style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-muted)' }}> /tela</span></p>
               <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: '1.5', margin: 0 }}>
                 a 1ª tela é grátis para sempre; depois R$ 49 por tela ativa (R$ 39 acima de 5). Em real, sem hardware para comprar — na TV que já está na sua parede.
@@ -443,23 +443,23 @@ const Pricing = ({ startConversion }) => {
               className={`preco-card reveal${plan.featured ? ' preco-card-featured' : ''}`}
               style={{
                 background: plan.featured ? 'rgba(14, 165, 233, 0.05)' : 'var(--bg-card)',
-                border: plan.featured ? '2px solid #0ea5e9' : '1px solid var(--border)',
+                border: plan.featured ? '2px solid var(--brand)' : '1px solid var(--border)',
                 borderRadius: '16px',
                 padding: '36px 28px',
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'space-between',
                 position: 'relative',
-                boxShadow: plan.featured ? '0 12px 32px rgba(14, 165, 233, 0.1)' : 'none',
+                boxShadow: plan.featured ? '0 12px 32px var(--brand-wash)' : 'none',
               }}
             >
               {plan.tag && (
-                <span className="featured-tag" style={{ position: 'absolute', top: '16px', right: '16px', background: '#0ea5e9', color: '#FFFFFF', fontSize: '0.65rem', fontWeight: '700', padding: '4px 10px', borderRadius: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                <span className="featured-tag" style={{ position: 'absolute', top: '16px', right: '16px', background: 'var(--brand)', color: '#FFFFFF', fontSize: '0.65rem', fontWeight: '700', padding: '4px 10px', borderRadius: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                   {plan.tag}
                 </span>
               )}
               <div>
-                <p className={`plan-name${plan.featured ? ' featured' : ''}`} style={{ fontSize: '0.8rem', fontWeight: '700', color: plan.featured ? '#38bdf8' : 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px' }}>
+                <p className={`plan-name${plan.featured ? ' featured' : ''}`} style={{ fontSize: '0.8rem', fontWeight: '700', color: plan.featured ? 'var(--brand)' : 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px' }}>
                   {plan.name}
                 </p>
 
@@ -486,7 +486,7 @@ const Pricing = ({ startConversion }) => {
                 <ul className="plan-features" style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '32px', padding: 0, listStyle: 'none' }}>
                   {plan.features.map((feature) => (
                     <li key={feature} className="plan-feature" style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.88rem', color: 'var(--text-secondary)' }}>
-                      <span className="plan-check" style={{ width: '18px', height: '18px', flex: '0 0 18px', background: 'rgba(14, 165, 233, 0.1)', border: '1px solid rgba(14, 165, 233, 0.25)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0ea5e9', fontSize: '0.65rem', fontWeight: 'bold' }}>✓</span>
+                      <span className="plan-check" style={{ width: '18px', height: '18px', flex: '0 0 18px', background: 'var(--brand-wash)', border: '1px solid rgba(14, 165, 233, 0.25)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--brand)', fontSize: '0.65rem', fontWeight: 'bold' }}>✓</span>
                       <span>{feature}</span>
                     </li>
                   ))}
@@ -499,7 +499,7 @@ const Pricing = ({ startConversion }) => {
                   width: '100%',
                   padding: '12px 0',
                   fontSize: '0.9rem',
-                  ...(plan.featured ? { background: '#0ea5e9', color: '#FFFFFF', fontWeight: '700' } : {}),
+                  ...(plan.featured ? { background: 'var(--brand)', color: '#FFFFFF', fontWeight: '700' } : {}),
                 }}
               >
                 {plan.cta}
@@ -540,7 +540,7 @@ const Pricing = ({ startConversion }) => {
         {/* FAQ Accordion Section */}
         <div style={{ borderTop: '1px solid var(--border)', paddingTop: '72px', maxWidth: '820px', marginLeft: 'auto', marginRight: 'auto' }}>
           <div style={{ textAlign: 'center', marginBottom: '48px' }}>
-            <div className="label reveal" style={{ background: 'rgba(14, 165, 233, 0.1)', color: '#0ea5e9', borderColor: 'rgba(14, 165, 233, 0.25)', borderRadius: '99px' }}>Perguntas Frequentes</div>
+            <div className="label reveal" style={{ background: 'var(--brand-wash)', color: 'var(--brand)', borderColor: 'rgba(14, 165, 233, 0.25)', borderRadius: '99px' }}>Perguntas Frequentes</div>
             <h2 style={{ fontSize: 'clamp(1.5rem, 2.5vw, 2.2rem)', fontWeight: '800', marginTop: '12px' }}>Dúvidas frequentes de empresários</h2>
           </div>
 
@@ -573,7 +573,7 @@ const Pricing = ({ startConversion }) => {
                     }}
                   >
                     <span>{faq.question}</span>
-                    <span style={{ fontSize: '1.2rem', color: '#0ea5e9', fontWeight: 'bold' }}>{isOpen ? '−' : '+'}</span>
+                    <span style={{ fontSize: '1.2rem', color: 'var(--brand)', fontWeight: 'bold' }}>{isOpen ? '−' : '+'}</span>
                   </button>
                   {isOpen && (
                     <div style={{
@@ -604,8 +604,8 @@ const Pricing = ({ startConversion }) => {
                 gap: '8px',
                 padding: '14px 28px',
                 fontSize: '0.95rem',
-                border: '1px solid #0ea5e9',
-                color: '#0ea5e9',
+                border: '1px solid var(--brand)',
+                color: 'var(--brand)',
                 fontWeight: '700',
                 background: 'transparent'
               }}

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import NetworkCanvas from './components/NetworkCanvas';
+import ScreenWall from './components/ScreenWall';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import TechArchitecture from './components/TechArchitecture';
@@ -12,6 +12,7 @@ import LeadModal from './components/LeadModal';
 import ConsentBanner from './components/ConsentBanner';
 import { trackEvent } from './lib/tracking';
 import { conversionDestination } from './lib/funnel';
+import { iniciarReveal } from './lib/reveal';
 
 /** Código do plano → nome exibido. Os eventos de analytics usam o nome. */
 const PLAN_LABELS = {
@@ -69,41 +70,21 @@ function App() {
 
 
 
-    // C. Initialize GSAP Elite Entrance Animations
-    let gsapCtx;
-    if (typeof window !== 'undefined' && window.gsap && window.ScrollTrigger) {
-      const gsap = window.gsap;
-      const ScrollTrigger = window.ScrollTrigger;
-      gsap.registerPlugin(ScrollTrigger);
-
-      gsapCtx = gsap.context(() => {
-        // Hero reveals
-        gsap.from('.hero-headline', { duration: 1.1, y: 35, opacity: 0, ease: 'power3.out' });
-        gsap.from('.hero-subheadline', { duration: 0.9, y: 20, opacity: 0, ease: 'power2.out', delay: 0.2 });
-        gsap.from('.hero-actions', { duration: 0.8, y: 15, opacity: 0, ease: 'power2.out', delay: 0.35 });
-        gsap.from('.hero-mockup', { duration: 1.3, scale: 0.96, y: 25, opacity: 0, ease: 'power3.out', delay: 0.25 });
-        gsap.from('.hero-float-badge', { duration: 1.3, scale: 0.8, opacity: 0, y: 20, ease: 'back.out(1.7)', delay: 0.6 });
-
-        // ScrollTriggers for segments
-        gsap.utils.toArray('.reveal').forEach((elem) => {
-          gsap.from(elem, {
-            scrollTrigger: {
-              trigger: elem,
-              start: 'top 88%',
-              toggleActions: 'play none none none',
-            },
-            duration: 0.8,
-            y: 25,
-            opacity: 0,
-            ease: 'power2.out'
-          });
-        });
-      });
-    }
+    // C. Revelação ao rolar.
+    //
+    // Era GSAP + ScrollTrigger vindos de dois <script> do cdnjs. Trocado por
+    // CSS + IntersectionObserver porque a montagem antiga tinha duas formas de
+    // deixar a página em branco — a de chegada por âncora foi reproduzida. O
+    // raciocínio completo está no cabeçalho de `src/lib/reveal.js`.
+    //
+    // A entrada do herói agora é CSS puro (`.hero-headline` e companhia em
+    // index.css): é a primeira coisa que o visitante vê, e não pode depender
+    // de JavaScript ter executado.
+    const pararReveal = iniciarReveal();
 
     return () => {
       clearInterval(syncInterval);
-      if (gsapCtx) gsapCtx.revert();
+      pararReveal();
     };
   }, []);
 
@@ -190,8 +171,8 @@ function App() {
       {/* 0. Consent banner (LGPD/GDPR) — decide antes de qualquer tag de marketing/analytics disparar */}
       <ConsentBanner />
 
-      {/* 1. Touch-Interactive particles background */}
-      <NetworkCanvas />
+      {/* 1. Fundo ambiente: parede de telas se atualizando (ver ScreenWall.jsx) */}
+      <ScreenWall />
 
       {/* 2. Top navigation header */}
       <Navbar 
