@@ -12,6 +12,7 @@
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
     "db:seed-plans": "tsx prisma/seed-plans.ts",
+    "db:seed-demo-users": "tsx prisma/seed-demo-users.ts",
     "db:studio": "prisma studio",
     "db:reset": "prisma migrate reset --force",
     "db:backfill-org": "tsx prisma/backfill-default-organization.ts",

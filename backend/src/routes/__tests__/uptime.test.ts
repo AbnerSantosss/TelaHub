@@ -29,8 +29,11 @@ let deviceRuimId: string;
 let deviceSemDadosId: string;
 
 beforeAll(async () => {
-  orgA = await createTestOrganization('Uptime A');
-  orgB = await createTestOrganization('Uptime B');
+  // `relatorios` é feature de plano pago desde 2026-07-31 e as rotas de uptime
+  // são gateadas por ela — sem isto, estes testes receberiam 403 e mediriam o
+  // gate em vez do cálculo de disponibilidade.
+  orgA = await createTestOrganization('Uptime A', { features: ['relatorios'] });
+  orgB = await createTestOrganization('Uptime B', { features: ['relatorios'] });
   authA = authHeaderFor({ organizationId: orgA.id });
 
   // Tela da org A: online desde antes do período, cai às 09:00 → 9h online +

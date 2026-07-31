@@ -130,6 +130,24 @@ export class PlanService {
     return prisma.plan.findUnique({ where: { code } });
   }
 
+  /**
+   * Plano mais barato do catálogo que libera `featureKey` — é o que a mensagem
+   * de bloqueio oferece ao cliente ("isso está no plano Rede").
+   *
+   * Derivado do catálogo em vez de um mapa fixo feature→plano de propósito: se
+   * amanhã `powerbi` descer para o plano Loja, a oferta acompanha sozinha. Um
+   * mapa hardcoded passaria a mentir sem ninguém perceber, que é exatamente o
+   * tipo de divergência entre superfícies que já custou trabalho neste projeto.
+   *
+   * "Mais barato" usa a mesma escada da vitrine (`listActive`): o Rede custa
+   * menos por tela que o Loja, mas é o plano maior — quem ordena é `minScreens`.
+   * O Enterprise (sob consulta) só é oferecido se for o único que tem a feature.
+   */
+  async cheapestPlanWithFeature(featureKey: string): Promise<Plan | null> {
+    const plans = await this.listActive();
+    return plans.find((plan) => parseFeatures(plan.features).includes(featureKey)) ?? null;
+  }
+
   /** Como `getByCode`, mas lança quando o plano não existe. */
   async requireByCode(code: string): Promise<Plan> {
     const plan = await this.getByCode(code);

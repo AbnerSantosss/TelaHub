@@ -4,6 +4,7 @@ import { Loader2, MonitorPlay, X, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useModalA11y } from '../hooks/useModalA11y';
 import { getDisplays, getDevices, saveDisplay } from '../services/storage';
+import { getBillingSnapshot } from '../services/billing';
 import { Display, Page, WidgetType, LayoutItem, Device } from '../types';
 
 import { WidgetLibrary } from './editor/WidgetLibrary';
@@ -49,6 +50,11 @@ const Editor: React.FC = () => {
   const [isClearingScene, setIsClearingScene] = useState(false);
   const [activeMealDay, setActiveMealDay] = useState<string>('Segunda');
 
+  // Features do plano, só para marcar no editor os widgets que o plano não
+  // libera. `undefined` = ainda não carregou; nada é bloqueado nesse estado,
+  // porque quem decide de verdade é o servidor no salvamento.
+  const [planFeatures, setPlanFeatures] = useState<string[] | undefined>(undefined);
+
   const [showBgAnimModal, setShowBgAnimModal] = useState(false);
   const [showLayersModal, setShowLayersModal] = useState(false);
   const [mediaLibraryConfig, setMediaLibraryConfig] = useState<{ isOpen: boolean, onSelect: (url: string) => void, allowedTypes: 'image' | 'video' | 'all' } | null>(null);
@@ -78,6 +84,16 @@ const Editor: React.FC = () => {
     };
     fetchData();
   }, [id, navigate]);
+
+  // Falha de billing não pode derrubar o editor: sem features carregadas, os
+  // widgets ficam todos liberados e o servidor recusa no salvamento se for o caso.
+  useEffect(() => {
+    getBillingSnapshot()
+      .then(snapshot => {
+        if (snapshot) setPlanFeatures(snapshot.subscription.plan.features);
+      })
+      .catch(() => setPlanFeatures(undefined));
+  }, []);
 
   const rowHeight = containerWidth / GRID_COLS;
 
@@ -110,8 +126,19 @@ const Editor: React.FC = () => {
       await saveDisplay(display);
       setShowToast(true);
       setTimeout(() => setShowToast(false), 3000);
-    } catch (e) {
-      toast.error('Não foi possível salvar a cena. Verifique sua conexão e tente novamente.');
+    } catch (e: any) {
+      // Bloqueio de plano (403 feature / 402 vídeo) traz uma mensagem escrita
+      // para o cliente ler, dizendo qual plano libera. Trocá-la por "verifique
+      // sua conexão" mandaria a pessoa depurar a internet por causa de uma
+      // decisão comercial.
+      const status = e?.response?.status;
+      const serverMessage = e?.response?.data?.error;
+
+      if ((status === 402 || status === 403) && serverMessage) {
+        toast.error(serverMessage, { duration: 8000 });
+      } else {
+        toast.error('Não foi possível salvar a cena. Verifique sua conexão e tente novamente.');
+      }
     } finally {
       setIsSaving(false);
       setShowPublishConfirm(false);
@@ -569,6 +596,7 @@ const Editor: React.FC = () => {
           setShowBgAnimModal={setShowBgAnimModal}
           showLeftSidebar={showLeftSidebar}
           setShowLeftSidebar={setShowLeftSidebar}
+          planFeatures={planFeatures}
         />
 
         {/* Canvas Area */}

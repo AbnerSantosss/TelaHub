@@ -2,6 +2,13 @@ import { Router, Request, Response } from 'express';
 import { authMiddleware } from '../middlewares/auth.middleware';
 import { requireTenant, TenantScopeError } from '../middlewares/tenant.middleware';
 import { validateBody } from '../middlewares/validate.middleware';
+import {
+  buildFeatureDenial,
+  featureDenialMessage,
+} from '../middlewares/feature.middleware';
+import { resolveTenantId } from '../middlewares/quota.middleware';
+import { hasFeature } from '../services/plan.service';
+import { subscriptionService } from '../services/subscription.service';
 import { saveBroadcastSchema } from '../schemas/broadcasts.schema';
 import { broadcastService } from '../services/broadcast.service';
 import { displayService } from '../services/display.service';
@@ -44,6 +51,38 @@ router.post('/', authMiddleware, requireTenant, validateBody(saveBroadcastSchema
     } = req.body;
 
     const displayIds: string[] = Array.isArray(display_ids) ? display_ids : [];
+
+    // ── Gate de `agendamento-avancado` (plano Rede para cima) ────────────────
+    //
+    // O gate é CONDICIONAL e mora aqui dentro, não como middleware na rota,
+    // porque simples e avançado compartilham o mesmo endpoint: o que distingue
+    // um do outro é o payload. Um middleware bloquearia também o aviso
+    // imediato, que é de todos os planos — e avisar em todas as telas de uma
+    // vez ("acabou o estoque da promoção") é justamente o que o produto vende
+    // como valor de entrada.
+    //
+    // Avançado = agendado para uma faixa de horário. Permanente/imediato = não.
+    const isScheduled = !is_permanent && Boolean(start_time || end_time);
+
+    if (isScheduled && req.user?.role !== 'master') {
+      const organizationId = await resolveTenantId(req);
+      const subscription = organizationId
+        ? await subscriptionService.getByOrganization(organizationId)
+        : null;
+
+      // Fail-open para organização sem assinatura, igual ao `requireFeature`.
+      if (subscription && !hasFeature(subscription, 'agendamento-avancado')) {
+        const denial = await buildFeatureDenial('agendamento-avancado', subscription);
+        res.status(403).json({
+          error:
+            `${featureDenialMessage(denial)} ` +
+            'Avisos imediatos e permanentes continuam liberados no seu plano.',
+          code: 'feature_not_in_plan',
+          ...denial,
+        });
+        return;
+      }
+    }
 
     // Um broadcast só pode apontar para displays do próprio tenant — se qualquer
     // id for de fora, rejeitamos o payload inteiro.

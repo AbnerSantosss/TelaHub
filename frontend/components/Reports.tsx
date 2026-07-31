@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, Wifi, WifiOff, Monitor, Megaphone, Loader2, TrendingUp, Calendar, RefreshCcw, Download } from 'lucide-react';
+import { Home, Lock, Wifi,WifiOff, Monitor, Megaphone, Loader2, TrendingUp, Calendar, RefreshCcw, Download } from 'lucide-react';
 import { getOrganizations, getOrganizationReport } from '../services/storage';
 import { Organization, OrganizationReport } from '../types';
 import { motion } from 'motion/react';
@@ -28,6 +28,8 @@ const Reports: React.FC = () => {
   const [endDate, setEndDate] = useState('');
   const [report, setReport] = useState<OrganizationReport | null>(null);
   const [loading, setLoading] = useState(false);
+  /** Mensagem do servidor quando o plano não inclui `relatorios`. */
+  const [planBlock, setPlanBlock] = useState<{ message: string; requiredPlan: string | null } | null>(null);
 
   useEffect(() => {
     getOrganizations().then((orgs) => {
@@ -39,8 +41,19 @@ const Reports: React.FC = () => {
   const fetchReport = () => {
     if (!selectedOrgId) return;
     setLoading(true);
+    setPlanBlock(null);
     getOrganizationReport(selectedOrgId, { startDate: startDate || undefined, endDate: endDate || undefined })
       .then(setReport)
+      .catch((err: any) => {
+        const data = err?.response?.data;
+        if (data?.code === 'feature_not_in_plan') {
+          setReport(null);
+          setPlanBlock({
+            message: data.error,
+            requiredPlan: data.requiredPlan?.name ?? null,
+          });
+        }
+      })
       .finally(() => setLoading(false));
   };
 
@@ -57,8 +70,9 @@ const Reports: React.FC = () => {
             <button
               onClick={() => navigate('/')}
               className="p-2 rounded-lg hover:bg-white/5 transition-colors text-slate-400 hover:text-white"
+              title="Ir para o início"
             >
-              <ChevronLeft size={20} />
+              <Home size={20} />
             </button>
             <div>
               <h1 className="text-2xl font-black tracking-tight text-white">Dashboard Gerencial</h1>
@@ -71,7 +85,7 @@ const Reports: React.FC = () => {
               <RefreshCcw size={16} className={`mr-2 ${loading ? 'animate-spin' : ''}`} />
               Atualizar
             </Button>
-            <Button className="bg-[#0ea5e9] hover:bg-[#0284c7] text-white font-bold border border-[#0ea5e9]/50 shadow-[0_0_15px_rgba(14,165,233,0.3)]">
+            <Button className="bg-[var(--th-accent)] hover:bg-[var(--th-accent-strong)] text-white font-bold border border-[var(--th-accent)]/50 shadow-[0_0_15px_rgba(var(--th-accent-rgb),0.3)]">
               <Download size={16} className="mr-2" />
               Exportar PDF
             </Button>
@@ -80,6 +94,26 @@ const Reports: React.FC = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-6 mt-8">
+        {/*
+          Bloqueio por plano. Ocupa a tela inteira em vez de virar um toast: o
+          relatório vazio por trás de um aviso passageiro faz o cliente achar
+          que o produto quebrou. Aqui ele lê o motivo e o plano que libera.
+        */}
+        {planBlock && (
+          <div className="bg-slate-900/60 border border-amber-500/25 rounded-xl p-8 mb-8 text-center">
+            <div className="w-12 h-12 rounded-full bg-amber-500/10 border border-amber-500/25 flex items-center justify-center mx-auto mb-4">
+              <Lock size={20} className="text-amber-400" />
+            </div>
+            <h2 className="text-lg font-black text-white mb-2">
+              Relatórios {planBlock.requiredPlan ? `são do plano ${planBlock.requiredPlan}` : 'não estão no seu plano'}
+            </h2>
+            <p className="text-sm text-slate-400 max-w-xl mx-auto leading-relaxed">{planBlock.message}</p>
+            <p className="text-xs text-slate-500 mt-4">
+              O alerta por e-mail quando uma tela cai continua ativo no seu plano — o que muda aqui é o histórico consolidado.
+            </p>
+          </div>
+        )}
+
         {/* BARRA DE FILTROS */}
         <motion.div 
           initial={{ opacity: 0, y: 10 }}
@@ -91,7 +125,7 @@ const Reports: React.FC = () => {
             <select
               value={selectedOrgId}
               onChange={(e) => setSelectedOrgId(e.target.value)}
-              className="w-full bg-slate-950 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-white focus:border-[#0ea5e9] focus:ring-1 focus:ring-[#0ea5e9] outline-none transition-all font-medium"
+              className="w-full bg-slate-950 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-white focus:border-[var(--th-accent)] focus:ring-1 focus:ring-[var(--th-accent)] outline-none transition-all font-medium"
             >
               {organizations.map((org) => (
                 <option key={org.id} value={org.id}>{org.name}</option>
@@ -106,7 +140,7 @@ const Reports: React.FC = () => {
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="w-full bg-slate-950 border border-white/10 rounded-lg pl-10 pr-4 py-2.5 text-sm text-white focus:border-[#0ea5e9] outline-none font-medium"
+                className="w-full bg-slate-950 border border-white/10 rounded-lg pl-10 pr-4 py-2.5 text-sm text-white focus:border-[var(--th-accent)] outline-none font-medium"
               />
             </div>
           </div>
@@ -118,7 +152,7 @@ const Reports: React.FC = () => {
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="w-full bg-slate-950 border border-white/10 rounded-lg pl-10 pr-4 py-2.5 text-sm text-white focus:border-[#0ea5e9] outline-none font-medium"
+                className="w-full bg-slate-950 border border-white/10 rounded-lg pl-10 pr-4 py-2.5 text-sm text-white focus:border-[var(--th-accent)] outline-none font-medium"
               />
             </div>
           </div>
@@ -126,7 +160,7 @@ const Reports: React.FC = () => {
 
         {loading ? (
           <div className="h-[400px] flex flex-col items-center justify-center text-slate-500">
-            <Loader2 size={32} className="animate-spin mb-4 text-[#0ea5e9]" />
+            <Loader2 size={32} className="animate-spin mb-4 text-[var(--th-accent)]" />
             <p className="font-medium">Sincronizando dados...</p>
           </div>
         ) : report ? (
@@ -136,7 +170,7 @@ const Reports: React.FC = () => {
               <KpiCard 
                 title="Telas Ativas" 
                 value={report.displaysCount} 
-                icon={<Monitor size={20} className="text-[#0ea5e9]" />} 
+                icon={<Monitor size={20} className="text-[var(--th-accent)]" />} 
                 trend="+12%" 
                 trendPositive={true}
                 delay={0}

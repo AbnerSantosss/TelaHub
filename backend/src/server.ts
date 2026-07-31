@@ -33,6 +33,7 @@ import usersRoutes from './routes/users.routes';
 import mediaRoutes from './routes/media.routes';
 import settingsRoutes from './routes/settings.routes';
 import organizationsRoutes from './routes/organizations.routes';
+import auditRoutes from './routes/audit.routes';
 import signupRoutes from './routes/signup.routes';
 import plansRoutes from './routes/plans.routes';
 import billingRoutes from './routes/billing.routes';
@@ -147,6 +148,8 @@ app.use('/api/users', usersRoutes);
 app.use('/api/media', mediaRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/organizations', organizationsRoutes);
+// Trilha de auditoria (feature `auditoria`, plano Loja para cima).
+app.use('/api/audit-logs', auditRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

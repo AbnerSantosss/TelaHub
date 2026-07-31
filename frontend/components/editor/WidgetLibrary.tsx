@@ -3,9 +3,10 @@ import {
   Layers, X, Trash2, ImageIcon, Film, Type, Sparkles, Globe, Clock, CloudSun, 
   LayoutDashboard, Rss, CalendarDays, StickyNote, ListTodo, Timer, ClipboardList, 
   Utensils, TrendingUp, Aperture, FileText, BookOpen, BarChart3, Database, Code2, 
-  Upload, MonitorPlay, Move, Info
+  Upload, MonitorPlay, Move, Info, Lock
 } from 'lucide-react';
 import { Display, Page, WidgetType } from '../../types';
+import { isWidgetLocked } from '../../services/billing';
 
 interface WidgetLibraryProps {
   display: Display;
@@ -20,9 +21,17 @@ interface WidgetLibraryProps {
   setShowBgAnimModal: React.Dispatch<React.SetStateAction<boolean>>;
   showLeftSidebar: boolean;
   setShowLeftSidebar: React.Dispatch<React.SetStateAction<boolean>>;
+  /**
+   * Features do plano da assinatura atual. `undefined` enquanto carrega — e
+   * nesse caso nada é bloqueado, porque o gate real é do servidor e esconder
+   * widget por dado ausente tiraria recurso de quem tem direito.
+   */
+  planFeatures?: string[];
+  /** Nome do plano que libera os widgets bloqueados, para o texto do cadeado. */
+  requiredPlanName?: string;
 }
 
-const WidgetTool = ({ icon, label, description, onClick, tooltipAlign = 'center' }: any) => {
+const WidgetTool = ({ icon, label, description, onClick, tooltipAlign = 'center', locked = false, lockedHint }: any) => {
   const alignClass = 
     tooltipAlign === 'left' ? 'left-0 items-start' :
     tooltipAlign === 'right' ? 'right-0 items-end' :
@@ -34,25 +43,32 @@ const WidgetTool = ({ icon, label, description, onClick, tooltipAlign = 'center'
     '';
 
   return (
-    <button 
+    <button
       onClick={onClick}
-      className="relative flex flex-col items-center justify-center p-1 bg-[#111827] border border-slate-800/60 rounded-lg hover:bg-[#0ea5e9]/10 hover:border-[#0ea5e9] hover:shadow-[0_0_12px_rgba(14,165,233,0.15)] active:scale-95 transition-all group w-full cursor-pointer py-1.5"
+      disabled={locked}
+      aria-disabled={locked}
+      title={locked ? lockedHint : undefined}
+      className={`relative flex flex-col items-center justify-center p-1 bg-[#111827] border rounded-lg active:scale-95 transition-all group w-full py-1.5 ${
+        locked
+          ? 'border-slate-800/60 opacity-45 cursor-not-allowed'
+          : 'border-slate-800/60 hover:bg-[var(--th-accent)]/10 hover:border-[var(--th-accent)] hover:shadow-[0_0_12px_rgba(var(--th-accent-rgb),0.15)] cursor-pointer'
+      }`}
     >
-      <div className="absolute top-1 right-1 opacity-20 group-hover:opacity-100 transition-opacity text-slate-400 group-hover:text-[#0ea5e9]">
-        <Info size={8} />
+      <div className={`absolute top-1 right-1 transition-opacity ${locked ? 'opacity-70 text-amber-400' : 'opacity-20 group-hover:opacity-100 text-slate-400 group-hover:text-[var(--th-accent)]'}`}>
+        {locked ? <Lock size={8} /> : <Info size={8} />}
       </div>
 
       <div className={`absolute bottom-full mb-2 hidden group-hover:flex flex-col pointer-events-none z-50 animate-in fade-in zoom-in-95 duration-200 ${alignClass}`}>
         <div className="bg-slate-950 border border-slate-800 text-slate-200 text-[9px] font-bold py-1.5 px-3 rounded-lg shadow-xl w-48 text-center leading-relaxed">
-          {description}
+          {locked ? lockedHint : description}
         </div>
         <div className={`w-2 h-2 bg-slate-950 border-r border-b border-slate-800 rotate-45 -mt-1 ${arrowClass}`}></div>
       </div>
 
-      <div className="text-slate-300 group-hover:text-[#0ea5e9] mb-0.5 transition-colors drop-shadow-sm flex items-center justify-center h-8 w-8">
+      <div className={`mb-0.5 transition-colors drop-shadow-sm flex items-center justify-center h-8 w-8 ${locked ? 'text-slate-500 grayscale' : 'text-slate-300 group-hover:text-[var(--th-accent)]'}`}>
         {icon}
       </div>
-      <span className="text-[8px] font-bold text-slate-400 group-hover:text-white uppercase tracking-wider transition-colors text-center truncate w-full px-0.5">
+      <span className={`text-[8px] font-bold uppercase tracking-wider transition-colors text-center truncate w-full px-0.5 ${locked ? 'text-slate-500' : 'text-slate-400 group-hover:text-white'}`}>
         {label}
       </span>
     </button>
@@ -78,14 +94,19 @@ export const WidgetLibrary: React.FC<WidgetLibraryProps> = ({
   setShowBgAnimModal,
   showLeftSidebar,
   setShowLeftSidebar,
+  planFeatures,
+  requiredPlanName = 'Rede',
 }) => {
+  const lockedHint = `Disponível no plano ${requiredPlanName}. Seu plano atual não inclui painéis de BI e documentos.`;
+  const locked = (type: WidgetType): boolean => isWidgetLocked(type, planFeatures);
+
   return (
     <aside className={`absolute md:relative left-0 top-0 h-full w-64 bg-[#1f2937] border-r border-slate-800 overflow-y-auto z-[60] shadow-xl transition-transform duration-300 ease-in-out ${showLeftSidebar ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
       
       {/* Section 1: Biblioteca de Widgets */}
       <div className="p-3.5 border-b border-slate-800">
          <div className="flex justify-between items-center mb-3">
-           <h3 className="text-[10px] font-black text-[#0ea5e9] uppercase tracking-widest flex items-center gap-1.5">
+           <h3 className="text-[10px] font-black text-[var(--th-accent)] uppercase tracking-widest flex items-center gap-1.5">
              <Layers size={11} /> Biblioteca de Widgets
            </h3>
            <button onClick={() => setShowLeftSidebar(false)} className="md:hidden text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors">
@@ -135,11 +156,11 @@ export const WidgetLibrary: React.FC<WidgetLibraryProps> = ({
            <div className="grid grid-cols-3 gap-1.5">
              <WidgetTool icon={<TrendingUp size={20} className="text-green-400" />} label="Bolsa" description="Painel de cotações financeiras de ações e criptomoedas em tempo real." onClick={() => addWidget(WidgetType.MARKET_WATCH)} tooltipAlign="left" />
              <WidgetTool icon={<Aperture size={20} className="text-blue-400" />} label="Snapshot" description="Renderiza capturas estáticas e periódicas de páginas de forma segura." onClick={() => addWidget(WidgetType.BROWSER_SNAPSHOT)} tooltipAlign="center" />
-             <WidgetTool icon={<FileText size={20} className="text-cyan-500" />} label="G Docs" description="Incorpora documentos, planilhas ou slides do Google Workspace." onClick={() => addWidget(WidgetType.GOOGLE_DOCS)} tooltipAlign="right" />
-             <WidgetTool icon={<BookOpen size={20} className="text-blue-500" />} label="Office Docs" description="Exibe planilhas Excel, documentos Word ou slides PowerPoint do Office 365." onClick={() => addWidget(WidgetType.OFFICE_DOCS)} tooltipAlign="left" />
-             <WidgetTool icon={<BarChart3 size={20} className="text-amber-500" />} label="Power BI" description="Exibe painéis interativos e relatórios dinâmicos do Microsoft Power BI." onClick={() => addWidget(WidgetType.POWER_BI)} tooltipAlign="center" />
-             <WidgetTool icon={<Database size={20} className="text-rose-500" />} label="Airtable" description="Exibe visualizações, tabelas ou bases de dados completas do Airtable." onClick={() => addWidget(WidgetType.AIRTABLE)} tooltipAlign="right" />
-             <WidgetTool icon={<FileText size={20} className="text-red-500" />} label="PDF" description="Exibe documentos PDFs e apostilas corporativas página a página." onClick={() => addWidget(WidgetType.PDF_DOCUMENT)} tooltipAlign="left" />
+             <WidgetTool icon={<FileText size={20} className="text-cyan-500" />} label="G Docs" description="Incorpora documentos, planilhas ou slides do Google Workspace." onClick={() => addWidget(WidgetType.GOOGLE_DOCS)} tooltipAlign="right" locked={locked(WidgetType.GOOGLE_DOCS)} lockedHint={lockedHint} />
+             <WidgetTool icon={<BookOpen size={20} className="text-blue-500" />} label="Office Docs" description="Exibe planilhas Excel, documentos Word ou slides PowerPoint do Office 365." onClick={() => addWidget(WidgetType.OFFICE_DOCS)} tooltipAlign="left" locked={locked(WidgetType.OFFICE_DOCS)} lockedHint={lockedHint} />
+             <WidgetTool icon={<BarChart3 size={20} className="text-amber-500" />} label="Power BI" description="Exibe painéis interativos e relatórios dinâmicos do Microsoft Power BI." onClick={() => addWidget(WidgetType.POWER_BI)} tooltipAlign="center" locked={locked(WidgetType.POWER_BI)} lockedHint={lockedHint} />
+             <WidgetTool icon={<Database size={20} className="text-rose-500" />} label="Airtable" description="Exibe visualizações, tabelas ou bases de dados completas do Airtable." onClick={() => addWidget(WidgetType.AIRTABLE)} tooltipAlign="right" locked={locked(WidgetType.AIRTABLE)} lockedHint={lockedHint} />
+             <WidgetTool icon={<FileText size={20} className="text-red-500" />} label="PDF" description="Exibe documentos PDFs e apostilas corporativas página a página." onClick={() => addWidget(WidgetType.PDF_DOCUMENT)} tooltipAlign="left" locked={locked(WidgetType.PDF_DOCUMENT)} lockedHint={lockedHint} />
              <WidgetTool icon={<Code2 size={20} className="text-indigo-400" />} label="HTML" description="Insira código HTML, CSS ou JS personalizado livremente." onClick={() => addWidget(WidgetType.EMBED_HTML)} tooltipAlign="center" />
            </div>
          </div>

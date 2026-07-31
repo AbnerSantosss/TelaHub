@@ -146,3 +146,49 @@ export const remainingScreens = (plan: PublicPlan, activeScreens: number): numbe
   if (plan.limits.maxDevices === null) return null;
   return Math.max(0, plan.limits.maxDevices - activeScreens);
 };
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FEATURES DE PLANO — ESPELHO DE LEITURA, NÃO O GATE
+//
+// O gate de verdade é o servidor (`requireFeature` no backend). O que estas
+// funções fazem é evitar que a pessoa monte uma tela inteira com um widget que
+// será recusado no salvamento — é cortesia de UX, não fronteira de segurança.
+// Nunca tratar `hasFeature` daqui como proteção: quem chama a API direto passa
+// por cima dela.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Feature do catálogo que libera os widgets de BI/documento. */
+export const BI_FEATURE_KEY = 'powerbi';
+
+/**
+ * Widgets cobertos pela feature `powerbi`. Precisa ser IGUAL a
+ * `BI_WIDGET_TYPES` em `backend/src/services/entitlement.service.ts` — se as
+ * duas listas divergirem, o editor libera um widget que o servidor recusa (ou
+ * esconde um que ele aceitaria).
+ */
+export const BI_WIDGET_TYPES = [
+  'POWER_BI',
+  'AIRTABLE',
+  'GOOGLE_DOCS',
+  'OFFICE_DOCS',
+  'PDF_DOCUMENT',
+] as const;
+
+/**
+ * `true` se a lista de features do plano inclui `featureKey`.
+ *
+ * `features` indefinido devolve `true` (fail-open): quando a assinatura ainda
+ * não carregou, ou a conta é legada e não tem assinatura, o certo é deixar
+ * passar e deixar o servidor decidir — bloquear por dado ausente esconderia
+ * recurso de quem tem direito a ele.
+ */
+export const hasFeature = (features: string[] | undefined | null, featureKey: string): boolean =>
+  !features || features.includes(featureKey);
+
+/** `true` quando o widget exige uma feature que o plano atual não tem. */
+export const isWidgetLocked = (
+  widgetType: string,
+  features: string[] | undefined | null
+): boolean =>
+  (BI_WIDGET_TYPES as readonly string[]).includes(widgetType) &&
+  !hasFeature(features, BI_FEATURE_KEY);

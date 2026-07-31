@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { authMiddleware, masterMiddleware } from '../middlewares/auth.middleware';
 import { requireTenant, assertSameTenant } from '../middlewares/tenant.middleware';
 import { validateBody } from '../middlewares/validate.middleware';
+import { requireFeature } from '../middlewares/feature.middleware';
 import { createOrganizationSchema } from '../schemas/organizations.schema';
 import { organizationService } from '../services/organization.service';
 
@@ -33,7 +34,9 @@ router.post('/', authMiddleware, masterMiddleware, validateBody(createOrganizati
 });
 
 // GET /api/organizations/:id/report?startDate=&endDate= — relatório agregado (US-017)
-router.get('/:id/report', authMiddleware, requireTenant, async (req: Request, res: Response): Promise<void> => {
+// Mesma feature `relatorios` das rotas de uptime: é a mesma promessa de plano
+// ("Relatórios de exibição"), só que agregada por unidade.
+router.get('/:id/report', authMiddleware, requireTenant, requireFeature('relatorios'), async (req: Request, res: Response): Promise<void> => {
   try {
     const organizationId = req.params.id as string;
 

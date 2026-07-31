@@ -377,7 +377,13 @@ export const getOrganizationReport = async (
     if (period?.endDate) params.set('endDate', period.endDate);
     const query = params.toString() ? `?${params.toString()}` : '';
     return await api.get<OrganizationReport>(`/organizations/${organizationId}/report${query}`);
-  } catch (error) {
+  } catch (error: any) {
+    // Bloqueio de plano NÃO é falha degradável: se engolirmos aqui, a tela
+    // mostra "sem dados" e o cliente conclui que o produto está quebrado, em
+    // vez de saber que o relatório é de outro plano. Sobe para quem chamou.
+    if (error?.response?.status === 403 && error?.response?.data?.code === 'feature_not_in_plan') {
+      throw error;
+    }
     console.error("Erro ao carregar relatório da organização:", error);
     return null;
   }

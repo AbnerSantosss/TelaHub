@@ -51,6 +51,63 @@ export class AuditService {
       userEmail: req.user?.email ?? null,
     });
   }
+
+  /**
+   * Lista a trilha de auditoria de UMA organização, da mais recente para a mais
+   * antiga.
+   *
+   * `organizationId` é obrigatório e sempre vem do tenant da requisição, nunca
+   * da query: trilha de auditoria é o tipo de dado em que um vazamento entre
+   * clientes é mais grave que a média — ela contém e-mail de usuário e nome de
+   * entidade de quem operou.
+   */
+  async listByOrganization(
+    organizationId: string,
+    options: { limit?: number; before?: Date } = {}
+  ): Promise<AuditLogEntry[]> {
+    const limit = Math.min(Math.max(options.limit ?? 50, 1), 200);
+
+    const rows = await prisma.auditLog.findMany({
+      where: {
+        organizationId,
+        ...(options.before ? { createdAt: { lt: options.before } } : {}),
+      },
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+    });
+
+    return rows.map((row) => ({
+      id: row.id,
+      action: row.action,
+      entityType: row.entityType,
+      entityId: row.entityId,
+      userEmail: row.userEmail,
+      metadata: parseMetadata(row.metadata),
+      createdAt: row.createdAt.toISOString(),
+    }));
+  }
+}
+
+/** Uma entrada da trilha, no formato que a API devolve. */
+export interface AuditLogEntry {
+  id: string;
+  action: string;
+  entityType: string;
+  entityId: string | null;
+  userEmail: string | null;
+  metadata: Record<string, unknown> | null;
+  createdAt: string;
+}
+
+/** `metadata` é JSON livre gravado como texto — parse defensivo na leitura. */
+function parseMetadata(value: string | null): Record<string, unknown> | null {
+  if (!value) return null;
+  try {
+    const parsed = JSON.parse(value);
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
 }
 
 function safeStringify(value: Record<string, unknown>): string | null {

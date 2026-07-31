@@ -10,7 +10,10 @@ let tenantHeader: string;
 let tenantOrgId: string;
 
 beforeAll(async () => {
-  const org = await createTestOrganization('Orgs');
+  // `relatorios` porque `GET /:id/report` é gateado por essa feature desde
+  // 2026-07-31. O teste de isolamento abaixo precisa que o gate PASSE, senão
+  // ele veria 403 e nunca chegaria a exercitar o 404 de outro tenant.
+  const org = await createTestOrganization('Orgs', { features: ['relatorios'] });
   tenantOrgId = org.id;
   tenantHeader = authHeaderFor({ organizationId: org.id });
 });

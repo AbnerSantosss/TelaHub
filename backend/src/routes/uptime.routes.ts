@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { authMiddleware } from '../middlewares/auth.middleware';
 import { requireTenant } from '../middlewares/tenant.middleware';
+import { requireFeature } from '../middlewares/feature.middleware';
 import { uptimeService, DeviceUptimeReport, UptimePeriod } from '../services/uptime.service';
 
 const router = Router();
@@ -66,7 +67,12 @@ function serializeDevice(report: DeviceUptimeReport) {
 }
 
 // GET /api/uptime/devices — uma linha por tela, da PIOR para a MELHOR.
-router.get('/devices', authMiddleware, requireTenant, async (req: Request, res: Response): Promise<void> => {
+//
+// `relatorios` é feature do plano Loja para cima. O ALERTA de tela offline
+// (`alerta-offline`) continua em TODOS os planos, inclusive o Grátis: ele é a
+// promessa central da página de vendas e o diferencial declarado do produto.
+// O que o plano pago libera é o histórico consolidado, não o aviso.
+router.get('/devices', authMiddleware, requireTenant, requireFeature('relatorios'), async (req: Request, res: Response): Promise<void> => {
   try {
     const period = parsePeriod(req);
     if ('error' in period) {
@@ -88,7 +94,7 @@ router.get('/devices', authMiddleware, requireTenant, async (req: Request, res: 
 });
 
 // GET /api/uptime/summary — agregado da organização no período.
-router.get('/summary', authMiddleware, requireTenant, async (req: Request, res: Response): Promise<void> => {
+router.get('/summary', authMiddleware, requireTenant, requireFeature('relatorios'), async (req: Request, res: Response): Promise<void> => {
   try {
     const period = parsePeriod(req);
     if ('error' in period) {

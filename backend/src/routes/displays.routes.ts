@@ -9,10 +9,14 @@ import { sseService } from '../services/sse.service';
 import { auditService } from '../services/audit.service';
 import {
   findPaidWidgetTypes,
+  findBiWidgetTypes,
   resolveVideoEntitlement,
+  BI_FEATURE_KEY,
   FREE_VIDEO_TRIAL_DAYS,
 } from '../services/entitlement.service';
 import { subscriptionService } from '../services/subscription.service';
+import { hasFeature } from '../services/plan.service';
+import { buildFeatureDenial, featureDenialMessage } from '../middlewares/feature.middleware';
 
 const router = Router();
 
@@ -170,21 +174,43 @@ router.post('/', authMiddleware, requireTenant, requireActiveSubscription, valid
     // `organizationId` do corpo é ignorado de propósito: o escopo vem do token.
     const { id, name, slug, pages, coverImage, orientation } = req.body;
 
-    // Direito de uso por conteúdo: vídeo é de plano pago, com degustação de
-    // 7 dias no plano Grátis. Checado no servidor porque o bloqueio no Editor é
-    // só conveniência — sem isto, bastava chamar a API direto para publicar vídeo.
-    const paidWidgets = findPaidWidgetTypes(pages);
-    if (paidWidgets.length > 0 && req.tenantId) {
-      const subscription = await subscriptionService.getByOrganization(req.tenantId);
-      const entitlement = resolveVideoEntitlement(subscription);
+    // Direito de uso por conteúdo. Checado no servidor porque o bloqueio no
+    // Editor é só conveniência — sem isto, bastava chamar a API direto para
+    // publicar o widget. São duas regras diferentes sobre o mesmo payload:
+    // vídeo é por TEMPO (degustação de 7 dias no Grátis) e BI é por PLANO
+    // (feature `powerbi`, do Rede para cima).
+    const videoWidgets = findPaidWidgetTypes(pages);
+    const biWidgets = findBiWidgetTypes(pages);
 
-      if (!entitlement.allowed) {
-        res.status(402).json({
+    if ((videoWidgets.length > 0 || biWidgets.length > 0) && req.tenantId) {
+      const subscription = await subscriptionService.getByOrganization(req.tenantId);
+
+      if (videoWidgets.length > 0) {
+        const entitlement = resolveVideoEntitlement(subscription);
+        if (!entitlement.allowed) {
+          res.status(402).json({
+            error:
+              `Seus ${FREE_VIDEO_TRIAL_DAYS} dias de vídeo no plano Grátis terminaram. ` +
+              'Assine o plano Loja para continuar publicando vídeos — o resto do conteúdo segue funcionando normalmente.',
+            code: 'video_requires_paid_plan',
+            widgetTypes: videoWidgets,
+          });
+          return;
+        }
+      }
+
+      // Fail-open sem assinatura, pelo mesmo motivo do `requireFeature`:
+      // organização legada (anterior à cobrança) não pode perder recurso por
+      // causa de dado ausente.
+      if (biWidgets.length > 0 && subscription && !hasFeature(subscription, BI_FEATURE_KEY)) {
+        const denial = await buildFeatureDenial(BI_FEATURE_KEY, subscription);
+        res.status(403).json({
           error:
-            `Seus ${FREE_VIDEO_TRIAL_DAYS} dias de vídeo no plano Grátis terminaram. ` +
-            'Assine o plano Loja para continuar publicando vídeos — o resto do conteúdo segue funcionando normalmente.',
-          code: 'video_requires_paid_plan',
-          widgetTypes: paidWidgets,
+            `${featureDenialMessage(denial)} ` +
+            'As telas que você já publicou com esses painéis continuam funcionando normalmente.',
+          code: 'feature_not_in_plan',
+          widgetTypes: biWidgets,
+          ...denial,
         });
         return;
       }
