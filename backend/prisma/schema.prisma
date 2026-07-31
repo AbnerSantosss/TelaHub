@@ -17,6 +17,18 @@ model User {
   createdAt DateTime  @default(now())
   lastLogin DateTime?
 
+  // `true` quando a senha atual foi GERADA pelo sistema e enviada por e-mail
+  // (convite ou compra no checkout), em vez de escolhida pela pessoa.
+  //
+  // Senha provisória trafega em texto claro no corpo do e-mail e fica na caixa
+  // de entrada para sempre. Enquanto ela continuar valendo, qualquer um com
+  // acesso àquela caixa entra na conta. Marcar aqui é o que permite o painel
+  // exigir a troca no primeiro acesso e encerrar essa janela.
+  //
+  // Default `false` para não obrigar a base existente a trocar senha — quem já
+  // usa o produto escolheu a própria senha em algum momento.
+  mustChangePassword Boolean @default(false)
+
   // Escopo de tenant. Nulo apenas para o role `master` (proprietário da
   // plataforma), que opera acima das organizações.
   organizationId String?

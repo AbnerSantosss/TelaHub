@@ -332,6 +332,17 @@ export interface User {
   lastLogin?: string | null; // null = nunca acessou
   /** Organização (tenant) à qual o usuário pertence. `master` opera acima dos tenants. */
   organizationId?: string | null;
+  /**
+   * A senha atual ainda é a provisória que o servidor gerou e mandou em texto
+   * claro por e-mail (convite ou compra no checkout). Enquanto for `true`, o
+   * painel bloqueia a navegação e exige a troca — ver `ProtectedRoute` em
+   * `App.tsx`. Vem tanto de `POST /auth/login` quanto de `GET /auth/me`, então
+   * uma sessão já aberta também cai na exigência ao recarregar.
+   *
+   * Opcional porque respostas antigas/legadas do backend podem não trazer o
+   * campo; `undefined` é tratado como "não precisa trocar".
+   */
+  mustChangePassword?: boolean;
   // Senha removida da interface frontend por segurança
 }
 

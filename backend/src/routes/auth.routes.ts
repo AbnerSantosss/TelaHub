@@ -48,6 +48,10 @@ router.get('/me', authMiddleware, async (req: Request, res: Response): Promise<v
       // O frontend precisa saber o tenant do usuário: `null` só acontece no
       // role `master`, que opera acima das organizações.
       organizationId: user.organizationId ?? null,
+      // Senha ainda é a provisória enviada por e-mail — o painel exige a troca
+      // antes de liberar o resto. Também vem aqui (e não só no login) porque
+      // uma sessão já aberta precisa cair na exigência ao recarregar a página.
+      mustChangePassword: user.mustChangePassword,
     });
   } catch (error: any) {
     console.error('Erro ao buscar usuário:', error);

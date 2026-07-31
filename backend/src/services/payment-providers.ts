@@ -324,33 +324,53 @@ export function isSimulatedActive(): boolean {
 }
 
 /**
- * Falha no CARREGAMENTO DO MÓDULO se a configuração de pagamento for insegura.
+ * Avisa no boot quando a configuração de pagamento não permite cobrar.
  *
- * Mesma estratégia de `auth.service.ts::assertJwtSecretIsSafe`, e pela mesma
- * razão: rodando aqui, a checagem cobre TODA porta de entrada — API, jobs,
- * seeds e scripts — e não só o servidor HTTP. Uma trava que só existe dentro
- * da rota é uma trava que um script de manutenção contorna sem querer.
+ * ── Correção de rumo (2026-07-31), registrada porque a primeira versão estava
+ *    errada e o motivo importa ────────────────────────────────────────────────
  *
- * Por que morrer no boot em vez de recusar por requisição: uma instância de
- * produção configurada para pagamento simulado está errada desde o primeiro
- * segundo, e "errado" aqui significa liberar plano pago de graça para quem
- * descobrir a URL. É melhor não subir do que subir vendendo de graça — e um
- * container que não sobe é visível no Portainer, enquanto um 503 intermitente
- * numa rota de checkout passa despercebido por dias.
+ * A primeira implementação desta função MATAVA o processo (`process.exit(1)`)
+ * em produção com provedor simulado, seguindo o padrão de
+ * `auth.service.ts::assertJwtSecretIsSafe`. O raciocínio era "melhor não subir
+ * do que subir vendendo de graça".
+ *
+ * O raciocínio estava incompleto: **este backend também serve o Player**. Um
+ * erro de configuração de PAGAMENTO derrubaria as TVs de todos os clientes —
+ * exatamente o problema que o produto existe para resolver, e que a página de
+ * vendas promete evitar. A cura era pior que a doença, e desproporcional: o
+ * risco a conter é "conta paga liberada de graça", não "checkout indisponível".
+ *
+ * O desenho atual contém o risco sem colateral: `resolveProvider()` continua
+ * recusando o provedor simulado em produção, então TODAS as rotas de cobrança
+ * respondem 503 e `/simulate-payment` fica inalcançável — nenhuma conta é
+ * liberada. O checkout já trata isso caindo no caminho de contato comercial, e
+ * o restante do sistema (painel, player, telas no ar) segue funcionando.
+ *
+ * Regra derivada: **guarda de segurança de um subsistema não pode ter como
+ * efeito colateral a queda de outro.** Degrade o subsistema afetado; não mate
+ * o processo que atende os demais.
  */
-export function assertPaymentConfigIsSafe(): void {
-  // Em teste a configuração é sempre a simulada e isso é o esperado.
+export function warnIfPaymentsDisabled(): void {
+  // Em teste a configuração é sempre a simulada, e isso é o esperado.
   if (process.env.NODE_ENV === 'test') return;
 
   try {
-    resolveProvider();
-  } catch (error) {
-    if (error instanceof PaymentConfigError && process.env.NODE_ENV === 'production') {
-      console.error(`\n❌ ${error.message}\n`);
-      process.exit(1);
+    const provider = resolveProvider();
+    if (provider.simulated) {
+      console.warn(
+        `⚠️  Pagamento em modo ${provider.label}: nenhuma cobrança real é feita ` +
+          'e a confirmação libera conta com assinatura ativa.'
+      );
     }
-    // Fora de produção o erro sobe na requisição (503), sem derrubar o dev.
+  } catch (error) {
+    if (error instanceof PaymentConfigError) {
+      console.warn(
+        `⚠️  Cobrança online DESATIVADA: ${error.message}\n` +
+          '   O checkout continua funcionando e cai no contato comercial. ' +
+          'O restante do sistema não é afetado.'
+      );
+    }
   }
 }
 
-assertPaymentConfigIsSafe();
+warnIfPaymentsDisabled();

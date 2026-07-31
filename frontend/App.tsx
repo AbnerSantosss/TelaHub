@@ -5,6 +5,7 @@ import { getCurrentUser } from './services/storage';
 import { Loader2 } from 'lucide-react';
 import { Toaster } from './components/ui/sonner';
 import { pricingUrl } from './libs/external-urls';
+import type { User } from './types';
 
 // Lazy load screen components to improve initial load time
 const Dashboard = React.lazy(() => import('./components/Dashboard'));
@@ -16,6 +17,7 @@ const Signup = React.lazy(() => import('./components/Signup'));
 const ForgotPassword = React.lazy(() => import('./components/ForgotPassword'));
 const ResetPassword = React.lazy(() => import('./components/ResetPassword'));
 const Reports = React.lazy(() => import('./components/Reports'));
+const ForcePasswordChange = React.lazy(() => import('./components/ForcePasswordChange'));
 
 /**
  * `/vendas` era uma SEGUNDA landing page, mantida aqui dentro em paralelo ao
@@ -40,19 +42,51 @@ const VendasRedirect: React.FC = () => {
   );
 };
 
-// Componente para Proteger Rotas
+/**
+ * Componente para Proteger Rotas.
+ *
+ * Também é aqui que a troca obrigatória de senha é aplicada, e o motivo é o
+ * mesmo que justifica o guard de autenticação estar aqui: este componente já é
+ * o único caminho pelo qual o conteúdo do painel é montado, e já faz a chamada
+ * a `GET /auth/me` de que a decisão depende. Alternativas foram descartadas:
+ *
+ * - Redirecionar para uma rota `/trocar-senha` exigiria interceptar TODA rota
+ *   nova que alguém criar no futuro (é fácil esquecer, e o esquecimento é um
+ *   furo de segurança silencioso), além de perder a rota de destino.
+ * - Tratar só no `Login` deixaria de fora a sessão que já estava aberta quando
+ *   o flag foi ligado (compra no checkout, convite reenviado) e qualquer
+ *   recarregamento de página com token válido no localStorage.
+ *
+ * Renderizando `ForcePasswordChange` NO LUGAR dos `children`, sem mexer na URL,
+ * não existe endereço que pule a exigência e, ao concluir, o usuário permanece
+ * na rota para onde ia (incluindo parâmetros, como `/edit/:id`).
+ *
+ * As rotas públicas (`/player`, `/player/:slug`, `/login`, `/signup`,
+ * `/forgot-password`, `/reset-password`) não passam por aqui e portanto seguem
+ * intocadas — a TV em especial nunca pode ser bloqueada por isto.
+ */
 const ProtectedRoute = ({ children }: { children?: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  // Estado separado do `currentUser` porque, ao concluir a troca, queremos
+  // liberar a navegação sem refazer o `GET /auth/me` (o servidor já zerou o
+  // flag; um refetch só adiaria a renderização).
+  const [mustChangePassword, setMustChangePassword] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
         const user = await getCurrentUser();
         setIsAuthenticated(!!user);
+        setCurrentUser(user);
+        // `undefined` (resposta legada do backend) conta como "não precisa".
+        setMustChangePassword(user?.mustChangePassword === true);
       } catch (error) {
         console.error("Auth check failed", error);
         setIsAuthenticated(false);
+        setCurrentUser(null);
+        setMustChangePassword(false);
       } finally {
         setLoading(false);
       }
@@ -76,6 +110,15 @@ const ProtectedRoute = ({ children }: { children?: React.ReactNode }) => {
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
+  }
+
+  if (mustChangePassword) {
+    return (
+      <ForcePasswordChange
+        user={currentUser}
+        onSuccess={() => setMustChangePassword(false)}
+      />
+    );
   }
 
   return <>{children}</>;

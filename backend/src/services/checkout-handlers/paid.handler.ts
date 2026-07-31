@@ -132,6 +132,10 @@ export const paidHandler: CheckoutEventHandler = {
           password: passwordHash,
           role: 'admin',
           organizationId: organization.id,
+          // A senha foi sorteada aqui e vai por e-mail — quem comprou não a
+          // escolheu. O painel exige a troca no primeiro acesso; sem isso ela
+          // valeria para sempre, guardada em texto claro na caixa de entrada.
+          mustChangePassword: true,
         },
       });
 

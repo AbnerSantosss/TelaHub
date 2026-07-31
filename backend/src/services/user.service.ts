@@ -43,6 +43,10 @@ export class UserService {
         email: user.email,
         role: user.role,
         organizationId: user.organizationId ?? null,
+        // O painel usa isto para exigir a troca antes de liberar a navegação.
+        // Vai no login (e não só no /me) para a decisão acontecer na primeira
+        // resposta, sem uma tela intermediária piscando.
+        mustChangePassword: user.mustChangePassword,
       },
     };
   }
@@ -100,6 +104,10 @@ export class UserService {
       password: hashedPwd,
       role: role || 'user',
       organizationId: tenantId ?? null,
+      // Senha GERADA pelo sistema e enviada por e-mail: vale só até o primeiro
+      // acesso. Enquanto não for trocada, quem tiver a caixa de entrada tem a
+      // conta.
+      mustChangePassword: true,
     });
 
     // 5. Enviar convite por e-mail
@@ -131,8 +139,9 @@ export class UserService {
     const plainPassword = this.generateRandomPassword();
     const hashedPwd = await hashPassword(plainPassword);
 
-    // Atualizar senha no banco
-    await userRepository.updatePassword(userId, hashedPwd);
+    // Atualizar senha no banco. A senha nova também foi gerada pelo sistema e
+    // vai por e-mail, então a obrigação de troca volta a valer.
+    await userRepository.updatePassword(userId, hashedPwd, { mustChangePassword: true });
 
     // Enviar email
     await sendInviteEmail(user.email, plainPassword);
@@ -194,9 +203,13 @@ export class UserService {
       throw new Error('Usuário não encontrado.');
     }
 
-    // Hash nova senha
+    // Hash nova senha.
+    // `clearMustChange`: aqui a senha também é ESCOLHIDA pela pessoa (ela
+    // digitou no formulário de redefinição), então a obrigação de troca se
+    // encerra — insistir na troca logo depois de redefinir seria pedir a mesma
+    // coisa duas vezes.
     const hashedPwd = await hashPassword(newPassword);
-    await userRepository.updatePassword(user.id, hashedPwd);
+    await userRepository.updatePassword(user.id, hashedPwd, { mustChangePassword: false });
 
     // Marcar token como usado
     await prisma.passwordReset.update({
@@ -275,8 +288,10 @@ export class UserService {
       throw new Error('A nova senha deve ter pelo menos 6 caracteres.');
     }
 
+    // A pessoa escolheu a própria senha: a provisória que foi por e-mail
+    // deixa de valer e a obrigação de troca se encerra aqui.
     const hashedPwd = await hashPassword(newPassword);
-    await userRepository.updatePassword(userId, hashedPwd);
+    await userRepository.updatePassword(userId, hashedPwd, { mustChangePassword: false });
 
     return { message: 'Senha alterada com sucesso!' };
   }

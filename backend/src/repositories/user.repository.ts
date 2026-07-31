@@ -47,6 +47,7 @@ export class UserRepository {
     email: string;
     password: string;
     role: string;
+    mustChangePassword?: boolean;
     organizationId?: string | null;
   }) {
     return prisma.user.create({
@@ -64,10 +65,33 @@ export class UserRepository {
     return prisma.user.delete({ where: { id } });
   }
 
-  async updatePassword(id: string, hashedPassword: string) {
+  /**
+   * Troca a senha.
+   *
+   * `mustChangePassword` é tri-estado de propósito:
+   *   - `false` → a pessoa ESCOLHEU esta senha (troca ou redefinição): encerra
+   *     a obrigação;
+   *   - `true`  → o SISTEMA gerou esta senha (reenvio de convite): a obrigação
+   *     recomeça, porque a senha nova também trafega por e-mail;
+   *   - omitido → não mexe no campo.
+   *
+   * Deixar isso implícito seria o erro fácil: um reenvio de convite que
+   * "esquecesse" de reativar a obrigação criaria uma senha de e-mail válida
+   * para sempre, exatamente o problema que o campo existe para fechar.
+   */
+  async updatePassword(
+    id: string,
+    hashedPassword: string,
+    options: { mustChangePassword?: boolean } = {}
+  ) {
     return prisma.user.update({
       where: { id },
-      data: { password: hashedPassword },
+      data: {
+        password: hashedPassword,
+        ...(options.mustChangePassword === undefined
+          ? {}
+          : { mustChangePassword: options.mustChangePassword }),
+      },
     });
   }
 

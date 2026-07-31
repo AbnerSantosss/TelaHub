@@ -82,10 +82,10 @@ services:
       # chega ao container por mais que se cadastre no Portainer — mesma
       # armadilha que já deixou ADMIN_*/SMTP_* sem efeito nesta stack.
       #
-      # Sem `ALLOW_SIMULATED_PAYMENTS=true`, o backend com PAYMENT_PROVIDER
-      # simulado ABORTA o boot em produção, de propósito: ele libera plano pago
-      # sem cobrar. Um container que não sobe é visível; um checkout que dá
-      # acesso de graça, não.
+      # Sem `ALLOW_SIMULATED_PAYMENTS=true`, o provedor simulado é RECUSADO em
+      # produção: as rotas de cobrança respondem 503 e o checkout cai no contato
+      # comercial. O backend NÃO morre — ele também serve o Player, e derrubá-lo
+      # por erro de pagamento apagaria as TVs dos clientes.
       - PAYMENT_PROVIDER=${PAYMENT_PROVIDER:-simulado}
       - ALLOW_SIMULATED_PAYMENTS=${ALLOW_SIMULATED_PAYMENTS:-}
     depends_on:
