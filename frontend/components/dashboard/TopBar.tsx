@@ -1,7 +1,9 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Plus, RefreshCw, LogOut, Tv, Monitor } from 'lucide-react';
 import { User, Display, Device } from '../../types';
 import { Button } from '../ui/button';
+import { AccentPicker } from './AccentPicker';
 
 interface TopBarProps {
   currentUser: User | null;
@@ -24,6 +26,7 @@ export const TopBar: React.FC<TopBarProps> = ({
   onRefresh,
   onLogout,
 }) => {
+  const navigate = useNavigate();
   const totalDisplays = displays.length;
 
   const onlineDisplays = displays.filter(display =>
@@ -47,16 +50,22 @@ export const TopBar: React.FC<TopBarProps> = ({
     >
       {/* 1. Logo */}
       <div className="flex items-center gap-3 flex-shrink-0 w-full lg:w-auto justify-between lg:justify-start">
-        <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={() => navigate('/')}
+          className="flex items-center gap-3 bg-transparent border-0 p-0 cursor-pointer text-left"
+          title="Ir para o início"
+          aria-label="Ir para o início"
+        >
           <div className="grid grid-cols-2 gap-[3px] w-[32px] h-[32px] flex-shrink-0">
-            <div className="bg-[#0ea5e9] rounded-[2px]"></div>
-            <div className="bg-[#0ea5e9]/35 rounded-[2px]"></div>
-            <div className="bg-[#0ea5e9]/35 rounded-[2px]"></div>
+            <div className="bg-[var(--th-accent)] rounded-[2px]"></div>
+            <div className="bg-[var(--th-accent)]/35 rounded-[2px]"></div>
+            <div className="bg-[var(--th-accent)]/35 rounded-[2px]"></div>
             <div className="bg-[#2563eb] rounded-[2px]"></div>
           </div>
           <div className="flex-shrink-0">
             <h1 className="text-xl font-normal text-[#eaf2ff] tracking-tight uppercase leading-none">
-              TELA<span className="font-extrabold text-[#0ea5e9]">HUB</span>
+              TELA<span className="font-extrabold text-[var(--th-accent)]">HUB</span>
             </h1>
             <p
               className="mt-0.5 font-medium whitespace-nowrap"
@@ -69,17 +78,18 @@ export const TopBar: React.FC<TopBarProps> = ({
               Bem-vindo, {currentUser?.username || 'admin'}
             </p>
           </div>
-        </div>
+        </button>
 
         {/* Refresh Action for Mobile Only - keeps top bar balanced */}
         <div className="lg:hidden flex items-center gap-2">
+          <AccentPicker />
           <Button
             variant="outline"
             size="icon"
             onClick={onRefresh}
             className="flex items-center justify-center w-[32px] h-[32px] rounded-xl border-white/10 hover:bg-white/5 text-slate-400 hover:text-slate-200"
           >
-            <RefreshCw size={13} className={loading ? 'animate-spin text-[#0ea5e9]' : ''} />
+            <RefreshCw size={13} className={loading ? 'animate-spin text-[var(--th-accent)]' : ''} />
           </Button>
         </div>
       </div>
@@ -88,7 +98,7 @@ export const TopBar: React.FC<TopBarProps> = ({
       <div className="flex items-center gap-2.5 flex-wrap flex-1 lg:justify-center w-full lg:w-auto">
         {/* Telas */}
         <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-lg px-2.5 py-1">
-          <Monitor size={12} className="text-[#0ea5e9]" />
+          <Monitor size={12} className="text-[var(--th-accent)]" />
           <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Telas:</span>
           <span className="text-[11px] font-bold text-white">{totalDisplays}</span>
         </div>
@@ -130,13 +140,17 @@ export const TopBar: React.FC<TopBarProps> = ({
           variant="brand"
           onClick={onCreateDisplay}
           disabled={loading}
-          className="flex-1 lg:flex-none flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl font-bold text-slate-900 bg-[#0ea5e9] hover:bg-[#0284c7] disabled:opacity-50 text-xs"
+          className="flex-1 lg:flex-none flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl font-bold text-slate-900 bg-[var(--th-accent)] hover:bg-[var(--th-accent-strong)] disabled:opacity-50 text-xs"
         >
           <Plus size={14} strokeWidth={3} />
           <span>Nova Tela</span>
         </Button>
 
         <div className="hidden lg:block h-5 w-px bg-white/10 mx-0.5" />
+
+        <div className="hidden lg:block">
+          <AccentPicker />
+        </div>
 
         <Button
           variant="outline"
@@ -145,7 +159,7 @@ export const TopBar: React.FC<TopBarProps> = ({
           className="hidden lg:flex items-center justify-center w-[32px] h-[32px] rounded-xl border-white/10 hover:bg-white/5 text-slate-400 hover:text-slate-200"
           title="Atualizar lista"
         >
-          <RefreshCw size={13} className={loading ? 'animate-spin text-[#0ea5e9]' : ''} />
+          <RefreshCw size={13} className={loading ? 'animate-spin text-[var(--th-accent)]' : ''} />
         </Button>
 
         <Button

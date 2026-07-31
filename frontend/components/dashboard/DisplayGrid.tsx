@@ -90,8 +90,8 @@ export const DisplayGrid: React.FC<DisplayGridProps> = ({
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
         <div className="flex items-center gap-3">
           <h2 className="text-xl font-black text-[#eaf2ff] tracking-tight">Suas Telas</h2>
-          <div className="flex items-center gap-1.5 bg-[#0ea5e9]/10 border border-[#0ea5e9]/20 rounded-full px-2.5 py-0.5">
-            <span className="text-[11px] font-bold text-[#0ea5e9] tracking-wide">
+          <div className="flex items-center gap-1.5 bg-[var(--th-accent)]/10 border border-[var(--th-accent)]/20 rounded-full px-2.5 py-0.5">
+            <span className="text-[11px] font-bold text-[var(--th-accent)] tracking-wide">
               {sorted.length} {sorted.length === 1 ? 'tela' : 'telas'}
               {filter !== 'all' && ` · ${filter === 'online' ? 'online' : 'offline'}`}
             </span>
@@ -105,7 +105,7 @@ export const DisplayGrid: React.FC<DisplayGridProps> = ({
               variant="ghost"
               size="icon"
               onClick={() => setView('grid')}
-              className={`w-8 h-8 rounded-lg transition-all ${view === 'grid' ? 'bg-white/10 text-[#0ea5e9]' : 'text-slate-500 hover:text-slate-300'}`}
+              className={`w-8 h-8 rounded-lg transition-all ${view === 'grid' ? 'bg-white/10 text-[var(--th-accent)]' : 'text-slate-500 hover:text-slate-300'}`}
               title="Visualização em grade"
             >
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
@@ -114,7 +114,7 @@ export const DisplayGrid: React.FC<DisplayGridProps> = ({
               variant="ghost"
               size="icon"
               onClick={() => setView('list')}
-              className={`w-8 h-8 rounded-lg transition-all ${view === 'list' ? 'bg-white/10 text-[#0ea5e9]' : 'text-slate-500 hover:text-slate-300'}`}
+              className={`w-8 h-8 rounded-lg transition-all ${view === 'list' ? 'bg-white/10 text-[var(--th-accent)]' : 'text-slate-500 hover:text-slate-300'}`}
               title="Visualização em lista"
             >
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
@@ -137,7 +137,7 @@ export const DisplayGrid: React.FC<DisplayGridProps> = ({
                   <button
                     key={s}
                     onClick={() => { setSort(s); setShowSortMenu(false); }}
-                    className={`w-full text-left px-4 py-2.5 text-[12px] font-semibold uppercase tracking-wider transition-all hover:bg-white/5 ${sort === s ? 'text-[#0ea5e9]' : 'text-slate-400'}`}
+                    className={`w-full text-left px-4 py-2.5 text-[12px] font-semibold uppercase tracking-wider transition-all hover:bg-white/5 ${sort === s ? 'text-[var(--th-accent)]' : 'text-slate-400'}`}
                   >
                     {{ name: 'Nome (A–Z)', date: 'Data de edição', orientation: 'Orientação' }[s]}
                     {sort === s && <span className="ml-2 text-[10px]">✓</span>}

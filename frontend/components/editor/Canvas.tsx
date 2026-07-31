@@ -320,7 +320,7 @@ export const Canvas: React.FC<CanvasProps> = ({
 
       {/* ── Caixa externa: tamanho visual no editor ── */}
       <div
-        className="border border-[#0ea5e9] rounded-md shadow-[0_0_40px_rgba(0,0,0,0.8)] shrink-0 overflow-hidden relative bg-black"
+        className="border border-[var(--th-accent)] rounded-md shadow-[0_0_40px_rgba(0,0,0,0.8)] shrink-0 overflow-hidden relative bg-black"
         style={
           display.orientation === 'vertical'
             ? { width: 405, height: 720 }
@@ -402,7 +402,7 @@ export const Canvas: React.FC<CanvasProps> = ({
               <div 
                 key={w.i} 
                 onClick={(e) => { e.stopPropagation(); setSelectedWidget(w.i); }}
-                className={`group transition-all ${selectedWidget === w.i ? 'border border-[#0ea5e9] shadow-[0_0_15px_rgba(124,58,237,0.35)]' : 'border border-transparent hover:border-white/20 hover:bg-white/5'} ${w.data.backgroundAnimation ? getBackgroundAnimationClass(w.data.backgroundAnimation) : (selectedWidget === w.i ? 'bg-slate-900/50 backdrop-blur-sm' : '')}`}
+                className={`group transition-all ${selectedWidget === w.i ? 'border border-[var(--th-accent)] shadow-[0_0_15px_rgba(124,58,237,0.35)]' : 'border border-transparent hover:border-white/20 hover:bg-white/5'} ${w.data.backgroundAnimation ? getBackgroundAnimationClass(w.data.backgroundAnimation) : (selectedWidget === w.i ? 'bg-slate-900/50 backdrop-blur-sm' : '')}`}
                 style={{ zIndex: selectedWidget === w.i ? 999 : (w.data.zIndex !== undefined ? w.data.zIndex : 10) }}
               >
                 <div 
@@ -413,7 +413,7 @@ export const Canvas: React.FC<CanvasProps> = ({
                   }}
                 >
                   {w.data.fullScreenMode && (
-                    <div className="absolute top-2 right-2 z-30 bg-indigo-950/80 border border-[#0ea5e9]/50 backdrop-blur-sm text-[#0ea5e9] text-[9px] font-black uppercase px-2 py-0.5 rounded-full shadow-[0_0_10px_rgba(124,58,237,0.3)] pointer-events-none animate-pulse flex items-center gap-1">
+                    <div className="absolute top-2 right-2 z-30 bg-indigo-950/80 border border-[var(--th-accent)]/50 backdrop-blur-sm text-[var(--th-accent)] text-[9px] font-black uppercase px-2 py-0.5 rounded-full shadow-[0_0_10px_rgba(124,58,237,0.3)] pointer-events-none animate-pulse flex items-center gap-1">
                       <span>📺 Tela Cheia (100% da TV)</span>
                     </div>
                   )}

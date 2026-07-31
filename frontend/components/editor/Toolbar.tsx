@@ -33,14 +33,14 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   return (
     <header className="h-auto md:h-16 bg-[#1f2937] border-b border-[#9CA3AF]/10 px-4 md:px-6 py-3 md:py-0 flex flex-col md:flex-row items-center justify-between z-30 shadow-md gap-3 md:gap-0">
       <div className="flex items-center gap-4 w-full md:w-auto justify-start">
-        <button onClick={onGoHome} className="p-2 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-[#0ea5e9] transition-colors">
+        <button onClick={onGoHome} className="p-2 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-[var(--th-accent)] transition-colors">
           <Home size={20} />
         </button>
         <div className="w-px h-6 bg-slate-800"></div>
         <div className="flex items-center gap-2">
           <LogoHub size={28} className="drop-shadow-[0_0_8px_rgba(124,58,237,0.35)]" />
           <h1 className="font-bold text-slate-100 tracking-tight uppercase text-sm">
-            Tela<span className="text-[#0ea5e9]">Hub</span> <span className="text-slate-600 mx-2">/</span> {display.name}
+            Tela<span className="text-[var(--th-accent)]">Hub</span> <span className="text-slate-600 mx-2">/</span> {display.name}
           </h1>
         </div>
       </div>
@@ -52,14 +52,14 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         <div className="flex items-center gap-2 md:hidden">
           <button 
             onClick={() => setShowLeftSidebar(!showLeftSidebar)}
-            className={`px-3 py-2 rounded-lg transition-all border ${showLeftSidebar ? 'bg-[#0ea5e9]/20 text-[#0ea5e9] border-[#0ea5e9]/50' : 'bg-slate-900 border-slate-800 text-slate-500 hover:text-[#0ea5e9]'}`}
+            className={`px-3 py-2 rounded-lg transition-all border ${showLeftSidebar ? 'bg-[var(--th-accent)]/20 text-[var(--th-accent)] border-[var(--th-accent)]/50' : 'bg-slate-900 border-slate-800 text-slate-500 hover:text-[var(--th-accent)]'}`}
             title="Widgets"
           >
             <Layers size={16} />
           </button>
           <button 
             onClick={() => setShowRightSidebar(!showRightSidebar)}
-            className={`px-3 py-2 rounded-lg transition-all border ${showRightSidebar ? 'bg-[#0ea5e9]/20 text-[#0ea5e9] border-[#0ea5e9]/50' : 'bg-slate-900 border-slate-800 text-slate-500 hover:text-[#0ea5e9]'}`}
+            className={`px-3 py-2 rounded-lg transition-all border ${showRightSidebar ? 'bg-[var(--th-accent)]/20 text-[var(--th-accent)] border-[var(--th-accent)]/50' : 'bg-slate-900 border-slate-800 text-slate-500 hover:text-[var(--th-accent)]'}`}
             title="Configurações"
           >
             <Settings size={16} />
@@ -88,7 +88,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           <button 
             onClick={handleSave} 
             disabled={isSaving} 
-            className="bg-[#0ea5e9] hover:bg-[#0284c7] text-white px-6 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-all shadow-[0_0_15px_rgba(124,58,237,0.3)] border border-white/10 active:scale-95 whitespace-nowrap disabled:opacity-50"
+            className="bg-[var(--th-accent)] hover:bg-[var(--th-accent-strong)] text-white px-6 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-all shadow-[0_0_15px_rgba(124,58,237,0.3)] border border-white/10 active:scale-95 whitespace-nowrap disabled:opacity-50"
           >
             {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />} 
             {isSaving ? 'SALVANDO...' : 'SALVAR'}

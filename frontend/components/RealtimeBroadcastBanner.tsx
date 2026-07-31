@@ -88,10 +88,10 @@ export const RealtimeBroadcastBanner: React.FC<RealtimeBroadcastBannerProps> = (
     rh: {
       icon: <Info className="text-purple-400 w-12 h-12" />,
       themeColor: 'rgba(124, 58, 237, 0.95)',
-      borderColor: 'border-[#0ea5e9]/50',
+      borderColor: 'border-[var(--th-accent)]/50',
       shadowColor: 'rgba(124, 58, 237, 0.4)',
-      bgGradient: 'from-[#0ea5e9]/15 via-slate-950/95 to-[#0ea5e9]/5',
-      glowClass: 'bg-[#0ea5e9]/20'
+      bgGradient: 'from-[var(--th-accent)]/15 via-slate-950/95 to-[var(--th-accent)]/5',
+      glowClass: 'bg-[var(--th-accent)]/20'
     },
     alert: {
       icon: <AlertTriangle className="text-amber-500 w-12 h-12" />,

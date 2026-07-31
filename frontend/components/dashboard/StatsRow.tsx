@@ -23,8 +23,8 @@ export const StatsRow: React.FC<StatsRowProps> = ({ displays, devices }) => {
     {
       label: 'Total',
       value: totalDisplays,
-      color: '#0ea5e9',
-      icon: <Monitor size={11} className="text-[#0ea5e9]" />,
+      color: 'var(--th-accent)',
+      icon: <Monitor size={11} className="text-[var(--th-accent)]" />,
     },
     {
       label: 'Online',
@@ -41,8 +41,8 @@ export const StatsRow: React.FC<StatsRowProps> = ({ displays, devices }) => {
     {
       label: 'TVs',
       value: totalDevices,
-      color: '#0ea5e9',
-      icon: <Tv size={11} className="text-[#0ea5e9]" />,
+      color: 'var(--th-accent)',
+      icon: <Tv size={11} className="text-[var(--th-accent)]" />,
     },
   ];
 

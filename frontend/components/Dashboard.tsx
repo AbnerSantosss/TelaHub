@@ -827,7 +827,7 @@ const Dashboard: React.FC = () => {
             ) : !loading && (
               <button
                 onClick={() => setIsLinkModalOpen(true)}
-                className="text-[11px] font-medium text-slate-500 hover:text-[#0ea5e9] transition-colors"
+                className="text-[11px] font-medium text-slate-500 hover:text-[var(--th-accent)] transition-colors"
               >
                 Nenhuma TV pareada ainda — clique aqui para parear a primeira
               </button>

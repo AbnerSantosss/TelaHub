@@ -101,7 +101,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
         <div className="space-y-6 animate-in slide-in-from-right-4 duration-200">
           <div className="flex items-center justify-between border-b border-slate-800 pb-4">
             <h3 className="font-bold text-slate-200 flex items-center gap-2 text-xs uppercase tracking-wider">
-               <Settings size={14} className="text-[#0ea5e9]" /> Configuração
+               <Settings size={14} className="text-[var(--th-accent)]" /> Configuração
             </h3>
             <div className="flex items-center gap-2">
               <button onClick={() => removeWidget(selectedWidget!)} className="text-rose-500 hover:bg-rose-500/10 p-2 rounded-lg transition-colors" title="Remover Widget">
@@ -123,7 +123,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
 
                 <button
                   onClick={setFullScreen}
-                  className="w-full py-2.5 bg-gradient-to-r from-blue-600 to-sky-500 hover:from-blue-500 hover:to-sky-400 text-white rounded-lg text-xs font-black uppercase tracking-wider transition-all shadow-[0_4px_12px_rgba(14,165,233,0.25)] flex items-center justify-center gap-2 relative overflow-hidden group border border-sky-400/30"
+                  className="w-full py-2.5 bg-gradient-to-r from-blue-600 to-sky-500 hover:from-blue-500 hover:to-sky-400 text-white rounded-lg text-xs font-black uppercase tracking-wider transition-all shadow-[0_4px_12px_rgba(var(--th-accent-rgb),0.25)] flex items-center justify-center gap-2 relative overflow-hidden group border border-sky-400/30"
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
                   <Maximize2 size={14} className="relative z-10" />
@@ -185,7 +185,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
               </h4>
               <button 
                 onClick={() => setShowBgAnimModal(true)}
-                className="w-full py-2 bg-[#0ea5e9] hover:bg-[#0284c7] text-white rounded-lg text-xs font-bold transition-colors shadow-lg flex items-center justify-center gap-2"
+                className="w-full py-2 bg-[var(--th-accent)] hover:bg-[var(--th-accent-strong)] text-white rounded-lg text-xs font-bold transition-colors shadow-lg flex items-center justify-center gap-2"
               >
                 <MonitorPlay size={14} />
                 {currentWidget.data.backgroundAnimation && currentWidget.data.backgroundAnimation !== 'none' 
@@ -798,7 +798,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                   <div>
                     <div className="flex justify-between items-center mb-2">
                       <label className="text-[9px] font-black text-slate-500 uppercase flex items-center gap-1">Tamanho dos Textos</label>
-                      <span className="text-[10px] font-mono text-[#0ea5e9]">{currentWidget.data.textSize || 100}%</span>
+                      <span className="text-[10px] font-mono text-[var(--th-accent)]">{currentWidget.data.textSize || 100}%</span>
                     </div>
                     <input 
                       type="range" 
@@ -807,14 +807,14 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                       step="5"
                       value={currentWidget.data.textSize || 100} 
                       onChange={(e) => updateWidgetData(selectedWidget!, { textSize: parseInt(e.target.value) })}
-                      className="w-full accent-[#0ea5e9]"
+                      className="w-full accent-[var(--th-accent)]"
                     />
                   </div>
                   
                   <div>
                     <div className="flex justify-between items-center mb-2">
                       <label className="text-[9px] font-black text-slate-500 uppercase flex items-center gap-1">Tamanho dos Números</label>
-                      <span className="text-[10px] font-mono text-[#0ea5e9]">{currentWidget.data.numberSize || 100}%</span>
+                      <span className="text-[10px] font-mono text-[var(--th-accent)]">{currentWidget.data.numberSize || 100}%</span>
                     </div>
                     <input 
                       type="range" 
@@ -823,7 +823,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                       step="5"
                       value={currentWidget.data.numberSize || 100} 
                       onChange={(e) => updateWidgetData(selectedWidget!, { numberSize: parseInt(e.target.value) })}
-                      className="w-full accent-[#0ea5e9]"
+                      className="w-full accent-[var(--th-accent)]"
                     />
                   </div>
                 </div>
@@ -1403,7 +1403,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                           input.value = '';
                         }
                       }}
-                      className="bg-indigo-600 hover:bg-[#0284c7] px-3 rounded text-white text-xs font-bold"
+                      className="bg-indigo-600 hover:bg-[var(--th-accent-strong)] px-3 rounded text-white text-xs font-bold"
                     >
                       +
                     </button>
@@ -1544,7 +1544,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                         assInput.value = '';
                       }
                     }}
-                    className="w-full py-1.5 bg-indigo-600 hover:bg-[#0284c7] rounded text-white text-xs font-bold transition-colors"
+                    className="w-full py-1.5 bg-indigo-600 hover:bg-[var(--th-accent-strong)] rounded text-white text-xs font-bold transition-colors"
                   >
                     Adicionar
                   </button>
@@ -1736,7 +1736,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                           input.value = '';
                         }
                       }}
-                      className="bg-indigo-600 hover:bg-[#0284c7] px-3 rounded text-white text-xs font-bold"
+                      className="bg-indigo-600 hover:bg-[var(--th-accent-strong)] px-3 rounded text-white text-xs font-bold"
                     >
                       +
                     </button>

@@ -24,7 +24,7 @@ export const ModuleNav: React.FC<ModuleNavProps> = ({
 
   const getNavItemClass = (active: boolean) => {
     return `flex items-center gap-2 px-1 h-[44px] font-bold text-[11.5px] uppercase tracking-wider transition-all whitespace-nowrap cursor-pointer border-b-[3px] rounded-none hover:bg-transparent ${
-      active ? 'text-[#0ea5e9] border-[#0ea5e9]' : 'text-slate-500 border-transparent hover:text-slate-300'
+      active ? 'text-[var(--th-accent)] border-[var(--th-accent)]' : 'text-slate-500 border-transparent hover:text-slate-300'
     }`;
   };
 
@@ -54,7 +54,7 @@ export const ModuleNav: React.FC<ModuleNavProps> = ({
         onClick={() => navigate('/scheduler')}
         className={getNavItemClass(isRouteActive('#/scheduler') || currentHash === '#/')}
       >
-        <Calendar size={14} className={isRouteActive('#/scheduler') || currentHash === '#/' ? 'text-[#0ea5e9]' : ''} />
+        <Calendar size={14} className={isRouteActive('#/scheduler') || currentHash === '#/' ? 'text-[var(--th-accent)]' : ''} />
         <span className="hidden min-[681px]:inline">Central de Programação</span>
       </Button>
 
@@ -81,7 +81,7 @@ export const ModuleNav: React.FC<ModuleNavProps> = ({
         onClick={() => navigate('/reports')}
         className={getNavItemClass(isRouteActive('#/reports'))}
       >
-        <BarChart3 size={14} className={isRouteActive('#/reports') ? 'text-[#0ea5e9]' : ''} />
+        <BarChart3 size={14} className={isRouteActive('#/reports') ? 'text-[var(--th-accent)]' : ''} />
         <span className="hidden min-[681px]:inline">Relatórios</span>
       </Button>
 

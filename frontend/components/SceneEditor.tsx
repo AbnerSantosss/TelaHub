@@ -445,12 +445,12 @@ const SceneEditor: React.FC<SceneEditorProps> = ({
                 margin={[0, 0]}
                 onLayoutChange={handleLayoutChange}
                 draggableHandle=".drag-handle"
-                resizeHandle={<div className="absolute bottom-0 right-0 p-1 cursor-se-resize text-[#0ea5e9] opacity-0 group-hover:opacity-100 transition-opacity"><MoveHorizontal size={12} /></div>}
+                resizeHandle={<div className="absolute bottom-0 right-0 p-1 cursor-se-resize text-[var(--th-accent)] opacity-0 group-hover:opacity-100 transition-opacity"><MoveHorizontal size={12} /></div>}
               >
                 {page.layout.map(w => (
                   <div
                     key={w.i}
-                    className={`group relative border transition-all ${selectedWidget === w.i ? 'border-[#0ea5e9] ring-2 ring-cyan-500/20 z-20' : 'border-transparent hover:border-slate-700'}`}
+                    className={`group relative border transition-all ${selectedWidget === w.i ? 'border-[var(--th-accent)] ring-2 ring-cyan-500/20 z-20' : 'border-transparent hover:border-slate-700'}`}
                     onClick={(e) => { e.stopPropagation(); setSelectedWidget(w.i); }}
                   >
                     <div className="drag-handle absolute top-0 left-0 w-full h-4 bg-slate-900/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 cursor-move flex items-center justify-center z-10 transition-opacity">
@@ -458,7 +458,7 @@ const SceneEditor: React.FC<SceneEditorProps> = ({
                     </div>
 
                     {w.data.fullScreenMode && (
-                      <div className="absolute top-5 right-2 z-30 bg-cyan-950/80 border border-[#0ea5e9]/50 backdrop-blur-sm text-[#0ea5e9] text-[8px] font-black uppercase px-2 py-0.5 rounded-full shadow-[0_0_10px_rgba(6,182,212,0.3)] pointer-events-none animate-pulse flex items-center gap-1">
+                      <div className="absolute top-5 right-2 z-30 bg-cyan-950/80 border border-[var(--th-accent)]/50 backdrop-blur-sm text-[var(--th-accent)] text-[8px] font-black uppercase px-2 py-0.5 rounded-full shadow-[0_0_10px_rgba(6,182,212,0.3)] pointer-events-none animate-pulse flex items-center gap-1">
                         <span>📺 Tela Cheia</span>
                       </div>
                     )}
@@ -509,7 +509,7 @@ const SceneEditor: React.FC<SceneEditorProps> = ({
             <div className="absolute md:relative right-0 top-0 h-full w-80 bg-slate-900 border-l border-slate-800 p-6 overflow-y-auto custom-scrollbar z-40 shadow-2xl transition-all duration-300 animate-in slide-in-from-right duration-300">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="font-black text-xs uppercase tracking-widest text-slate-400 flex items-center gap-2">
-                  <Settings size={14} className="text-[#0ea5e9]" /> Propriedades
+                  <Settings size={14} className="text-[var(--th-accent)]" /> Propriedades
                 </h3>
                 <button onClick={() => setSelectedWidget(null)} className="text-slate-500 hover:text-white transition-colors">
                   <X size={18} />
@@ -540,10 +540,10 @@ const SceneEditor: React.FC<SceneEditorProps> = ({
 const WidgetTool: React.FC<{ icon: React.ReactNode | string, label: string, description: string, onClick: () => void }> = ({ icon, label, description, onClick }) => (
   <button
     onClick={onClick}
-    className="relative flex flex-col items-center justify-center p-1.5 min-w-[66px] h-[66px] bg-slate-800/80 hover:bg-[#0ea5e9]/20 hover:text-white text-slate-300 rounded-lg transition-all border border-slate-700/60 hover:border-[#0ea5e9] hover:shadow-[0_0_12px_rgba(14,165,233,0.15)] active:scale-95 group cursor-pointer"
+    className="relative flex flex-col items-center justify-center p-1.5 min-w-[66px] h-[66px] bg-slate-800/80 hover:bg-[var(--th-accent)]/20 hover:text-white text-slate-300 rounded-lg transition-all border border-slate-700/60 hover:border-[var(--th-accent)] hover:shadow-[0_0_12px_rgba(var(--th-accent-rgb),0.15)] active:scale-95 group cursor-pointer"
   >
     {/* Tiny Info Icon in Corner */}
-    <div className="absolute top-1 right-1 opacity-30 group-hover:opacity-100 transition-opacity text-slate-400 group-hover:text-[#0ea5e9]">
+    <div className="absolute top-1 right-1 opacity-30 group-hover:opacity-100 transition-opacity text-slate-400 group-hover:text-[var(--th-accent)]">
       <Info size={8} />
     </div>
 
@@ -561,7 +561,7 @@ const WidgetTool: React.FC<{ icon: React.ReactNode | string, label: string, desc
         <img
           src={icon}
           alt={label}
-          className="w-9 h-9 object-contain group-hover:scale-110 transition-transform duration-300 filter drop-shadow-[0_0_5px_rgba(14,165,233,0.1)]"
+          className="w-9 h-9 object-contain group-hover:scale-110 transition-transform duration-300 filter drop-shadow-[0_0_5px_rgba(var(--th-accent-rgb),0.1)]"
         />
       ) : (
         <div className="group-hover:scale-110 transition-transform">{icon}</div>
@@ -756,10 +756,10 @@ const renderWidgetControls = (
   return (
     <div className="space-y-4">
       {w.data.fillContainer && (
-        <div className="bg-gradient-to-b from-[#0ea5e9]/15 to-slate-950/90 p-4 rounded-xl border border-[#0ea5e9]/40 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+        <div className="bg-gradient-to-b from-[var(--th-accent)]/15 to-slate-950/90 p-4 rounded-xl border border-[var(--th-accent)]/40 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
           <div className="flex items-center gap-2">
-            <Maximize2 size={12} className="text-[#0ea5e9]" />
-            <span className="text-[10px] font-black text-[#0ea5e9] uppercase tracking-wider">Modo Tela Cheia Ativo</span>
+            <Maximize2 size={12} className="text-[var(--th-accent)]" />
+            <span className="text-[10px] font-black text-[var(--th-accent)] uppercase tracking-wider">Modo Tela Cheia Ativo</span>
           </div>
 
           <button
@@ -786,7 +786,7 @@ const renderWidgetControls = (
               }
               onChange({ ...page, layout: cleanedLayout });
             }}
-            className="w-full py-2.5 bg-gradient-to-r from-blue-600 to-sky-500 hover:from-blue-500 hover:to-sky-400 text-white rounded-lg text-xs font-black uppercase tracking-wider transition-all shadow-[0_4px_12px_rgba(14,165,233,0.25)] flex items-center justify-center gap-2 relative overflow-hidden group border border-sky-400/30"
+            className="w-full py-2.5 bg-gradient-to-r from-blue-600 to-sky-500 hover:from-blue-500 hover:to-sky-400 text-white rounded-lg text-xs font-black uppercase tracking-wider transition-all shadow-[0_4px_12px_rgba(var(--th-accent-rgb),0.25)] flex items-center justify-center gap-2 relative overflow-hidden group border border-sky-400/30"
           >
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
             <Maximize2 size={14} className="relative z-10" />
@@ -802,7 +802,7 @@ const renderWidgetControls = (
               type="text"
               value={w.data.backgroundImage || ''}
               onChange={e => updateData(w.i, { backgroundImage: e.target.value })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#0ea5e9]"
+              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)]"
               placeholder="URL da imagem ou vídeo de fundo..."
             />
             <div className="grid grid-cols-2 gap-1.5 mt-1.5">
@@ -847,7 +847,7 @@ const renderWidgetControls = (
             <textarea
               value={w.data.content}
               onChange={e => updateData(w.i, { content: e.target.value })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#0ea5e9] h-24"
+              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)] h-24"
             />
           </div>
 
@@ -877,7 +877,7 @@ const renderWidgetControls = (
                   type="text"
                   value={w.data.color || '#ffffff'}
                   onChange={e => updateData(w.i, { color: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-700 rounded text-[10px] text-slate-300 px-2 uppercase font-mono outline-none focus:border-[#0ea5e9]"
+                  className="w-full bg-slate-950 border border-slate-700 rounded text-[10px] text-slate-300 px-2 uppercase font-mono outline-none focus:border-[var(--th-accent)]"
                 />
               </div>
             </div>
@@ -891,7 +891,7 @@ const renderWidgetControls = (
             type="text"
             value={w.data.url}
             onChange={e => updateData(w.i, { url: e.target.value })}
-            className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#0ea5e9] mb-2"
+            className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)] mb-2"
           />
           <button
             onClick={() => {
@@ -917,7 +917,7 @@ const renderWidgetControls = (
             type="text"
             value={w.data.videoUrl}
             onChange={e => updateData(w.i, { videoUrl: e.target.value })}
-            className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#0ea5e9] mb-2"
+            className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)] mb-2"
           />
           <button
             onClick={() => {
@@ -943,13 +943,13 @@ const renderWidgetControls = (
             type="text"
             value={w.data.city}
             onChange={e => updateData(w.i, { city: e.target.value })}
-            className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#0ea5e9] mb-2"
+            className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)] mb-2"
           />
           {w.type === WidgetType.FULL_INFO && (
             <>
               <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Modelo Visual</label>
               <select
-                className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#0ea5e9] mb-2"
+                className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)] mb-2"
                 value={w.data.model || 'standard'}
                 onChange={(e) => updateData(w.i, { model: e.target.value })}
               >
@@ -965,7 +965,7 @@ const renderWidgetControls = (
                   type="text"
                   value={w.data.backgroundImage || ''}
                   onChange={e => updateData(w.i, { backgroundImage: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#0ea5e9]"
+                  className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)]"
                   placeholder="URL da imagem ou vídeo (ex: https://...)"
                 />
                 <div className="grid grid-cols-2 gap-1.5 mt-1.5">
@@ -1006,7 +1006,7 @@ const renderWidgetControls = (
                 <div className="mt-4 pt-4 border-t border-slate-800 space-y-2">
                   <button
                     onClick={() => setFullScreen(w.i)}
-                    className="w-full py-2.5 bg-gradient-to-r from-blue-600 to-sky-500 hover:from-blue-500 hover:to-sky-400 text-white rounded-lg text-xs font-black uppercase tracking-wider transition-all shadow-[0_4px_12px_rgba(14,165,233,0.25)] flex items-center justify-center gap-2 relative overflow-hidden group border border-sky-400/30"
+                    className="w-full py-2.5 bg-gradient-to-r from-blue-600 to-sky-500 hover:from-blue-500 hover:to-sky-400 text-white rounded-lg text-xs font-black uppercase tracking-wider transition-all shadow-[0_4px_12px_rgba(var(--th-accent-rgb),0.25)] flex items-center justify-center gap-2 relative overflow-hidden group border border-sky-400/30"
                   >
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
                     <Maximize2 size={14} className="relative z-10" />
@@ -1025,7 +1025,7 @@ const renderWidgetControls = (
             type="text"
             value={w.data.videoUrl}
             onChange={e => updateData(w.i, { videoUrl: e.target.value })}
-            className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#0ea5e9]"
+            className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)]"
           />
 
           <div className="mt-3">
@@ -1033,7 +1033,7 @@ const renderWidgetControls = (
             <select
               value={w.data.videoConfig?.youtubeQuality || 'highres'}
               onChange={(e) => updateData(w.i, { videoConfig: { ...w.data.videoConfig, youtubeQuality: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#0ea5e9]"
+              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)]"
             >
               <option value="highres">Máxima (Auto)</option>
               <option value="hd1080">1080p</option>
@@ -1048,7 +1048,7 @@ const renderWidgetControls = (
             {!isFullscreen ? (
               <button
                 onClick={() => setFullScreen(w.i)}
-                className="w-full py-2 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white rounded-lg text-xs font-bold transition-all shadow-[0_4px_12px_rgba(14,165,233,0.2)] flex items-center justify-center gap-2"
+                className="w-full py-2 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white rounded-lg text-xs font-bold transition-all shadow-[0_4px_12px_rgba(var(--th-accent-rgb),0.2)] flex items-center justify-center gap-2"
               >
                 <Maximize2 size={14} />
                 Preencher Tela Inteira
@@ -1072,13 +1072,13 @@ const renderWidgetControls = (
             type="text"
             value={w.data.rssUrl}
             onChange={e => updateData(w.i, { rssUrl: e.target.value })}
-            className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#0ea5e9]"
+            className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)]"
           />
           <div className="mt-4 pt-4 border-t border-slate-800 space-y-2">
             {!isFullscreen ? (
               <button
                 onClick={() => setFullScreen(w.i)}
-                className="w-full py-2 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white rounded-lg text-xs font-bold transition-all shadow-[0_4px_12px_rgba(14,165,233,0.2)] flex items-center justify-center gap-2"
+                className="w-full py-2 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white rounded-lg text-xs font-bold transition-all shadow-[0_4px_12px_rgba(var(--th-accent-rgb),0.2)] flex items-center justify-center gap-2"
               >
                 <Maximize2 size={14} />
                 Preencher Tela Inteira
@@ -1115,7 +1115,7 @@ const renderWidgetControls = (
               } catch { }
               updateData(w.i, { calendarId: raw });
             }}
-            className="w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-xs text-slate-200 outline-none focus:border-[#0ea5e9] transition-all font-mono"
+            className="w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-xs text-slate-200 outline-none focus:border-[var(--th-accent)] transition-all font-mono"
             placeholder="Cole aqui o ID, URL ou iframe do Google Calendar"
           />
           <p className="text-[9px] text-emerald-500/80 leading-relaxed bg-emerald-500/5 p-2 rounded border border-emerald-500/10">
@@ -1171,7 +1171,7 @@ const renderWidgetControls = (
             <textarea
               value={w.data.content || ''}
               onChange={e => updateData(w.i, { content: e.target.value })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#0ea5e9] h-28"
+              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)] h-28"
               placeholder="Digite o recado aqui..."
             />
           </div>
@@ -1180,7 +1180,7 @@ const renderWidgetControls = (
             <select
               value={w.data.notesConfig?.paperTheme || 'glass'}
               onChange={e => updateData(w.i, { notesConfig: { ...w.data.notesConfig, paperTheme: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#0ea5e9]"
+              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)]"
             >
               <option value="glass">Glassmorphism (Translúcido)</option>
               <option value="yellow-sticky">Post-it Amarelo</option>
@@ -1193,7 +1193,7 @@ const renderWidgetControls = (
             <select
               value={w.data.notesConfig?.fontFamily || 'sans'}
               onChange={e => updateData(w.i, { notesConfig: { ...w.data.notesConfig, fontFamily: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#0ea5e9]"
+              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)]"
             >
               <option value="sans">Sans-serif (Moderna)</option>
               <option value="serif">Serif (Clássica)</option>
@@ -1219,7 +1219,7 @@ const renderWidgetControls = (
               type="text"
               value={w.data.todoConfig?.title || 'Lista de Tarefas'}
               onChange={e => updateData(w.i, { todoConfig: { ...w.data.todoConfig, title: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#0ea5e9]"
+              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)]"
             />
           </div>
           <div>
@@ -1240,7 +1240,7 @@ const renderWidgetControls = (
                     }
                   }
                 }}
-                className="flex-1 bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#0ea5e9]"
+                className="flex-1 bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)]"
               />
               <button
                 onClick={() => {
@@ -1297,7 +1297,7 @@ const renderWidgetControls = (
               type="text"
               value={w.data.countdownConfig?.title || ''}
               onChange={e => updateData(w.i, { countdownConfig: { ...w.data.countdownConfig, title: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#0ea5e9]"
+              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)]"
               placeholder="Ex: Lançamento"
             />
           </div>
@@ -1307,7 +1307,7 @@ const renderWidgetControls = (
               type="datetime-local"
               value={w.data.countdownConfig?.targetDate || ''}
               onChange={e => updateData(w.i, { countdownConfig: { ...w.data.countdownConfig, targetDate: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#0ea5e9]"
+              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)]"
             />
           </div>
           <div>
@@ -1316,7 +1316,7 @@ const renderWidgetControls = (
               type="text"
               value={w.data.countdownConfig?.expiredMessage || ''}
               onChange={e => updateData(w.i, { countdownConfig: { ...w.data.countdownConfig, expiredMessage: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#0ea5e9]"
+              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)]"
               placeholder="Ex: Chegou o momento!"
             />
           </div>
@@ -1325,7 +1325,7 @@ const renderWidgetControls = (
             <select
               value={w.data.countdownConfig?.theme || 'glass'}
               onChange={e => updateData(w.i, { countdownConfig: { ...w.data.countdownConfig, theme: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#0ea5e9]"
+              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)]"
             >
               <option value="glass">Glassmorphism</option>
               <option value="neon">Neon Vermelho</option>
@@ -1344,7 +1344,7 @@ const renderWidgetControls = (
               type="text"
               value={w.data.choresConfig?.title || ''}
               onChange={e => updateData(w.i, { choresConfig: { ...w.data.choresConfig, title: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#0ea5e9]"
+              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)]"
             />
           </div>
 
@@ -1354,18 +1354,18 @@ const renderWidgetControls = (
               type="text"
               id={`new-chore-text-${w.i}`}
               placeholder="Nome da atividade..."
-              className="w-full bg-slate-950 border border-slate-700 rounded p-1.5 text-xs text-white outline-none focus:border-[#0ea5e9]"
+              className="w-full bg-slate-950 border border-slate-700 rounded p-1.5 text-xs text-white outline-none focus:border-[var(--th-accent)]"
             />
             <div className="grid grid-cols-2 gap-2">
               <input
                 type="text"
                 id={`new-chore-assignee-${w.i}`}
                 placeholder="Responsável..."
-                className="bg-slate-950 border border-slate-700 rounded p-1.5 text-xs text-white outline-none focus:border-[#0ea5e9]"
+                className="bg-slate-950 border border-slate-700 rounded p-1.5 text-xs text-white outline-none focus:border-[var(--th-accent)]"
               />
               <select
                 id={`new-chore-day-${w.i}`}
-                className="bg-slate-950 border border-slate-700 rounded p-1.5 text-xs text-white outline-none focus:border-[#0ea5e9]"
+                className="bg-slate-950 border border-slate-700 rounded p-1.5 text-xs text-white outline-none focus:border-[var(--th-accent)]"
               >
                 <option value="Segunda">Segunda</option>
                 <option value="Terça">Terça</option>
@@ -1447,7 +1447,7 @@ const renderWidgetControls = (
               type="text"
               value={w.data.mealPlanConfig?.title || ''}
               onChange={e => updateData(w.i, { mealPlanConfig: { ...w.data.mealPlanConfig, title: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#0ea5e9]"
+              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)]"
             />
           </div>
 
@@ -1455,7 +1455,7 @@ const renderWidgetControls = (
             <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Dia para Editar</label>
             <select
               id={`meal-day-selector-${w.i}`}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#0ea5e9]"
+              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)]"
               defaultValue="Segunda"
               onChange={() => {
                 updateData(w.i, {});
@@ -1490,14 +1490,14 @@ const renderWidgetControls = (
 
             return (
               <div className="bg-slate-900/40 p-2.5 rounded border border-slate-800 space-y-2">
-                <span className="text-[9px] font-black text-[#0ea5e9] uppercase block">Refeições de {currentDay}</span>
+                <span className="text-[9px] font-black text-[var(--th-accent)] uppercase block">Refeições de {currentDay}</span>
                 <div>
                   <label className="text-[8px] text-slate-400 block mb-0.5">Café da Manhã</label>
                   <input
                     type="text"
                     value={dayMeal.breakfast || ''}
                     onChange={e => updateMeal('breakfast', e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-700 rounded p-1 text-xs text-white outline-none focus:border-[#0ea5e9]"
+                    className="w-full bg-slate-950 border border-slate-700 rounded p-1 text-xs text-white outline-none focus:border-[var(--th-accent)]"
                     placeholder="Ex: Ovos, Pão e Café"
                   />
                 </div>
@@ -1507,7 +1507,7 @@ const renderWidgetControls = (
                     type="text"
                     value={dayMeal.lunch || ''}
                     onChange={e => updateMeal('lunch', e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-700 rounded p-1 text-xs text-white outline-none focus:border-[#0ea5e9]"
+                    className="w-full bg-slate-950 border border-slate-700 rounded p-1 text-xs text-white outline-none focus:border-[var(--th-accent)]"
                     placeholder="Ex: Frango com Salada e Arroz"
                   />
                 </div>
@@ -1517,7 +1517,7 @@ const renderWidgetControls = (
                     type="text"
                     value={dayMeal.dinner || ''}
                     onChange={e => updateMeal('dinner', e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-700 rounded p-1 text-xs text-white outline-none focus:border-[#0ea5e9]"
+                    className="w-full bg-slate-950 border border-slate-700 rounded p-1 text-xs text-white outline-none focus:border-[var(--th-accent)]"
                     placeholder="Ex: Sopa leve"
                   />
                 </div>
@@ -1527,7 +1527,7 @@ const renderWidgetControls = (
                     type="text"
                     value={dayMeal.snacks || ''}
                     onChange={e => updateMeal('snacks', e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-700 rounded p-1 text-xs text-white outline-none focus:border-[#0ea5e9]"
+                    className="w-full bg-slate-950 border border-slate-700 rounded p-1 text-xs text-white outline-none focus:border-[var(--th-accent)]"
                     placeholder="Ex: Frutas ou Mix de Castanhas"
                   />
                 </div>
@@ -1545,7 +1545,7 @@ const renderWidgetControls = (
               type="text"
               value={w.data.marketWatchConfig?.title || ''}
               onChange={e => updateData(w.i, { marketWatchConfig: { ...w.data.marketWatchConfig, title: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#0ea5e9]"
+              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)]"
             />
           </div>
           <div>
@@ -1553,7 +1553,7 @@ const renderWidgetControls = (
             <select
               value={w.data.marketWatchConfig?.layout || 'grid'}
               onChange={e => updateData(w.i, { marketWatchConfig: { ...w.data.marketWatchConfig, layout: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#0ea5e9]"
+              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)]"
             >
               <option value="grid">Grade (Cards)</option>
               <option value="list">Lista Vertical</option>
@@ -1567,7 +1567,7 @@ const renderWidgetControls = (
                 type="text"
                 id={`new-symbol-${w.i}`}
                 placeholder="Ex: AAPL, BTC-USD, EURUSD=X"
-                className="flex-1 bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#0ea5e9] uppercase"
+                className="flex-1 bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)] uppercase"
                 onKeyDown={e => {
                   if (e.key === 'Enter') {
                     const input = e.currentTarget;
@@ -1627,7 +1627,7 @@ const renderWidgetControls = (
               type="text"
               value={w.data.browserSnapshotConfig?.url || ''}
               onChange={e => updateData(w.i, { browserSnapshotConfig: { ...w.data.browserSnapshotConfig, url: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#0ea5e9]"
+              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)]"
               placeholder="Ex: https://g1.globo.com"
             />
           </div>
@@ -1637,7 +1637,7 @@ const renderWidgetControls = (
               type="number"
               value={w.data.browserSnapshotConfig?.updateIntervalMinutes || 10}
               onChange={e => updateData(w.i, { browserSnapshotConfig: { ...w.data.browserSnapshotConfig, updateIntervalMinutes: parseInt(e.target.value) || 10 } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#0ea5e9]"
+              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)]"
             />
           </div>
         </div>
@@ -1650,7 +1650,7 @@ const renderWidgetControls = (
             <select
               value={w.data.googleDocsConfig?.docType || 'document'}
               onChange={e => updateData(w.i, { googleDocsConfig: { ...w.data.googleDocsConfig, docType: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#0ea5e9]"
+              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)]"
             >
               <option value="document">Google Documentos (Doc)</option>
               <option value="spreadsheet">Google Planilhas (Sheets)</option>
@@ -1664,7 +1664,7 @@ const renderWidgetControls = (
               type="text"
               value={w.data.googleDocsConfig?.url || ''}
               onChange={e => updateData(w.i, { googleDocsConfig: { ...w.data.googleDocsConfig, url: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#0ea5e9]"
+              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)]"
               placeholder="Cole o link completo do Google Docs..."
             />
           </div>
@@ -1681,7 +1681,7 @@ const renderWidgetControls = (
             <select
               value={w.data.officeDocsConfig?.docType || 'word'}
               onChange={e => updateData(w.i, { officeDocsConfig: { ...w.data.officeDocsConfig, docType: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#0ea5e9]"
+              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)]"
             >
               <option value="word">Microsoft Word</option>
               <option value="excel">Microsoft Excel</option>
@@ -1694,7 +1694,7 @@ const renderWidgetControls = (
               type="text"
               value={w.data.officeDocsConfig?.url || ''}
               onChange={e => updateData(w.i, { officeDocsConfig: { ...w.data.officeDocsConfig, url: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#0ea5e9]"
+              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)]"
               placeholder="Cole o link gerado pelo OneDrive embed..."
             />
           </div>
@@ -1709,7 +1709,7 @@ const renderWidgetControls = (
               type="text"
               value={w.data.powerBiConfig?.embedUrl || ''}
               onChange={e => updateData(w.i, { powerBiConfig: { ...w.data.powerBiConfig, embedUrl: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#0ea5e9]"
+              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)]"
               placeholder="Cole o link https://app.powerbi.com/reportEmbed..."
             />
           </div>
@@ -1723,7 +1723,7 @@ const renderWidgetControls = (
             <textarea
               value={w.data.embedHtmlConfig?.html || ''}
               onChange={e => updateData(w.i, { embedHtmlConfig: { html: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white font-mono outline-none focus:border-[#0ea5e9] h-44"
+              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white font-mono outline-none focus:border-[var(--th-accent)] h-44"
               placeholder="<!-- Insira seu HTML, CSS ou Script aqui -->"
             />
           </div>
@@ -1738,7 +1738,7 @@ const renderWidgetControls = (
               type="text"
               value={w.data.airtableConfig?.shareUrl || ''}
               onChange={e => updateData(w.i, { airtableConfig: { shareUrl: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#0ea5e9]"
+              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)]"
               placeholder="https://airtable.com/embed/shr..."
             />
           </div>
@@ -1753,7 +1753,7 @@ const renderWidgetControls = (
               type="text"
               value={w.data.pdfDocumentConfig?.pdfUrl || ''}
               onChange={e => updateData(w.i, { pdfDocumentConfig: { pdfUrl: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[#0ea5e9]"
+              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)]"
               placeholder="https://exemplo.com/documento.pdf"
             />
           </div>
@@ -1766,7 +1766,7 @@ const renderWidgetControls = (
 
         {/* Grid de Switches */}
         <div className="grid grid-cols-1 gap-2">
-          <label className={`flex items-center gap-3 text-[11px] text-slate-300 cursor-pointer p-2.5 rounded-lg border transition-all w-full select-none ${w.data.fillContainer ? 'bg-[#0ea5e9]/10 border-[#0ea5e9]/50 ring-1 ring-[#0ea5e9]/20' : 'bg-slate-950/60 border-slate-800/80 hover:border-[#0ea5e9]/30 hover:bg-slate-950'}`}>
+          <label className={`flex items-center gap-3 text-[11px] text-slate-300 cursor-pointer p-2.5 rounded-lg border transition-all w-full select-none ${w.data.fillContainer ? 'bg-[var(--th-accent)]/10 border-[var(--th-accent)]/50 ring-1 ring-[var(--th-accent)]/20' : 'bg-slate-950/60 border-slate-800/80 hover:border-[var(--th-accent)]/30 hover:bg-slate-950'}`}>
             <input
               type="checkbox"
               checked={w.data.fillContainer || false}
@@ -1784,7 +1784,7 @@ const renderWidgetControls = (
                   setFullScreen(w.i);
                 }
               }}
-              className="rounded border-slate-700 bg-slate-900 text-[#0ea5e9] focus:ring-0 w-4 h-4 cursor-pointer"
+              className="rounded border-slate-700 bg-slate-900 text-[var(--th-accent)] focus:ring-0 w-4 h-4 cursor-pointer"
             />
             <div className="flex flex-col">
               <span className="font-bold text-slate-200">Preencher Container</span>
@@ -1792,7 +1792,7 @@ const renderWidgetControls = (
             </div>
           </label>
 
-          <label className={`flex items-center gap-3 text-[11px] text-slate-300 cursor-pointer p-2.5 rounded-lg border transition-all w-full select-none ${w.data.fullScreenMode ? 'bg-indigo-950/40 border-indigo-500/50 ring-1 ring-indigo-500/20' : 'bg-slate-950/60 border-slate-800/80 hover:border-[#0ea5e9]/30 hover:bg-slate-950'}`}>
+          <label className={`flex items-center gap-3 text-[11px] text-slate-300 cursor-pointer p-2.5 rounded-lg border transition-all w-full select-none ${w.data.fullScreenMode ? 'bg-indigo-950/40 border-indigo-500/50 ring-1 ring-indigo-500/20' : 'bg-slate-950/60 border-slate-800/80 hover:border-[var(--th-accent)]/30 hover:bg-slate-950'}`}>
             <input
               type="checkbox"
               checked={w.data.fullScreenMode || false}
@@ -1812,7 +1812,7 @@ const renderWidgetControls = (
                   setFullScreen(w.i);
                 }
               }}
-              className="rounded border-slate-700 bg-slate-900 text-[#0ea5e9] focus:ring-0 w-4 h-4 cursor-pointer"
+              className="rounded border-slate-700 bg-slate-900 text-[var(--th-accent)] focus:ring-0 w-4 h-4 cursor-pointer"
             />
             <div className="flex flex-col">
               <span className="font-bold text-slate-200">Tela Cheia (100% da TV)</span>
@@ -1839,7 +1839,7 @@ const renderWidgetControls = (
                   type="button"
                   onClick={() => updateData(w.i, { contentAlignment: align.id as any })}
                   className={`py-1 text-[9px] rounded font-medium border transition-all ${(w.data.contentAlignment || 'center') === align.id
-                      ? 'bg-[#0ea5e9]/20 text-[#0ea5e9] border-[#0ea5e9]'
+                      ? 'bg-[var(--th-accent)]/20 text-[var(--th-accent)] border-[var(--th-accent)]'
                       : 'bg-slate-950 text-slate-400 border-slate-800 hover:border-slate-700'
                     }`}
                 >
@@ -1875,7 +1875,7 @@ const renderWidgetControls = (
             <select
               value={w.data.fitContainerMode || ''}
               onChange={(e) => updateData(w.i, { fitContainerMode: e.target.value as any })}
-              className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white outline-none focus:border-[#0ea5e9]"
+              className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white outline-none focus:border-[var(--th-accent)]"
             >
               <option value="">Padrão do Sistema</option>
               <option value="cover">Cortar e Preencher (Cover)</option>

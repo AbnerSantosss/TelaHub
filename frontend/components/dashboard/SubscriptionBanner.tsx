@@ -111,14 +111,14 @@ export const SubscriptionBanner: React.FC<SubscriptionBannerProps> = ({
             isFreePlan
               ? 'border-[#22c55e]/25 bg-[#22c55e]/10'
               : view.isTrial
-                ? 'border-[#0ea5e9]/25 bg-[#0ea5e9]/10'
+                ? 'border-[var(--th-accent)]/25 bg-[var(--th-accent)]/10'
                 : 'border-white/10 bg-white/5'
           }`}
         >
           {isFreePlan ? (
             <Gift size={12} className="text-[#4ade80]" aria-hidden="true" />
           ) : view.isTrial ? (
-            <Sparkles size={12} className="text-[#0ea5e9]" aria-hidden="true" />
+            <Sparkles size={12} className="text-[var(--th-accent)]" aria-hidden="true" />
           ) : (
             <BadgeCheck size={12} className="text-[#22c55e]" aria-hidden="true" />
           )}
@@ -151,7 +151,7 @@ export const SubscriptionBanner: React.FC<SubscriptionBannerProps> = ({
           <button
             type="button"
             onClick={onChoosePlan}
-            className="text-[11px] font-semibold text-[#38bdf8] hover:text-[#7dd3fc] underline underline-offset-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0ea5e9]/50 rounded"
+            className="text-[11px] font-semibold text-[var(--th-accent-soft)] hover:text-[#7dd3fc] underline underline-offset-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--th-accent)]/50 rounded"
           >
             Ver planos
           </button>

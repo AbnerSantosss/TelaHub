@@ -88,7 +88,7 @@ const App: React.FC = () => {
         <Toaster closeButton theme="dark" position="top-right" />
         <Suspense fallback={
           <div className="h-screen w-screen bg-slate-950 flex flex-col items-center justify-center gap-4">
-            <Loader2 className="animate-spin text-[#0ea5e9]" size={32} />
+            <Loader2 className="animate-spin text-[var(--th-accent)]" size={32} />
             <p className="text-xs uppercase tracking-widest font-bold text-slate-500">Carregando...</p>
           </div>
         }>
