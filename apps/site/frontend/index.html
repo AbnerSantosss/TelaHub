@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#0ea5e9" />
+
+    <title>TelaHub — Transforme qualquer Smart TV em vitrine de ofertas | 1ª tela grátis</title>
+    <meta name="description" content="Troque preços, cardápios e avisos nas TVs do seu negócio em 30 segundos, pelo celular. Sem pen-drive, sem técnico e sem comprar hardware. A primeira tela é grátis para sempre; depois R$ 49 por tela ativa. Se uma tela parar, você recebe aviso por e-mail." />
+    <!-- Lei da Categoria (Ries & Trout): "digital signage" é o termo do mercado
+         corporativo, dominado por integradores. O dono de padaria, clínica ou loja
+         de bairro busca em português concreto. Termos de SMB primeiro; os termos de
+         categoria corporativa seguem depois, para não perder quem já os conhece. -->
+    <meta name="keywords" content="tv com cardápio digital, tela de ofertas para loja, cardápio digital para TV, painel de avisos para condomínio, transformar smart tv em vitrine, mural digital para recepção, digital signage, gerenciamento de telas, telahub" />
+    <link rel="canonical" href="https://telahub.com.br/" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+
+    <!-- Open Graph / redes sociais (LinkedIn, WhatsApp — canais comuns em vendas B2B) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="pt_BR" />
+    <meta property="og:site_name" content="TelaHub" />
+    <meta property="og:title" content="TelaHub — Transforme qualquer Smart TV em vitrine de ofertas" />
+    <meta property="og:description" content="Troque preços, cardápios e avisos nas TVs do seu negócio em 30 segundos, pelo celular. Sem pen-drive, sem técnico e sem comprar hardware. A primeira tela é grátis para sempre." />
+    <meta property="og:image" content="https://telahub.com.br/dashboard-hero.png" />
+    <meta property="og:url" content="https://telahub.com.br/" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="TelaHub — Transforme qualquer Smart TV em vitrine de ofertas" />
+    <meta name="twitter:description" content="Troque preços e cardápios nas TVs do seu negócio em 30 segundos, pelo celular. Sem pen-drive e sem técnico." />
+    <meta name="twitter:image" content="https://telahub.com.br/dashboard-hero.png" />
+
+    <!-- Dados estruturados (SEO/AEO/GEO): entidade da organização e do produto -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://telahub.com.br/#organization",
+          "name": "TelaHub",
+          "url": "https://telahub.com.br/",
+          "logo": "https://telahub.com.br/favicon.svg"
+        },
+        {
+          "@type": "SoftwareApplication",
+          "@id": "https://telahub.com.br/#software",
+          "name": "TelaHub",
+          "applicationCategory": "BusinessApplication",
+          "operatingSystem": "Web",
+          "description": "Plataforma de gerenciamento remoto de telas digitais (digital signage) para empresas no Brasil, sem hardware proprietário, com atualização de conteúdo em tempo real e alerta por e-mail quando uma tela para de responder.",
+          "publisher": { "@id": "https://telahub.com.br/#organization" },
+          "offers": [
+            {
+              "@type": "Offer",
+              "name": "Grátis",
+              "price": "0",
+              "priceCurrency": "BRL",
+              "description": "1 tela conectada, para sempre, sem cartão de crédito."
+            },
+            {
+              "@type": "Offer",
+              "name": "Loja",
+              "price": "49",
+              "priceCurrency": "BRL",
+              "description": "Por tela ativa/mês, a partir de 1 tela. Telas ilimitadas.",
+              "priceSpecification": {
+                "@type": "UnitPriceSpecification",
+                "price": "49",
+                "priceCurrency": "BRL",
+                "unitText": "tela ativa por mês"
+              }
+            },
+            {
+              "@type": "Offer",
+              "name": "Rede",
+              "price": "39",
+              "priceCurrency": "BRL",
+              "description": "Por tela ativa/mês, com piso de 5 telas na fatura. Inclui Power BI, Airtable e documentos na TV.",
+              "priceSpecification": {
+                "@type": "UnitPriceSpecification",
+                "price": "39",
+                "priceCurrency": "BRL",
+                "unitText": "tela ativa por mês",
+                "minPrice": "195"
+              }
+            }
+          ]
+        },
+        {
+          "@type": "WebPage",
+          "@id": "https://telahub.com.br/#webpage",
+          "url": "https://telahub.com.br/",
+          "name": "TelaHub — Transforme qualquer Smart TV em vitrine de ofertas",
+          "isPartOf": { "@id": "https://telahub.com.br/#organization" },
+          "inLanguage": "pt-BR"
+        }
+      ]
+    }
+    </script>
+
+    <!-- Google Fonts (Geist/Outfit carregadas via index.css; Inter aqui para uso imediato no <head>) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+    <!-- Consent Mode v2 — padrão negado ANTES de qualquer tag carregar (LGPD/GDPR) -->
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){ window.dataLayer.push(arguments); }
+      gtag('consent', 'default', {
+        ad_storage: 'denied',
+        analytics_storage: 'denied',
+        ad_user_data: 'denied',
+        ad_personalization: 'denied',
+        wait_for_update: 500
+      });
+    </script>
+
+    <!-- Google Tag Manager: substitua GTM-XXXXXXX pelo ID real do container antes de publicar -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-XXXXXXX');</script>
+    <!-- End Google Tag Manager -->
+
+    <!-- GSAP: async e não bloqueia o parsing do HTML -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js" defer></script>
+  </head>
+  <body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-XXXXXXX"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

@@ -1,0 +1,48 @@
+# TelaHub
+
+> TelaHub é uma plataforma SaaS B2B brasileira para gerenciar telas digitais
+> (digital signage) remotamente, sem hardware proprietário: roda no navegador de
+> Smart TVs e em dispositivos Android TV comuns. O conteúdo é atualizado em tempo
+> real e o pareamento de uma tela nova leva menos de 2 minutos, por código
+> exibido na própria TV.
+
+## Sobre
+
+- Público: pequenos e médios negócios (academias, clínicas, restaurantes,
+  condomínios, escritórios) e redes corporativas/franquias.
+- Principais casos de uso: condomínios e elevadores, prédios corporativos e
+  recepções, varejo e cardápios digitais, endomarketing e comunicação de RH.
+- Modelo de cobrança: **por tela ativa, em real**. Grátis (1 tela, sem prazo e
+  sem cartão de crédito), Loja (R$ 49 por tela/mês), Rede (R$ 39 por tela/mês,
+  faturamento mínimo de 5 telas) e Enterprise (sob consulta).
+- Diferenciais verificáveis: sem instalação técnica; editor visual de arrastar e
+  soltar; broadcast de avisos instantâneos em todas as telas; painel de saúde dos
+  dispositivos por heartbeat; **alerta por e-mail quando uma tela fica offline**;
+  relatório agregado por loja; e, nos planos Rede e Enterprise, exibição de
+  Power BI, Airtable, Google Docs, Office e PDF na tela.
+
+## Limitações declaradas
+
+Esta seção existe de propósito. Descrever o produto além do que ele faz seria
+publicidade enganosa (Código de Defesa do Consumidor, arts. 30 e 37) e induziria
+ferramentas de IA a repetir a informação errada.
+
+- **Não há operação offline completa.** O player mantém o conteúdo já carregado e
+  volta a sincronizar sozinho quando a conexão retorna, mas não há armazenamento
+  local persistente: se o aparelho for reiniciado sem internet, a programação não
+  carrega.
+- **Não há white label, SSO/SAML nem SLA contratado** disponíveis na plataforma
+  hoje. No plano Enterprise, esses itens são escopo de projeto definido em
+  contrato, não recurso pronto.
+- **Não há autenticação de dois fatores.**
+- **Não há aplicativo nativo para Android TV** — o player roda no navegador.
+- **Não há checkout automatizado ainda**: a contratação passa pelo canal
+  comercial.
+- O produto é novo e **não há base de clientes publicada**. Qualquer número de
+  clientes, nota de avaliação ou selo de "mais vendido" atribuído ao TelaHub não
+  vem de nós.
+
+## Páginas
+
+- [Home](https://telahub.com.br/): proposta de valor, argumento técnico,
+  recursos, casos de uso por segmento, planos e preços, FAQ.
