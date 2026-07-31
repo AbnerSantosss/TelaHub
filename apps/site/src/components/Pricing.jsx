@@ -1,7 +1,18 @@
 import { useState } from 'react';
+import { precoPorTela, pisoTelas } from '../data/catalogo';
 
 /**
- * Catálogo de planos — espelho de `backend/prisma/seed-plans.ts`.
+ * Copy dos planos.
+ *
+ * ⚠️ **Não escreva preço aqui.** Todo valor em real vem de
+ * `src/data/catalogo.js`, que espelha `GET /api/plans` — a mesma fonte que o
+ * checkout usa para cobrar. Este arquivo guarda só o que é editorial: nome de
+ * seção, descrição, bullets e CTA.
+ *
+ * O motivo é jurídico antes de ser técnico. Enquanto o preço era uma constante
+ * aqui, ele podia divergir do que o cliente pagava — e preço anunciado vincula
+ * o contrato (CDC art. 30), com o desvio caracterizando publicidade enganosa
+ * (art. 37). Ver o cabeçalho de `scripts/fetch-plans.mjs`.
  *
  * O modelo é **cobrança por tela ativa**, em real. Não existe pacote fechado de
  * "até N telas": nos planos pagos o número de telas é ilimitado e o que cresce
@@ -14,9 +25,9 @@ const plans = [
   {
     code: 'gratis',
     name: 'Grátis',
-    price: '0',
+    price: String(precoPorTela('gratis')),
     period: '/mês',
-    priceNote: '1 tela, para sempre',
+    priceNote: `${pisoTelas('gratis')} tela, para sempre`,
     description: 'Para tirar do papel hoje. Uma tela no ar, sem cartão de crédito e sem prazo para expirar.',
     features: [
       '1 tela conectada para sempre',
@@ -38,9 +49,9 @@ const plans = [
   {
     code: 'loja',
     name: 'Loja',
-    price: '49',
+    price: String(precoPorTela('loja')),
     period: '/tela/mês',
-    priceNote: 'a partir de 1 tela',
+    priceNote: `a partir de ${pisoTelas('loja')} tela`,
     description: 'Para quem já depende da tela no dia a dia. Telas ilimitadas — você paga só pelas que estiverem ativas.',
     features: [
       'Telas ilimitadas (paga por tela ativa)',
@@ -53,14 +64,14 @@ const plans = [
     cta: 'Assinar o Loja',
     // Telas com que o checkout abre. É só sugestão: quem calcula o valor é o
     // servidor, no PATCH da sessão.
-    checkoutScreens: 1,
+    checkoutScreens: pisoTelas('loja'),
   },
   {
     code: 'rede',
     name: 'Rede',
-    price: '39',
+    price: String(precoPorTela('rede')),
     period: '/tela/mês',
-    priceNote: 'mínimo de 5 telas na fatura',
+    priceNote: `mínimo de ${pisoTelas('rede')} telas na fatura`,
     featured: true,
     // "Mais Escolhido" não pode voltar: não há base de clientes para sustentar
     // superlativo de venda. "Recomendado" é escolha editorial nossa, e isso é
@@ -79,7 +90,7 @@ const plans = [
     // Abre no piso de telas cobradas do plano — abrir em 1 mostraria um valor
     // menor do que a fatura mínima real, que é o tipo de surpresa que derruba a
     // conversão no passo seguinte.
-    checkoutScreens: 5,
+    checkoutScreens: pisoTelas('rede'),
   },
   {
     code: 'enterprise',
@@ -103,13 +114,16 @@ const plans = [
 ];
 
 /**
- * Valores usados pelo simulador de total. São os MESMOS números da grade
- * `plans` acima e do `seed-plans.ts` do backend — o simulador só multiplica,
- * não inventa preço. Se o catálogo mudar, atualize aqui, na grade e no seed.
+ * Valores usados pelo simulador de total.
+ *
+ * Vêm do MESMO catálogo que a grade acima e que o checkout — o simulador só
+ * multiplica, não inventa preço. Antes eram três constantes escritas à mão
+ * aqui, e um reajuste aplicado no backend deixava o simulador mentindo por
+ * quanto tempo ninguém reparasse.
  */
-const LOJA_POR_TELA = 49;
-const REDE_POR_TELA = 39;
-const REDE_PISO_TELAS = 5;
+const LOJA_POR_TELA = precoPorTela('loja');
+const REDE_POR_TELA = precoPorTela('rede');
+const REDE_PISO_TELAS = pisoTelas('rede');
 
 /**
  * Simulador "quanto fica por mês para N telas". Existe porque preço por tela

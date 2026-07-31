@@ -8,7 +8,7 @@
 services:
   site:
     build:
-      context: ./frontend
+      context: .
       dockerfile: Dockerfile
       args:
         # Lidos em tempo de BUILD pelo Vite — defini-los como variável de

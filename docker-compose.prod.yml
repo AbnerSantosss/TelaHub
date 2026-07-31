@@ -47,7 +47,7 @@ services:
 
   backend:
     build:
-      context: ./backend
+      context: ./apps/api
       dockerfile: Dockerfile
     restart: unless-stopped
     environment:
@@ -116,7 +116,7 @@ services:
       # painel.proxserverabner.site -> localhost:4025 (rota no túnel do host)
       - "4025:3025"
     build:
-      context: ./frontend
+      context: ./apps/painel
       dockerfile: Dockerfile
       args:
         # Rota relativa: o Nginx desta imagem faz o proxy de /api para o backend.

@@ -74,25 +74,25 @@ async function runPortDiagnostics() {
   
   // 4. Check Environment Variables in Backend
   console.log(`\n${colors.bold}${colors.cyan}--- Backend Configuration ---${colors.reset}`);
-  const envPath = path.join(__dirname, 'backend', '.env');
+  const envPath = path.join(__dirname, 'apps', 'api', '.env');
   if (fs.existsSync(envPath)) {
-    console.log(`${colors.green}✓ .env File:${colors.reset} Found at backend/.env`);
+    console.log(`${colors.green}✓ .env File:${colors.reset} Found at apps/api/.env`);
     const envContent = fs.readFileSync(envPath, 'utf8');
     const dbUrlLine = envContent.split('\n').find(line => line.startsWith('DATABASE_URL='));
     if (dbUrlLine) {
       console.log(`  Database URL configured: ${dbUrlLine.trim()}`);
     } else {
-      console.log(`${colors.red}✗ DATABASE_URL:${colors.reset} Missing in backend/.env`);
+      console.log(`${colors.red}✗ DATABASE_URL:${colors.reset} Missing in apps/api/.env`);
     }
   } else {
-    console.log(`${colors.red}✗ .env File:${colors.reset} Missing at backend/.env (Copy from .env.example)`);
+    console.log(`${colors.red}✗ .env File:${colors.reset} Missing at apps/api/.env (Copy from .env.example)`);
   }
 
   // Final Actionable Summary
   console.log(`\n${colors.bold}${colors.cyan}--- Next Steps ---${colors.reset}`);
   if (!dockerRunning && !fs.existsSync(envPath)) {
     console.log(`1. Start Docker Desktop so PostgreSQL can be spun up.`);
-    console.log(`2. Create backend/.env based on backend/.env.example.`);
+    console.log(`2. Create apps/api/.env based on apps/api/.env.example.`);
   } else if (!dockerRunning) {
     console.log(`1. Start Docker Desktop so the database can be initialized.`);
   } else if (portConflicts > 0) {

@@ -8,3 +8,6 @@ dist-ssr
 Dockerfile
 .dockerignore
 README.md
+assets
+docker-compose.yml
+docker-compose.prod.yml
