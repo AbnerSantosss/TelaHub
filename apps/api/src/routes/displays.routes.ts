@@ -10,8 +10,10 @@ import { auditService } from '../services/audit.service';
 import {
   findPaidWidgetTypes,
   findBiWidgetTypes,
+  findDocWidgetTypes,
   resolveVideoEntitlement,
   BI_FEATURE_KEY,
+  DOC_FEATURE_KEY,
   FREE_VIDEO_TRIAL_DAYS,
 } from '../services/entitlement.service';
 import { subscriptionService } from '../services/subscription.service';
@@ -35,7 +37,8 @@ router.get('/', authMiddleware, requireTenant, async (req: Request, res: Respons
 // PÚBLICO por design: as TVs dependem dele. Só expõe o updatedAt do próprio slug.
 router.get('/slug/:slug/version', async (req: Request, res: Response): Promise<void> => {
   try {
-    const version = await displayService.getVersionBySlug(req.params.slug as string);
+    // Aceita token público (preferido) ou slug legado.
+    const version = await displayService.getVersionByPublicRef(req.params.slug as string);
 
     if (!version) {
       res.status(404).json({ error: 'Display não encontrado.' });
@@ -74,7 +77,8 @@ router.get('/slug/:slug/live', (req: Request, res: Response): void => {
 // GET /api/displays/slug/:slug (PÚBLICO — Player)
 router.get('/slug/:slug', async (req: Request, res: Response): Promise<void> => {
   try {
-    const display = await displayService.getBySlug(req.params.slug as string);
+    // Aceita token público (preferido) ou slug legado.
+    const display = await displayService.getByPublicRef(req.params.slug as string);
 
     if (!display) {
       res.status(404).json({ error: 'Display não encontrado.' });
@@ -176,13 +180,18 @@ router.post('/', authMiddleware, requireTenant, requireActiveSubscription, valid
 
     // Direito de uso por conteúdo. Checado no servidor porque o bloqueio no
     // Editor é só conveniência — sem isto, bastava chamar a API direto para
-    // publicar o widget. São duas regras diferentes sobre o mesmo payload:
-    // vídeo é por TEMPO (degustação de 7 dias no Grátis) e BI é por PLANO
-    // (feature `powerbi`, do Rede para cima).
+    // publicar o widget. São TRÊS regras diferentes sobre o mesmo payload:
+    // vídeo é por TEMPO (degustação de 7 dias no Grátis); documento é por PLANO
+    // (feature `documentos`, do Loja para cima); painel de gestão também é por
+    // plano, um degrau acima (feature `powerbi`, do Rede para cima).
     const videoWidgets = findPaidWidgetTypes(pages);
+    const docWidgets = findDocWidgetTypes(pages);
     const biWidgets = findBiWidgetTypes(pages);
 
-    if ((videoWidgets.length > 0 || biWidgets.length > 0) && req.tenantId) {
+    if (
+      (videoWidgets.length > 0 || docWidgets.length > 0 || biWidgets.length > 0) &&
+      req.tenantId
+    ) {
       const subscription = await subscriptionService.getByOrganization(req.tenantId);
 
       if (videoWidgets.length > 0) {
@@ -199,9 +208,23 @@ router.post('/', authMiddleware, requireTenant, requireActiveSubscription, valid
         }
       }
 
-      // Fail-open sem assinatura, pelo mesmo motivo do `requireFeature`:
-      // organização legada (anterior à cobrança) não pode perder recurso por
-      // causa de dado ausente.
+      // Fail-open sem assinatura nos dois gates abaixo, pelo mesmo motivo do
+      // `requireFeature`: organização legada (anterior à cobrança) não pode
+      // perder recurso por causa de dado ausente.
+      if (docWidgets.length > 0 && subscription && !hasFeature(subscription, DOC_FEATURE_KEY)) {
+        const denial = await buildFeatureDenial(DOC_FEATURE_KEY, subscription);
+        res.status(403).json({
+          error:
+            `${featureDenialMessage(denial)} ` +
+            'PDF, Google Docs e Office entram a partir do plano Loja. ' +
+            'As telas que você já publicou com esses documentos continuam funcionando normalmente.',
+          code: 'feature_not_in_plan',
+          widgetTypes: docWidgets,
+          ...denial,
+        });
+        return;
+      }
+
       if (biWidgets.length > 0 && subscription && !hasFeature(subscription, BI_FEATURE_KEY)) {
         const denial = await buildFeatureDenial(BI_FEATURE_KEY, subscription);
         res.status(403).json({

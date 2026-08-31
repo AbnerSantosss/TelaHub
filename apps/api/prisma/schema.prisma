@@ -52,9 +52,18 @@ model Organization {
 }
 
 model Display {
-  id             String        @id @default(uuid())
-  name           String
-  slug           String        @unique
+  id   String @id @default(uuid())
+  name String
+
+  /// Slug legível escolhido pelo usuário (`loja-centro`). Continua funcionando
+  /// para não derrubar TV já pareada, mas é ADIVINHÁVEL: quem acerta o nome lê
+  /// a tela do cliente e consegue mapear quem usa a plataforma.
+  /// Preferir `publicToken` em URL nova. Ver wiki/tecnico/seguranca.
+  slug String @unique
+
+  /// Endereço público não adivinhável do player. Gerado no cadastro; as linhas
+  /// antigas foram preenchidas na migração `add_display_public_token`.
+  publicToken String? @unique
   pages          String
   coverImage     String?
   updatedAt      DateTime      @updatedAt
@@ -134,7 +143,17 @@ model Plan {
 
   // Preço por tela ativa, em centavos de BRL. 0 = plano sem cobrança (trial).
   pricePerScreenCents Int @default(0)
-  minScreens          Int @default(1)
+
+  // Preço por tela/MÊS quando a assinatura é paga anualmente. Campo próprio, e
+  // não um desconto percentual calculado, porque o anual é uma OFERTA (número
+  // redondo escolhido pelo dono: R$ 39 no Loja, R$ 32 no Rede) e não uma regra
+  // de três — derivar por porcentagem faria a vitrine exibir centavos quebrados
+  // e mudaria sozinha a cada ajuste do mensal.
+  // `0` = plano SEM oferta anual (grátis e Enterprise); nesse caso quem paga
+  // "no anual" continua na base mensal. Ver `unitPriceCents()`.
+  priceAnnualPerScreenCents Int @default(0)
+
+  minScreens Int @default(1)
 
   // Limites. `null` = ilimitado.
   maxDevices       Int?
@@ -160,6 +179,12 @@ model Subscription {
   status           String    @default("trialing")
   trialEndsAt      DateTime?
   currentPeriodEnd DateTime?
+
+  // monthly | yearly — COMO se paga, não O QUE se contrata. Fica aqui e não em
+  // `Plan` porque duas contas do mesmo plano podem estar em intervalos
+  // diferentes. Consequência deliberada: trocar de intervalo NÃO é upgrade de
+  // plano (ver `isPlanUpgrade`), então não passa pela guarda de pagamento.
+  billingInterval String @default("monthly")
 
   // Integração com gateway (asaas | stripe | manual). Nulo enquanto em trial.
   gateway               String?
@@ -215,7 +240,13 @@ model CheckoutSession {
   // para a sessão sobreviver a mudança de catálogo e preservar o histórico).
   planCode    String?
   screens     Int     @default(1)
+  // monthly | yearly — o intervalo escolhido no seletor do checkout. Precisa
+  // ficar na sessão (e não só na assinatura que ainda nem existe) porque é o
+  // que explica o `amountCents` congelado abaixo: sem ele, um relatório de
+  // abandono não distingue "achou caro" de "escolheu o anual".
+  billingInterval String @default("monthly")
   // Valor congelado no momento do passo — o preço do catálogo pode mudar depois.
+  // Sempre o valor MENSAL EQUIVALENTE, inclusive no anual.
   amountCents Int     @default(0)
 
   // Dados do lead. Todos opcionais: a sessão nasce antes do formulário.
@@ -349,4 +380,42 @@ model DeviceStatusChange {
   @@index([deviceId, changedAt])
   @@index([organizationId, changedAt])
   @@index([status, changedAt])
+}
+
+/// Lead comercial vindo do site (formulário "Falar com a gente" / Enterprise).
+///
+/// Existe porque o formulário do site era um `setTimeout` que mostrava
+/// "Recebemos seu contato!" e não guardava nada em lugar nenhum: todo lead de
+/// plano sob consulta era perdido em silêncio.
+///
+/// Guarda o mínimo (LGPD): nome, contato e origem. O IP entra como hash, nunca
+/// cru — mesmo padrão de `CheckoutSession.ipHash`.
+model Lead {
+  id      String  @id @default(uuid())
+  name    String
+  email   String
+  company String?
+  phone   String?
+
+  /// Plano que a pessoa estava vendo quando pediu contato (ex.: `enterprise`).
+  planCode String?
+
+  /// Origem da visita, para medir o que traz lead qualificado.
+  utmSource   String?
+  utmMedium   String?
+  utmCampaign String?
+  referrer    String?
+
+  ipHash String?
+
+  /// new | contacted | qualified | discarded — atendimento comercial.
+  status String @default("new")
+
+  /// `true` quando o e-mail de aviso para o comercial saiu.
+  notifiedAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([status, createdAt])
+  @@index([email])
 }

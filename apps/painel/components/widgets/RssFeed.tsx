@@ -17,134 +17,94 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import { getAlignmentClasses } from '../Player';
 
-// Import Recharts parts to make sure they are accessible (recharts does not default export AreaChart sometimes)
-// If Recharts has specific issues, importing them directly as named works in Vite.
+const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
 export const RssFeed: React.FC<{url: string, config?: any, widgetData?: any}> = ({ url, config, widgetData }) => {
   const [items, setItems] = useState<any[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [invalidImages, setInvalidImages] = useState<Set<string>>(new Set());
+  const [brokenImages, setBrokenImages] = useState<Set<string>>(new Set());
   const layout = config?.layout || 'full-image';
   const feedMode = config?.feedMode || 'default';
 
   // Função para extrair imagem
   const getImageUrl = (item: any) => {
     if (!item) return null;
-    if (item.thumbnail && item.thumbnail.length > 0) return item.thumbnail;
-    if (item.enclosure?.link) return item.enclosure.link;
-    if (item.enclosure?.url) return item.enclosure.url;
-    const descImg = item.description?.match(/<img[^>]+src="([^">]+)"/)?.[1];
-    if (descImg) return descImg;
-    const contentImg = item.content?.match(/<img[^>]+src="([^">]+)"/)?.[1];
-    if (contentImg) return contentImg;
-    return null;
+    let img: string | null = null;
+    if (item.thumbnail && typeof item.thumbnail === 'string' && item.thumbnail.length > 0) {
+      img = item.thumbnail;
+    } else if (item.enclosure?.url) {
+      img = item.enclosure.url;
+    } else if (item.enclosure?.link) {
+      img = item.enclosure.link;
+    } else {
+      const descImg = item.description?.match(/<img[^>]+src=["']([^"']+)["']/i)?.[1];
+      if (descImg) img = descImg;
+      else {
+        const contentImg = item.content?.match(/<img[^>]+src=["']([^"']+)["']/i)?.[1];
+        if (contentImg) img = contentImg;
+      }
+    }
+    if (img && brokenImages.has(img)) return null;
+    return img;
   };
 
   useEffect(() => {
+    let isMounted = true;
+
     const fetchRss = async () => {
-      if (!url) {
-        setLoading(false);
-        return;
-      }
+      const targetUrl = url?.trim() || 'https://g1.globo.com/rss/g1/tecnologia/';
       try {
         let itemsData: any[] = [];
         
-        // Tentativa 1: rss2json
+        // Tentativa 1: Proxy interno do backend (sem CORS, rápido e com cache)
         try {
-          const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}`);
-          const data = await res.json();
-          if (data.status === 'ok' && data.items && data.items.length > 0) {
-            itemsData = data.items;
+          const proxyBase = API_BASE.startsWith('http') 
+            ? API_BASE 
+            : `${window.location.origin}${API_BASE.startsWith('/') ? '' : '/'}${API_BASE}`;
+          const res = await fetch(`${proxyBase}/proxy/rss?url=${encodeURIComponent(targetUrl)}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.status === 'ok' && Array.isArray(data.items) && data.items.length > 0) {
+              itemsData = data.items;
+            }
           }
         } catch (e) {
-          console.warn("rss2json falhou, tentando fallback", e);
+          console.warn("Proxy backend falhou, tentando fallback externo...", e);
         }
 
-        // Tentativa 2: Fallback usando corsproxy.io
+        // Tentativa 2: rss2json
         if (itemsData.length === 0) {
           try {
-            const res = await fetch(`https://corsproxy.io/?${encodeURIComponent(url)}`);
-            if (!res.ok) throw new Error("corsproxy falhou");
-            const text = await res.text();
-            
-            const parser = new DOMParser();
-            const xml = parser.parseFromString(text, "text/xml");
-            const items = Array.from(xml.querySelectorAll("item"));
-            
-            itemsData = items.map(item => {
-              const title = item.querySelector("title")?.textContent || "";
-              const description = item.querySelector("description")?.textContent || "";
-              const link = item.querySelector("link")?.textContent || "";
-              const pubDate = item.querySelector("pubDate")?.textContent || "";
-              
-              let author = item.querySelector("author")?.textContent || "";
-              if (!author) {
-                const creator = item.getElementsByTagNameNS("*", "creator")[0];
-                if (creator) author = creator.textContent || "";
+            const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(targetUrl)}`);
+            if (res.ok) {
+              const data = await res.json();
+              if (data.status === 'ok' && data.items && data.items.length > 0) {
+                itemsData = data.items;
               }
-
-              let content = "";
-              const encoded = item.getElementsByTagNameNS("*", "encoded")[0];
-              if (encoded) content = encoded.textContent || "";
-
-              const enclosure = item.querySelector("enclosure");
-              const enclosureUrl = enclosure ? enclosure.getAttribute("url") : null;
-              
-              let mediaUrl = null;
-              const mediaContent = item.getElementsByTagNameNS("*", "content")[0];
-              if (mediaContent && mediaContent.getAttribute("url")) {
-                 mediaUrl = mediaContent.getAttribute("url");
-              }
-              
-              return {
-                title,
-                description,
-                link,
-                pubDate,
-                author,
-                content,
-                enclosure: enclosureUrl ? { url: enclosureUrl } : (mediaUrl ? { url: mediaUrl } : null)
-              };
-            });
+            }
           } catch (e) {
-            console.warn("Fallback corsproxy falhou, tentando allorigins alternativo", e);
-            
-            // Tentativa 3: Fallback usando allorigins (get)
-            try {
-              const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);
-              if (!res.ok) throw new Error("allorigins alternative falhou");
-              const json = await res.json();
-              const text = json.contents;
-              
+            console.warn("rss2json falhou, tentando fallback", e);
+          }
+        }
+
+        // Tentativa 3: Fallback usando corsproxy.io
+        if (itemsData.length === 0) {
+          try {
+            const res = await fetch(`https://corsproxy.io/?${encodeURIComponent(targetUrl)}`);
+            if (res.ok) {
+              const text = await res.text();
               const parser = new DOMParser();
               const xml = parser.parseFromString(text, "text/xml");
-              const items = Array.from(xml.querySelectorAll("item"));
+              const rawItems = Array.from(xml.querySelectorAll("item, entry"));
               
-              itemsData = items.map(item => {
+              itemsData = rawItems.map(item => {
                 const title = item.querySelector("title")?.textContent || "";
-                const description = item.querySelector("description")?.textContent || "";
-                const link = item.querySelector("link")?.textContent || "";
-                const pubDate = item.querySelector("pubDate")?.textContent || "";
-                
-                let author = item.querySelector("author")?.textContent || "";
-                if (!author) {
-                  const creator = item.getElementsByTagNameNS("*", "creator")[0];
-                  if (creator) author = creator.textContent || "";
-                }
-
-                let content = "";
-                const encoded = item.getElementsByTagNameNS("*", "encoded")[0];
-                if (encoded) content = encoded.textContent || "";
-
-                const enclosure = item.querySelector("enclosure");
-                const enclosureUrl = enclosure ? enclosure.getAttribute("url") : null;
-                
-                let mediaUrl = null;
-                const mediaContent = item.getElementsByTagNameNS("*", "content")[0];
-                if (mediaContent && mediaContent.getAttribute("url")) {
-                   mediaUrl = mediaContent.getAttribute("url");
-                }
+                const description = item.querySelector("description, summary")?.textContent || "";
+                const link = item.querySelector("link")?.textContent || item.querySelector("link")?.getAttribute("href") || "";
+                const pubDate = item.querySelector("pubDate, published, updated")?.textContent || "";
+                const author = item.querySelector("author, creator")?.textContent || "";
+                const enclosureUrl = item.querySelector("enclosure")?.getAttribute("url") || item.querySelector("content")?.getAttribute("url");
                 
                 return {
                   title,
@@ -152,70 +112,94 @@ export const RssFeed: React.FC<{url: string, config?: any, widgetData?: any}> = 
                   link,
                   pubDate,
                   author,
-                  content,
-                  enclosure: enclosureUrl ? { url: enclosureUrl } : (mediaUrl ? { url: mediaUrl } : null)
+                  thumbnail: enclosureUrl || '',
+                  enclosure: enclosureUrl ? { url: enclosureUrl } : null
                 };
               });
-            } catch (err) {
-              console.error("Todos os fallbacks RSS falharam", err);
             }
+          } catch (e) {
+            console.warn("Fallback corsproxy falhou, tentando allorigins alternativo", e);
           }
         }
 
-        if (itemsData.length > 0) {
-           const itemsWithImages = itemsData.filter((item: any) => getImageUrl(item) !== null);
-           
-           if (config?.feedMode === 'require-image') {
-              setItems(itemsWithImages);
-           } else if (config?.feedMode === 'text-only') {
-              setItems(itemsData);
-           } else {
-              // Default behavior: tenta usar com imagens se houver, senão fallback para todos
-              setItems(itemsWithImages.length > 0 ? itemsWithImages : itemsData);
-           }
+        // Tentativa 4: Fallback usando allorigins (get)
+        if (itemsData.length === 0) {
+          try {
+            const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`);
+            if (res.ok) {
+              const json = await res.json();
+              const text = json.contents;
+              
+              const parser = new DOMParser();
+              const xml = parser.parseFromString(text, "text/xml");
+              const rawItems = Array.from(xml.querySelectorAll("item, entry"));
+              
+              itemsData = rawItems.map(item => {
+                const title = item.querySelector("title")?.textContent || "";
+                const description = item.querySelector("description, summary")?.textContent || "";
+                const link = item.querySelector("link")?.textContent || item.querySelector("link")?.getAttribute("href") || "";
+                const pubDate = item.querySelector("pubDate, published, updated")?.textContent || "";
+                const author = item.querySelector("author, creator")?.textContent || "";
+                const enclosureUrl = item.querySelector("enclosure")?.getAttribute("url") || item.querySelector("content")?.getAttribute("url");
+                
+                return {
+                  title,
+                  description,
+                  link,
+                  pubDate,
+                  author,
+                  thumbnail: enclosureUrl || '',
+                  enclosure: enclosureUrl ? { url: enclosureUrl } : null
+                };
+              });
+            }
+          } catch (err) {
+            console.error("Todos os fallbacks RSS falharam", err);
+          }
+        }
+
+        if (isMounted) {
+          if (itemsData.length > 0) {
+            setItems(itemsData);
+          }
         }
       } catch (e) {
         console.error("Erro geral ao carregar RSS", e);
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
+
     fetchRss();
-    const interval = setInterval(fetchRss, 300000);
-    return () => clearInterval(interval);
+    const interval = setInterval(fetchRss, 180000);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
   }, [url]);
 
-  // Filtra itens válidos (que não estão marcados como imagem inválida)
-  const validItems = useMemo(() => {
-    return items.filter(item => {
-      const imgUrl = getImageUrl(item);
-      if (imgUrl && invalidImages.has(imgUrl)) return false;
-      return true;
-    });
-  }, [items, invalidImages]);
-
   useEffect(() => {
-    if (validItems.length === 0) return;
+    if (items.length === 0) return;
     const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % validItems.length);
+      setCurrentIndex((prev) => (prev + 1) % items.length);
     }, 8000);
     return () => clearInterval(interval);
-  }, [validItems.length]);
+  }, [items.length]);
 
   const handleImageError = (imgUrl: string | null) => {
     if (!imgUrl) return;
-    setInvalidImages(prev => {
+    setBrokenImages(prev => {
       const newSet = new Set(prev);
       newSet.add(imgUrl);
       return newSet;
     });
-    // Força a troca imediata para o próximo item se o atual quebrou
-    setCurrentIndex((prev) => (prev + 1) % (validItems.length - 1 || 1));
   };
 
   if (loading) return <div className="text-white/50 text-xs animate-pulse font-mono flex items-center justify-center h-full">CARREGANDO FEED...</div>;
   
-  if (validItems.length === 0) {
+  if (items.length === 0) {
     return (
       <div className="text-white/50 text-xs font-mono flex flex-col items-center justify-center h-full p-4 text-center">
         <Rss size={24} className="mb-2 opacity-50" />
@@ -224,7 +208,7 @@ export const RssFeed: React.FC<{url: string, config?: any, widgetData?: any}> = 
     );
   }
 
-  const currentItem = validItems[currentIndex % validItems.length];
+  const currentItem = items[currentIndex % items.length];
   const imageUrl = getImageUrl(currentItem);
 
   // Layout: Split (Imagem Topo / Texto Baixo)

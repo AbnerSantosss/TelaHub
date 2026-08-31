@@ -62,7 +62,7 @@ const METHODS: MethodCard[] = [
     id: 'credit_card',
     label: 'Cartão de crédito',
     icon: CreditCard,
-    detail: 'Assinatura com renovação mensal automática.',
+    detail: 'Assinatura com renovação automática ao fim do período contratado.',
   },
   {
     id: 'boleto',
@@ -89,14 +89,38 @@ const DemoBanner = () => (
   </Notice>
 );
 
-/** Bloco de total, repetido nas telas do passo para o valor nunca sumir. */
-const TotalRow = ({ quoteOnly, totalCents }: { quoteOnly: boolean; totalCents: number }) => (
+/**
+ * Bloco de total, repetido nas telas do passo para o valor nunca sumir.
+ *
+ * No anual o número grande é o DO ANO, com o equivalente mensal na linha de
+ * baixo. Esta é a última tela antes do clique que cobra: um "/mês" aqui, ao lado
+ * de um botão que fecha 12 meses, seria a divergência de preço acontecendo no
+ * pior lugar possível.
+ */
+const TotalRow = ({
+  quoteOnly,
+  yearly,
+  monthlyCents,
+  yearCents,
+}: {
+  quoteOnly: boolean;
+  yearly: boolean;
+  monthlyCents: number;
+  yearCents: number;
+}) => (
   <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 rounded-lg bg-app px-3.5 py-3">
     <span className="eyebrow">Total a contratar</span>
     <span className="money text-xl font-extrabold text-success">
-      {quoteOnly ? 'Sob consulta' : formatBRL(totalCents)}
-      {!quoteOnly ? <span className="ml-1 text-xs font-bold text-ink-muted">/mês</span> : null}
+      {quoteOnly ? 'Sob consulta' : formatBRL(yearly ? yearCents : monthlyCents)}
+      {!quoteOnly ? (
+        <span className="ml-1 text-xs font-bold text-ink-muted">{yearly ? '/ano' : '/mês'}</span>
+      ) : null}
     </span>
+    {yearly && !quoteOnly ? (
+      <span className="w-full text-[11px] leading-relaxed text-ink-muted">
+        Assinatura de 12 meses, equivalente a {formatBRL(monthlyCents)} por mês.
+      </span>
+    ) : null}
   </div>
 );
 
@@ -105,12 +129,12 @@ export const PaymentStep = ({ checkout }: { checkout: CheckoutController }) => {
     selectedPlan,
     screens,
     totalCents,
+    yearCents,
+    billingInterval,
     finish,
     submitting,
     result,
     alreadySubmitted,
-    session,
-    identity,
     // pagamento
     paymentConfigError,
     paymentMethods,
@@ -135,8 +159,8 @@ export const PaymentStep = ({ checkout }: { checkout: CheckoutController }) => {
   const [copyFailed, setCopyFailed] = useState(false);
 
   const quoteOnly = !!selectedPlan?.quoteOnly;
+  const yearly = billingInterval === 'yearly';
   const billed = selectedPlan ? billedScreens(selectedPlan, screens) : screens;
-  const buyerEmail = identity.email?.trim() || session?.email || null;
 
   const copyPix = async (text: string) => {
     try {
@@ -153,65 +177,14 @@ export const PaymentStep = ({ checkout }: { checkout: CheckoutController }) => {
   };
 
   // ── 1. Pagamento aprovado ─────────────────────────────────────────────────
-  // Vem ANTES de `result` de propósito: quando a cobrança online acontece,
-  // quem descreve o desfecho é ela, não o fluxo antigo de contato comercial.
-  if (payment?.paid) {
-    return (
-      <div className="flex flex-col gap-4">
-        <div className="flex items-start gap-3 rounded-xl border border-success/45 bg-success/8 p-4">
-          <span
-            aria-hidden="true"
-            className="flex size-8 shrink-0 items-center justify-center rounded-full bg-success text-white"
-          >
-            <Check size={17} strokeWidth={3} />
-          </span>
-          <div className="min-w-0">
-            <p className="text-sm font-extrabold text-ink">
-              {simulatedPayment ? 'Pagamento simulado aprovado' : 'Pagamento aprovado'}
-            </p>
-            <p className="mt-1.5 text-xs leading-relaxed text-ink-muted">{payment.message}</p>
-          </div>
-        </div>
-
-        <Notice tone="success" role="status" icon={<Mail size={15} />}>
-          <strong className="font-bold">Acesso liberado.</strong> As credenciais de entrada foram
-          enviadas para {buyerEmail ? <strong className="font-bold">{buyerEmail}</strong> : 'o e-mail informado'}.
-          Se não chegar em alguns minutos, confira a caixa de spam antes de falar com o suporte.
-        </Notice>
-
-        {simulatedPayment ? (
-          <Notice tone="warning" icon={<FlaskConical size={15} />}>
-            <strong className="font-bold">Nenhum valor foi cobrado.</strong> Esta contratação foi
-            processada por um provedor de pagamento simulado — não há cobrança em cartão, Pix ou
-            fatura, e nada aparecerá no seu extrato.
-          </Notice>
-        ) : null}
-
-        <dl className="flex flex-col gap-2 rounded-lg bg-app px-3.5 py-3 text-xs">
-          <div className="flex items-baseline justify-between gap-3">
-            <dt className="text-ink-muted">Plano contratado</dt>
-            <dd className="font-bold text-ink">
-              {selectedPlan?.name ?? '—'} · {pluralScreens(billed)}
-            </dd>
-          </div>
-          <div className="flex items-baseline justify-between gap-3">
-            <dt className="text-ink-muted">Valor</dt>
-            <dd className="money font-extrabold text-ink">{formatBRL(totalCents)}/mês</dd>
-          </div>
-          <div className="flex items-baseline justify-between gap-3">
-            <dt className="text-ink-muted">Forma de pagamento</dt>
-            <dd className="font-bold text-ink">
-              {payment.method === 'pix'
-                ? 'Pix'
-                : payment.card
-                  ? `${payment.card.brand} •••• ${payment.card.last4}`
-                  : 'Cartão de crédito'}
-            </dd>
-          </div>
-        </dl>
-      </div>
-    );
-  }
+  //
+  // NÃO desenhe o sucesso aqui. Quando `payment.paid` é verdadeiro, o
+  // `CheckoutPage` troca a página inteira pela `ThankYouScreen` e este passo
+  // nem chega a renderizar. Este bloco existia e mostrava o desfecho dentro do
+  // acordeão — foi removido em 2026-08-01 para não virar uma segunda versão da
+  // mesma tela, divergindo em silêncio (o texto daqui afirmava, no passado,
+  // que o e-mail de credenciais já tinha sido enviado; o envio é assíncrono e
+  // pode falhar — ver o cabeçalho de `ThankYouScreen.tsx`).
 
   // ── 2. Pix gerado, aguardando confirmação ─────────────────────────────────
   if (payment && payment.status === 'pending' && payment.pix) {
@@ -221,7 +194,12 @@ export const PaymentStep = ({ checkout }: { checkout: CheckoutController }) => {
       <div className="flex flex-col gap-4">
         {simulatedPayment ? <DemoBanner /> : null}
 
-        <TotalRow quoteOnly={quoteOnly} totalCents={totalCents} />
+        <TotalRow
+          quoteOnly={quoteOnly}
+          yearly={yearly}
+          monthlyCents={totalCents}
+          yearCents={yearCents}
+        />
 
         <div className="flex flex-col items-center gap-3 rounded-xl border border-line bg-surface p-4">
           {payment.pix.qrCodeDataUri ? (
@@ -322,7 +300,11 @@ export const PaymentStep = ({ checkout }: { checkout: CheckoutController }) => {
           <div className="flex items-baseline justify-between gap-3">
             <dt className="text-ink-muted">Valor a confirmar</dt>
             <dd className="money font-extrabold text-ink">
-              {quoteOnly ? 'Sob consulta' : `${formatBRL(totalCents)}/mês`}
+              {quoteOnly
+                ? 'Sob consulta'
+                : yearly
+                  ? `${formatBRL(yearCents)}/ano`
+                  : `${formatBRL(totalCents)}/mês`}
             </dd>
           </div>
         </dl>
@@ -355,7 +337,7 @@ export const PaymentStep = ({ checkout }: { checkout: CheckoutController }) => {
     : paymentMethod === 'pix'
       ? 'Gerar QR Code do Pix'
       : paymentMethod === 'credit_card'
-        ? `Pagar ${formatBRL(totalCents)}`
+        ? `Pagar ${formatBRL(yearly ? yearCents : totalCents)}`
         : 'Continuar';
 
   return (
@@ -369,7 +351,12 @@ export const PaymentStep = ({ checkout }: { checkout: CheckoutController }) => {
     >
       {simulatedPayment ? <DemoBanner /> : null}
 
-      <TotalRow quoteOnly={quoteOnly} totalCents={totalCents} />
+      <TotalRow
+          quoteOnly={quoteOnly}
+          yearly={yearly}
+          monthlyCents={totalCents}
+          yearCents={yearCents}
+        />
 
       <fieldset className="min-w-0" aria-describedby="checkout-methods-reason">
         <legend className="eyebrow mb-2">Forma de pagamento</legend>

@@ -45,6 +45,15 @@ export type CheckoutEventType = (typeof CHECKOUT_EVENT_TYPES)[number];
 export const MAX_SCREENS = 1000;
 
 /**
+ * Intervalos de cobrança aceitos pelo checkout. Enum fechado de propósito: o
+ * intervalo escolhe QUAL PREÇO do catálogo vale, então uma string livre aqui
+ * viraria preço errado na sessão (e no relatório de conversão do anual).
+ */
+export const BILLING_INTERVALS = ['monthly', 'yearly'] as const;
+
+export type CheckoutBillingInterval = (typeof BILLING_INTERVALS)[number];
+
+/**
  * Trata string vazia como campo ausente. O formulário do checkout envia `""`
  * para o que o visitante ainda não digitou; sem isso, cada passo derrubaria a
  * validação (ou pior: gravaria string vazia como se fosse um nome).
@@ -61,6 +70,10 @@ const screensField = z.coerce
   .int('Número de telas deve ser inteiro.')
   .min(1, 'Mínimo de 1 tela.')
   .max(MAX_SCREENS, `Máximo de ${MAX_SCREENS} telas.`);
+
+const intervalField = z.enum(BILLING_INTERVALS, {
+  message: 'Intervalo inválido: use "monthly" ou "yearly".',
+});
 
 const utmField = z.string().trim().max(200);
 const urlishField = z.string().trim().max(1000);
@@ -91,6 +104,8 @@ const companyNameField = z.string().trim().min(2).max(120);
 export const createCheckoutSessionSchema = z.object({
   planCode: optional(planCodeField),
   screens: optional(screensField),
+  /** Ausente = `monthly`. O default mora no serviço, não aqui. */
+  interval: optional(intervalField),
   utmSource: optional(utmField),
   utmMedium: optional(utmField),
   utmCampaign: optional(utmField),
@@ -113,6 +128,7 @@ export const updateCheckoutSessionSchema = z
   .object({
     planCode: optional(planCodeField),
     screens: optional(screensField),
+    interval: optional(intervalField),
     name: optional(nameField),
     email: optional(emailField),
     phone: optional(phoneField),

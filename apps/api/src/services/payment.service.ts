@@ -122,6 +122,14 @@ export class PaymentService {
       }
     }
 
+    // ⚠️ `session.amountCents` é o valor MENSAL EQUIVALENTE, também quando
+    // `session.billingInterval === 'yearly'` (ver `computeAmountCents`). Cobrar
+    // este número numa sessão anual seria cobrar 1/12 do combinado. Não se
+    // corrige aqui inventando uma multiplicação por 12: quando o gateway real
+    // entrar, quem decide o que vira fatura é o fluxo de assinatura recorrente
+    // (`billing.routes.ts`), que precisa tratar junto proporcionalidade,
+    // renovação e a regra anti-cobrança-retroativa. Até lá o provedor é
+    // simulado e nenhum centavo real passa por aqui.
     const charge = await provider.createCharge({
       method: input.method,
       amountCents: session.amountCents,

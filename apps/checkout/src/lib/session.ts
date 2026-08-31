@@ -4,6 +4,7 @@
 // torna o abandono mensurável por etapa. Cada passo concluído é um PATCH, e o
 // valor devolvido pelo servidor é o único válido.
 import { api } from './api';
+import type { BillingInterval } from './plans';
 
 export type CheckoutStatus =
   | 'started'
@@ -19,6 +20,12 @@ export interface CheckoutSession {
   status: CheckoutStatus;
   planCode: string | null;
   screens: number;
+  /**
+   * Intervalo de cobrança decidido pelo servidor. Note que `amountCents`
+   * continua sendo o MENSAL EQUIVALENTE mesmo no anual — o valor do ano é
+   * `amountCents × 12`, e é ele que a tela precisa dizer em voz alta.
+   */
+  billingInterval: BillingInterval;
   amountCents: number;
   currency: string;
   name: string | null;
@@ -46,6 +53,8 @@ export interface Attribution {
 export interface UpdateSessionInput {
   planCode?: string;
   screens?: number;
+  /** Nome do campo no corpo é `interval`, não `billingInterval` — é o contrato. */
+  interval?: BillingInterval;
   name?: string;
   email?: string;
   phone?: string;
@@ -74,6 +83,15 @@ const asRecord = (value: unknown): Record<string, unknown> =>
 
 const optionalText = (value: unknown): string | null =>
   typeof value === 'string' && value.trim() !== '' ? value : null;
+
+/**
+ * Só `'yearly'` explícito vira anual — campo ausente, `'anual'`, `'annual'` ou
+ * lixo colado na URL viram mensal. O default precisa ser o intervalo de MENOR
+ * compromisso: cair no anual por causa de um parâmetro malformado prenderia a
+ * pessoa em 12 meses que ela não pediu.
+ */
+export const parseBillingInterval = (value: unknown): BillingInterval =>
+  value === 'yearly' ? 'yearly' : 'monthly';
 
 const STATUSES: CheckoutStatus[] = [
   'started',
@@ -107,6 +125,7 @@ function normalizeSession(payload: unknown): CheckoutSession {
       typeof raw.screens === 'number' && Number.isFinite(raw.screens)
         ? Math.max(1, Math.floor(raw.screens))
         : 1,
+    billingInterval: parseBillingInterval(raw.billingInterval),
     amountCents:
       typeof raw.amountCents === 'number' && Number.isFinite(raw.amountCents)
         ? raw.amountCents
@@ -357,8 +376,23 @@ export function readAttribution(): Attribution {
   return attribution;
 }
 
-/** Plano e telas sugeridos pelo link (ex.: vindo da página de preços). */
-export function readSelectionHint(): { planCode: string | null; screens: number | null } {
+/**
+ * Plano, telas e intervalo sugeridos pelo link (ex.: vindo da página de preços).
+ *
+ * O `interval` fecha a lacuna que existia entre as duas superfícies: a landing
+ * anuncia o preço anual em destaque e manda para cá com `?interval=yearly`. Sem
+ * ler esse parâmetro, quem clicou em "R$ 39 no anual" chegava a uma tela de
+ * R$ 49 — divergência entre o anúncio e a contratação, que é o que os arts. 30
+ * e 37 do CDC alcançam (e o jeito mais fácil de perder a venda no último passo).
+ *
+ * Nada aqui pode derrubar a página: os três campos vêm de fora e caem em valor
+ * neutro quando não fazem sentido.
+ */
+export function readSelectionHint(): {
+  planCode: string | null;
+  screens: number | null;
+  interval: BillingInterval;
+} {
   try {
     const params = new URLSearchParams(window.location.search);
     const plan = params.get('plan') ?? params.get('planCode');
@@ -367,9 +401,10 @@ export function readSelectionHint(): { planCode: string | null; screens: number 
     return {
       planCode: plan && /^[a-z][a-z0-9-]{0,59}$/i.test(plan) ? plan.toLowerCase() : null,
       screens: Number.isFinite(parsed) && parsed > 0 ? Math.min(parsed, 1000) : null,
+      interval: parseBillingInterval((params.get('interval') ?? '').trim().toLowerCase()),
     };
   } catch {
-    return { planCode: null, screens: null };
+    return { planCode: null, screens: null, interval: 'monthly' };
   }
 }
 

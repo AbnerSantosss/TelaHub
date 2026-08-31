@@ -31,6 +31,77 @@ export const LEGACY_TRIAL_PLAN_CODE = 'trial';
  */
 export const UPGRADE_PLAN_CODES = ['loja', 'rede'] as const;
 
+/**
+ * Erro de quem tenta subir de plano sem passar pelo pagamento.
+ *
+ * Existia um buraco aqui: `POST /api/billing/plan` gravava o novo `planId`
+ * direto no banco, então qualquer admin de tenant se colocava no plano Rede de
+ * graça — entregando exatamente o que deveria ser cobrado. Descer de plano e
+ * cancelar seguem livres (o cliente não fica refém), mas subir passa pelo
+ * checkout.
+ */
+export class PlanUpgradeRequiresPaymentError extends Error {
+  readonly code = 'payment_required';
+  constructor(planName: string) {
+    super(
+      `Mudar para o plano ${planName} exige pagamento confirmado. ` +
+        'Finalize a contratação pelo checkout.'
+    );
+    this.name = 'PlanUpgradeRequiresPaymentError';
+  }
+}
+
+export interface ChangePlanOptions {
+  /**
+   * Só o fluxo de pagamento confirmado (webhook/provisionamento) passa `true`.
+   * Nenhuma rota exposta ao cliente deve setar isto.
+   */
+  paymentConfirmed?: boolean;
+}
+
+/**
+ * `true` quando o plano de destino entrega mais que o atual — e portanto é uma
+ * compra, não um ajuste.
+ *
+ * Comparar só o preço por tela não serve: o Rede custa R$ 39/tela contra
+ * R$ 49 do Loja, mas tem piso de 5 telas e limites maiores, então "mais barato
+ * por tela" seria lido como downgrade e liberaria o Rede de graça. Por isso a
+ * checagem olha três coisas: a fatura estimada para o uso atual, os limites e
+ * as features.
+ */
+export function isPlanUpgrade(current: Plan, target: Plan, activeDevices: number): boolean {
+  // ⚠️ A comparação é SEMPRE na base MENSAL — nada de `interval` aqui, e isso
+  // não é esquecimento. Intervalo de cobrança é FORMA DE PAGAMENTO, não degrau
+  // de plano: quem sai do mensal para o anual no mesmo plano não ganha nenhum
+  // recurso novo, ele só paga mais barato adiantado. Se o intervalo entrasse
+  // nesta conta, migrar para o anual (mais barato por mês) seria lido como
+  // downgrade e migrar de volta para o mensal viraria "upgrade" bloqueado por
+  // `PlanUpgradeRequiresPaymentError` — exatamente o oposto do que se quer.
+  if (estimateMonthlyCents(target, activeDevices) > estimateMonthlyCents(current, activeDevices)) {
+    return true;
+  }
+
+  // `null` = ilimitado, então vence qualquer número.
+  const limitRelaxed = (currentLimit: number | null, targetLimit: number | null): boolean => {
+    if (targetLimit === null) return currentLimit !== null;
+    if (currentLimit === null) return false;
+    return targetLimit > currentLimit;
+  };
+
+  if (
+    limitRelaxed(current.maxDevices, target.maxDevices) ||
+    limitRelaxed(current.maxUsers, target.maxUsers) ||
+    limitRelaxed(current.maxOrganizations, target.maxOrganizations)
+  ) {
+    return true;
+  }
+
+  const currentFeatures = new Set(parseFeatures(current.features));
+  return parseFeatures(target.features).some(
+    (feature) => feature !== FEATURE_QUOTE_ONLY && !currentFeatures.has(feature)
+  );
+}
+
 export type SubscriptionStatus = 'trialing' | 'active' | 'past_due' | 'canceled';
 
 export type SubscriptionWithPlan = Subscription & { plan: Plan };
@@ -81,26 +152,79 @@ export function isFreePlan(
   return plan.pricePerScreenCents === 0 && !parseFeatures(plan.features ?? null).includes(FEATURE_QUOTE_ONLY);
 }
 
+/** Como a assinatura é paga. Não confundir com o PLANO contratado. */
+export type BillingInterval = 'monthly' | 'yearly';
+
+/** Plano no mínimo necessário para calcular fatura. */
+export interface PricedPlan {
+  pricePerScreenCents: number;
+  /**
+   * Opcional de propósito: dezenas de chamadores montam objetos de plano
+   * parciais (rotas, testes, fixtures). Ausente = plano sem oferta anual.
+   */
+  priceAnnualPerScreenCents?: number | null;
+  minScreens: number;
+  features?: string | null;
+}
+
+/**
+ * Preço por tela/mês a aplicar, dado o intervalo escolhido. Função pura.
+ *
+ * O anual só vale quando o plano TEM oferta anual (`> 0`). Um plano sem oferta
+ * (grátis, Enterprise, ou qualquer linha antiga do banco anterior à migração)
+ * cai no mensal em vez de virar R$ 0,00 — cobrar zero por engano é pior que
+ * cobrar o preço de tabela, e é o erro que um `?? 0` silencioso produziria.
+ */
+export function unitPriceCents(plan: PricedPlan, interval: BillingInterval): number {
+  const annual = plan.priceAnnualPerScreenCents ?? 0;
+  if (interval === 'yearly' && annual > 0) return annual;
+  return plan.pricePerScreenCents;
+}
+
 /**
  * Valor mensal previsto da assinatura, em centavos. Função pura.
  *
- *   max(telas ativas, plan.minScreens) × plan.pricePerScreenCents
+ *   max(telas ativas, plan.minScreens) × preço unitário do intervalo
  *
  * O piso `minScreens` existe porque o plano `rede` troca preço por tela mais
  * baixo por um compromisso mínimo de 5 telas — com 3 telas ativas, a fatura
  * ainda é de 5. Devolve `0` para plano grátis e para plano sob consulta
  * (Enterprise), onde `pricePerScreenCents = 0` não significa gratuito.
+ *
+ * `interval` é OPCIONAL com default `'monthly'`: a função já era chamada de
+ * meia dúzia de lugares (billing, checkout, sugestão de upgrade, gate de
+ * troca de plano) e o mensal continua sendo a resposta certa para todos eles.
+ * Torná-lo obrigatório trocaria uma adição de recurso por uma refatoração de
+ * risco em cima do cálculo de fatura.
+ *
+ * No anual o retorno continua sendo o valor MENSAL EQUIVALENTE (o que o cliente
+ * compara com o mensal), não o boleto do ano — esse é `estimateAnnualTotalCents`.
  */
 export function estimateMonthlyCents(
-  plan: { pricePerScreenCents: number; minScreens: number; features?: string | null },
-  activeDevices: number
+  plan: PricedPlan,
+  activeDevices: number,
+  interval: BillingInterval = 'monthly'
 ): number {
   const features = parseFeatures(plan.features ?? null);
   if (features.includes(FEATURE_QUOTE_ONLY)) return 0;
-  if (plan.pricePerScreenCents <= 0) return 0;
+
+  const unit = unitPriceCents(plan, interval);
+  if (unit <= 0) return 0;
 
   const billedScreens = Math.max(activeDevices, plan.minScreens, 0);
-  return billedScreens * plan.pricePerScreenCents;
+  return billedScreens * unit;
+}
+
+/**
+ * Total do ANO no pagamento anual, em centavos: o mensal-equivalente × 12.
+ *
+ * É este número que vai no contrato ("R$ 468/ano por tela"), enquanto a vitrine
+ * mostra o mensal-equivalente. Manter a derivação num lugar só evita a
+ * divergência clássica de arredondar o mensal e multiplicar por 12 em outra
+ * superfície.
+ */
+export function estimateAnnualTotalCents(plan: PricedPlan, activeDevices: number): number {
+  return estimateMonthlyCents(plan, activeDevices, 'yearly') * 12;
 }
 
 /** Quantas telas entram na fatura (piso de `minScreens`). Função pura. */
@@ -224,7 +348,11 @@ export class SubscriptionService {
    * Troca o plano da assinatura. Recusa downgrade quando o uso atual estoura
    * algum limite do plano de destino — o chamador deve mapear para 400.
    */
-  async changePlan(organizationId: string, planCode: string): Promise<SubscriptionWithPlan> {
+  async changePlan(
+    organizationId: string,
+    planCode: string,
+    options: ChangePlanOptions = {}
+  ): Promise<SubscriptionWithPlan> {
     const subscription = await this.requireByOrganization(organizationId);
     const plan = await planService.getByCode(planCode);
 
@@ -234,6 +362,15 @@ export class SubscriptionService {
 
     if (plan.id === subscription.planId) {
       return subscription;
+    }
+
+    // Subir de plano é uma compra. Só o fluxo de pagamento confirmado pode
+    // chamar isto com `paymentConfirmed`. Ver `PlanUpgradeRequiresPaymentError`.
+    if (!options.paymentConfirmed) {
+      const counts = await this.countResources(organizationId);
+      if (isPlanUpgrade(subscription.plan, plan, counts.devices)) {
+        throw new PlanUpgradeRequiresPaymentError(plan.name);
+      }
     }
 
     const blocker = await this.findDowngradeBlocker(organizationId, plan);

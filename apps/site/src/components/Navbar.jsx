@@ -1,129 +1,96 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { APP_URL } from '../lib/funnel';
+import './Navbar.css';
 
-const Navbar = ({ scrollToSection, startConversion }) => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+/**
+ * Barra de navegação da landing v2.
+ *
+ * Três decisões que não são estéticas:
+ *
+ * 1. **O botão do topo leva à GRADE DE PLANOS, não ao cadastro.** Antes ele
+ *    mandava direto para o `signup`, e o visitante saía do site sem nunca ver
+ *    que existem Loja e Rede — todo clique de topo virava conversão para R$ 0.
+ *    Quem escolhe o plano é o visitante, na grade; este botão só o leva até lá.
+ *    (Os botões DOS CARDS de plano continuam indo direto ao destino: lá o plano
+ *    já foi escolhido.)
+ *
+ * 2. **"Entrar" existe e fica separado do CTA.** A landing v2 é a porta de
+ *    entrada de quem já é cliente também; sem esse link, o síndico que quer
+ *    trocar o aviso da portaria pelo celular precisa lembrar a URL do painel.
+ *
+ * 3. **No celular os links de seção somem, o CTA fica.** O artboard de 390px
+ *    (`Planejamento/design-2026-08-30/Mobile.dc.html`) tem só marca + botão. Um
+ *    menu sanfona aqui seria mais um estado para manter e mais uma coisa para
+ *    quebrar numa página cuja única tarefa é levar ao cadastro — as seções
+ *    continuam alcançáveis rolando, e o rodapé repete os atalhos.
+ */
+const Navbar = ({ scrollToSection, goToPlans }) => {
+  const [descolada, setDescolada] = useState(false);
 
-  const handleNavClick = (selector, name) => {
-    scrollToSection(selector, name);
-    setIsMenuOpen(false);
-  };
+  // Sombra só depois que a página rola: sobre o herói (que já tem fundo
+  // `--papel-2`) a sombra permanente cria uma linha dupla com a borda.
+  useEffect(() => {
+    const aoRolar = () => setDescolada(window.scrollY > 8);
+    aoRolar();
+    window.addEventListener('scroll', aoRolar, { passive: true });
+    return () => window.removeEventListener('scroll', aoRolar);
+  }, []);
+
+  const secoes = [
+    { id: '#como-funciona', nome: 'como-funciona', rotulo: 'Como funciona' },
+    { id: '#segmentos', nome: 'segmentos', rotulo: 'Para o seu negócio' },
+    { id: '#na-tela', nome: 'na-tela', rotulo: 'O que vai na tela' },
+    { id: '#precos', nome: 'precos', rotulo: 'Preços' },
+  ];
 
   return (
-    <nav id="navbar" role="navigation" aria-label="Navegação principal" className={isMenuOpen ? 'mobile-menu-active' : ''}>
-      <div className="nav-inner">
-        <button 
-          onClick={() => {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-            setIsMenuOpen(false);
-          }} 
-          className="nav-logo" 
-          style={{ background: 'none', border: 'none', cursor: 'pointer' }} 
-          aria-label="TelaHub Home"
-        >
-          <div className="nav-logo-icon">
-            <svg 
-              xmlns="http://www.w3.org/2000/svg" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="2.5" 
-              strokeLinecap="round" 
-              strokeLinejoin="round" 
-              style={{ width: 18, height: 18, color: '#FFFFFF' }}
+    <nav
+      className={`navbar${descolada ? ' navbar--descolada' : ''}`}
+      aria-label="Navegação principal"
+    >
+      <div className="navbar__inner">
+        <a className="navbar__marca" href="#topo" aria-label="TelaHub — início">
+          <span className="navbar__logo" aria-hidden="true">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#ffffff"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             >
-              <rect x="2" y="7" width="20" height="15" rx="2" ry="2" />
-              <polyline points="17 2 12 7 7 2" />
+              <rect x="2" y="5" width="20" height="13" rx="2" />
+              <path d="M8 22h8M12 18v4" />
             </svg>
-          </div>
+          </span>
           TelaHub
-        </button>
-        
-        <ul className="nav-links" role="list">
-          <li>
-            <button onClick={() => scrollToSection('#recursos', 'recursos')}>Recursos</button>
-          </li>
-          <li>
-            <button onClick={() => scrollToSection('#casos', 'casos')}>Casos de Uso</button>
-          </li>
-          <li>
-            <button onClick={() => scrollToSection('#precos', 'precos')}>Preços</button>
-          </li>
+        </a>
+
+        <ul className="navbar__links" role="list">
+          {secoes.map((secao) => (
+            <li key={secao.id}>
+              <button type="button" onClick={() => scrollToSection(secao.id, secao.nome)}>
+                {secao.rotulo}
+              </button>
+            </li>
+          ))}
         </ul>
 
-        <div className="nav-cta">
+        <div className="navbar__acoes">
+          <a className="navbar__entrar" href={`${APP_URL}/`}>
+            Entrar
+          </a>
           <button
-            onClick={() => startConversion('gratis', 'navbar', 'Começar grátis')}
-            className="btn btn-primary"
-            style={{ padding: '8px 18px', fontSize: '0.85rem' }}
+            type="button"
+            className="btn navbar__btn"
+            onClick={() => goToPlans('navbar', 'Começar grátis')}
           >
             Começar grátis
-            <svg 
-              xmlns="http://www.w3.org/2000/svg" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="2.5" 
-              strokeLinecap="round" 
-              strokeLinejoin="round" 
-              style={{ width: 14, height: 14 }}
-            >
-              <line x1="5" y1="12" x2="19" y2="12" />
-              <polyline points="12 5 19 12 12 19" />
-            </svg>
           </button>
         </div>
-
-        <button 
-          className={`mobile-menu-toggle ${isMenuOpen ? 'open' : ''}`}
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-          aria-expanded={isMenuOpen}
-          aria-controls="mobile-menu"
-          aria-label={isMenuOpen ? "Fechar menu" : "Abrir menu"}
-        >
-          <span className="hamburger-line"></span>
-          <span className="hamburger-line"></span>
-          <span className="hamburger-line"></span>
-        </button>
       </div>
-
-      {isMenuOpen && (
-        <div id="mobile-menu" className="mobile-menu-overlay" role="dialog" aria-modal="true" aria-label="Menu móvel">
-          <ul className="mobile-nav-links" role="list">
-            <li>
-              <button onClick={() => handleNavClick('#recursos', 'recursos')}>Recursos</button>
-            </li>
-            <li>
-              <button onClick={() => handleNavClick('#casos', 'casos')}>Casos de Uso</button>
-            </li>
-            <li>
-              <button onClick={() => handleNavClick('#precos', 'precos')}>Preços</button>
-            </li>
-          </ul>
-
-          <div className="mobile-nav-cta">
-            <button
-              onClick={() => { startConversion('gratis', 'navbar_mobile', 'Começar grátis'); setIsMenuOpen(false); }}
-              className="btn btn-primary"
-              style={{ width: '100%', padding: '14px', fontSize: '0.95rem' }}
-            >
-              Começar grátis
-              <svg 
-                xmlns="http://www.w3.org/2000/svg" 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="currentColor" 
-                strokeWidth="2.5" 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                style={{ width: 14, height: 14 }}
-              >
-                <line x1="5" y1="12" x2="19" y2="12" />
-                <polyline points="12 5 19 12 12 19" />
-              </svg>
-            </button>
-          </div>
-        </div>
-      )}
     </nav>
   );
 };

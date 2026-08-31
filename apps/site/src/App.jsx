@@ -1,18 +1,50 @@
-import { useState, useEffect } from 'react';
-import ScreenWall from './components/ScreenWall';
+import { useEffect, useState } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
-import TechArchitecture from './components/TechArchitecture';
-import BentoFeatures from './components/BentoFeatures';
-import UseCases from './components/UseCases';
-import Pricing from './components/Pricing';
-import CtaStrip from './components/CtaStrip';
-import Footer from './components/Footer';
+import Cenas from './components/Cenas';
+import Passos from './components/Passos';
+import Formatos from './components/Formatos';
+import Blocos from './components/Blocos';
+import Hospedagem from './components/Hospedagem';
+import Comparacao from './components/Comparacao';
+import Precos from './components/Precos';
+import RiscoZero from './components/RiscoZero';
+import Faq from './components/Faq';
+import CtaFinal from './components/CtaFinal';
+import Rodape from './components/Rodape';
 import LeadModal from './components/LeadModal';
 import ConsentBanner from './components/ConsentBanner';
 import { trackEvent } from './lib/tracking';
-import { conversionDestination } from './lib/funnel';
+import { conversionDestination, API_URL, attributionFields } from './lib/funnel';
 import { iniciarReveal } from './lib/reveal';
+
+/**
+ * Landing v2 do TelaHub.
+ *
+ * ── O que mudou em 30/08/2026 e por quê ─────────────────────────────────────
+ * A página anterior era escura, "corporativa", abria com um painel de telemetria
+ * falso e vendia por RAMO (cardápio, ofertas). A auditoria do plano comercial v2
+ * mostrou dois problemas que se somam: (1) quem chega não sabe que tem o
+ * problema, então recurso no herói não converte — dor invisível converte; e (2)
+ * ancorar o produto em comida entrega a página a uma disputa que não é a nossa
+ * (o termo é dominado por QR/delivery) e faz síndico, gerente e dono de clínica
+ * concluírem "não é pra mim". O produto passou a ser apresentado por PORTE:
+ * condomínio, escritório, clínica, loja, academia, rede — comida é um caso entre
+ * vários e nunca abre nada.
+ *
+ * ── A ordem das seções é o argumento ────────────────────────────────────────
+ * dor → cena reconhecível → como funciona (com a TV real) → dois formatos →
+ * o que cabe na tela (só o que existe) → por que é barato → contra o que se
+ * compara → preço → risco zero → dúvidas → convite. Cada seção responde à
+ * objeção que a anterior levanta; trocar a ordem quebra a corrente.
+ *
+ * ── Regras que a página inteira herda ───────────────────────────────────────
+ * Nenhum fato que não exista pode aparecer aqui. Sem depoimento, sem nota, sem
+ * "+N clientes", sem contador de vagas, sem "14 dias" (o trial foi
+ * descontinuado e essa frase já voltou quatro vezes), sem "API externa" nem
+ * "múltiplas unidades" (vendidos e inexistentes), sem Pix/boleto (não há
+ * gateway), sem WhatsApp ou CNPJ (não há número publicável).
+ */
 
 /** Código do plano → nome exibido. Os eventos de analytics usam o nome. */
 const PLAN_LABELS = {
@@ -22,133 +54,146 @@ const PLAN_LABELS = {
   enterprise: 'Enterprise',
 };
 
-
-
 function App() {
-  // ==========================================
-  // STATE MANAGEMENT
-  // ==========================================
-  const [activeTab, setActiveTab] = useState('cond');
-  const [activeDock, setActiveDock] = useState('home');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState('Grátis');
-  const [lastSyncTime, setLastSyncTime] = useState(3);
-  
-  // Leads Registration Form State
+
+  // Formulário de contato (o único backend que esta página chama).
   const [formName, setFormName] = useState('');
   const [formEmail, setFormEmail] = useState('');
   const [formCompany, setFormCompany] = useState('');
   const [formPhone, setFormPhone] = useState('');
   const [submitStatus, setSubmitStatus] = useState({ loading: false, success: false, error: null });
 
-  // Telemetry displays live fallback state
-  const [telemetry] = useState({
-    total: 6,
-    onlineCount: 4,
-    uptime: '99.7%',
-    scenesActive: 4,
-    displays: [
-      { id: 1, name: 'Hall Principal', status: 'online', screen: 'screen-a' },
-      { id: 2, name: 'Elevador A', status: 'online', screen: 'screen-b' },
-      { id: 3, name: 'Recepção', status: 'online', screen: 'screen-c' },
-      { id: 4, name: 'Sala de Reunião', status: 'offline', screen: 'screen-d' },
-      { id: 5, name: 'Cafeteria', status: 'offline', screen: 'screen-e' },
-      { id: 6, name: 'Loja Térreo', status: 'online', screen: 'screen-a' }
-    ]
-  });
-
-
-  // ==========================================
-  // API INTEGRATIONS & GSAP ANIMATIONS
-  // ==========================================
   useEffect(() => {
-    
-    // Simulate real-time sync seconds counter update
-    const syncInterval = setInterval(() => {
-      setLastSyncTime(Math.floor(Math.random() * 7) + 1);
-    }, 4000);
-
-
-
-    // C. Revelação ao rolar.
-    //
-    // Era GSAP + ScrollTrigger vindos de dois <script> do cdnjs. Trocado por
-    // CSS + IntersectionObserver porque a montagem antiga tinha duas formas de
-    // deixar a página em branco — a de chegada por âncora foi reproduzida. O
-    // raciocínio completo está no cabeçalho de `src/lib/reveal.js`.
-    //
-    // A entrada do herói agora é CSS puro (`.hero-headline` e companhia em
-    // index.css): é a primeira coisa que o visitante vê, e não pode depender
-    // de JavaScript ter executado.
+    // Revelação ao rolar. Era GSAP + ScrollTrigger de CDN e tinha duas formas de
+    // deixar a página em branco — CDN fora do ar e chegada por âncora
+    // (`/#precos`, o link que o painel e o checkout usam). Virou CSS +
+    // IntersectionObserver com estado padrão VISÍVEL; o raciocínio completo está
+    // no cabeçalho de `src/lib/reveal.js`. O herói não participa disso: é a
+    // primeira coisa que o visitante vê e não pode depender de JavaScript.
     const pararReveal = iniciarReveal();
-
-    return () => {
-      clearInterval(syncInterval);
-      pararReveal();
-    };
+    return pararReveal;
   }, []);
 
-  // Ergonomic smooth scrolling to sections
-  const scrollToSection = (id, dockName) => {
-    setActiveDock(dockName);
-    const target = document.querySelector(id);
-    if (target) {
-      window.scrollTo({
-        top: target.offsetTop - 70,
-        behavior: 'smooth'
-      });
-    }
+  const scrollToSection = (id) => {
+    const alvo = document.querySelector(id);
+    if (!alvo) return;
+    window.scrollTo({ top: alvo.offsetTop - 80, behavior: 'smooth' });
+  };
+
+  /**
+   * CTA de navegação: leva à GRADE DE PLANOS, não ao cadastro.
+   *
+   * Vale para os botões que aparecem ANTES da seção de preços e não dizem qual
+   * plano estão oferecendo (hoje, o da navbar). Eles mandavam direto para o
+   * `signup`, e o visitante saía do site sem nunca ver que existem Loja e Rede:
+   * todo clique de topo virava conversão para R$ 0. Quem escolhe o plano é o
+   * visitante, na grade.
+   *
+   * O botão do herói é a exceção deliberada: ele diz "minha 1ª tela — grátis",
+   * então mandá-lo para a grade seria um clique que não anda.
+   */
+  const goToPlans = (ctaLocation = 'unknown', ctaLabel = 'Ver planos') => {
+    trackEvent('cta_click', {
+      cta_location: ctaLocation,
+      cta_label: ctaLabel,
+      plan_selected: 'nao_escolhido',
+    });
+    trackEvent('view_item_list', { item_list_name: 'planos', cta_location: ctaLocation });
+    scrollToSection('#precos');
+  };
+
+  /** Abre o formulário de contato (Parceiro, Enterprise, setup assistido). */
+  const abrirContato = (planName = 'Contato', ctaLocation = 'unknown') => {
+    setSelectedPlan(planName);
+    setSubmitStatus({ loading: false, success: false, error: null });
+    setIsModalOpen(true);
+    trackEvent('modal_open', {
+      modal_name: 'lead_capture',
+      plan_selected: planName,
+      cta_location: ctaLocation,
+    });
   };
 
   /**
    * Ponto único de conversão da página.
    *
    * Funil híbrido: `gratis` vai para o cadastro (sem cartão, como o FAQ desta
-   * página promete), `loja`/`rede` vão para o checkout com o plano sugerido, e
-   * `enterprise` — que não tem preço público — cai no modal de contato.
+   * página promete), `loja`/`rede` vão para o checkout com plano, telas e
+   * INTERVALO sugeridos, e `enterprise` — que não tem preço público — cai no
+   * formulário de contato.
+   *
+   * O `intervalo` é o que impede a incoerência mais cara desta página: o
+   * visitante escolhe "anual — R$ 39/tela" na grade e, sem esse parâmetro, o
+   * checkout abriria no mensal cobrando R$ 49. Anunciar um preço e cobrar outro
+   * é CDC arts. 30 e 37, além de matar a conversão no último passo.
    *
    * O `trackEvent` dispara ANTES de navegar: sair da página cancela requisição
    * em voo, e um clique que não é medido é uma venda que some do funil.
    */
-  const startConversion = (planCode, ctaLocation = 'unknown', ctaLabel = planCode, screens) => {
+  const startConversion = (planCode, ctaLocation = 'unknown', ctaLabel = planCode, screens, intervalo) => {
     const planName = PLAN_LABELS[planCode] || planCode;
-    trackEvent('cta_click', { cta_location: ctaLocation, cta_label: ctaLabel, plan_selected: planName });
+    trackEvent('cta_click', {
+      cta_location: ctaLocation,
+      cta_label: ctaLabel,
+      plan_selected: planName,
+      billing_interval: intervalo || 'nao_escolhido',
+    });
 
-    const destination = conversionDestination(planCode, screens);
+    const destination = conversionDestination(planCode, screens, intervalo);
 
     if (!destination) {
-      // Enterprise: contratação por proposta, não self-service.
-      setSelectedPlan(planName);
-      setSubmitStatus({ loading: false, success: false, error: null });
-      setIsModalOpen(true);
-      trackEvent('modal_open', { modal_name: 'lead_capture', plan_selected: planName });
+      abrirContato(planName, ctaLocation);
       return;
     }
 
     trackEvent('begin_checkout', {
       plan_selected: planName,
       cta_location: ctaLocation,
+      billing_interval: intervalo || 'mensal',
       destination: planCode === 'gratis' ? 'signup' : 'checkout',
     });
 
     window.location.href = destination;
   };
 
-  // Handle Lead Form Submission (Client-side — integrate with Formspree/Zapier/Webhook later)
+  /**
+   * Envia o lead para `POST /api/leads`.
+   *
+   * Era um `setTimeout` que mostrava "Recebemos seu contato!" sem gravar nada:
+   * todo lead de plano sob consulta era perdido em silêncio. Agora, se o envio
+   * falhar, a pessoa VÊ o erro — mostrar sucesso sobre uma falha é o que fazia
+   * o problema durar.
+   */
   const handleLeadSubmit = async (e) => {
     e.preventDefault();
     if (!formName || !formEmail) {
-      setSubmitStatus({ loading: false, success: false, error: 'Por favor, preencha nome e email.' });
+      setSubmitStatus({ loading: false, success: false, error: 'Preencha nome e e-mail.' });
       return;
     }
 
     setSubmitStatus({ loading: true, success: false, error: null });
 
-    // TODO: Replace with your preferred integration:
-    // - Formspree: fetch('https://formspree.io/f/YOUR_ID', { method: 'POST', body: ... })
-    // - Zapier Webhook: fetch('https://hooks.zapier.com/hooks/catch/YOUR_ID', { method: 'POST', body: ... })
-    // - EmailJS, Google Forms, etc.
-    setTimeout(() => {
+    try {
+      const response = await fetch(`${API_URL}/leads`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formName,
+          email: formEmail,
+          company: formCompany || undefined,
+          phone: formPhone || undefined,
+          planCode: selectedPlan || undefined,
+          ...attributionFields(),
+        }),
+      });
+
+      if (!response.ok) {
+        const corpo = await response.json().catch(() => ({}));
+        throw new Error(corpo.error || 'Não foi possível enviar agora.');
+      }
+
       setSubmitStatus({ loading: false, success: true, error: null });
 
       trackEvent('generate_lead', {
@@ -156,67 +201,50 @@ function App() {
         plan_selected: selectedPlan,
         lead_company: formCompany || undefined,
         value: 0,
-        currency: 'BRL'
+        currency: 'BRL',
       });
 
       setFormName('');
       setFormEmail('');
       setFormCompany('');
       setFormPhone('');
-    }, 800);
+    } catch (error) {
+      setSubmitStatus({
+        loading: false,
+        success: false,
+        error: `${error.message} Tente de novo em instantes.`,
+      });
+    }
   };
 
   return (
     <>
-      {/* 0. Consent banner (LGPD/GDPR) — decide antes de qualquer tag de marketing/analytics disparar */}
+      {/* Decide o consentimento ANTES de qualquer tag de marketing disparar. */}
       <ConsentBanner />
 
-      {/* 1. Fundo ambiente: parede de telas se atualizando (ver ScreenWall.jsx) */}
-      <ScreenWall />
+      <a className="pular" href="#conteudo">
+        Pular para o conteúdo
+      </a>
 
-      {/* 2. Top navigation header */}
-      <Navbar 
-        scrollToSection={scrollToSection} 
-        startConversion={startConversion} 
-      />
+      <Navbar scrollToSection={scrollToSection} goToPlans={goToPlans} />
 
-      {/* 3. Hero section (includes DashboardMockup inside) */}
-      <Hero 
-        startConversion={startConversion}
-        scrollToSection={scrollToSection}
-        telemetry={telemetry}
-        lastSyncTime={lastSyncTime}
-      />
+      <main id="conteudo">
+        <Hero startConversion={startConversion} scrollToSection={scrollToSection} />
+        <Cenas />
+        <Passos />
+        <Formatos />
+        <Blocos />
+        <Hospedagem />
+        <Comparacao />
+        <Precos startConversion={startConversion} abrirContato={abrirContato} />
+        <RiscoZero abrirContato={() => abrirContato('Setup assistido', 'risco_zero')} />
+        <Faq />
+        <CtaFinal startConversion={startConversion} />
+      </main>
 
-      {/* 4. Technical argument section */}
-      <TechArchitecture />
+      <Rodape scrollToSection={scrollToSection} />
 
-      {/* 5. Bento grid resources */}
-      <BentoFeatures />
-
-      {/* 6. Case of Use tabs section */}
-      <UseCases 
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        telemetry={telemetry}
-      />
-
-      {/* 7. Pricing section */}
-      <Pricing startConversion={startConversion} />
-
-      {/* 8. Conversion action strip */}
-      <CtaStrip startConversion={startConversion} />
-
-      {/* 9 & 10. Footer and mobile bottom navigation dock */}
-      <Footer 
-        scrollToSection={scrollToSection}
-        setActiveTab={setActiveTab}
-        activeDock={activeDock}
-        startConversion={startConversion}
-      />
-
-      {/* 11. Lead capture conversion modal */}
-      <LeadModal 
+      <LeadModal
         isModalOpen={isModalOpen}
         setIsModalOpen={setIsModalOpen}
         selectedPlan={selectedPlan}

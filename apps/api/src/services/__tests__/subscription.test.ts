@@ -1,16 +1,22 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
+import type { Plan } from '@prisma/client';
+
 import prisma from '../../lib/prisma';
 import {
   FREE_PLAN_CODE,
+  PlanUpgradeRequiresPaymentError,
   TRIAL_DAYS,
   billedScreens,
+  estimateAnnualTotalCents,
   estimateMonthlyCents,
   isActive,
   isFreePlan,
+  isPlanUpgrade,
   subscriptionService,
   trialDaysRemaining,
   trialEndDate,
+  unitPriceCents,
 } from '../../services/subscription.service';
 import { hasFeature, parseFeatures } from '../../services/plan.service';
 
@@ -23,6 +29,7 @@ const createdPlanIds: string[] = [];
 async function makePlan(opts: {
   code: string;
   pricePerScreenCents?: number;
+  priceAnnualPerScreenCents?: number;
   minScreens?: number;
   maxDevices?: number | null;
   maxUsers?: number | null;
@@ -34,6 +41,7 @@ async function makePlan(opts: {
       code: `${opts.code}-${SUFFIX}`,
       name: opts.code.toUpperCase(),
       pricePerScreenCents: opts.pricePerScreenCents ?? 4900,
+      priceAnnualPerScreenCents: opts.priceAnnualPerScreenCents ?? 0,
       minScreens: opts.minScreens ?? 1,
       maxDevices: opts.maxDevices ?? null,
       maxUsers: opts.maxUsers ?? null,
@@ -133,6 +141,64 @@ describe('estimateMonthlyCents / billedScreens', () => {
   });
 });
 
+describe('preço anual (unitPriceCents / estimateMonthlyCents / estimateAnnualTotalCents)', () => {
+  const loja = {
+    pricePerScreenCents: 4900,
+    priceAnnualPerScreenCents: 3900,
+    minScreens: 1,
+    features: '["relatorios"]',
+  };
+  const rede = {
+    pricePerScreenCents: 3900,
+    priceAnnualPerScreenCents: 3200,
+    minScreens: 5,
+    features: '["powerbi"]',
+  };
+  /** Plano sem oferta anual — grátis, Enterprise e qualquer linha antiga. */
+  const semAnual = { pricePerScreenCents: 2900, priceAnnualPerScreenCents: 0, minScreens: 1 };
+  const enterprise = {
+    pricePerScreenCents: 0,
+    priceAnnualPerScreenCents: 0,
+    minScreens: 1,
+    features: '["sso","preco-sob-consulta"]',
+  };
+
+  it('usa o preço anual quando o intervalo é yearly', () => {
+    expect(unitPriceCents(loja, 'yearly')).toBe(3900);
+    expect(unitPriceCents(loja, 'monthly')).toBe(4900);
+    expect(unitPriceCents(rede, 'yearly')).toBe(3200);
+  });
+
+  it('cai no MENSAL quando o plano não tem oferta anual — nunca em zero', () => {
+    expect(unitPriceCents(semAnual, 'yearly')).toBe(2900);
+    // Campo ausente (objeto parcial de chamador antigo) equivale a "sem oferta".
+    expect(unitPriceCents({ pricePerScreenCents: 2900, minScreens: 1 }, 'yearly')).toBe(2900);
+  });
+
+  it('estimateMonthlyCents no anual multiplica as telas faturadas pelo preço anual', () => {
+    expect(estimateMonthlyCents(loja, 3, 'yearly')).toBe(3 * 3900);
+    // O piso de minScreens continua valendo no anual: 3 telas, fatura de 5.
+    expect(estimateMonthlyCents(rede, 3, 'yearly')).toBe(5 * 3200);
+  });
+
+  it('o parâmetro é opcional e o default é mensal (não quebra chamador antigo)', () => {
+    expect(estimateMonthlyCents(loja, 2)).toBe(estimateMonthlyCents(loja, 2, 'monthly'));
+    expect(estimateMonthlyCents(loja, 2)).toBe(9800);
+  });
+
+  it('plano sob consulta segue em 0 nos dois intervalos', () => {
+    expect(estimateMonthlyCents(enterprise, 50, 'yearly')).toBe(0);
+    expect(estimateAnnualTotalCents(enterprise, 50)).toBe(0);
+  });
+
+  it('estimateAnnualTotalCents é o mensal-equivalente × 12', () => {
+    // Uma tela no Loja: R$ 39 × 12 = R$ 468/ano, o número do plano comercial.
+    expect(estimateAnnualTotalCents(loja, 1)).toBe(46800);
+    // Rede com 5 telas: R$ 160/mês → R$ 1.920/ano.
+    expect(estimateAnnualTotalCents(rede, 5)).toBe(192000);
+  });
+});
+
 describe('trialEndDate / trialDaysRemaining (trial promocional, não o caminho padrão)', () => {
   it(`soma ${TRIAL_DAYS} dias`, () => {
     const from = new Date('2026-07-25T00:00:00Z');
@@ -205,13 +271,104 @@ describe('changePlan', () => {
     expect(after.planId).toBe(big.id);
   });
 
-  it('permite a troca quando o uso cabe no plano de destino', async () => {
+  it('recusa subir de plano sem pagamento confirmado', async () => {
     const from = await makePlan({ code: 'from', maxDevices: 1 });
     const to = await makePlan({ code: 'to', maxDevices: 5 });
     const org = await makeOrgWithSubscription(from.id);
 
+    await expect(subscriptionService.changePlan(org.id, to.code)).rejects.toBeInstanceOf(
+      PlanUpgradeRequiresPaymentError
+    );
+
+    const after = await subscriptionService.requireByOrganization(org.id);
+    expect(after.planId).toBe(from.id);
+  });
+
+  it('permite subir de plano quando o pagamento foi confirmado', async () => {
+    const from = await makePlan({ code: 'from-pago', maxDevices: 1 });
+    const to = await makePlan({ code: 'to-pago', maxDevices: 5 });
+    const org = await makeOrgWithSubscription(from.id);
+
+    const updated = await subscriptionService.changePlan(org.id, to.code, {
+      paymentConfirmed: true,
+    });
+    expect(updated.planId).toBe(to.id);
+  });
+
+  it('permite descer de plano quando o uso cabe no destino', async () => {
+    const from = await makePlan({ code: 'from-down', maxDevices: 5 });
+    const to = await makePlan({ code: 'to-down', maxDevices: 2 });
+    const org = await makeOrgWithSubscription(from.id);
+
     const updated = await subscriptionService.changePlan(org.id, to.code);
     expect(updated.planId).toBe(to.id);
+  });
+});
+
+describe('isPlanUpgrade', () => {
+  const plano = (over: Partial<Plan> = {}): Plan =>
+    ({
+      id: 'x',
+      code: 'x',
+      name: 'X',
+      pricePerScreenCents: 4900,
+      priceAnnualPerScreenCents: 0,
+      minScreens: 1,
+      maxDevices: 3,
+      maxUsers: 3,
+      maxOrganizations: 1,
+      features: '[]',
+      active: true,
+      ...over,
+    }) as Plan;
+
+  it('trata como upgrade o plano que fica mais caro para o uso atual', () => {
+    const barato = plano({ pricePerScreenCents: 1000 });
+    const caro = plano({ pricePerScreenCents: 4900 });
+    expect(isPlanUpgrade(barato, caro, 2)).toBe(true);
+    expect(isPlanUpgrade(caro, barato, 2)).toBe(false);
+  });
+
+  it('trata como upgrade o plano com preço unitário menor mas piso maior (Loja → Rede)', () => {
+    const loja = plano({ pricePerScreenCents: 4900, minScreens: 1, maxDevices: 3 });
+    const rede = plano({ pricePerScreenCents: 3900, minScreens: 5, maxDevices: 50 });
+    expect(isPlanUpgrade(loja, rede, 2)).toBe(true);
+  });
+
+  it('trata como upgrade o plano que libera limite ou feature nova', () => {
+    const base = plano({ maxDevices: 3, features: '["relatorios"]' });
+    expect(isPlanUpgrade(base, plano({ maxDevices: 10, features: '["relatorios"]' }), 1)).toBe(true);
+    expect(isPlanUpgrade(base, plano({ maxDevices: null, features: '["relatorios"]' }), 1)).toBe(
+      true
+    );
+    expect(
+      isPlanUpgrade(base, plano({ maxDevices: 3, features: '["relatorios","powerbi"]' }), 1)
+    ).toBe(true);
+  });
+
+  it('NÃO trata troca de intervalo como upgrade — intervalo é forma de pagamento', () => {
+    // Mesmo plano, com oferta anual: nem sair do mensal para o anual (mais
+    // barato por mês) nem voltar pode ser lido como mudança de degrau. Se
+    // fosse, voltar para o mensal bateria em `PlanUpgradeRequiresPaymentError`
+    // e o cliente ficaria preso no anual.
+    const mensal = plano({ pricePerScreenCents: 4900, priceAnnualPerScreenCents: 3900 });
+    const anual = plano({ pricePerScreenCents: 4900, priceAnnualPerScreenCents: 3900 });
+    expect(isPlanUpgrade(mensal, anual, 3)).toBe(false);
+    expect(isPlanUpgrade(anual, mensal, 3)).toBe(false);
+
+    // E o campo de preço anual sozinho não inventa upgrade: um plano que ganha
+    // oferta anual continua sendo o mesmo plano.
+    const semOferta = plano({ pricePerScreenCents: 4900, priceAnnualPerScreenCents: 0 });
+    const comOferta = plano({ pricePerScreenCents: 4900, priceAnnualPerScreenCents: 3900 });
+    expect(isPlanUpgrade(semOferta, comOferta, 3)).toBe(false);
+  });
+
+  it('não trata como upgrade a troca para plano igual ou mais restrito', () => {
+    const base = plano({ maxDevices: 10, features: '["relatorios","powerbi"]' });
+    expect(isPlanUpgrade(base, plano({ maxDevices: 10, features: '["relatorios","powerbi"]' }), 1)).toBe(
+      false
+    );
+    expect(isPlanUpgrade(base, plano({ maxDevices: 2, features: '["relatorios"]' }), 1)).toBe(false);
   });
 });
 
@@ -260,6 +417,50 @@ describe('createFreeSubscription', () => {
     await subscriptionService.createFreeSubscription(org.id);
     const sub = await subscriptionService.requireByOrganization(org.id);
     expect(estimateMonthlyCents(sub.plan, 1)).toBe(0);
+  });
+});
+
+describe('catálogo semeado — distribuição de features (§5.1b)', () => {
+  async function features(code: string): Promise<string[]> {
+    const plan = await prisma.plan.findUnique({ where: { code } });
+    if (!plan) throw new Error(`Plano "${code}" ausente. Rode "npm run db:seed-plans".`);
+    return parseFeatures(plan.features);
+  }
+
+  it('não vende mais `api-externa` nem `multi-org` — não existem no código', async () => {
+    for (const code of ['gratis', 'loja', 'rede', 'enterprise']) {
+      const list = await features(code);
+      expect(list).not.toContain('api-externa');
+      expect(list).not.toContain('multi-org');
+    }
+  });
+
+  it('Loja tem `agendamento-avancado` e `documentos` (desceram do Rede)', async () => {
+    const loja = await features('loja');
+    expect(loja).toContain('agendamento-avancado');
+    expect(loja).toContain('documentos');
+    expect(loja).toContain('relatorios');
+  });
+
+  it('`auditoria` só a partir do Rede', async () => {
+    expect(await features('gratis')).not.toContain('auditoria');
+    expect(await features('loja')).not.toContain('auditoria');
+    expect(await features('rede')).toContain('auditoria');
+    expect(await features('enterprise')).toContain('auditoria');
+  });
+
+  it('o preço anual está semeado onde há oferta, e zerado onde não há', async () => {
+    const [gratis, loja, rede, enterprise] = await Promise.all(
+      ['gratis', 'loja', 'rede', 'enterprise'].map((code) =>
+        prisma.plan.findUnique({ where: { code } })
+      )
+    );
+
+    expect(loja!.priceAnnualPerScreenCents).toBe(3900);
+    expect(rede!.priceAnnualPerScreenCents).toBe(3200);
+    // `0` = sem oferta anual. Não é "grátis no anual".
+    expect(gratis!.priceAnnualPerScreenCents).toBe(0);
+    expect(enterprise!.priceAnnualPerScreenCents).toBe(0);
   });
 });
 

@@ -4,7 +4,8 @@
  * ## Por que este script existe
  *
  * Até 2026-07-31 os preços da página de vendas eram três constantes escritas à
- * mão em `src/components/Pricing.jsx` (a grade, o simulador e o `priceNote`),
+ * mão em `src/components/Pricing.jsx` (a grade, o simulador e o `priceNote`; hoje
+ * `Precos.jsx`),
  * enquanto o preço que o cliente realmente paga vem de `Plan` no banco, semeado
  * por `apps/api/prisma/seed-plans.ts` e servido em `GET /api/plans`.
  *
@@ -73,14 +74,34 @@ async function buscarCatalogo() {
  * Reduz a resposta da API ao que a página realmente usa.
  *
  * Só NÚMERO entra aqui — nome comercial, bullets e CTA continuam em
- * `Pricing.jsx`, porque são texto editorial, não dado do catálogo. A lista de
+ * `Precos.jsx`, porque são texto editorial, não dado do catálogo. A lista de
  * `features` da API é técnica (chaves como `powerbi`) e não serve de copy.
  */
 function normalizar(payload) {
-  const planos = Array.isArray(payload?.plans) ? payload.plans : [];
-  const faltando = CODIGOS_OBRIGATORIOS.filter((c) => !planos.some((p) => p.code === c));
+  const todos = Array.isArray(payload?.plans) ? payload.plans : [];
+  const faltando = CODIGOS_OBRIGATORIOS.filter((c) => !todos.some((p) => p.code === c));
   if (faltando.length > 0) {
     throw new Error(`catálogo sem os planos: ${faltando.join(', ')}`);
+  }
+
+  // Só entram no snapshot os códigos que a página sabe apresentar.
+  //
+  // Isto não é paranoia: em 2026-08-31 o catálogo de desenvolvimento apareceu
+  // com 13 planos `pay-loja-<timestamp>` ativos — restos de uma execução de
+  // teste interrompida, que roda contra o MESMO banco e limpa no `afterAll`.
+  // Sem este filtro eles entrariam no snapshot, e o componente de preços
+  // renderizaria (ou explodiria com) planos que não têm nome comercial, bullets
+  // nem CTA. Plano novo de verdade só chega à página quando alguém escrever a
+  // copy dele e acrescentar o código em `CODIGOS_OBRIGATORIOS` — que é
+  // exatamente a revisão que se quer nesse caso.
+  const planos = todos.filter((p) => CODIGOS_OBRIGATORIOS.includes(p.code));
+  const ignorados = todos.filter((p) => !CODIGOS_OBRIGATORIOS.includes(p.code));
+  if (ignorados.length > 0) {
+    aviso(
+      `${ignorados.length} plano(s) ativo(s) fora da lista da página foram ignorados: ` +
+        `${ignorados.map((p) => p.code).join(', ')}. Se algum deles é real, escreva a copy e ` +
+        'acrescente o código em CODIGOS_OBRIGATORIOS.',
+    );
   }
 
   return {
@@ -92,6 +113,15 @@ function normalizar(payload) {
       name: p.name,
       /** Reais por tela/mês. `null` quando é sob consulta (Enterprise). */
       precoPorTela: p.quoteOnly ? null : p.pricePerScreen,
+      /**
+       * Reais por tela/mês quando a assinatura é anual. `null` quando o plano
+       * não tem oferta anual (grátis e Enterprise) — a API devolve `0` nesse
+       * caso, e `0` na página viraria "R$ 0 no anual", que é o oposto do que a
+       * grade quer dizer. Normalizar para `null` obriga o componente a decidir
+       * o que fazer com a ausência, em vez de imprimir um preço falso.
+       */
+      precoAnualPorTela:
+        p.quoteOnly || !p.priceAnnualPerScreen ? null : p.priceAnnualPerScreen,
       /** Piso de telas cobradas na fatura. */
       minScreens: p.minScreens ?? 1,
       quoteOnly: Boolean(p.quoteOnly),
@@ -131,7 +161,8 @@ async function main() {
   await writeFile(SNAPSHOT, `${JSON.stringify(novo, null, 2)}\n`, 'utf-8');
   ok('snapshot atualizado a partir da API — revise o diff antes de commitar.');
   for (const p of novo.planos) {
-    console.log(`    ${p.code.padEnd(12)} ${p.precoPorTela === null ? 'sob consulta' : `R$ ${p.precoPorTela}/tela`}  (mín. ${p.minScreens})`);
+    const anual = p.precoAnualPorTela === null ? '' : ` · R$ ${p.precoAnualPorTela}/tela no anual`;
+    console.log(`    ${p.code.padEnd(12)} ${p.precoPorTela === null ? 'sob consulta' : `R$ ${p.precoPorTela}/tela`}${anual}  (mín. ${p.minScreens})`);
   }
 }
 

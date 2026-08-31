@@ -7,11 +7,15 @@ import { changePlanSchema, checkoutSchema } from '../schemas/billing.schema';
 import { toPublicPlan } from '../services/plan.service';
 import {
   billedScreens,
+  estimateAnnualTotalCents,
   estimateMonthlyCents,
   isActive,
   isFreePlan,
+  PlanUpgradeRequiresPaymentError,
   subscriptionService,
   trialDaysRemaining,
+  unitPriceCents,
+  type BillingInterval,
 } from '../services/subscription.service';
 
 const router = Router();
@@ -24,6 +28,12 @@ router.use(authMiddleware);
  * `activeDevices` (telas com `status: 'linked'`) alimenta `estimatedMonthly`,
  * a previsão de fatura — o cliente precisa ver quanto vai pagar ANTES de
  * escalar, não depois.
+ *
+ * `estimatedAnnual` vem junto e SEMPRE, mesmo para quem está no mensal: é a
+ * comparação que faz o cliente migrar ("no anual sai R$ X a menos por ano").
+ * Sem ela, o painel teria que reconstruir a conta a partir do preço unitário —
+ * e é assim que a superfície diverge do que a fatura cobra. Quando o plano não
+ * tem oferta anual (grátis/Enterprise), `available: false` e a economia é 0.
  */
 function serializeSubscription(
   subscription: {
@@ -31,12 +41,22 @@ function serializeSubscription(
     trialEndsAt: Date | null;
     currentPeriodEnd: Date | null;
     gateway: string | null;
+    billingInterval?: string | null;
     plan: Parameters<typeof toPublicPlan>[0];
   },
   activeDevices: number
 ) {
   const plan = toPublicPlan(subscription.plan);
-  const cents = estimateMonthlyCents(subscription.plan, activeDevices);
+  const interval: BillingInterval =
+    subscription.billingInterval === 'yearly' ? 'yearly' : 'monthly';
+  const cents = estimateMonthlyCents(subscription.plan, activeDevices, interval);
+
+  // Comparação anual × mensal com as MESMAS telas faturadas, senão a "economia"
+  // exibida não seria economia nenhuma, e sim diferença de volume.
+  const monthlyBaseCents = estimateMonthlyCents(subscription.plan, activeDevices, 'monthly');
+  const annualMonthlyCents = estimateMonthlyCents(subscription.plan, activeDevices, 'yearly');
+  const annualTotalCents = estimateAnnualTotalCents(subscription.plan, activeDevices);
+  const annualSavingsCents = Math.max(monthlyBaseCents * 12 - annualTotalCents, 0);
 
   return {
     status: subscription.status,
@@ -46,6 +66,8 @@ function serializeSubscription(
     currentPeriodEnd: subscription.currentPeriodEnd?.toISOString() ?? null,
     // Apenas o nome do provedor — nunca customerId/subscriptionId.
     gateway: subscription.gateway ?? null,
+    /** `monthly` | `yearly` — como esta conta paga hoje. */
+    billingInterval: interval,
     plan,
     estimatedMonthly: {
       currency: 'BRL',
@@ -59,6 +81,22 @@ function serializeSubscription(
       free: isFreePlan(subscription.plan),
       /** `true` quando o preço depende do comercial (Enterprise). */
       quoteOnly: plan.quoteOnly,
+    },
+    estimatedAnnual: {
+      currency: 'BRL',
+      /** `false` quando o plano não tem oferta anual — o front esconde o seletor. */
+      available: plan.priceAnnualPerScreenCents > 0,
+      /** Preço por tela/mês praticado no anual. */
+      unitCents: unitPriceCents(subscription.plan, 'yearly'),
+      /** Valor MENSAL EQUIVALENTE no anual (é o que se compara com o mensal). */
+      monthlyEquivalentCents: annualMonthlyCents,
+      monthlyEquivalentAmount: annualMonthlyCents / 100,
+      /** Total do ano: mensal-equivalente × 12. */
+      totalCents: annualTotalCents,
+      totalAmount: annualTotalCents / 100,
+      /** Quanto se deixa de pagar em 12 meses ao trocar o mensal pelo anual. */
+      savingsCents: annualSavingsCents,
+      savingsAmount: annualSavingsCents / 100,
     },
   };
 }
@@ -95,7 +133,11 @@ router.get('/subscription', async (req: Request, res: Response): Promise<void> =
 
 /**
  * POST /api/billing/plan — troca de plano (admin).
- * Recusa com 400 quando o downgrade estouraria algum limite do plano de destino.
+ *
+ * Só **desce** de plano ou cancela. Subir é compra e passa pelo checkout:
+ * antes desta guarda, um admin gravava `planId: rede` direto e ficava com o
+ * plano pago de graça. Recusa com 400 quando o downgrade estouraria algum
+ * limite do plano de destino, e com 402 quando a troca é um upgrade.
  */
 router.post(
   '/plan',
@@ -115,6 +157,12 @@ router.post(
       res.json({ subscription: serializeSubscription(updated, usage.devices.used), usage });
     } catch (error: any) {
       const message = error?.message || 'Não foi possível trocar de plano.';
+
+      // Upgrade sem pagamento: 402 com a rota para o checkout.
+      if (error instanceof PlanUpgradeRequiresPaymentError) {
+        res.status(402).json({ error: message, code: error.code });
+        return;
+      }
 
       if (/não está disponível|não encontrad/i.test(message)) {
         res.status(400).json({ error: message, code: 'plan_unavailable' });

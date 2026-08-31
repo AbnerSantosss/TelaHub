@@ -146,12 +146,34 @@ describe('GET /api/plans', () => {
     expect(loja).toMatchObject({ pricePerScreenCents: 4900, pricePerScreen: 49, minScreens: 1, free: false });
     // Telas ilimitadas nos planos pagos: quem limita é a fatura por tela ativa.
     expect(loja.limits).toMatchObject({ maxDevices: null, maxUsers: 3, maxOrganizations: 1 });
-    expect(loja.features).toContain('auditoria');
+    // Este teste afirmava `loja.features` conter `auditoria`. A política mudou
+    // no plano comercial v2 (§5.1b): auditoria subiu para o Rede e o Loja
+    // ganhou `documentos` e `agendamento-avancado`. A afirmação antiga
+    // fixava a distribuição antiga, não um contrato.
+    expect(loja.features).toContain('relatorios');
+    expect(loja.features).toContain('documentos');
+    expect(loja.features).toContain('agendamento-avancado');
+    expect(loja.features).not.toContain('auditoria');
 
     const rede = res.body.plans.find((p: any) => p.code === 'rede');
     expect(rede).toMatchObject({ pricePerScreenCents: 3900, pricePerScreen: 39, minScreens: 5 });
     expect(rede.limits).toMatchObject({ maxDevices: null, maxUsers: 15, maxOrganizations: 10 });
     expect(rede.features).toContain('powerbi');
+    expect(rede.features).toContain('auditoria');
+
+    // Preço anual exposto pela API. A landing NÃO pode escrever preço à mão —
+    // o número da vitrine tem que ser o mesmo que a fatura vai usar.
+    expect(loja).toMatchObject({ priceAnnualPerScreenCents: 3900, priceAnnualPerScreen: 39 });
+    expect(rede).toMatchObject({ priceAnnualPerScreenCents: 3200, priceAnnualPerScreen: 32 });
+    // Sem oferta anual: `0` é o sinal para o front esconder o seletor.
+    expect(gratis.priceAnnualPerScreenCents).toBe(0);
+
+    // Feature vendida sem existir no código é dívida: `api-externa` e
+    // `multi-org` foram retiradas do catálogo em 2026-08-30.
+    for (const plan of res.body.plans) {
+      expect(plan.features).not.toContain('api-externa');
+      expect(plan.features).not.toContain('multi-org');
+    }
 
     const enterprise = res.body.plans.find((p: any) => p.code === 'enterprise');
     expect(enterprise.quoteOnly).toBe(true);

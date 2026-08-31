@@ -74,7 +74,24 @@ const Editor: React.FC = () => {
       const displays = await getDisplays();
       const found = displays.find(d => d.id === id);
       if (found) {
-        setDisplay(found);
+        // Normaliza z-indexes de displays legados onde todos os widgets têm o mesmo zIndex
+        const normalized = { ...found };
+        normalized.pages = normalized.pages.map(page => {
+          if (!page.layout || page.layout.length <= 1) return page;
+          const zValues = page.layout.map(w => w.data.zIndex ?? 10);
+          const allSame = zValues.every(z => z === zValues[0]);
+          if (allSame) {
+            return {
+              ...page,
+              layout: page.layout.map((w, idx) => ({
+                ...w,
+                data: { ...w.data, zIndex: 10 + idx }
+              }))
+            };
+          }
+          return page;
+        });
+        setDisplay(normalized);
       } else {
         navigate('/');
       }
@@ -304,7 +321,9 @@ const Editor: React.FC = () => {
           pdfUrl: ''
         } : undefined,
         fullScreenMode: type === WidgetType.FULL_INFO ? true : undefined,
-        zIndex: type === WidgetType.FULL_INFO ? 0 : 10
+        zIndex: type === WidgetType.FULL_INFO 
+          ? 0 
+          : Math.max(10, ...display.pages[activePageIdx].layout.map(w => w.data.zIndex ?? 10)) + 1
       }
     };
 

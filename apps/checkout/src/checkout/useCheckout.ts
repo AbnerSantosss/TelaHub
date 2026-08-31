@@ -13,9 +13,14 @@ import { toast } from 'sonner';
 import { isApiError } from '../lib/api';
 import { declinedCard, isLuhnValid, randomCard } from '../lib/fake-data';
 import {
+  annualSavingsPercent,
   estimateMonthlyCents,
   fetchPlanCatalog,
+  hasAnnualOffer,
   maxScreensOf,
+  unitCentsFor,
+  yearTotalCents,
+  type BillingInterval,
   type Plan,
   type PlanCatalog,
 } from '../lib/plans';
@@ -178,6 +183,17 @@ export function useCheckout(routeToken?: string) {
   // ─── Seleção ───────────────────────────────────────────────────────────────
   const [planCode, setPlanCode] = useState<string | null>(null);
   const [screens, setScreens] = useState(1);
+  // O INTERVALO tem duas faces, e confundi-las é o bug fácil aqui:
+  //
+  // `intervalWish` é o que a PESSOA pediu (clicou em anual, ou chegou pela
+  // landing com `?interval=yearly`). Ele sobrevive à troca de plano, para quem
+  // veio da oferta anual não perder o anual ao comparar planos. Mas ele é só um
+  // desejo: num plano sem oferta anual ele não vira cobrança nenhuma.
+  const [intervalWish, setIntervalWish] = useState<BillingInterval>('monthly');
+  // `annualDropped` guarda o momento em que o desejo não coube no plano — é o
+  // que autoriza a tela a EXPLICAR a volta ao mensal em vez de simplesmente
+  // desmarcar o anual nas costas de quem escolheu.
+  const [annualDropped, setAnnualDropped] = useState(false);
   const [planError, setPlanError] = useState<string | null>(null);
   const [amountSyncing, setAmountSyncing] = useState(false);
   const [syncFailed, setSyncFailed] = useState(false);
@@ -215,6 +231,11 @@ export function useCheckout(routeToken?: string) {
     () => plans.find((plan) => plan.code === planCode) ?? null,
     [plans, planCode]
   );
+
+  /** O plano escolhido tem preço anual publicado? Governa seletor e PATCH. */
+  const annualAvailable = hasAnnualOffer(selectedPlan);
+  /** O desejo da pessoa filtrado pelo plano: o intervalo que dá para contratar. */
+  const requestedInterval: BillingInterval = annualAvailable ? intervalWish : 'monthly';
 
   // ─── Carga do catálogo ─────────────────────────────────────────────────────
   useEffect(() => {
@@ -431,7 +452,7 @@ export function useCheckout(routeToken?: string) {
     []
   );
 
-  // ─── Pré-seleção vinda do link (?plan=rede&screens=8) ──────────────────────
+  // ─── Pré-seleção vinda do link (?plan=rede&screens=8&interval=yearly) ──────
   const selectionHydratedRef = useRef(false);
 
   useEffect(() => {
@@ -450,14 +471,27 @@ export function useCheckout(routeToken?: string) {
     const wanted = session.screens > 1 ? session.screens : (hint.screens ?? session.screens);
     const clamped = Math.min(Math.max(1, wanted), maxScreensOf(plan));
 
+    // Mesma precedência do plano: o que o servidor já sabe manda, e o link só
+    // decide quando a sessão ainda está no padrão. Uma sessão retomada não pode
+    // voltar para o mensal só porque o link de recuperação não tinha o parâmetro.
+    const wish: BillingInterval =
+      session.billingInterval === 'yearly' ? 'yearly' : hint.interval;
+    const interval: BillingInterval = hasAnnualOffer(plan) ? wish : 'monthly';
+
     if (code) setPlanCode(code);
     setScreens(clamped);
+    setIntervalWish(wish);
+    // Link pedindo anual num plano que não tem anual (`?plan=enterprise&
+    // interval=yearly`): a tela precisa dizer por que o anual não apareceu, em
+    // vez de simplesmente ignorar metade do link que a pessoa clicou.
+    setAnnualDropped(!!plan && wish === 'yearly' && interval === 'monthly');
 
-    // Só registra no servidor o que ele ainda não sabe — o plano/telas vindos do
-    // próprio servidor não geram PATCH redundante.
+    // Só registra no servidor o que ele ainda não sabe — o plano/telas/intervalo
+    // vindos do próprio servidor não geram PATCH redundante.
     const patch: UpdateSessionInput = {};
     if (fromLink) patch.planCode = fromLink;
     if (clamped !== session.screens) patch.screens = clamped;
+    if (interval !== session.billingInterval) patch.interval = interval;
     if (Object.keys(patch).length > 0) queuePatch(patch, 0);
   }, [catalog, session, queuePatch]);
 
@@ -469,10 +503,36 @@ export function useCheckout(routeToken?: string) {
       const plan = plans.find((candidate) => candidate.code === code) ?? null;
       const clamped = Math.min(screens, maxScreensOf(plan));
       if (clamped !== screens) setScreens(clamped);
+
+      // Trocar de plano pode invalidar o anual (grátis e Enterprise não têm
+      // oferta anual). O intervalo vai junto no MESMO PATCH em vez de num
+      // segundo: entre um patch e outro existiria um instante em que o servidor
+      // teria plano novo com intervalo velho — e é desse instante que sai um
+      // `amountCents` com preço que não existe em lugar nenhum.
+      const interval: BillingInterval =
+        hasAnnualOffer(plan) && intervalWish === 'yearly' ? 'yearly' : 'monthly';
+      setAnnualDropped(intervalWish === 'yearly' && interval === 'monthly');
+
       // Escolher plano é um clique deliberado: vai sem debounce.
-      queuePatch({ planCode: code, screens: clamped }, 0);
+      queuePatch({ planCode: code, screens: clamped, interval }, 0);
     },
-    [plans, screens, queuePatch]
+    [plans, screens, intervalWish, queuePatch]
+  );
+
+  /**
+   * Troca mensal ↔ anual. Só PATCHa quando o plano de fato tem oferta anual —
+   * mandar `interval: 'yearly'` para um plano sem preço anual seria pedir ao
+   * servidor um valor que ele não sabe calcular.
+   */
+  const chooseInterval = useCallback(
+    (next: BillingInterval) => {
+      setIntervalWish(next);
+      setAnnualDropped(false);
+      const plan = plans.find((candidate) => candidate.code === planCode) ?? null;
+      if (!hasAnnualOffer(plan)) return;
+      queuePatch({ interval: next }, 0);
+    },
+    [plans, planCode, queuePatch]
   );
 
   const changeScreens = useCallback(
@@ -486,10 +546,10 @@ export function useCheckout(routeToken?: string) {
   );
 
   const retrySync = useCallback(() => {
-    const payload: UpdateSessionInput = { screens };
+    const payload: UpdateSessionInput = { screens, interval: requestedInterval };
     if (planCode) payload.planCode = planCode;
     void sendPatch(payload);
-  }, [planCode, screens, sendPatch]);
+  }, [planCode, screens, requestedInterval, sendPatch]);
 
   // ─── Ações de identificação ────────────────────────────────────────────────
   const setIdentityField = useCallback((field: IdentityField, value: string) => {
@@ -563,13 +623,13 @@ export function useCheckout(routeToken?: string) {
     }
 
     setSavingPlan(true);
-    const ok = await sendPatch({ planCode, screens });
+    const ok = await sendPatch({ planCode, screens, interval: requestedInterval });
     setSavingPlan(false);
     if (!ok) return;
 
     setCompleted((current) => ({ ...current, plan: true }));
     setActiveStep('payment');
-  }, [planCode, screens, sendPatch]);
+  }, [planCode, screens, requestedInterval, sendPatch]);
 
   // ─── Ações de pagamento ────────────────────────────────────────────────────
 
@@ -804,6 +864,11 @@ export function useCheckout(routeToken?: string) {
     setPaymentError(null);
     setCard(emptyCard());
     setCardErrors({});
+    // A sessão nova nasce mensal no servidor; o desejo de anual da sessão antiga
+    // não pode sobreviver aqui e ressurgir como um "anual" marcado sobre um
+    // `amountCents` mensal. Quem quiser o anual clica de novo.
+    setIntervalWish('monthly');
+    setAnnualDropped(false);
     setCompleted({ identify: false, plan: false, payment: false });
     setActiveStep('identify');
     setForceCreate(true);
@@ -814,10 +879,34 @@ export function useCheckout(routeToken?: string) {
   const retrySession = useCallback(() => setSessionAttempt((attempt) => attempt + 1), []);
 
   // ─── Valores ───────────────────────────────────────────────────────────────
-  const localCents = estimateMonthlyCents(selectedPlan, screens);
+  const localCents = estimateMonthlyCents(selectedPlan, screens, requestedInterval);
   const serverCents = session?.amountCents ?? 0;
-  /** Durante a ida ao servidor mostra a previsão; depois, o valor dele. */
+  /**
+   * Durante a ida ao servidor mostra a previsão; depois, o valor dele.
+   * Vale tanto no mensal quanto no anual: `amountCents` é sempre o MENSAL
+   * EQUIVALENTE, e o total do ano sai de multiplicar esse valor por 12.
+   */
   const totalCents = amountSyncing ? localCents : serverCents;
+
+  /**
+   * Intervalo EXIBIDO. Segue a mesma regra do valor: previsão enquanto o PATCH
+   * está no ar, servidor assim que a resposta chega. Manter "anual" marcado
+   * sobre um `amountCents` que o servidor calculou como mensal seria exibir
+   * exatamente a divergência de preço que este seletor existe para eliminar —
+   * e desmarcar sozinho é o erro barato (a pessoa vê e clica de novo), enquanto
+   * cobrar diferente do que a tela mostra é o erro caro.
+   */
+  const billingInterval: BillingInterval = !annualAvailable
+    ? 'monthly'
+    : amountSyncing
+      ? requestedInterval
+      : (session?.billingInterval ?? requestedInterval);
+
+  /** Preço por tela/mês do intervalo em exibição (catálogo, não total). */
+  const unitCents = unitCentsFor(selectedPlan, billingInterval);
+  /** O que sai da conta no anual: 12 meses de uma vez. */
+  const yearCents = yearTotalCents(totalCents);
+  const annualSavings = annualSavingsPercent(selectedPlan);
 
   /**
    * Pagamento online concluído, traduzido para o formato do fluxo antigo.
@@ -888,6 +977,16 @@ export function useCheckout(routeToken?: string) {
 
     // valores
     totalCents,
+    /** Intervalo em exibição — o do servidor, exceto durante o PATCH. */
+    billingInterval,
+    /** `false` = plano sem oferta anual: o seletor não aparece. */
+    annualAvailable,
+    /** `true` = o anual pedido não cabe no plano escolhido; a tela explica. */
+    annualDropped,
+    /** Economia do anual em % inteiros. `0` = não existe economia a anunciar. */
+    annualSavings,
+    unitCents,
+    yearCents,
     alreadySubmitted: !!session?.paymentAt,
     concluded: session?.status === 'paid',
 
@@ -896,6 +995,7 @@ export function useCheckout(routeToken?: string) {
     retrySession,
     startOver,
     choosePlan,
+    chooseInterval,
     changeScreens,
     retrySync,
     setIdentityField,

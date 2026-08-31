@@ -111,6 +111,18 @@ function pagesWithPowerBi() {
   ];
 }
 
+/** Página com um widget de documento (PDF), mesmo formato de grid. */
+function pagesWithPdf() {
+  return [
+    {
+      id: 'page-1',
+      name: 'Página 1',
+      duration: 10,
+      layout: [{ i: 'w1', type: 'PDF_DOCUMENT', x: 0, y: 0, w: 12, h: 8 }],
+    },
+  ];
+}
+
 afterAll(async () => {
   await prisma.broadcast.deleteMany({ where: { organizationId: { in: createdOrgIds } } });
   await prisma.display.deleteMany({ where: { id: { in: createdDisplayIds } } });
@@ -260,21 +272,113 @@ describe('gate de widgets de BI (feature `powerbi`)', () => {
     createdDisplayIds.push(res.body.id);
   });
 
-  it('não bloqueia widgets que nunca foram vendidos como pagos (EMBED_HTML)', async () => {
+  // REVERSÃO DE POLÍTICA (2026-08-30). Este teste afirmava o contrário:
+  // "não bloqueia widgets que nunca foram vendidos como pagos (EMBED_HTML)",
+  // porque a oferta da época não os anunciava. A landing v2 passou a vender
+  // "Power BI, Bolsa, Snapshot, Airtable, HTML próprio — plano Rede" (§5.1b),
+  // então o gate os alcança. O critério continua o mesmo (o gate só cobra o que
+  // a oferta diz ser pago); o que mudou foi a oferta.
+  it('bloqueia HTML próprio, cotações e snapshot sem a feature — a v2 os vende como Rede', async () => {
     const plan = await makePlan('gratis-embed', ['widgets-basicos']);
+    const { authHeader } = await makeTenant(plan.id);
+
+    for (const type of ['EMBED_HTML', 'MARKET_WATCH', 'BROWSER_SNAPSHOT']) {
+      const res = await request(app)
+        .post('/api/displays')
+        .set('Authorization', authHeader)
+        .send({
+          name: `Tela ${SUFFIX}`,
+          slug: `tela-${type.toLowerCase()}-${SUFFIX}`,
+          pages: [{ id: 'p1', name: 'P1', duration: 10, layout: [{ i: 'w1', type }] }],
+        });
+
+      expect(res.status).toBe(403);
+      expect(res.body.featureKey).toBe('powerbi');
+      expect(res.body.widgetTypes).toContain(type);
+    }
+  });
+
+  it('documento NÃO cai mais no gate de BI — quem o cobre é `documentos`', async () => {
+    // Plano com `documentos` mas SEM `powerbi`: é o Loja da grade v2.
+    const plan = await makePlan('loja-doc-nao-bi', ['widgets-basicos', 'documentos']);
     const { authHeader } = await makeTenant(plan.id);
 
     const res = await request(app)
       .post('/api/displays')
       .set('Authorization', authHeader)
-      .send({
-        name: `Tela ${SUFFIX}`,
-        slug: `tela-embed-${SUFFIX}`,
-        pages: [{ id: 'p1', name: 'P1', duration: 10, layout: [{ i: 'w1', type: 'EMBED_HTML' }] }],
-      });
+      .send({ name: `Tela ${SUFFIX}`, slug: `tela-doc-nao-bi-${SUFFIX}`, pages: pagesWithPdf() });
 
     expect(res.status).toBe(200);
     createdDisplayIds.push(res.body.id);
+  });
+});
+
+describe('gate de widgets de documento (feature `documentos`)', () => {
+  it('recusa publicar PDF no Grátis', async () => {
+    const plan = await makePlan('gratis-doc', ['widgets-basicos', 'alerta-offline']);
+    const { authHeader } = await makeTenant(plan.id);
+
+    const res = await request(app)
+      .post('/api/displays')
+      .set('Authorization', authHeader)
+      .send({ name: `Tela ${SUFFIX}`, slug: `tela-doc-${SUFFIX}`, pages: pagesWithPdf() });
+
+    expect(res.status).toBe(403);
+    expect(res.body.code).toBe('feature_not_in_plan');
+    expect(res.body.featureKey).toBe('documentos');
+    expect(res.body.widgetTypes).toContain('PDF_DOCUMENT');
+    // A mensagem tem que dizer a partir de qual plano libera — é o que o front
+    // oferece na hora do bloqueio.
+    expect(res.body.error).toMatch(/plano Loja/);
+  });
+
+  it('bloqueia Google Docs e Office pelo mesmo gate', async () => {
+    const plan = await makePlan('gratis-doc-2', ['widgets-basicos']);
+    const { authHeader } = await makeTenant(plan.id);
+
+    for (const type of ['GOOGLE_DOCS', 'OFFICE_DOCS']) {
+      const res = await request(app)
+        .post('/api/displays')
+        .set('Authorization', authHeader)
+        .send({
+          name: `Tela ${SUFFIX}`,
+          slug: `tela-${type.toLowerCase()}-${SUFFIX}`,
+          pages: [{ id: 'p1', name: 'P1', duration: 10, layout: [{ i: 'w1', type }] }],
+        });
+
+      expect(res.status).toBe(403);
+      expect(res.body.featureKey).toBe('documentos');
+    }
+  });
+
+  it('libera no Loja (plano com `documentos`)', async () => {
+    const plan = await makePlan('loja-doc', ['widgets-basicos', 'relatorios', 'documentos']);
+    const { authHeader } = await makeTenant(plan.id);
+
+    const res = await request(app)
+      .post('/api/displays')
+      .set('Authorization', authHeader)
+      .send({ name: `Tela ${SUFFIX}`, slug: `tela-doc-ok-${SUFFIX}`, pages: pagesWithPdf() });
+
+    expect(res.status).toBe(200);
+    createdDisplayIds.push(res.body.id);
+  });
+
+  // O fail-open do gate (assinatura ausente passa) existe no serviço, mas nesta
+  // rota ele nunca é alcançado: `requireActiveSubscription` responde 402 antes.
+  // Fixamos isso aqui para ninguém "consertar" o gate achando que a conta sem
+  // assinatura está sendo barrada por falta de feature — cada camada responde
+  // por uma pergunta só, e a resposta certa aqui é 402, não 403.
+  it('organização SEM assinatura para em `requireActiveSubscription` (402), não no gate', async () => {
+    const { authHeader } = await makeTenant(null);
+
+    const res = await request(app)
+      .post('/api/displays')
+      .set('Authorization', authHeader)
+      .send({ name: `Tela ${SUFFIX}`, slug: `tela-doc-legado-${SUFFIX}`, pages: pagesWithPdf() });
+
+    expect(res.status).toBe(402);
+    expect(res.body.code).not.toBe('feature_not_in_plan');
   });
 });
 

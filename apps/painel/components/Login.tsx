@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Lock, User, LogIn, Loader2, CheckCircle2, Tv } from 'lucide-react';
+import { Lock, User, LogIn, Loader2, CheckCircle2, Tv, ShieldCheck, Zap } from 'lucide-react';
 import { motion } from 'motion/react';
 import { login } from '../services/storage';
 import { Button } from './ui/button';
@@ -93,6 +93,38 @@ const Login: React.FC = () => {
       if (msg.includes('Invalid login credentials')) msg = 'Email ou senha incorretos.';
       if (msg.includes('Email not confirmed')) msg = 'Email não confirmado. Verifique sua caixa de entrada.';
       
+      setError(msg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleQuickAdminLogin = async () => {
+    if (!isConfigured || loading) return;
+    const adminEmail = DEV_MASTER_EMAIL || 'admin@telahub.com';
+    const adminPass = DEV_MASTER_PASSWORD || 'adminpass123';
+
+    setUsername(adminEmail);
+    setPassword(adminPass);
+    setLoading(true);
+    setError('');
+
+    try {
+      const user = await login(adminEmail, adminPass);
+      if (user) {
+        if (rememberMe) {
+          localStorage.setItem('officecom_saved_user', adminEmail);
+        }
+        navigate('/');
+      } else {
+        setError('Login realizado, mas perfil de usuário não encontrado.');
+      }
+    } catch (e: any) {
+      console.error(e);
+      let msg = e.message || 'Erro ao realizar login como administrador.';
+      if (msg.includes('Invalid login credentials') || msg.includes('Credenciais')) {
+        msg = 'Credenciais de administrador não conferem.';
+      }
       setError(msg);
     } finally {
       setLoading(false);
@@ -395,40 +427,28 @@ const Login: React.FC = () => {
                 type="submit" 
                 disabled={loading}
                 variant="brand"
-                className="w-full py-6 rounded-xl hover:shadow-[0_0_20px_rgba(56,189,248,0.3)] transition-all duration-300 ease-out flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed text-xs tracking-wider active:scale-[0.98] border border-white/10 uppercase"
+                className="w-full py-6 rounded-xl hover:shadow-[0_0_20px_rgba(56,189,248,0.3)] transition-all duration-300 ease-out flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed text-xs tracking-wider active:scale-[0.98] border border-white/10 uppercase font-bold"
               >
                 {loading ? <Loader2 size={18} className="animate-spin" /> : <LogIn size={18} className="group-hover:translate-x-0.5 transition-transform" />} 
                 {loading ? 'ENTRANDO...' : 'ACESSAR SISTEMA'}
               </Button>
 
-              {SHOW_DEV_LOGIN && (
-                <Button
-                  type="button"
-                  onClick={async () => {
-                    setUsername(DEV_MASTER_EMAIL!);
-                    setPassword(DEV_MASTER_PASSWORD!);
-                    setLoading(true);
-                    setError('');
-                    try {
-                      const user = await login(DEV_MASTER_EMAIL!, DEV_MASTER_PASSWORD!);
-                      if (user) {
-                        navigate('/');
-                      } else {
-                        setError('Login realizado, mas perfil de usuário não encontrado.');
-                      }
-                    } catch (e: any) {
-                      setError(e.message || 'Erro ao realizar login master.');
-                    } finally {
-                      setLoading(false);
-                    }
-                  }}
-                  disabled={loading}
-                  variant="outline"
-                  className="w-full py-5 rounded-xl text-xs tracking-wider active:scale-[0.98] transition-all hover:bg-sky-500/10 hover:text-sky-400 border border-sky-500/20 text-sky-400 uppercase font-bold"
-                >
-                  Acesso Master (Dev)
-                </Button>
-              )}
+              <div className="relative flex py-1 items-center">
+                <div className="flex-grow border-t border-border/40"></div>
+                <span className="flex-shrink mx-3 text-[10px] uppercase font-mono text-muted-foreground tracking-widest">ou</span>
+                <div className="flex-grow border-t border-border/40"></div>
+              </div>
+
+              <Button
+                type="button"
+                onClick={handleQuickAdminLogin}
+                disabled={loading}
+                variant="outline"
+                className="w-full py-5 rounded-xl text-xs tracking-wider active:scale-[0.98] transition-all bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 hover:text-sky-300 border border-sky-500/30 uppercase font-bold flex items-center justify-center gap-2 shadow-sm"
+              >
+                <ShieldCheck size={16} className="text-sky-400" />
+                Entrada Rápida Admin
+              </Button>
             </form>
 
             <p className="text-center text-xs text-muted-foreground mt-5 pt-5 border-t border-border/60">

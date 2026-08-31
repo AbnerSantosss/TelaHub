@@ -12,7 +12,7 @@ const prisma = new PrismaClient();
 // USUÁRIOS DE DEMONSTRAÇÃO — UM POR PLANO
 //
 // Para quê: até 2026-07-31 as features de plano (`relatorios`, `auditoria`,
-// `powerbi`, `agendamento-avancado`) eram vendidas e NÃO aplicadas em lugar
+// `powerbi`, `documentos`, `agendamento-avancado`) eram vendidas e NÃO aplicadas em lugar
 // nenhum — todo mundo tinha tudo. Ao ligar os gates, a única forma honesta de
 // saber o que cada plano entrega é entrar como cliente de cada plano e usar.
 // Estas contas existem para isso: demonstração de venda e verificação manual do
@@ -64,7 +64,7 @@ const DEMO_ACCOUNTS: DemoAccount[] = [
     username: 'demo-loja',
     email: 'demo.loja@telahub.local',
     demonstrates:
-      'Telas ilimitadas, vídeo sem prazo, relatórios e trilha de auditoria. BI e agendamento por horário seguem bloqueados.',
+      'Telas ilimitadas, vídeo sem prazo, relatórios, documentos na tela (PDF/Docs/Office) e agendamento por horário. Painel de gestão e trilha de auditoria seguem bloqueados.',
   },
   {
     planCode: 'rede',
@@ -73,7 +73,7 @@ const DEMO_ACCOUNTS: DemoAccount[] = [
     username: 'demo-rede',
     email: 'demo.rede@telahub.local',
     demonstrates:
-      'Tudo do Loja + Power BI/Airtable/Docs/PDF na tela, agendamento por faixa de horário e múltiplas unidades.',
+      'Tudo do Loja + painel de gestão (Power BI, Airtable, cotações, snapshot e HTML próprio) e trilha de auditoria.',
   },
   {
     planCode: 'enterprise',

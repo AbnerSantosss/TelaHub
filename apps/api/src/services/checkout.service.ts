@@ -3,7 +3,7 @@ import type { CheckoutEvent, CheckoutSession, Prisma } from '@prisma/client';
 
 import prisma from '../lib/prisma';
 import { planService } from './plan.service';
-import { estimateMonthlyCents } from './subscription.service';
+import { estimateMonthlyCents, type BillingInterval } from './subscription.service';
 import type {
   CheckoutEventType,
   CheckoutStatus,
@@ -50,6 +50,9 @@ export interface PublicCheckoutSession {
   status: CheckoutStatus;
   planCode: string | null;
   screens: number;
+  /** `monthly` | `yearly` — o que o seletor do checkout escolheu. */
+  billingInterval: BillingInterval;
+  /** Valor MENSAL EQUIVALENTE, inclusive quando `billingInterval` é `yearly`. */
   amountCents: number;
   amount: number;
   currency: 'BRL';
@@ -73,6 +76,7 @@ const ADMIN_SESSION_SELECT = {
   status: true,
   planCode: true,
   screens: true,
+  billingInterval: true,
   amountCents: true,
   name: true,
   email: true,
@@ -158,6 +162,18 @@ export function statusAfterRecovery(session: {
   return 'started';
 }
 
+/**
+ * Normaliza a coluna `billingInterval` (texto no banco) para o tipo fechado.
+ *
+ * Qualquer valor inesperado vira `monthly`: sessões anteriores à migração e
+ * dado torto no banco caem no preço de TABELA, nunca no descontado — o erro
+ * barato é cobrar o cheio e o cliente reclamar, não faturar o anual sem
+ * compromisso anual nenhum.
+ */
+export function normalizeInterval(value: string | null | undefined): BillingInterval {
+  return value === 'yearly' ? 'yearly' : 'monthly';
+}
+
 function isPastExpiry(session: { expiresAt: Date | null }, now: Date): boolean {
   return !!session.expiresAt && session.expiresAt.getTime() <= now.getTime();
 }
@@ -168,6 +184,7 @@ function toPublic(session: CheckoutSession): PublicCheckoutSession {
     status: session.status as CheckoutStatus,
     planCode: session.planCode,
     screens: session.screens,
+    billingInterval: normalizeInterval(session.billingInterval),
     amountCents: session.amountCents,
     amount: session.amountCents / 100,
     currency: 'BRL',
@@ -219,13 +236,22 @@ export interface CheckoutMetrics {
 
 export class CheckoutService {
   /**
-   * Valor mensal da sessão, em centavos, SEMPRE recalculado no servidor a partir
-   * do catálogo. Mesma fórmula de `subscriptionService.estimateMonthlyCents`
-   * (`max(telas, minScreens) × pricePerScreenCents`, `0` para plano grátis ou
-   * sob consulta) — se o checkout usasse outra conta, prometeria um preço que a
-   * fatura não cumpre.
+   * Valor MENSAL EQUIVALENTE da sessão, em centavos, SEMPRE recalculado no
+   * servidor a partir do catálogo. Mesma fórmula de
+   * `subscriptionService.estimateMonthlyCents` (`max(telas, minScreens) × preço
+   * unitário do intervalo`, `0` para plano grátis ou sob consulta) — se o
+   * checkout usasse outra conta, prometeria um preço que a fatura não cumpre.
+   *
+   * A fórmula NÃO muda no anual: o que muda é só o preço unitário que entra
+   * nela. Guardar o mensal-equivalente (e não o total do ano) é o que mantém
+   * `amountCents` comparável entre sessões mensais e anuais no relatório de
+   * abandono — o total do ano sai multiplicando por 12.
    */
-  async computeAmountCents(planCode: string | null | undefined, screens: number): Promise<number> {
+  async computeAmountCents(
+    planCode: string | null | undefined,
+    screens: number,
+    interval: BillingInterval = 'monthly'
+  ): Promise<number> {
     if (!planCode) return 0;
 
     const plan = await planService.getByCode(planCode);
@@ -237,7 +263,7 @@ export class CheckoutService {
       );
     }
 
-    return estimateMonthlyCents(plan, screens);
+    return estimateMonthlyCents(plan, screens, interval);
   }
 
   /** Cria a sessão anônima da primeira visita e registra o evento `view`. */
@@ -247,7 +273,8 @@ export class CheckoutService {
   ): Promise<PublicCheckoutSession> {
     const now = new Date();
     const screens = input.screens ?? 1;
-    const amountCents = await this.computeAmountCents(input.planCode ?? null, screens);
+    const interval = normalizeInterval(input.interval);
+    const amountCents = await this.computeAmountCents(input.planCode ?? null, screens, interval);
 
     const events: CheckoutEventType[] = input.planCode ? ['view', 'plan_selected'] : ['view'];
 
@@ -257,6 +284,7 @@ export class CheckoutService {
         status: 'started',
         planCode: input.planCode ?? null,
         screens,
+        billingInterval: interval,
         amountCents,
         utmSource: input.utmSource ?? null,
         utmMedium: input.utmMedium ?? null,
@@ -272,7 +300,10 @@ export class CheckoutService {
         events: {
           create: events.map((type) => ({
             type,
-            metadata: type === 'plan_selected' ? JSON.stringify({ planCode: input.planCode, screens }) : null,
+            metadata:
+              type === 'plan_selected'
+                ? JSON.stringify({ planCode: input.planCode, screens, interval })
+                : null,
           })),
         },
       },
@@ -305,15 +336,18 @@ export class CheckoutService {
 
     const nextPlanCode = input.planCode ?? session.planCode;
     const nextScreens = input.screens ?? session.screens;
+    const currentInterval = normalizeInterval(session.billingInterval);
+    const nextInterval = input.interval ? normalizeInterval(input.interval) : currentInterval;
     const nextName = input.name ?? session.name;
     const nextEmail = input.email ?? session.email;
 
     const planChanged = input.planCode !== undefined && input.planCode !== session.planCode;
     const screensChanged = input.screens !== undefined && input.screens !== session.screens;
+    const intervalChanged = nextInterval !== currentInterval;
 
     // Recalcula sempre: qualquer PATCH é um passo novo e congela o preço atual
     // do catálogo para esta sessão.
-    const amountCents = await this.computeAmountCents(nextPlanCode, nextScreens);
+    const amountCents = await this.computeAmountCents(nextPlanCode, nextScreens, nextInterval);
 
     const events: Array<{ type: CheckoutEventType; metadata?: unknown }> = [];
 
@@ -326,8 +360,16 @@ export class CheckoutService {
     if (recovered) {
       events.push({ type: 'recovered', metadata: { from: 'abandoned', to: status } });
     }
-    if (planChanged) {
-      events.push({ type: 'plan_selected', metadata: { planCode: nextPlanCode, amountCents } });
+    // Virar a chavinha do anual é escolher OUTRO preço, então também registra
+    // `plan_selected`. Não se cria tipo de evento novo de propósito: o funil
+    // conta plano selecionado por `planCode` preenchido, não por evento, então
+    // isto não infla taxa nenhuma — só deixa o rastro de quando a pessoa mudou
+    // de intervalo, que é o que a oferta v2 precisa medir.
+    if (planChanged || intervalChanged) {
+      events.push({
+        type: 'plan_selected',
+        metadata: { planCode: nextPlanCode, interval: nextInterval, amountCents },
+      });
     }
     if (screensChanged) {
       events.push({ type: 'screens_changed', metadata: { from: session.screens, to: nextScreens, amountCents } });
@@ -347,6 +389,7 @@ export class CheckoutService {
       data: {
         planCode: nextPlanCode,
         screens: nextScreens,
+        billingInterval: nextInterval,
         amountCents,
         name: nextName,
         email: nextEmail,
@@ -403,7 +446,11 @@ export class CheckoutService {
 
     // Defensivo: o valor volta a ser calculado no servidor no ato do submit, para
     // uma mudança de catálogo entre passos não congelar um preço fantasma.
-    const amountCents = await this.computeAmountCents(session.planCode, session.screens);
+    const amountCents = await this.computeAmountCents(
+      session.planCode,
+      session.screens,
+      normalizeInterval(session.billingInterval)
+    );
 
     const events: Array<{ type: CheckoutEventType; metadata?: unknown }> = [];
     if (session.status === 'abandoned') {
@@ -414,7 +461,13 @@ export class CheckoutService {
     }
     events.push({
       type: 'submit',
-      metadata: { amountCents, planCode: session.planCode, screens: session.screens, note: input.note ?? null },
+      metadata: {
+        amountCents,
+        planCode: session.planCode,
+        screens: session.screens,
+        interval: normalizeInterval(session.billingInterval),
+        note: input.note ?? null,
+      },
     });
 
     const updated = await prisma.checkoutSession.update({

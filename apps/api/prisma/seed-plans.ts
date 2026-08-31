@@ -36,6 +36,8 @@ export interface PlanSeed {
   code: string;
   name: string;
   pricePerScreenCents: number;
+  /** Preço por tela/MÊS no pagamento anual. `0` = plano sem oferta anual. */
+  priceAnnualPerScreenCents: number;
   minScreens: number;
   maxDevices: number | null;
   maxUsers: number | null;
@@ -59,15 +61,42 @@ export const FREE_PLAN_CODE = 'gratis';
  */
 export const LEGACY_TRIAL_PLAN_CODE = 'trial';
 
+// ── Distribuição de features (plano comercial v2, §5.1b) ────────────────────
+//
+// Regra que vale para a grade inteira: só entra no catálogo feature que EXISTE
+// no código. `api-externa` e `multi-org` saíram daqui porque nunca tiveram
+// implementação — vender direito de uso de algo inexistente transforma o
+// bloqueio numa promessa que nenhuma rota cumpre, e o gate acabaria "liberando"
+// um recurso que não há como usar.
 const FEATURES_GRATIS = ['widgets-basicos', 'alerta-offline'];
-const FEATURES_LOJA = [...FEATURES_GRATIS, 'relatorios', 'auditoria'];
+
+const FEATURES_LOJA = [
+  ...FEATURES_GRATIS,
+  'relatorios',
+  // `documentos` (PDF, Google Docs, Office) desceu do gate de BI para cá: até
+  // agora esses três eram cobrados junto com Power BI como recurso de Rede, mas
+  // documento na parede é a cena de uma clínica ou de uma empresa de 1 tela, não
+  // de uma rede de lojas. Trancá-lo no plano de piso 5 telas cobrava o degrau
+  // errado; no Rede fica só o painel de gestão.
+  'documentos',
+  // `agendamento-avancado` desceu de Rede para Loja pelo mesmo motivo: a janela
+  // simples de "aviso agendado por data/hora" é exatamente o caso da loja ou da
+  // clínica com uma tela. A recorrência/publicação em lote continua sendo
+  // território do Rede — mas ela ainda não existe no código, então não ganha
+  // feature aqui (ver a regra acima).
+  'agendamento-avancado',
+];
+
 const FEATURES_REDE = [
   ...FEATURES_LOJA,
+  // `auditoria` subiu de Loja para Rede: "quem publicou isso na tela?" só vira
+  // pergunta quando há várias pessoas publicando, que é a realidade do Rede
+  // (15 usuários) e não a do Loja (3). O relatório de exibição/uptime
+  // (`relatorios`) continua no Loja — são coisas diferentes.
+  'auditoria',
   'powerbi',
-  'api-externa',
-  'agendamento-avancado',
-  'multi-org',
 ];
+
 const FEATURES_ENTERPRISE = [...FEATURES_REDE, 'white-label', 'sso', 'sla', FEATURE_QUOTE_ONLY];
 
 export const PLAN_CATALOG: PlanSeed[] = [
@@ -75,6 +104,8 @@ export const PLAN_CATALOG: PlanSeed[] = [
     code: FREE_PLAN_CODE,
     name: 'Grátis',
     pricePerScreenCents: 0,
+    // Sem oferta anual: não há o que descontar num plano que já é 0.
+    priceAnnualPerScreenCents: 0,
     minScreens: 1,
     // Única trava real de device no catálogo: a 1ª tela é grátis para sempre.
     maxDevices: 1,
@@ -87,6 +118,10 @@ export const PLAN_CATALOG: PlanSeed[] = [
     code: 'loja',
     name: 'Loja',
     pricePerScreenCents: 4900,
+    // R$ 39/tela/mês no anual (R$ 468/ano) — a oferta principal do plano
+    // comercial v2. O anual corta churn por construção, e o mensal segue
+    // existindo sem fidelidade: é o desconto que paga a permanência, não a multa.
+    priceAnnualPerScreenCents: 3900,
     minScreens: 1,
     maxDevices: null, // ilimitado — quem limita é a fatura por tela ativa.
     maxUsers: 3,
@@ -98,6 +133,9 @@ export const PLAN_CATALOG: PlanSeed[] = [
     code: 'rede',
     name: 'Rede',
     pricePerScreenCents: 3900,
+    // R$ 32/tela/mês no anual — com o piso de 5 telas, é a fatura de R$ 160/mês
+    // que a landing expõe para uma rede de 5 lojas.
+    priceAnnualPerScreenCents: 3200,
     // Preço menor por tela em troca de um piso de 5 telas na fatura.
     minScreens: 5,
     maxDevices: null,
@@ -112,6 +150,8 @@ export const PLAN_CATALOG: PlanSeed[] = [
     // Preço sob consulta — 0 aqui NÃO significa gratuito. O flag
     // `preco-sob-consulta` em `features` é o que sinaliza isso ao frontend.
     pricePerScreenCents: 0,
+    // Sob consulta também no anual: o desconto entra na proposta, não na vitrine.
+    priceAnnualPerScreenCents: 0,
     minScreens: 1,
     maxDevices: null,
     maxUsers: null,
@@ -166,6 +206,7 @@ export async function seedPlans(client: PrismaClient = prisma): Promise<void> {
     const data = {
       name: plan.name,
       pricePerScreenCents: plan.pricePerScreenCents,
+      priceAnnualPerScreenCents: plan.priceAnnualPerScreenCents,
       minScreens: plan.minScreens,
       maxDevices: plan.maxDevices,
       maxUsers: plan.maxUsers,
@@ -180,6 +221,12 @@ export async function seedPlans(client: PrismaClient = prisma): Promise<void> {
       create: { code: plan.code, ...data },
     });
 
+    // O log imprime os DOIS preços porque a oferta agora é o anual: um seed que
+    // só mostra o mensal esconde exatamente o número que a vitrine destaca.
+    const anual =
+      plan.priceAnnualPerScreenCents > 0
+        ? ` · anual R$ ${(plan.priceAnnualPerScreenCents / 100).toFixed(2)}/tela/mês`
+        : ' · sem oferta anual';
     const preco =
       plan.pricePerScreenCents === 0
         ? plan.code === 'enterprise'
@@ -187,7 +234,7 @@ export async function seedPlans(client: PrismaClient = prisma): Promise<void> {
           : 'gratuito (1 tela para sempre)'
         : `R$ ${(plan.pricePerScreenCents / 100).toFixed(2)}/tela/mês (mín. ${plan.minScreens} tela${
             plan.minScreens > 1 ? 's' : ''
-          })`;
+          })${anual}`;
     console.log(`  ✔ ${plan.code.padEnd(11)} ${preco}`);
   }
 

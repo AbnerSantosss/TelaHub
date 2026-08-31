@@ -226,7 +226,14 @@ export interface Device {
 export interface Display {
   id: string;
   name: string;
+  /** Slug legível e ADIVINHÁVEL. Continua válido, mas não use em link novo. */
   slug: string;
+  /**
+   * Endereço público não adivinhável do player. Preferir este ao `slug` ao
+   * montar a URL da TV: com o slug, quem chuta "loja-centro" abre a tela do
+   * cliente. Pode vir nulo em tela criada antes de 2026-08-29.
+   */
+  publicToken?: string | null;
   pages: Page[];
   updatedAt: number;
   coverImage?: string;

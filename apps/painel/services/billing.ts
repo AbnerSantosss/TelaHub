@@ -157,18 +157,42 @@ export const remainingScreens = (plan: PublicPlan, activeScreens: number): numbe
 // por cima dela.
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** Feature do catálogo que libera os widgets de BI/documento. */
+/** Feature do catálogo que libera os painéis de gestão (plano Rede). */
 export const BI_FEATURE_KEY = 'powerbi';
+
+/** Feature do catálogo que libera documentos (plano Loja). */
+export const DOC_FEATURE_KEY = 'documentos';
 
 /**
  * Widgets cobertos pela feature `powerbi`. Precisa ser IGUAL a
- * `BI_WIDGET_TYPES` em `backend/src/services/entitlement.service.ts` — se as
+ * `BI_WIDGET_TYPES` em `apps/api/src/services/entitlement.service.ts` — se as
  * duas listas divergirem, o editor libera um widget que o servidor recusa (ou
  * esconde um que ele aceitaria).
+ *
+ * ⚠️ A lista MUDOU em 2026-08-31, nos dois sentidos, junto com o empacotamento
+ * v2 (§5.1b do plano comercial): documento saiu daqui para o Loja, e cotações,
+ * snapshot e HTML próprio entraram, porque a página de vendas passou a
+ * anunciá-los como "painel de resultados — plano Rede". Antes eles estavam de
+ * fora justamente por nunca terem sido vendidos como pagos; o critério não
+ * mudou (o gate só alcança o que a oferta publicada diz ser pago), a oferta é
+ * que mudou.
  */
 export const BI_WIDGET_TYPES = [
   'POWER_BI',
   'AIRTABLE',
+  'MARKET_WATCH',
+  'BROWSER_SNAPSHOT',
+  'EMBED_HTML',
+] as const;
+
+/**
+ * Widgets de documento, cobertos pela feature `documentos` (plano Loja).
+ * Espelha `DOC_WIDGET_TYPES` do backend. Eles saíram do grupo de BI porque
+ * "o comunicado que já está no Word e a tabela que já está no Sheets" é o que
+ * uma clínica ou um escritório de 1 tela precisa — cobrá-los no plano de piso
+ * de 5 telas vendia o degrau errado.
+ */
+export const DOC_WIDGET_TYPES = [
   'GOOGLE_DOCS',
   'OFFICE_DOCS',
   'PDF_DOCUMENT',
@@ -185,10 +209,26 @@ export const BI_WIDGET_TYPES = [
 export const hasFeature = (features: string[] | undefined | null, featureKey: string): boolean =>
   !features || features.includes(featureKey);
 
+/**
+ * Qual feature o widget exige, ou `null` quando ele é de todos os planos.
+ *
+ * Existe separada de `isWidgetLocked` porque a mensagem de bloqueio precisa
+ * dizer o plano CERTO: documento destrava no Loja, painel de gestão só no Rede.
+ * Um aviso genérico ("assine o Rede") mandaria para o plano de 5 telas alguém
+ * que resolveria o problema com o de 1 — e essa é a diferença entre uma venda e
+ * um abandono.
+ */
+export const widgetFeatureKey = (widgetType: string): string | null => {
+  if ((DOC_WIDGET_TYPES as readonly string[]).includes(widgetType)) return DOC_FEATURE_KEY;
+  if ((BI_WIDGET_TYPES as readonly string[]).includes(widgetType)) return BI_FEATURE_KEY;
+  return null;
+};
+
 /** `true` quando o widget exige uma feature que o plano atual não tem. */
 export const isWidgetLocked = (
   widgetType: string,
   features: string[] | undefined | null
-): boolean =>
-  (BI_WIDGET_TYPES as readonly string[]).includes(widgetType) &&
-  !hasFeature(features, BI_FEATURE_KEY);
+): boolean => {
+  const key = widgetFeatureKey(widgetType);
+  return key !== null && !hasFeature(features, key);
+};

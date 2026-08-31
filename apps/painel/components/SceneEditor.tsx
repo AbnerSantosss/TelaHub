@@ -446,6 +446,7 @@ const SceneEditor: React.FC<SceneEditorProps> = ({
                 onLayoutChange={handleLayoutChange}
                 draggableHandle=".drag-handle"
                 resizeHandle={<div className="absolute bottom-0 right-0 p-1 cursor-se-resize text-[var(--th-accent)] opacity-0 group-hover:opacity-100 transition-opacity"><MoveHorizontal size={12} /></div>}
+                transformScale={orientation === 'vertical' ? 0.375 : 1}
               >
                 {page.layout.map(w => (
                   <div

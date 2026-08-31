@@ -1,5 +1,26 @@
 import { useEffect, useRef } from 'react';
 
+/**
+ * Formulário de contato da landing.
+ *
+ * ── Quem cai aqui ───────────────────────────────────────────────────────────
+ * Só quem NÃO tem caminho self-service: Enterprise (não tem preço público),
+ * Parceiro (o programa ainda não tem contrato publicado) e quem pede ajuda para
+ * montar a primeira tela. Grátis, Loja e Rede não passam por aqui — vão direto
+ * ao cadastro ou ao checkout. Pedir dado a quem já podia se cadastrar sozinho é
+ * perder a venda para o formulário.
+ *
+ * ── A tela de sucesso não pode prometer entrega que não acontece ────────────
+ * A versão antiga afirmava que a conta estava ativa e que um e-mail com login e
+ * código de pareamento havia sido enviado. Nada disso acontecia: o envio era um
+ * `setTimeout` e o lead não ia a lugar nenhum. Hoje o lead é gravado de verdade
+ * (`POST /api/leads`), mas a conta continua não sendo criada aqui — então a
+ * mensagem diz exatamente isso, e o botão fecha a caixa em vez de fingir que
+ * leva a um painel que ainda não existe para essa pessoa.
+ *
+ * Também não citamos WhatsApp: não há número publicável, e mandar alguém para
+ * um canal inexistente é pior do que não oferecer canal nenhum.
+ */
 const LeadModal = ({
   isModalOpen,
   setIsModalOpen,
@@ -13,14 +34,15 @@ const LeadModal = ({
   formPhone,
   setFormPhone,
   submitStatus,
-  handleLeadSubmit
+  handleLeadSubmit,
 }) => {
   const modalRef = useRef(null);
   const closeButtonRef = useRef(null);
   const lastFocusedRef = useRef(null);
 
-  // Focus management: move focus into the modal on open, trap Tab inside it,
-  // close on Escape, and return focus to whatever triggered it on close.
+  // Foco entra na caixa ao abrir, fica preso enquanto ela estiver aberta, sai
+  // no Escape e volta para quem a abriu. Sem isso, quem navega por teclado
+  // continua tabulando pela página atrás do overlay, sem saber onde está.
   useEffect(() => {
     if (!isModalOpen) return;
 
@@ -35,7 +57,7 @@ const LeadModal = ({
       if (e.key !== 'Tab' || !modalRef.current) return;
 
       const focusable = modalRef.current.querySelectorAll(
-        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
       );
       if (focusable.length === 0) return;
       const first = focusable[0];
@@ -59,6 +81,25 @@ const LeadModal = ({
 
   if (!isModalOpen) return null;
 
+  const ehParceiro = selectedPlan === 'Parceiro';
+  const ehSetup = selectedPlan === 'Setup assistido';
+
+  const titulo = ehParceiro
+    ? 'Quero ser parceiro'
+    : ehSetup
+      ? 'Montamos sua primeira tela com você'
+      : 'Falar com a gente';
+
+  const introducao = ehParceiro
+    ? 'Conte onde você instala e quantas telas costuma atender. Retornamos com as condições do programa.'
+    : ehSetup
+      ? 'Deixe seu contato e a gente marca um horário para montar a primeira tela junto com você — do zero até o conteúdo no ar.'
+      : `Deixe seu contato e a gente responde com uma proposta${
+          selectedPlan && !['Contato', 'Grátis'].includes(selectedPlan)
+            ? ` para o plano ${selectedPlan}`
+            : ''
+        }.`;
+
   return (
     <div className="lead-modal-overlay" onClick={() => setIsModalOpen(false)}>
       <div
@@ -69,15 +110,14 @@ const LeadModal = ({
         ref={modalRef}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Close Modal Button */}
         <button
           className="modal-close"
           onClick={() => setIsModalOpen(false)}
-          aria-label="Fechar modal"
+          aria-label="Fechar"
           ref={closeButtonRef}
+          type="button"
         >
           <svg
-            xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -85,31 +125,27 @@ const LeadModal = ({
             strokeLinecap="round"
             strokeLinejoin="round"
             style={{ width: 20, height: 20 }}
+            aria-hidden="true"
           >
             <line x1="18" y1="6" x2="6" y2="18" />
             <line x1="6" y1="6" x2="18" y2="18" />
           </svg>
         </button>
 
-        {/* Conditional Modal Contents */}
         {!submitStatus.success ? (
           <>
-            <h3 id="lead-modal-title" style={{ fontFamily: 'var(--font-title)', fontWeight: 800 }}>Experimente o TelaHub Grátis</h3>
-            <p style={{ marginTop: '8px' }}>
-              {/* NÃO prometer "14 dias de teste": o trial de 14 dias foi descontinuado
-                  no backend e substituído por freemium (1 tela, para sempre). */}
-              Preencha os dados abaixo para criar sua conta. Sua primeira tela é grátis para sempre — sem cartão de crédito.
-              {selectedPlan && selectedPlan !== 'Grátis' ? <> Depois você sobe para o plano <strong>{selectedPlan}</strong> quando quiser.</> : null}
-            </p>
+            <h2 id="lead-modal-title">{titulo}</h2>
+            <p style={{ marginTop: 8 }}>{introducao}</p>
 
-            <form onSubmit={handleLeadSubmit} style={{ marginTop: '20px' }} noValidate>
+            <form onSubmit={handleLeadSubmit} style={{ marginTop: 20 }} noValidate>
               <div className="form-group">
-                <label htmlFor="lead-name">Seu Nome <span aria-hidden="true">*</span></label>
+                <label htmlFor="lead-name">
+                  Seu nome <span aria-hidden="true">*</span>
+                </label>
                 <input
                   id="lead-name"
                   type="text"
                   className="form-input"
-                  placeholder="Ex: Carlos Mendes"
                   value={formName}
                   onChange={(e) => setFormName(e.target.value)}
                   autoComplete="name"
@@ -119,12 +155,13 @@ const LeadModal = ({
               </div>
 
               <div className="form-group">
-                <label htmlFor="lead-email">E-mail Corporativo <span aria-hidden="true">*</span></label>
+                <label htmlFor="lead-email">
+                  E-mail <span aria-hidden="true">*</span>
+                </label>
                 <input
                   id="lead-email"
                   type="email"
                   className="form-input"
-                  placeholder="Ex: carlos@empresa.com"
                   value={formEmail}
                   onChange={(e) => setFormEmail(e.target.value)}
                   autoComplete="email"
@@ -135,12 +172,11 @@ const LeadModal = ({
               </div>
 
               <div className="form-group">
-                <label htmlFor="lead-company">Nome da Empresa / Condomínio</label>
+                <label htmlFor="lead-company">Empresa, condomínio ou loja</label>
                 <input
                   id="lead-company"
                   type="text"
                   className="form-input"
-                  placeholder="Ex: Alameda Towers"
                   value={formCompany}
                   onChange={(e) => setFormCompany(e.target.value)}
                   autoComplete="organization"
@@ -148,20 +184,20 @@ const LeadModal = ({
               </div>
 
               <div className="form-group">
-                <label htmlFor="lead-phone">Telefone / WhatsApp</label>
+                <label htmlFor="lead-phone">Telefone</label>
                 <input
                   id="lead-phone"
                   type="tel"
                   className="form-input"
-                  placeholder="Ex: (11) 99999-9999"
                   value={formPhone}
                   onChange={(e) => setFormPhone(e.target.value)}
                   autoComplete="tel"
                 />
               </div>
 
-              <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: 14 }}>
-                <span aria-hidden="true">*</span> Campos obrigatórios
+              <p className="micro" style={{ marginBottom: 14 }}>
+                <span aria-hidden="true">*</span> Campos obrigatórios. Usamos seus dados só para
+                responder este contato.
               </p>
 
               {submitStatus.error && (
@@ -169,69 +205,44 @@ const LeadModal = ({
                   id="lead-form-error"
                   role="alert"
                   aria-live="assertive"
-                  style={{ color: '#DC2626', fontSize: '0.82rem', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 6 }}
+                  style={{ color: 'var(--danger)', fontSize: '0.875rem', marginBottom: 14 }}
                 >
-                  <span aria-hidden="true">⚠️</span> {submitStatus.error}
+                  {submitStatus.error}
                 </p>
               )}
 
-              <button
-                type="submit"
-                className="btn btn-primary"
-                style={{ width: '100%', justifyContent: 'center', marginTop: 12, padding: '14px 24px' }}
-                disabled={submitStatus.loading}
-              >
-                {submitStatus.loading ? (
-                  <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <svg className="animate-spin" viewBox="0 0 24 24" fill="none" style={{ width: 16, height: 16, stroke: '#ffffff', strokeWidth: 3 }} aria-hidden="true">
-                      <circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.2)"></circle>
-                      <path d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" fill="#ffffff"></path>
-                    </svg>
-                    Processando...
-                  </span>
-                ) : 'Quero minha tela grátis'}
-                {/* NÃO voltar a escrever "14 dias": o trial de 14 dias foi
-                    descontinuado em 2026-07-25 e substituído por 1 tela grátis
-                    sem prazo. Prometer prazo inexistente é o mesmo problema de
-                    CDC (arts. 30 e 37) já corrigido no resto da página. */}
+              <button type="submit" className="btn btn--largo" disabled={submitStatus.loading}>
+                {submitStatus.loading ? 'Enviando…' : 'Enviar contato'}
               </button>
             </form>
           </>
         ) : (
           <div className="lead-success-card" role="status" aria-live="polite">
-            <div className="success-icon-wrapper">
+            <div className="success-icon-wrapper" aria-hidden="true">
               <svg
-                xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
-                strokeWidth="3.5"
+                strokeWidth="3"
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 style={{ width: 30, height: 30 }}
-                aria-hidden="true"
               >
                 <polyline points="20 6 9 17 4 12" />
               </svg>
             </div>
-            <h3 id="lead-modal-title" style={{ fontFamily: 'var(--font-title)', fontWeight: 800 }}>Recebemos seu contato!</h3>
-            {/* A mensagem anterior afirmava que a conta estava ativa e que um
-                e-mail com login e código de pareamento havia sido enviado.
-                Nada disso acontece: `handleLeadSubmit` em `src/App.jsx` é um
-                mock com `setTimeout` e o lead não é enviado a lugar nenhum.
-                Afirmar entrega que não ocorreu é a falha mais grave possível
-                aqui — o visitante fica esperando um e-mail que nunca vem.
-                Só volte a prometer envio quando o formulário estiver de fato
-                integrado (webhook/CRM) e o cadastro criar a conta. */}
-            <p style={{ marginTop: 12, color: 'var(--text-secondary)' }}>
-              Vamos falar com você em breve para liberar sua primeira tela grátis. Se preferir adiantar, chame no WhatsApp — respondemos por lá.
+            <h2 id="lead-modal-title">Recebemos seu contato</h2>
+            <p style={{ marginTop: 12 }}>
+              Seu pedido foi registrado e vai para a nossa fila de atendimento. Enquanto isso, você
+              pode colocar sua primeira tela no ar sozinho — ela é grátis e não pede cartão.
             </p>
             <button
+              type="button"
               onClick={() => setIsModalOpen(false)}
-              className="btn btn-primary"
-              style={{ marginTop: 28, width: '100%', justifyContent: 'center', padding: '14px 24px' }}
+              className="btn btn--fantasma btn--largo"
+              style={{ marginTop: 24 }}
             >
-              Acessar Painel TelaHub
+              Fechar
             </button>
           </div>
         )}

@@ -28,8 +28,9 @@ interface DisplayCardProps {
   devices: Device[];
   copiedId: string | null;
   onNavigateToEdit: (id: string) => void;
-  onCopyPlayerLink: (slug: string, id: string) => void;
-  onOpenPlayer: (slug: string) => void;
+  /** Recebe o token público (ou o slug, como reserva) — nunca só o slug. */
+  onCopyPlayerLink: (ref: string, id: string) => void;
+  onOpenPlayer: (ref: string) => void;
   onOpenRenameModal: (display: Display) => void;
   onOpenCoverModal: (display: Display) => void;
   onRemoveCover: (display: Display) => void;
@@ -156,7 +157,7 @@ export const DisplayCard: React.FC<DisplayCardProps> = ({
           <div className="display-actions">
             <button 
               className={`btn-sub ${copiedId === display.id ? 'copied' : ''}`}
-              onClick={() => onCopyPlayerLink(display.slug, display.id)}
+              onClick={() => onCopyPlayerLink(display.publicToken || display.slug, display.id)}
             >
               {copiedId === display.id ? <Check size={13} /> : <Copy size={13} />}
               {copiedId === display.id ? 'Copiado!' : 'Copiar URL'}
@@ -164,7 +165,7 @@ export const DisplayCard: React.FC<DisplayCardProps> = ({
 
             <button 
               className="btn-sub"
-              onClick={() => onOpenPlayer(display.slug)}
+              onClick={() => onOpenPlayer(display.publicToken || display.slug)}
             >
               <ExternalLink size={13} /> Visualizar
             </button>

@@ -1,0 +1,42 @@
+/* Estilo da seção FORMATOS. `.secao`, `.secao--papel`, `.secao--compacta`,
+   `.secao__cabeca`, `.grid-2`, `.chip`, `.shot` e `.cap` vêm de src/index.css. */
+
+.formatos {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+/* Mesma razão de `.passos__chip`: filho de flex column, o inline-flex é
+   blocado e esticaria. */
+.formatos__chip {
+  align-self: flex-start;
+  margin: 0;
+}
+
+/* O mockup dá 24px entre as duas capturas, e não os 20px do `.grid-2` — com
+   duas imagens grandes lado a lado, quatro pixels a mais separam as molduras. */
+.formatos__grade {
+  gap: 24px;
+}
+
+.formato {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+}
+
+.formato__legenda {
+  display: block;
+}
+
+@media (max-width: 900px) {
+  .formatos {
+    gap: 24px;
+  }
+
+  .formatos__grade {
+    gap: 20px;
+  }
+}

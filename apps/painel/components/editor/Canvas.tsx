@@ -210,7 +210,11 @@ const renderWidgetPreview = (w: LayoutItem) => {
          </div>
       );
     case WidgetType.RSS:
-      return <div className="w-full h-full bg-slate-900/50 p-2 overflow-hidden text-[8px] text-slate-500">RSS Feed: {w.data.rssUrl}</div>;
+      return (
+        <div className="w-full h-full overflow-hidden pointer-events-none">
+          <RssFeed url={w.data.rssUrl || w.data.rssFeeds?.[0]?.url || w.data.url || ''} config={w.data.rssConfig} widgetData={w.data} />
+        </div>
+      );
     case WidgetType.NOTES:
       return <div className="w-full h-full overflow-hidden"><NotesWidget data={w.data} /></div>;
     case WidgetType.TODO:
@@ -397,13 +401,16 @@ export const Canvas: React.FC<CanvasProps> = ({
             allowOverlap={true}
             resizeHandles={['s', 'w', 'e', 'n', 'sw', 'nw', 'se', 'ne']}
             onLayoutChange={handleLayoutChange}
+            transformScale={display.orientation === 'vertical' ? 0.375 : 1}
           >
-            {activePage.layout.map(w => (
+            {activePage.layout.map(w => {
+              const widgetZIndex = selectedWidget === w.i ? 999 : (w.data.zIndex !== undefined ? w.data.zIndex : 10);
+              return (
               <div 
                 key={w.i} 
                 onClick={(e) => { e.stopPropagation(); setSelectedWidget(w.i); }}
-                className={`group transition-all ${selectedWidget === w.i ? 'border border-[var(--th-accent)] shadow-[0_0_15px_rgba(124,58,237,0.35)]' : 'border border-transparent hover:border-white/20 hover:bg-white/5'} ${w.data.backgroundAnimation ? getBackgroundAnimationClass(w.data.backgroundAnimation) : (selectedWidget === w.i ? 'bg-slate-900/50 backdrop-blur-sm' : '')}`}
-                style={{ zIndex: selectedWidget === w.i ? 999 : (w.data.zIndex !== undefined ? w.data.zIndex : 10) }}
+                className={`group transition-all ${selectedWidget === w.i ? 'border border-[var(--th-accent)] shadow-[0_0_15px_rgba(124,58,237,0.35)]' : 'border border-transparent hover:border-white/20 hover:bg-white/5'} ${w.data.backgroundAnimation ? getBackgroundAnimationClass(w.data.backgroundAnimation) : (selectedWidget === w.i ? 'bg-slate-900/50 backdrop-blur-sm' : '')} !z-[var(--widget-z)]`}
+                style={{ '--widget-z': widgetZIndex, zIndex: widgetZIndex } as React.CSSProperties}
               >
                 <div 
                   className={`w-full h-full relative overflow-hidden flex ${getAlignmentClasses(w.data.fillContainer ? 'stretch' : w.data.contentAlignment)}`}
@@ -451,7 +458,8 @@ export const Canvas: React.FC<CanvasProps> = ({
                   )}
                 </div>
               </div>
-            ))}
+              );
+            })}
           </GridLayout>
         </div>
         {/* fim: absoluto inset z-10 */}

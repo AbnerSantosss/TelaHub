@@ -5,7 +5,21 @@
 // otimista enquanto a requisição está no ar — elas repetem de propósito a mesma
 // fórmula do backend (`estimateMonthlyCents`), e quando o servidor responde o
 // valor dele é o que fica na tela.
+//
+// O INTERVALO entra nessa mesma fórmula, não ao lado dela. O servidor devolve
+// `amountCents` sempre como valor MENSAL EQUIVALENTE — no anual ele já vem com o
+// preço anual por tela/mês, e o que o cliente paga no ano é `amountCents × 12`.
+// A previsão local precisa ter exatamente esse comportamento: se ela ignorasse o
+// intervalo, a tela mostraria o preço mensal por um instante depois do clique em
+// "anual" e o valor "pularia" quando a resposta chegasse — o tipo de piscada que
+// a pessoa lê como pegadinha de preço.
 import { api } from './api';
+
+/** Como a assinatura é cobrada. O nome no corpo/query da API é `interval`. */
+export type BillingInterval = 'monthly' | 'yearly';
+
+/** Meses faturados de uma vez no anual. Existe para o `12` não ficar solto. */
+export const MONTHS_PER_YEAR = 12;
 
 export interface PlanLimits {
   maxDevices: number | null;
@@ -19,6 +33,13 @@ export interface Plan {
   /** Preço por tela/mês em centavos. `0` quando gratuito OU sob consulta. */
   pricePerScreenCents: number;
   pricePerScreen: number;
+  /**
+   * Preço por tela/MÊS em centavos quando a assinatura é anual — não é o preço
+   * do ano. `0` = o plano não tem oferta anual (grátis e Enterprise), e nesse
+   * caso o seletor de intervalo nem aparece.
+   */
+  priceAnnualPerScreenCents: number;
+  priceAnnualPerScreen: number;
   /** Preço não é público: a contratação passa pelo comercial (Enterprise). */
   quoteOnly: boolean;
   /** Plano de entrada freemium: sem cobrança, sem prazo e sem cartão. */
@@ -78,6 +99,10 @@ function normalizePlan(raw: unknown): Plan | null {
     : [];
 
   const cents = Math.max(0, Math.round(num(plan.pricePerScreenCents, 0)));
+  // Backend antigo (sem os campos do anual) cai em `0`, e `0` já significa
+  // "sem oferta anual" — o seletor some e o checkout continua vendendo o
+  // mensal, em vez de anunciar um desconto que o servidor não vai aplicar.
+  const annualCents = Math.max(0, Math.round(num(plan.priceAnnualPerScreenCents, 0)));
   const limits = asRecord(plan.limits);
   const optionalLimit = (value: unknown): number | null =>
     typeof value === 'number' && Number.isFinite(value) ? value : null;
@@ -87,6 +112,8 @@ function normalizePlan(raw: unknown): Plan | null {
     name: str(plan.name, code),
     pricePerScreenCents: cents,
     pricePerScreen: num(plan.pricePerScreen, cents / 100),
+    priceAnnualPerScreenCents: annualCents,
+    priceAnnualPerScreen: num(plan.priceAnnualPerScreen, annualCents / 100),
     quoteOnly: plan.quoteOnly === true || features.includes('preco-sob-consulta'),
     free: plan.free === true,
     minScreens: Math.max(1, Math.round(num(plan.minScreens, 1))),
@@ -131,10 +158,57 @@ export async function fetchPlanCatalog(): Promise<PlanCatalog> {
 export const billedScreens = (plan: Plan, screens: number): number =>
   Math.max(plan.minScreens, Math.max(1, Math.floor(screens)));
 
-/** Previsão do mensal, só para o intervalo entre o clique e a resposta do servidor. */
-export const estimateMonthlyCents = (plan: Plan | null, screens: number): number => {
+/** `true` quando o plano tem preço anual publicado — grátis e Enterprise não têm. */
+export const hasAnnualOffer = (plan: Plan | null): boolean =>
+  !!plan && !plan.quoteOnly && !plan.free && plan.priceAnnualPerScreenCents > 0;
+
+/**
+ * Preço unitário (por tela/mês) do intervalo escolhido.
+ *
+ * Pedir "anual" num plano sem oferta anual devolve o preço MENSAL, nunca `0`:
+ * um total zerado numa tela de cobrança parece "de graça" e é o erro mais caro
+ * que esta função poderia cometer.
+ */
+export const unitCentsFor = (plan: Plan | null, interval: BillingInterval): number => {
+  if (!plan) return 0;
+  if (interval === 'yearly' && hasAnnualOffer(plan)) return plan.priceAnnualPerScreenCents;
+  return plan.pricePerScreenCents;
+};
+
+/**
+ * Previsão do MENSAL EQUIVALENTE (a mesma grandeza do `amountCents` do
+ * servidor), só para o intervalo entre o clique e a resposta.
+ *
+ * O `interval` é obrigatório de propósito: um valor padrão faria uma chamada
+ * esquecida devolver preço mensal numa tela anual — em silêncio, e justamente
+ * na tela onde a divergência de preço vira reclamação.
+ */
+export const estimateMonthlyCents = (
+  plan: Plan | null,
+  screens: number,
+  interval: BillingInterval
+): number => {
   if (!plan || plan.quoteOnly || plan.pricePerScreenCents <= 0) return 0;
-  return billedScreens(plan, screens) * plan.pricePerScreenCents;
+  return billedScreens(plan, screens) * unitCentsFor(plan, interval);
+};
+
+/** O que sai da conta no anual: 12 × o mensal equivalente (do servidor, quando há). */
+export const yearTotalCents = (monthlyEquivalentCents: number): number =>
+  Math.max(0, Math.round(monthlyEquivalentCents)) * MONTHS_PER_YEAR;
+
+/**
+ * Economia do anual, em pontos percentuais inteiros e arredondada PARA BAIXO.
+ * Prometer 20% e entregar 20,4% é diferente de prometer 21% e entregar 20,4% —
+ * só o segundo é publicidade que não se sustenta (CDC, art. 37).
+ * Devolve `0` quando não há oferta anual: a tela usa isso para não dizer
+ * "economize 0%".
+ */
+export const annualSavingsPercent = (plan: Plan | null): number => {
+  if (!hasAnnualOffer(plan) || !plan) return 0;
+  const monthly = plan.pricePerScreenCents;
+  const annual = plan.priceAnnualPerScreenCents;
+  if (monthly <= 0 || annual >= monthly) return 0;
+  return Math.floor(((monthly - annual) / monthly) * 100);
 };
 
 /** Teto de telas do plano (`maxDevices`), quando existir. */

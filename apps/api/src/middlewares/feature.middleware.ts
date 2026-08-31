@@ -18,7 +18,14 @@ import { resolveTenantId } from './quota.middleware';
 // `auditoria`, `powerbi`, `agendamento-avancado` e `multi-org` como recursos de
 // plano pago, e `hasFeature()` — escrito, testado e correto — não era chamado
 // por NENHUMA rota de produção. Na prática, uma conta no plano Grátis usava
-// tudo. O risco aqui é o inverso do habitual (não é enganar o cliente, é
+// tudo.
+//
+// Features vendidas HOJE (plano comercial v2 §5.1b, catálogo em
+// `prisma/seed-plans.ts`): `relatorios`, `documentos` e `agendamento-avancado`
+// no Loja; `auditoria` e `powerbi` no Rede; `white-label`, `sso` e `sla` no
+// Enterprise. `api-externa` e `multi-org` foram RETIRADAS do catálogo em
+// 2026-08-30 — eram vendidas sem existir no código, e um rótulo aqui para
+// feature inexistente só serviria para alguém religar o gate por engano. O risco aqui é o inverso do habitual (não é enganar o cliente, é
 // entregar de graça o que deveria ser pago) e ele piora com o tempo: quanto
 // mais gente monta a operação em cima de um recurso não cobrado, mais caro fica
 // ligar o gate depois.
@@ -49,10 +56,10 @@ export interface FeatureDenial {
 const FEATURE_LABEL: Record<string, string> = {
   relatorios: 'os relatórios de exibição',
   auditoria: 'a trilha de auditoria',
-  powerbi: 'os painéis de BI e documentos (Power BI, Airtable, Google Docs, Office e PDF)',
+  documentos: 'os documentos na tela (PDF, Google Docs e Office)',
+  powerbi:
+    'os painéis de gestão (Power BI, Airtable, cotações, snapshot de página e HTML próprio)',
   'agendamento-avancado': 'o agendamento por faixa de horário',
-  'multi-org': 'múltiplas unidades',
-  'api-externa': 'a API externa',
 };
 
 export function featureLabel(featureKey: string): string {

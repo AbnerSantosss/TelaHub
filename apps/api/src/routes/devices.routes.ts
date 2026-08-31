@@ -7,6 +7,7 @@ import { registerDeviceSchema, linkDeviceSchema, updateDeviceDisplaySchema } fro
 import { deviceService } from '../services/device.service';
 import { sseService } from '../services/sse.service';
 import { auditService } from '../services/audit.service';
+import { deviceRegisterRateLimit, deviceTelemetryRateLimit } from '../middlewares/rate-limit.middleware';
 
 const router = Router();
 
@@ -43,7 +44,7 @@ router.get('/health', authMiddleware, requireTenant, async (req: Request, res: R
 });
 
 // POST /api/devices/register (PÚBLICO — dispositivo se registra; ainda sem tenant)
-router.post('/register', validateBody(registerDeviceSchema), async (req: Request, res: Response): Promise<void> => {
+router.post('/register', deviceRegisterRateLimit, validateBody(registerDeviceSchema), async (req: Request, res: Response): Promise<void> => {
   try {
     const { deviceId, code } = req.body;
 
@@ -56,7 +57,7 @@ router.post('/register', validateBody(registerDeviceSchema), async (req: Request
 });
 
 // GET /api/devices/:id/status (PÚBLICO — dispositivo verifica o SEU status)
-router.get('/:id/status', async (req: Request, res: Response): Promise<void> => {
+router.get('/:id/status', deviceTelemetryRateLimit, async (req: Request, res: Response): Promise<void> => {
   try {
     const device = await deviceService.getStatus(req.params.id as string);
 
@@ -125,7 +126,7 @@ router.post('/link', authMiddleware, requireTenant, requireActiveSubscription, e
 });
 
 // PATCH /api/devices/:id/heartbeat (PÚBLICO — a TV bate o próprio id)
-router.patch('/:id/heartbeat', async (req: Request, res: Response): Promise<void> => {
+router.patch('/:id/heartbeat', deviceTelemetryRateLimit, async (req: Request, res: Response): Promise<void> => {
   try {
     await deviceService.heartbeat(req.params.id as string);
     res.json({ message: 'Heartbeat registrado.' });

@@ -118,7 +118,9 @@ router.get(
  * PATCH /api/checkout/sessions/:publicToken — enriquecimento por passo.
  *
  * O `amountCents` é SEMPRE recalculado no servidor a partir de `planCode` +
- * `screens`; valor enviado pelo cliente é descartado pelo Zod.
+ * `screens` + `interval`; valor enviado pelo cliente é descartado pelo Zod.
+ * `interval` (`monthly` | `yearly`) é o seletor anual da interface: ele escolhe
+ * QUAL preço do catálogo vale, nunca o preço em si.
  */
 router.patch(
   '/sessions/:publicToken',

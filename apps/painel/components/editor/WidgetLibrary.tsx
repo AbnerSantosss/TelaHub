@@ -6,7 +6,7 @@ import {
   Upload, MonitorPlay, Move, Info, Lock
 } from 'lucide-react';
 import { Display, Page, WidgetType } from '../../types';
-import { isWidgetLocked } from '../../services/billing';
+import { DOC_FEATURE_KEY, isWidgetLocked, widgetFeatureKey } from '../../services/billing';
 
 interface WidgetLibraryProps {
   display: Display;
@@ -97,8 +97,15 @@ export const WidgetLibrary: React.FC<WidgetLibraryProps> = ({
   planFeatures,
   requiredPlanName = 'Rede',
 }) => {
-  const lockedHint = `Disponível no plano ${requiredPlanName}. Seu plano atual não inclui painéis de BI e documentos.`;
   const locked = (type: WidgetType): boolean => isWidgetLocked(type, planFeatures);
+
+  // O aviso precisa nomear o plano CERTO: documento destrava no Loja (1 tela),
+  // painel de gestão só no Rede (piso de 5). Um texto único mandaria para o
+  // plano de 5 telas quem resolveria o problema com o de 1.
+  const lockedHint = (type: WidgetType): string =>
+    widgetFeatureKey(type) === DOC_FEATURE_KEY
+      ? 'Disponível a partir do plano Loja. Seu plano atual não inclui documentos (PDF, Google Docs e Office).'
+      : `Disponível no plano ${requiredPlanName}. Seu plano atual não inclui os painéis de gestão.`;
 
   return (
     <aside className={`absolute md:relative left-0 top-0 h-full w-64 bg-[#1f2937] border-r border-slate-800 overflow-y-auto z-[60] shadow-xl transition-transform duration-300 ease-in-out ${showLeftSidebar ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
@@ -154,14 +161,14 @@ export const WidgetLibrary: React.FC<WidgetLibraryProps> = ({
          <div className="mb-2.5">
            <h4 className="text-[9px] font-black text-rose-400 uppercase tracking-widest mb-1 flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-rose-400 inline-block"></span>Integrações</h4>
            <div className="grid grid-cols-3 gap-1.5">
-             <WidgetTool icon={<TrendingUp size={20} className="text-green-400" />} label="Bolsa" description="Painel de cotações financeiras de ações e criptomoedas em tempo real." onClick={() => addWidget(WidgetType.MARKET_WATCH)} tooltipAlign="left" />
-             <WidgetTool icon={<Aperture size={20} className="text-blue-400" />} label="Snapshot" description="Renderiza capturas estáticas e periódicas de páginas de forma segura." onClick={() => addWidget(WidgetType.BROWSER_SNAPSHOT)} tooltipAlign="center" />
-             <WidgetTool icon={<FileText size={20} className="text-cyan-500" />} label="G Docs" description="Incorpora documentos, planilhas ou slides do Google Workspace." onClick={() => addWidget(WidgetType.GOOGLE_DOCS)} tooltipAlign="right" locked={locked(WidgetType.GOOGLE_DOCS)} lockedHint={lockedHint} />
-             <WidgetTool icon={<BookOpen size={20} className="text-blue-500" />} label="Office Docs" description="Exibe planilhas Excel, documentos Word ou slides PowerPoint do Office 365." onClick={() => addWidget(WidgetType.OFFICE_DOCS)} tooltipAlign="left" locked={locked(WidgetType.OFFICE_DOCS)} lockedHint={lockedHint} />
-             <WidgetTool icon={<BarChart3 size={20} className="text-amber-500" />} label="Power BI" description="Exibe painéis interativos e relatórios dinâmicos do Microsoft Power BI." onClick={() => addWidget(WidgetType.POWER_BI)} tooltipAlign="center" locked={locked(WidgetType.POWER_BI)} lockedHint={lockedHint} />
-             <WidgetTool icon={<Database size={20} className="text-rose-500" />} label="Airtable" description="Exibe visualizações, tabelas ou bases de dados completas do Airtable." onClick={() => addWidget(WidgetType.AIRTABLE)} tooltipAlign="right" locked={locked(WidgetType.AIRTABLE)} lockedHint={lockedHint} />
-             <WidgetTool icon={<FileText size={20} className="text-red-500" />} label="PDF" description="Exibe documentos PDFs e apostilas corporativas página a página." onClick={() => addWidget(WidgetType.PDF_DOCUMENT)} tooltipAlign="left" locked={locked(WidgetType.PDF_DOCUMENT)} lockedHint={lockedHint} />
-             <WidgetTool icon={<Code2 size={20} className="text-indigo-400" />} label="HTML" description="Insira código HTML, CSS ou JS personalizado livremente." onClick={() => addWidget(WidgetType.EMBED_HTML)} tooltipAlign="center" />
+             <WidgetTool icon={<TrendingUp size={20} className="text-green-400" />} label="Bolsa" description="Painel de cotações financeiras de ações e criptomoedas em tempo real." onClick={() => addWidget(WidgetType.MARKET_WATCH)} tooltipAlign="left" locked={locked(WidgetType.MARKET_WATCH)} lockedHint={lockedHint(WidgetType.MARKET_WATCH)} />
+             <WidgetTool icon={<Aperture size={20} className="text-blue-400" />} label="Snapshot" description="Renderiza capturas estáticas e periódicas de páginas de forma segura." onClick={() => addWidget(WidgetType.BROWSER_SNAPSHOT)} tooltipAlign="center" locked={locked(WidgetType.BROWSER_SNAPSHOT)} lockedHint={lockedHint(WidgetType.BROWSER_SNAPSHOT)} />
+             <WidgetTool icon={<FileText size={20} className="text-cyan-500" />} label="G Docs" description="Incorpora documentos, planilhas ou slides do Google Workspace." onClick={() => addWidget(WidgetType.GOOGLE_DOCS)} tooltipAlign="right" locked={locked(WidgetType.GOOGLE_DOCS)} lockedHint={lockedHint(WidgetType.GOOGLE_DOCS)} />
+             <WidgetTool icon={<BookOpen size={20} className="text-blue-500" />} label="Office Docs" description="Exibe planilhas Excel, documentos Word ou slides PowerPoint do Office 365." onClick={() => addWidget(WidgetType.OFFICE_DOCS)} tooltipAlign="left" locked={locked(WidgetType.OFFICE_DOCS)} lockedHint={lockedHint(WidgetType.OFFICE_DOCS)} />
+             <WidgetTool icon={<BarChart3 size={20} className="text-amber-500" />} label="Power BI" description="Exibe painéis interativos e relatórios dinâmicos do Microsoft Power BI." onClick={() => addWidget(WidgetType.POWER_BI)} tooltipAlign="center" locked={locked(WidgetType.POWER_BI)} lockedHint={lockedHint(WidgetType.POWER_BI)} />
+             <WidgetTool icon={<Database size={20} className="text-rose-500" />} label="Airtable" description="Exibe visualizações, tabelas ou bases de dados completas do Airtable." onClick={() => addWidget(WidgetType.AIRTABLE)} tooltipAlign="right" locked={locked(WidgetType.AIRTABLE)} lockedHint={lockedHint(WidgetType.AIRTABLE)} />
+             <WidgetTool icon={<FileText size={20} className="text-red-500" />} label="PDF" description="Exibe documentos PDFs e apostilas corporativas página a página." onClick={() => addWidget(WidgetType.PDF_DOCUMENT)} tooltipAlign="left" locked={locked(WidgetType.PDF_DOCUMENT)} lockedHint={lockedHint(WidgetType.PDF_DOCUMENT)} />
+             <WidgetTool icon={<Code2 size={20} className="text-indigo-400" />} label="HTML" description="Insira código HTML, CSS ou JS personalizado livremente." onClick={() => addWidget(WidgetType.EMBED_HTML)} tooltipAlign="center" locked={locked(WidgetType.EMBED_HTML)} lockedHint={lockedHint(WidgetType.EMBED_HTML)} />
            </div>
          </div>
          

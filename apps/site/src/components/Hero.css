@@ -1,0 +1,283 @@
+/* Herói. Duas colunas no desktop (texto | vitrine), uma no celular.
+   A entrada é CSS puro e o estado padrão é VISÍVEL: é a primeira coisa que o
+   visitante vê e não pode depender de JavaScript ter executado. Por isso o
+   herói NÃO usa `.reveal`. */
+
+.hero {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 64px;
+  align-items: center;
+  padding: 88px var(--gutter) 80px;
+  background: var(--papel-2);
+  border-bottom: 1px solid var(--borda-2);
+}
+
+.hero__texto {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.hero__grito {
+  color: var(--marca);
+}
+
+.hero__lead {
+  font-size: clamp(1.0625rem, 1rem + 0.35vw, 1.25rem);
+}
+
+.hero__acoes {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.hero__secundario {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 4px;
+  border: none;
+  background: none;
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--marca);
+  cursor: pointer;
+}
+
+.hero__secundario:hover {
+  color: var(--marca-hover);
+  text-decoration: underline;
+}
+
+.hero__vitrine {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* A deitada manda na largura; a em pé ocupa uma faixa fixa ao lado, alinhada
+   pela base — é assim que as duas convivem numa recepção de verdade. */
+.hero__telas {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 150px;
+  gap: 16px;
+  align-items: end;
+}
+
+.hero__figura {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.hero__blocos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* ── A moldura de TV ─────────────────────────────────────────────────────── */
+
+.tv {
+  background: var(--noite);
+  border-radius: var(--raio-12);
+  padding: 10px;
+  box-shadow: 0 24px 60px rgba(7, 20, 38, 0.25);
+}
+
+.tv--pe {
+  padding: 8px;
+}
+
+.tv__quadro {
+  border-radius: 6px;
+  background: #0a1223;
+  color: #ffffff;
+  overflow: hidden;
+}
+
+.tv__quadro--deitada {
+  aspect-ratio: 16 / 9;
+  padding: 18px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 96px;
+  gap: 12px;
+}
+
+.tv__quadro--pe {
+  aspect-ratio: 9 / 16;
+  background: #0b1a2e;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tv__coluna {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tv__lado {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tv__titulo {
+  font-size: 1.25rem;
+  font-weight: 800;
+  line-height: 1.05;
+}
+
+.tv__linha {
+  font-size: 0.75rem;
+  color: var(--noite-titulo);
+  line-height: 1.4;
+}
+
+.tv__destaque {
+  font-size: 0.6875rem;
+  color: var(--luz);
+  margin-top: auto;
+}
+
+.tv__ok {
+  font-size: 0.6875rem;
+  color: #34d399;
+}
+
+.tv__bloco {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 8px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tv__bloco strong {
+  font-size: 1.125rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.tv__bloco span {
+  font-size: 0.5625rem;
+  color: var(--noite-texto);
+}
+
+.tv__rodape {
+  margin-top: auto;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  padding: 6px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+/* A vertical do herói tem outra escala de texto — ela é estreita de propósito. */
+.tv__quadro--pe .tv__titulo {
+  font-size: 0.75rem;
+  line-height: 1.1;
+}
+
+.tv__quadro--pe .tv__linha {
+  font-size: 0.5625rem;
+  line-height: 1.35;
+}
+
+.tv__quadro--pe .tv__destaque,
+.tv__quadro--pe .tv__ok {
+  font-size: 0.5rem;
+  margin-top: 0;
+}
+
+/* ── Larguras ────────────────────────────────────────────────────────────── */
+
+@media (max-width: 980px) {
+  .hero {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 36px;
+    padding-top: 48px;
+    padding-bottom: 48px;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero {
+    padding-top: 36px;
+    padding-bottom: 32px;
+    gap: 28px;
+  }
+
+  .hero__texto {
+    gap: 16px;
+  }
+
+  .hero__telas {
+    grid-template-columns: minmax(0, 1fr) 96px;
+    gap: 10px;
+  }
+
+  .hero__acoes .btn {
+    width: 100%;
+  }
+
+  .tv {
+    padding: 6px;
+    border-radius: 10px;
+  }
+
+  .tv__quadro--deitada {
+    padding: 10px;
+    grid-template-columns: minmax(0, 1fr) 62px;
+    gap: 8px;
+  }
+
+  .tv__titulo {
+    font-size: 0.75rem;
+  }
+
+  .tv__linha {
+    font-size: 0.5rem;
+  }
+
+  .tv__destaque {
+    font-size: 0.5rem;
+  }
+
+  .tv__bloco strong {
+    font-size: 0.75rem;
+  }
+
+  .tv__bloco span {
+    font-size: 0.4375rem;
+  }
+
+  .tv__quadro--pe {
+    padding: 8px;
+  }
+
+  .tv__quadro--pe .tv__titulo {
+    font-size: 0.5625rem;
+  }
+
+  .tv__quadro--pe .tv__linha,
+  .tv__quadro--pe .tv__destaque,
+  .tv__quadro--pe .tv__ok {
+    font-size: 0.4375rem;
+  }
+}

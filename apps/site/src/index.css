@@ -1,1948 +1,711 @@
-@import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap');
+/* ============================================================================
+   TelaHub — sistema visual "Vitrine Acesa"
+   ----------------------------------------------------------------------------
+   Substitui o tema escuro "corporativo" que a landing usava até 30/08/2026.
+   A troca não é de gosto: a auditoria de design do plano comercial v2 (§3.5)
+   mostrou três identidades diferentes em três apps — site claro, painel escuro
+   com 11 famílias de fonte importadas, checkout quente — e um destaque
+   (#0ea5e9) que REPROVAVA em contraste sobre fundo claro. Quem chega pela
+   página de vendas e entra no painel achava que tinha trocado de produto.
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   SISTEMA DE COR — "vitrine acesa"
-   ═══════════════════════════════════════════════════════════════════════════
+   Um sistema só, com contraste medido, e a mesma voz nas três superfícies.
 
-   Reescrito em 2026-07-31. O sistema anterior era a paleta padrão do Tailwind
-   (slate + sky) aplicada direto, e reprovava em contraste nos pontos que mais
-   importam. Medido, não estimado:
+   ── Como este arquivo se relaciona com os componentes ──────────────────────
+   Aqui moram TOKENS e PRIMITIVAS: as peças que aparecem em mais de uma seção
+   (botão, cartão, chip, título, moldura de captura, grade). Estilo que só uma
+   seção usa mora no `.css` ao lado do próprio componente (`Cenas.css`,
+   `Faq.css`…), importado pelo `.jsx` dele. A regra existe para que várias
+   pessoas — ou vários agentes — possam escrever seções diferentes ao mesmo
+   tempo sem disputar este arquivo.
 
-     branco sobre o botão principal (#0ea5e9) ....  2,77:1   ← o CTA da página
-     accent #0ea5e9 usado como texto .............  2,77:1
-     --cyan-soft #0284c7 como texto ..............  4,10:1
-     --text-footer #94a3b8 .......................  2,56:1
-
-   O mínimo da WCAG 2.2 AA para texto normal é 4,5:1. Um CTA que o cliente com
-   catarata, ou qualquer pessoa num celular sob sol, não consegue ler é um
-   problema de conversão antes de ser de acessibilidade.
-
-   ── A ideia ──────────────────────────────────────────────────────────────
-   O produto é uma TELA ACESA dentro de uma loja. A página passa a alternar
-   entre "papel" (fundo claro, leitura longa, alto contraste) e "painel aceso"
-   (blocos escuros onde a tela do produto aparece). O contraste deixa de ser
-   um detalhe de acabamento e vira a própria linguagem visual.
-
-   ── A regra que não pode ser quebrada ────────────────────────────────────
-   O azul da marca existe em DOIS níveis, e eles não são intercambiáveis:
-
-     --brand     #0369A1  — texto, link, ícone e preenchimento de botão.
-                            5,93:1 sobre papel. É o único que pode carregar
-                            texto sobre fundo claro.
-     --brand-lit #38BDF8  — brilho, borda acesa e texto SOBRE painel escuro.
-                            8,62:1 sobre --panel; sobre papel dá 2,3:1 e
-                            NUNCA deve receber texto ali.
-
-   Foi misturar esses dois papéis num token só que produziu o botão ilegível.
-   ═══════════════════════════════════════════════════════════════════════ */
+   ── Contraste ──────────────────────────────────────────────────────────────
+   Os pares de cor abaixo foram escolhidos medidos, não no olho:
+     --tinta   sobre --papel    = 16,9:1     --tinta-2 sobre --papel   = 8,6:1
+     --tinta-3 sobre --papel    = 5,7:1      --marca   sobre --papel   = 5,4:1
+     branco    sobre --marca    = 5,4:1      --luz     sobre --noite   = 9,8:1
+   Nenhuma cor nova deve entrar sem passar pelo mesmo teste. `--luz` é a única
+   armadilha do conjunto: ela SÓ funciona sobre `--noite`; sobre papel branco
+   dá 1,8:1 e some. Por isso ela nunca aparece como cor de texto em seção clara.
+   ========================================================================== */
 
 :root {
-  /* ── Papel: as superfícies claras ── */
-  --paper:         #ffffff;
-  --paper-2:       #f4f7fb; /* superfície inset, dá profundidade sem sombra */
-  --paper-3:       #e9eff7; /* trilhos, barras de progresso, chips apagados */
+  /* Papel — os fundos, do mais claro ao mais fechado. */
+  --papel: #ffffff;
+  --papel-2: #f4f7fb;
+  --papel-3: #e9eff7;
 
-  /* ── Tinta: hierarquia de texto sobre papel (todos AA ou AAA) ── */
-  --ink:           #0a1223; /* títulos ............ 18,69:1  AAA */
-  --ink-2:         #33415c; /* corpo .............. 10,24:1  AAA */
-  --ink-3:         #55637d; /* apoio, legenda .....  6,06:1  AA  */
+  /* Tinta — texto sobre papel, do mais forte ao mais discreto. */
+  --tinta: #0a1223;
+  --tinta-2: #33415c;
+  --tinta-3: #55637d;
 
-  /* ── Linhas ── */
-  --line:          #dbe4ef; /* separador decorativo (não delimita componente) */
-  --line-strong:   #7d8ca0; /* limite de componente interativo — 3,43:1, o que
-                               a WCAG 1.4.11 exige para input e botão vazado */
+  /* Marca — o azul que carrega ação e link. */
+  --marca: #0369a1;
+  --marca-hover: #025584;
 
-  /* ── Marca, em dois níveis (ver a regra acima) ── */
-  --brand:         #0369a1;
-  --brand-hover:   #025584;
-  --brand-lit:     #38bdf8;
-  --brand-wash:    rgba(3, 105, 161, 0.08);
-  --brand-ring:    rgba(3, 105, 161, 0.35);
+  /* Noite — as faixas escuras (cenas e CTA final) e o que vive dentro delas. */
+  --noite: #071426;
+  --noite-2: #0c1e36;
+  --noite-texto: #c5d3e6;
+  --noite-titulo: #e9f0fa;
+  /* Só sobre --noite. Ver nota de contraste no cabeçalho. */
+  --luz: #38bdf8;
 
-  /* ── Painel aceso: os blocos escuros ── */
-  --panel:         #071426;
-  --panel-2:       #0c1e36;
-  --on-panel:      #e9f0fa; /* 16,10:1 sobre --panel  AAA */
-  --on-panel-2:    #a8bcd6; /*  9,52:1                AAA */
-  --on-panel-3:    #7e93b0; /*  5,88:1                AA  */
+  /* Bordas, da mais discreta à de campo de formulário. */
+  --borda: #dbe4ef;
+  --borda-2: #c9d5e3;
+  --borda-3: #7d8ca0;
 
-  /* ── Semânticos ── */
-  --ok:            #0f7a5a; /* verde escuro o bastante para virar texto */
-  --ok-lit:        #34d399;
-  --warn:          #a35a06;
-  --danger:        #b3261e;
+  /* Estado. */
+  --ok: #0f7a5a;
+  --warn: #a35a06;
+  --danger: #b3261e;
 
-  /* ── Geometria ── */
-  --radius-sm:     8px;
-  --radius-md:     12px;
-  --radius-lg:     16px;
-  --radius-xl:     24px;
+  --raio-8: 8px;
+  --raio-12: 12px;
+  --raio-16: 16px;
+  --raio-24: 24px;
 
-  /* ── Tipografia ── */
-  --font: 'Geist', 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
-  --font-title: 'Geist', 'Outfit', 'Inter', system-ui, sans-serif;
-  --font-mono: 'Geist Mono', 'JetBrains Mono', monospace;
+  --sombra-card: 0 10px 30px rgba(7, 20, 38, 0.08);
+  --sombra-shot: 0 24px 60px rgba(7, 20, 38, 0.18);
+  --sombra-btn: 0 8px 24px rgba(3, 105, 161, 0.22);
 
-  /* Escala de display. Existe para que o tamanho seja escolhido de uma lista
-     curta, e não digitado a cada componente — foi assim que a página acumulou
-     onze tamanhos de fonte diferentes. */
-  --step--1: clamp(0.80rem, 0.77rem + 0.15vw, 0.88rem);
-  --step-0:  clamp(1.00rem, 0.96rem + 0.20vw, 1.10rem);
-  --step-1:  clamp(1.25rem, 1.15rem + 0.50vw, 1.50rem);
-  --step-2:  clamp(1.60rem, 1.40rem + 1.00vw, 2.10rem);
-  --step-3:  clamp(2.00rem, 1.60rem + 2.00vw, 3.00rem);
-  --step-4:  clamp(2.60rem, 1.90rem + 3.40vw, 4.25rem);
+  /* Uma família só. O painel importava dez; §3.5 do plano corta para esta. */
+  --fonte: 'Geist', 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
-  --transition: 0.3s ease-out;
+  /* Respiro lateral da página. Cai junto com a largura da tela (ver .secao). */
+  --gutter: 160px;
 
-  /* ═════════════════════════════════════════════════════════════════════
-     ALIAS DE COMPATIBILIDADE
-
-     O restante deste arquivo (~1500 linhas) e os componentes usam os nomes
-     antigos. Em vez de reescrever tudo — o que trocaria um problema de cor
-     por um de regressão visual em página que vende — os nomes antigos passam
-     a APONTAR para o sistema novo. Quem escrever componente novo usa os
-     tokens de cima; o que já existe herda a correção de contraste sozinho.
-
-     `--cyan` é o caso que importa: era #0ea5e9 e servia de texto E de fundo
-     de botão, reprovando nos dois papéis. Agora resolve para --brand, que
-     passa nos dois (5,93:1 tanto como texto sobre papel quanto como fundo
-     sob texto branco).
-     ═════════════════════════════════════════════════════════════════════ */
-  --bg-primary:    var(--paper);
-  --bg-secondary:  rgba(255, 255, 255, 0.72);
-  --bg-tertiary:   var(--paper-2);
-  --bg-card:       var(--paper);
-  --bg-card-hover: var(--paper-2);
-  --border:        var(--line);
-  --border-active: var(--brand);
-
-  --cyan:          var(--brand);
-  --cyan-soft:     var(--brand);
-  --cyan-hover:    var(--brand-hover);
-  --cyan-dim:      var(--brand-wash);
-  --cyan-glow:     0 0 0 4px var(--brand-wash);
-
-  --emerald:       var(--brand);
-  --emerald-dim:   var(--brand-wash);
-
-  --slate:         var(--ink-3);
-  --slate-dim:     rgba(85, 99, 125, 0.08);
-
-  --rose:          var(--danger);
-  --rose-dim:      rgba(179, 38, 30, 0.1);
-
-  --text-primary:  var(--ink);
-  --text-secondary:var(--ink-2);
-  --text-muted:    var(--ink-3);
-  /* Era #94a3b8 (2,56:1). Nota de rodapé continua sendo texto: quem lê termo
-     de contratação e política de preço lê exatamente daqui. */
-  --text-footer:   var(--ink-3);
+  color-scheme: light;
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   SUPERFÍCIES ESCURAS — remapeamento de escopo
+/* ── Reset curto ─────────────────────────────────────────────────────────── */
 
-   Três blocos da página são escuros: o rodapé, a faixa final de ação e o modal
-   de captura de lead. Todos os três estavam com texto ILEGÍVEL, e sempre pela
-   mesma causa: a superfície é escura, mas o texto herdava os tokens de tinta
-   feitos para papel. As piores medições da página vinham daqui —
-
-     logotipo no rodapé (preto sobre #111827) ....  1,18:1
-     assinatura da marca .........................  1,73:1
-     aviso de copyright ..........................  2,34:1
-
-   A correção não é caçar cada `color:` — vários vêm de estilo inline no JSX e
-   escapariam. Como variável CSS CASCATEIA, redefinir os tokens de tinta DENTRO
-   do escopo escuro faz cada `var(--text-secondary)` lá dentro resolver sozinho
-   para o valor certo, inclusive nos inline e em componente que ainda nem foi
-   escrito.
-
-   Consequência prática: para criar um bloco escuro novo, basta acrescentá-lo
-   a esta lista de seletores. Nada mais precisa ser tocado.
-   ═══════════════════════════════════════════════════════════════════════════ */
-footer,
-.cta-strip,
-.lead-modal {
-  --text-primary:   var(--on-panel);
-  --text-secondary: var(--on-panel-2);
-  --text-muted:     var(--on-panel-2);
-  --text-footer:    var(--on-panel-3);
-  --border:         rgba(168, 188, 214, 0.18);
-  /* Sobre escuro quem carrega texto é o azul aceso, nunca o --brand. */
-  --cyan:           var(--brand-lit);
-  --cyan-soft:      var(--brand-lit);
-}
-
-/* Exceção: o logotipo do rodapé tem fundo próprio da marca, e ali o azul
-   sólido continua correto por baixo do ícone branco. */
-footer .nav-logo-icon.footer-logo-icon {
-  background: var(--brand);
-}
-
-/* ═══════════════════════════════════════════
-   RESET & BASE
-   ═══════════════════════════════════════════ */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
-  margin: 0;
-  padding: 0;
 }
 
 html {
   scroll-behavior: smooth;
-  background-color: var(--bg-primary);
+  /* A navbar é fixa: sem isto, chegar por âncora (`/#precos`, o link que o
+     painel e o checkout usam) esconde o título da seção atrás dela. */
+  scroll-padding-top: 88px;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
-  font-family: var(--font);
-  background: var(--bg-primary);
-  color: var(--text-primary);
-  line-height: 1.6;
-  overflow-x: hidden;
+  margin: 0;
+  font-family: var(--fonte);
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--tinta);
+  background: var(--papel);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* Nenhuma seção pode empurrar a página de lado. Tabela larga e faixa escura
+     rolam DENTRO do próprio contêiner (ver .tabela). */
+  overflow-x: hidden;
 }
 
-img {
+img,
+svg,
+video {
   max-width: 100%;
-  display: block;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5 {
+  margin: 0;
+  text-wrap: pretty;
+}
+
+p {
+  margin: 0;
 }
 
 a {
+  color: var(--marca);
   text-decoration: none;
+}
+
+a:hover {
+  color: var(--marca-hover);
+  text-decoration: underline;
+}
+
+button {
+  font: inherit;
   color: inherit;
 }
 
-ul {
-  list-style: none;
-}
-
-/* ═══════════════════════════════════════════
-   TECHNICAL GRID BACKGROUND (Swiss Grid)
-   ═══════════════════════════════════════════ */
-/* Malha de pontos. Era branco a 3% sobre fundo branco — ou seja, não existia.
-   Agora é tinta a 5%: perceptível como textura, longe de competir com texto. */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background-image:
-    radial-gradient(rgba(10, 18, 35, 0.05) 1px, transparent 1px);
-  background-size: 26px 26px;
-  pointer-events: none;
-  z-index: 0;
-}
-
-/* Parede de telas (ScreenWall.jsx).
-
-   O desvanecimento no centro (para a parede não virar esqueleto de
-   carregamento atrás do texto) é feito NO DESENHO, dentro do componente — e
-   não com `mask-image` aqui, como foi tentado primeiro.
-
-   Motivo: máscara sobre um canvas FIXO de viewport inteira obriga o navegador
-   a recompor a página toda a cada quadro. O sintoma foi concreto: a captura de
-   tela do renderizador passou a estourar o tempo limite e devolver quadro em
-   branco com a página normal no DOM. Se a captura sofre, a rolagem em máquina
-   modesta sofre igual. Multiplicar o alfa por célula custa uma conta por
-   retângulo e não cria camada nenhuma. */
-#network-canvas {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100vw; height: 100vh;
-  pointer-events: none;
-  z-index: 0;
-}
-
-/* Em telas estreitas o conteúdo ocupa a largura inteira: não sobra borda para
-   a parede viver, e ela só atrapalharia. */
-@media (max-width: 860px) {
-  #network-canvas { display: none; }
-}
-
-/* ═══════════════════════════════════════════
-   FOCO VISÍVEL
-
-   Não havia estilo de foco na página: quem navega por teclado (e quem usa
-   leitor de tela junto) não tinha como saber onde estava. O anel usa
-   `box-shadow` além da `outline` porque em elemento com `overflow: hidden`
-   ou `border-radius` grande a outline é cortada em alguns navegadores.
-   ═══════════════════════════════════════════ */
-:where(a, button, input, textarea, select, [tabindex]):focus-visible {
-  outline: 2px solid var(--brand);
+/* Foco visível em tudo que recebe teclado. Removê-lo por estética deixa a
+   página inutilizável para quem navega por Tab — e é o primeiro item que
+   qualquer auditoria de acessibilidade cobra. */
+:focus-visible {
+  outline: 3px solid var(--marca);
   outline-offset: 2px;
-  border-radius: var(--radius-sm);
+  border-radius: 4px;
 }
 
-/* Sobre painel escuro o azul de texto some — ali o anel é o azul aceso. */
-:where(.cta-strip, .lead-modal, .panel) :where(a, button, input, textarea, select, [tabindex]):focus-visible {
-  outline-color: var(--brand-lit);
+/* ── Seção: o bloco de página ────────────────────────────────────────────── */
+
+.secao {
+  padding: 96px var(--gutter);
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  position: relative;
 }
 
-/* ═══════════════════════════════════════════
-   REVEAL AO ROLAR — sem depender de CDN
+.secao--compacta {
+  padding-block: 80px;
+}
 
-   Antes: `gsap.from('.reveal', { opacity: 0 })` com ScrollTrigger, e o GSAP
-   vindo de dois <script> do cdnjs. Duas formas de a página ficar EM BRANCO:
+.secao--papel {
+  background: var(--papel-2);
+  border-top: 1px solid var(--borda);
+  border-bottom: 1px solid var(--borda);
+}
 
-     1. o CDN não responde (rede corporativa, bloqueador, offline) e os 26
-        elementos `.reveal` ficam presos em opacity 0;
-     2. o GSAP carrega, mas o visitante chega por âncora (`/#precos`, que é
-        exatamente o link que o painel e o checkout usam): o ScrollTrigger de
-        tudo que ficou ACIMA do ponto de chegada nunca dispara, porque esses
-        elementos jamais "entram" pela borda de baixo.
+.secao--noite {
+  background: var(--noite);
+  color: var(--noite-titulo);
+}
 
-   O caso 2 foi reproduzido: a seção inteira renderizou vazia.
+.secao--noite .h2,
+.secao--noite h2,
+.secao--noite h3 {
+  color: #ffffff;
+}
 
-   Numa página que é pré-renderizada justamente para o conteúdo existir sem
-   JavaScript, esconder o conteúdo COM JavaScript desfaz o trabalho. Agora o
-   estado padrão é VISÍVEL e a animação é progressiva: sem JS, sem observer,
-   ou com `prefers-reduced-motion`, o conteúdo simplesmente aparece.
-   ═══════════════════════════════════════════ */
+.secao--noite .lead,
+.secao--noite p {
+  color: var(--noite-texto);
+}
+
+.secao--noite .cap,
+.secao--noite .trust {
+  color: var(--noite-texto);
+}
+
+.secao--noite a {
+  color: var(--luz);
+}
+
+.secao__cabeca {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 760px;
+}
+
+/* ── Tipografia ──────────────────────────────────────────────────────────── */
+
+.h1 {
+  font-size: clamp(2rem, 1.35rem + 2.6vw, 3.625rem);
+  line-height: 1.03;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--tinta);
+}
+
+.h2 {
+  font-size: clamp(1.75rem, 1.35rem + 1.6vw, 2.5rem);
+  line-height: 1.1;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--tinta);
+}
+
+.lead {
+  font-size: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+  line-height: 1.6;
+  color: var(--tinta-2);
+  text-wrap: pretty;
+}
+
+.cap {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--tinta-3);
+  text-align: center;
+  line-height: 1.4;
+}
+
+.micro {
+  font-size: 0.8125rem;
+  color: var(--tinta-3);
+  line-height: 1.45;
+}
+
+/* Rótulo mínimo de 12px (§3.5). Abaixo disso o painel tinha texto que ninguém
+   lia de pé, a três metros da TV — e a landing repetia o vício. */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 28px;
+  padding: 4px 12px;
+  border-radius: 99px;
+  border: 1px solid var(--borda);
+  background: var(--papel-2);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--marca);
+  width: fit-content;
+}
+
+.secao--noite .chip {
+  background: rgba(56, 189, 248, 0.1);
+  border-color: rgba(168, 188, 214, 0.28);
+  color: var(--luz);
+}
+
+/* ── Botões ──────────────────────────────────────────────────────────────── */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 0 24px;
+  border: none;
+  border-radius: var(--raio-8);
+  font-weight: 700;
+  font-size: 1rem;
+  line-height: 1.2;
+  text-align: center;
+  background: var(--marca);
+  color: #ffffff;
+  box-shadow: var(--sombra-btn);
+  cursor: pointer;
+  transition: background-color 0.16s ease, transform 0.16s ease;
+}
+
+.btn:hover {
+  background: var(--marca-hover);
+  color: #ffffff;
+  text-decoration: none;
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Sobre fundo --noite: o azul da marca desaparece no escuro, a luz não. */
+.btn--luz {
+  background: var(--luz);
+  color: var(--noite);
+  box-shadow: 0 8px 24px rgba(56, 189, 248, 0.25);
+}
+
+.btn--luz:hover {
+  background: #7dd3fc;
+  color: var(--noite);
+}
+
+.btn--fantasma {
+  background: var(--papel);
+  color: var(--marca);
+  border: 1.5px solid var(--borda-3);
+  box-shadow: none;
+}
+
+.btn--fantasma:hover {
+  background: var(--papel-2);
+  color: var(--marca-hover);
+  border-color: var(--marca);
+}
+
+.btn--grande {
+  min-height: 56px;
+  padding: 0 28px;
+  font-size: 1.0625rem;
+}
+
+.btn--largo {
+  width: 100%;
+}
+
+/* ── Cartão, moldura de captura, selos ───────────────────────────────────── */
+
+.card {
+  background: var(--papel);
+  border: 1px solid var(--borda-2);
+  border-radius: var(--raio-16);
+  box-shadow: var(--sombra-card);
+}
+
+.shot {
+  border-radius: var(--raio-12);
+  overflow: hidden;
+  border: 1px solid var(--borda-2);
+  box-shadow: var(--sombra-shot);
+  background: var(--noite);
+}
+
+.shot img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.trust {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.875rem;
+  color: var(--tinta-3);
+  font-weight: 500;
+}
+
+/* ── Grades ──────────────────────────────────────────────────────────────── */
+
+.grid-2,
+.grid-3 {
+  display: grid;
+  gap: 20px;
+}
+
+.grid-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.grid-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.split {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 64px;
+  align-items: center;
+}
+
+.split--midia {
+  grid-template-columns: minmax(0, 1fr) 560px;
+}
+
+/* ── Tabela ──────────────────────────────────────────────────────────────── */
+
+/* O wrapper existe para a tabela rolar DENTRO dele. Sem isso, uma tabela de
+   seis colunas empurra a página inteira de lado no celular — e o defeito não
+   aparece no desktop de quem escreveu. */
+.tabela {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tabela table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 720px;
+}
+
+.tabela th,
+.tabela td {
+  padding: 14px 18px;
+  text-align: left;
+  font-size: 0.9375rem;
+  border-bottom: 1px solid var(--borda);
+  vertical-align: top;
+  line-height: 1.45;
+}
+
+.tabela th {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--tinta-3);
+  font-weight: 700;
+}
+
+.tabela tr:last-child td {
+  border-bottom: none;
+}
+
+/* ── Revelação ao rolar ──────────────────────────────────────────────────── */
+
+/* O estado PADRÃO é visível, de propósito: `src/lib/reveal.js` só acrescenta
+   `.is-in`. A montagem antiga (GSAP + ScrollTrigger de CDN) tinha duas formas
+   de deixar a página em branco — CDN fora do ar e chegada por âncora — e a
+   segunda foi reproduzida. Conteúdo nunca depende de JavaScript para aparecer. */
 .reveal {
   opacity: 1;
   transform: none;
 }
 
-/* A classe só é adicionada pelo próprio observer, depois de confirmar que ele
-   funciona — ver `useReveal` em src/lib/reveal.js. */
-html.reveal-ready .reveal {
+.reveal-ready .reveal {
   opacity: 0;
-  transform: translate3d(0, 22px, 0);
-  transition:
-    opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
-    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
-  will-change: opacity, transform;
+  transform: translateY(18px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
 }
 
-html.reveal-ready .reveal.is-in {
+.reveal-ready .reveal.is-in {
   opacity: 1;
   transform: none;
-  will-change: auto;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html.reveal-ready .reveal,
-  html.reveal-ready .reveal.is-in {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .reveal-ready .reveal,
+  .reveal-ready .reveal.is-in {
     opacity: 1;
     transform: none;
     transition: none;
   }
-}
 
-/* ═══════════════════════════════════════════
-   ENTRADA DO HERÓI
-
-   Em CSS, e não em JavaScript, por um motivo específico: é o primeiro bloco
-   que o visitante vê. Se depender de script, existe uma janela — curta, mas
-   real em 3G — em que o pré-render já pintou o texto e o script ainda não
-   rodou. Animar a partir do CSS elimina a janela.
-
-   `animation-fill-mode: both` guarda o estado inicial durante o `delay`, o
-   que evita o pisca-esconde clássico de conteúdo aparecendo antes da hora.
-   ═══════════════════════════════════════════ */
-@keyframes th-sobe {
-  from { opacity: 0; transform: translate3d(0, 26px, 0); }
-  to   { opacity: 1; transform: none; }
-}
-
-@keyframes th-emerge {
-  from { opacity: 0; transform: translate3d(0, 20px, 0) scale(0.975); }
-  to   { opacity: 1; transform: none; }
-}
-
-.hero-headline,
-.hero-subheadline,
-.hero-actions,
-.hero-mockup,
-.hero-float-badge {
-  animation: th-sobe 0.85s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-.hero-headline     { animation-delay: 0.05s; }
-.hero-subheadline  { animation-delay: 0.16s; }
-.hero-actions      { animation-delay: 0.26s; }
-.hero-mockup       { animation: th-emerge 1.05s cubic-bezier(0.22, 1, 0.36, 1) 0.20s both; }
-.hero-float-badge  { animation-delay: 0.5s; }
-
-@media (prefers-reduced-motion: reduce) {
-  .hero-headline,
-  .hero-subheadline,
-  .hero-actions,
-  .hero-mockup,
-  .hero-float-badge {
-    animation: none;
+  * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
   }
 }
 
-/* ═══════════════════════════════════════════
-   SCROLLBAR
-   ═══════════════════════════════════════════ */
-::-webkit-scrollbar {
-  width: 6px;
-}
-::-webkit-scrollbar-track {
-  background: var(--bg-primary);
-}
-::-webkit-scrollbar-thumb {
-  background: #374151;
-  border-radius: 99px;
-}
-
-/* ═══════════════════════════════════════════
-   LAYOUT HELPERS
-   ═══════════════════════════════════════════ */
-.container {
-  max-width: 1120px;
-  margin: 0 auto;
-  padding: 0 16px; /* mobile-first: telas pequenas primeiro */
-  position: relative;
-  z-index: 1;
-}
-@media (min-width: 640px) {
-  .container { padding: 0 24px; }
-}
-
-section {
-  padding: 64px 0; /* mobile-first */
-  position: relative;
-}
-@media (min-width: 1024px) {
-  section { padding: 96px 0; }
-}
-
-.orb {
-  display: none !important; /* banido de acordo com a especificação clara */
-}
-
-/* Spring-loaded active states */
-.btn:active, .tab-btn:active, .preco-card:active, .bento-card:active {
-  transform: scale(0.98) !important;
-  transition: transform 0.08s cubic-bezier(0.16, 1, 0.3, 1) !important;
-}
-
-/* ═══════════════════════════════════════════
-   FOCUS VISIBLE — indicador de foco consistente
-   (nunca remover o outline; sobrescrever com um visível)
-   ═══════════════════════════════════════════ */
-:focus-visible {
-  outline: 2px solid var(--cyan);
-  outline-offset: 2px;
-  border-radius: 4px;
-}
-
-/* ═══════════════════════════════════════════
-   ALVOS DE TOQUE — mínimo 44x44px em controles mobile
-   ═══════════════════════════════════════════ */
-.modal-close {
-  min-width: 44px;
-  min-height: 44px;
-}
-
-/* ═══════════════════════════════════════════
-   TYPOGRAPHY
-   ═══════════════════════════════════════════ */
-.label {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--cyan-soft);
-  padding: 6px 14px;
-  border: 1px solid rgba(14, 165, 233, 0.2);
-  border-radius: 99px;
-  background: rgba(14, 165, 233, 0.1);
-  margin-bottom: 20px;
-}
-.label::before {
-  content: '';
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: var(--cyan);
-}
-
-h1, h2, h3, h4 {
-  font-family: var(--font-title);
-  line-height: 1.15;
-  letter-spacing: -0.025em;
-  font-weight: 700;
-  color: var(--text-primary);
-}
-h1 { font-size: 1.75rem; font-weight: 800; } /* mobile-first: tamanho fixo para telas pequenas */
-h2 { font-size: 1.5rem; font-weight: 750; }
-h3 { font-size: clamp(1.1rem, 1.8vw, 1.35rem); font-weight: 650; }
-h4 { font-size: 1.0rem; font-weight: 600; }
-@media (min-width: 640px) {
-  h1 { font-size: clamp(2.2rem, 3.8vw, 3.4rem); }
-  h2 { font-size: clamp(1.7rem, 2.8vw, 2.2rem); }
-}
-
-.text-gradient {
-  background: linear-gradient(135deg, var(--text-primary) 30%, var(--cyan-soft) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-.text-cyan { color: var(--cyan-soft); }
-.text-secondary { color: var(--text-secondary); }
-
-/* ═══════════════════════════════════════════
-   BUTTONS
-   ═══════════════════════════════════════════ */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 12px 24px;
-  border-radius: var(--radius-sm);
-  font-family: var(--font);
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  border: none;
-  transition: var(--transition);
-  white-space: nowrap;
-}
-.btn-primary {
-  background: var(--cyan);
-  color: #ffffff;
-  box-shadow: 0 2px 8px rgba(14, 165, 233, 0.2);
-  position: relative;
-  overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-.btn-primary:hover {
-  background: var(--cyan-hover);
-  box-shadow: var(--cyan-glow);
-  transform: translateY(-1px);
-}
-.btn-ghost {
-  background: transparent;
-  color: var(--text-secondary);
-  border: 1px solid var(--border);
-}
-.btn-ghost:hover {
-  border-color: #ffffff;
-  color: var(--text-primary);
-  background: rgba(148, 163, 184, 0.08);
-  transform: translateY(-1px);
-}
-
-.btn svg, .btn i { width: 16px; height: 16px; flex-shrink: 0; }
-
-/* ═══════════════════════════════════════════
-   NAVBAR
-   ═══════════════════════════════════════════ */
-nav {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  z-index: 100;
-  padding: 0 24px;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.85);
-  transition: var(--transition);
-}
-.nav-inner {
-  max-width: 1120px;
-  margin: 0 auto;
-  height: 64px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.nav-logo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-weight: 700;
-  font-size: 1.1rem;
-  letter-spacing: -0.02em;
-}
-.nav-logo-icon {
-  width: 32px; height: 32px;
-  background: var(--cyan);
-  border-radius: var(--radius-sm);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.nav-logo-icon svg, .nav-logo-icon i { width: 18px; height: 18px; color: #FFFFFF; }
-.nav-links {
-  display: flex;
-  align-items: center;
-  gap: 32px;
-}
-.nav-links button, .nav-links a {
-  background: transparent;
-  border: none;
-  font-family: var(--font);
-  font-size: 0.875rem;
-  color: var(--text-secondary);
-  cursor: pointer;
-  transition: color var(--transition);
-}
-.nav-links button:hover, .nav-links a:hover { color: var(--text-primary); }
-.nav-cta { display: flex; align-items: center; gap: 12px; }
-
-/* Hamburger Toggle Button */
-.mobile-menu-toggle {
-  display: none;
-  flex-direction: column;
-  justify-content: space-between;
-  box-sizing: content-box;
-  width: 20px;
-  height: 14px;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  padding: 15px 12px;
-  z-index: 1001;
-}
-
-.hamburger-line {
-  width: 100%;
-  height: 2px;
-  background-color: var(--text-primary);
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
-  transform-origin: left center;
-}
-
-/* Transform to Close Icon */
-.mobile-menu-toggle.open .hamburger-line:nth-child(1) {
-  transform: rotate(45deg) translate(2px, -1px);
-}
-
-.mobile-menu-toggle.open .hamburger-line:nth-child(2) {
-  opacity: 0;
-}
-
-.mobile-menu-toggle.open .hamburger-line:nth-child(3) {
-  transform: rotate(-45deg) translate(2px, 1px);
-}
-
-/* Mobile Fullscreen Menu Overlay */
-.mobile-menu-overlay {
-  position: fixed;
-  top: 64px; /* Directly under the header border */
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(255, 255, 255, 0.98);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  z-index: 999;
-  display: flex;
-  flex-direction: column;
-  padding: 40px 24px;
-  animation: mobileMenuFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  overflow-y: auto;
-}
-
-@keyframes mobileMenuFadeIn {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.mobile-nav-links {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  margin-bottom: 40px;
-}
-
-.mobile-nav-links li button {
-  display: block;
-  width: 100%;
-  text-align: left;
-  background: transparent;
-  border: none;
-  font-family: var(--font-title);
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  padding: 8px 0;
-  cursor: pointer;
-  border-bottom: 1px solid var(--border);
-  transition: color 0.2s ease;
-}
-
-.mobile-nav-links li a {
-  display: block;
-  width: 100%;
-  text-align: left;
-  font-family: var(--font-title);
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--text-secondary);
-  padding: 8px 0;
-  border-bottom: 1px solid var(--border);
-  transition: color 0.2s ease;
-}
-
-.mobile-nav-links li button:hover,
-.mobile-nav-links li a:hover {
-  color: var(--cyan);
-}
-
-.mobile-nav-cta {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-top: auto;
-  padding-bottom: 40px;
-}
-
-/* ═══════════════════════════════════════════
-   SECTION 1 — HERO
-   ═══════════════════════════════════════════ */
-#hero {
-  padding: 140px 0 64px;
-  min-height: auto;
-  display: flex;
-  align-items: center;
-  background: transparent;
-}
-.hero-inner {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 64px;
-  align-items: center;
-}
-.hero-content { max-width: 600px; }
-.hero-headline { margin-bottom: 24px; }
-.hero-subheadline {
-  font-size: 1.05rem;
-  color: var(--text-secondary);
-  line-height: 1.7;
-  margin-bottom: 36px;
-  max-width: 480px;
-}
-.hero-actions {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  flex-wrap: wrap;
-}
-.hero-actions button {
-  cursor: pointer;
-}
-.hero-trust {
-  margin-top: 24px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.78rem;
-  color: var(--text-muted);
-}
-.hero-trust svg, .hero-trust i { color: var(--cyan); width: 14px; height: 14px; }
-
-/* Hero Visual — Dashboard Mockup */
-.hero-visual {
-  position: relative;
-}
-.hero-mockup {
-  position: relative;
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  border: 1px solid var(--border);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.05);
-}
-.hero-mockup-bar {
-  background: #0f172a;
-  padding: 10px 14px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  border-bottom: 1px solid var(--border);
-}
-.mockup-dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-}
-.mockup-dot:nth-child(1) { background: #ff5f57; }
-.mockup-dot:nth-child(2) { background: #febc2e; }
-.mockup-dot:nth-child(3) { background: #28c840; }
-.mockup-url {
-  margin-left: 10px;
-  flex: 1;
-  /* A barra do navegador simulado é escura; o texto herdava tinta de papel
-     (1,74:1). É texto decorativo, mas ilegível também estraga a ilustração. */
-  color: var(--on-panel-2);
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(168, 188, 214, 0.22);
-  border-radius: 6px;
-  padding: 2px 10px;
-  font-size: 0.7rem;
-}
-.mockup-body {
-  background: var(--bg-primary);
-  padding: 20px;
-}
-.mockup-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16px;
-}
-.mockup-title {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-.mockup-badge-total {
-  font-size: 0.68rem;
-  padding: 3px 8px;
-  border-radius: var(--radius-sm);
-  background: var(--cyan-dim);
-  color: var(--cyan);
-  border: 1px solid var(--border);
-}
-.mockup-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-}
-.mockup-display-card {
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 10px;
-  transition: var(--transition);
-}
-.mockup-display-card:hover {
-  border-color: var(--border-active);
-  background: var(--bg-card-hover);
-}
-.mockup-screen {
-  width: 100%;
-  aspect-ratio: 16/9;
-  border-radius: 0px;
-  margin-bottom: 8px;
-  overflow: hidden;
-  position: relative;
-}
-.mockup-screen-inner {
-  width: 100%; height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.screen-a { background: url('/assets/images/recepcao_boas_vindas.png') center/cover no-repeat; }
-.screen-b { background: url('/assets/images/aviso_condominio.png') center/cover no-repeat; }
-.screen-c { background: url('/assets/images/cardapio_digital.png') center/cover no-repeat; }
-.screen-d { background: url('/assets/images/painel_rh.png') center/cover no-repeat; }
-.screen-e { background: url('/assets/images/cardapio_digital.png') center/cover no-repeat; }
-.screen-f { background: url('/assets/images/recepcao_boas_vindas.png') center/cover no-repeat; }
-.screen-icon { display: none; }
-.screen-icon svg, .screen-icon i { width: 20px; height: 20px; color: var(--cyan); }
-.mockup-display-info {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.mockup-display-name {
-  font-size: 0.65rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 60%;
-}
-.badge {
-  font-size: 0.58rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  padding: 2px 6px;
-  border-radius: 0px;
-  text-transform: uppercase;
-}
-.badge-online {
-  background: var(--emerald-dim);
-  color: var(--emerald);
-  border: 1px solid rgba(14, 165, 233, 0.25);
-}
-.badge-offline {
-  background: var(--bg-secondary);
-  color: var(--slate);
-  border: 1px solid var(--border);
-}
-.mockup-stat-row {
-  display: flex;
-  gap: 8px;
-  margin-top: 12px;
-}
-.mockup-stat {
-  flex: 1;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 8px 10px;
-}
-.mockup-stat-label { font-size: 0.58rem; color: var(--text-secondary); margin-bottom: 2px; }
-.mockup-stat-value { font-size: 0.8rem; font-weight: 700; color: var(--text-primary); }
-.mockup-stat-value.cyan { color: var(--cyan); }
-
-/* floating badge */
-.hero-float-badge {
-  position: absolute;
-  bottom: -16px;
-  left: -20px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 10px 16px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-  animation: float 4s ease-in-out infinite;
-}
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-8px); }
-}
-.float-icon { font-size: 1.2rem; }
-.float-text { font-size: 0.72rem; }
-.float-text strong { display: block; color: var(--text-primary); font-size: 0.8rem; }
-.float-text span { color: var(--text-secondary); }
-
-/* ═══════════════════════════════════════════
-   SECTION 2 — ARGUMENTO TÉCNICO (Problema vs Solução)
-   ═══════════════════════════════════════════ */
-#argumento {
-  background: var(--bg-secondary);
-  backdrop-filter: blur(8px);
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-}
-#argumento .argumento-card {
-  background: var(--bg-card);
-}
-.argumento-header {
-  text-align: center;
-  margin-bottom: 64px;
-}
-.argumento-header h2 { max-width: 640px; margin: 0 auto 16px; }
-.argumento-header p {
-  max-width: 500px;
-  margin: 0 auto;
-  color: var(--text-secondary);
-  font-size: 1rem;
-}
-
-.argumento-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 24px;
-}
-.argumento-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 40px;
-  position: relative;
-  overflow: hidden;
-  transition: border-color var(--transition), transform var(--transition);
-}
-.argumento-card:hover { border-color: var(--border-active); transform: translateY(-3px); }
-.argumento-icon {
-  width: 48px; height: 48px;
-  border-radius: var(--radius-sm);
-  background: var(--cyan-dim);
-  border: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 24px;
-}
-.argumento-icon svg, .argumento-icon i { width: 22px; height: 22px; color: var(--cyan); }
-.argumento-card h3 { margin-bottom: 12px; font-size: 1.2rem; }
-.argumento-card p {
-  color: var(--text-secondary);
-  font-size: 0.95rem;
-  line-height: 1.7;
-}
-
-
-/* ═══════════════════════════════════════════
-   SECTION 3 — BENTO GRID
-   ═══════════════════════════════════════════ */
-#recursos .section-header {
-  text-align: center;
-  margin-bottom: 64px;
-}
-#recursos .section-header h2 { margin-bottom: 12px; }
-#recursos .section-header p {
-  color: var(--text-secondary);
-  font-size: 1rem;
-  max-width: 480px;
-  margin: 0 auto;
-}
-
-
-/* ═══════════════════════════════════════════
-   SECTION 4 — TABS CASOS DE USO
-   ═══════════════════════════════════════════ */
-#casos {
-  background: var(--bg-secondary);
-  backdrop-filter: blur(8px);
-}
-
-
-
-#casos .label::before {
-  background: #38bdf8;
-}
-
-
-
-
-
-.casos-header {
-  text-align: center;
-  margin-bottom: 48px;
-}
-.casos-header h2 { margin-bottom: 12px; }
-.casos-header p { color: var(--text-secondary); font-size: 1rem; max-width: 520px; margin: 0 auto; }
-
-.tabs-wrapper { position: relative; }
-.tabs-nav {
-  display: flex;
-  gap: 4px;
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 5px;
-  margin-bottom: 24px;
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-.tabs-nav::-webkit-scrollbar { display: none; }
-.tab-btn { flex: 1;
-  min-width: max-content;
-  padding: 10px 20px;
-  border: none;
-  background: transparent; color: var(--text-secondary);
-  font-family: var(--font);
-  font-size: 0.85rem;
-  font-weight: 600;
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  transition: var(--transition);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  white-space: nowrap;
-}
-.tab-btn:hover { color: var(--text-primary); }
-/* A aba ativa usava --brand-lit (#38bdf8) como TEXTO sobre um fundo azul a 20%
-   quase branco: 1,99:1. Além de ilegível, o estado selecionado é informação —
-   se ele não se distingue, a pessoa não sabe qual caso de uso está lendo.
-   Agora é o azul sólido carregando texto branco: o selecionado se lê de
-   relance, e não depende só de cor (ganha peso e sombra). */
-.tab-btn.active {
-  background: var(--brand);
-  color: #ffffff;
-  border: 1px solid var(--brand);
-  box-shadow: 0 2px 12px rgba(3, 105, 161, 0.28);
-}
-.tab-icon { font-size: 1rem; }
-
-.tab-panel { display: none; }
-.tab-panel.active { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start; }
-
-.tab-content h3 { font-size: 1.5rem; margin-bottom: 14px; line-height: 1.25; }
-.tab-content p {
-  color: var(--text-secondary);
-  font-size: 0.95rem;
-  line-height: 1.7;
-  margin-bottom: 20px;
-}
-.tab-features {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.tab-feature {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  font-size: 0.875rem;
-  color: var(--text-secondary);
-}
-.tab-feature-icon {
-  width: 28px; height: 28px;
-  flex-shrink: 0;
-  border-radius: var(--radius-sm);
-  background: var(--cyan-dim);
-  border: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.75rem;
-  color: var(--cyan);
-}
-.tab-feature-text strong {
-  display: block;
-  color: var(--text-primary);
-  font-size: 0.875rem;
-  margin-bottom: 2px;
-}
-
-.tab-visual {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 28px;
-  min-height: 280px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-/* ═══════════════════════════════════════════
-   TV BEZEL SIMULATION — Side-by-Side 16:9 & 9:16
-   ═══════════════════════════════════════════ */
-.tv-simulation-container {
-  display: flex;
-  flex-direction: column; /* mobile-first: TVs empilhadas em telas pequenas */
-  align-items: center;
-  gap: 16px;
-  justify-content: center;
-  width: 100%;
-  margin: 8px 0;
-}
-@media (min-width: 640px) {
-  .tv-simulation-container {
-    flex-direction: row;
-    align-items: flex-end;
-    gap: 20px;
-  }
-}
-
-.tv-bezel {
-  background: linear-gradient(180deg, #1F2937 0%, #111827 100%);
-  padding: 6px 6px 14px 6px;
-  border-radius: 4px;
-  box-shadow: 
-    0 12px 28px -10px rgba(0, 0, 0, 0.25),
-    0 4px 10px -2px rgba(0, 0, 0, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  position: relative;
-  border: 1px solid #374151;
-  transition: transform var(--transition), box-shadow var(--transition);
-}
-
-.tv-bezel:hover {
-  transform: translateY(-3px);
-  box-shadow: 
-    0 18px 36px -10px rgba(0, 0, 0, 0.3),
-    0 6px 14px -2px rgba(0, 0, 0, 0.18),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
-}
-
-.tv-bezel::after {
-  content: '';
-  position: absolute;
-  bottom: 5px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 5px;
-  height: 5px;
-  /* LED aceso sobre a moldura escura da TV: aqui o azul claro é o certo — é
-     luz sobre fundo escuro, o papel de --brand-lit. */
-  background: var(--brand-lit);
-  border-radius: 50%;
-  box-shadow:
-    0 0 6px rgba(56, 189, 248, 0.8),
-    0 0 2px var(--brand-lit);
-}
-
-.tv-bezel.tv-landscape,
-.tv-bezel.tv-vertical {
-  width: 100%;
-  max-width: 320px;
-  flex: none;
-}
-@media (min-width: 640px) {
-  .tv-bezel.tv-landscape {
-    flex: 1.6;
-    max-width: 60%;
-  }
-  .tv-bezel.tv-vertical {
-    flex: 0.7;
-    max-width: 35%;
-  }
-}
-
-.tv-screen {
-  width: 100%;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  border: 1px solid rgba(0, 0, 0, 0.4);
-  background-color: #0a0a0a;
-  display: block;
-}
-
-.tv-screen.landscape-aspect {
-  aspect-ratio: 16 / 9;
-}
-
-.tv-screen.vertical-aspect {
-  aspect-ratio: 9 / 16;
-}
-
-.tv-ratio-badge {
-  position: absolute;
-  top: 12px;
-  left: 12px;
-  background: rgba(17, 24, 39, 0.75);
-  backdrop-filter: blur(4px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: #F3F4F6;
-  font-size: 9px;
-  font-weight: 700;
-  padding: 3px 8px;
-  border-radius: 2px;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  pointer-events: none;
-  z-index: 2;
-}
-
-/* ═══════════════════════════════════════════
-   SECTION 5 — PREÇOS
-   ═══════════════════════════════════════════ */
-#precos {
-  background: var(--bg-secondary);
-  border-top: 1px solid var(--border);
-}
-.precos-header {
-  text-align: center;
-  margin-bottom: 60px;
-}
-.precos-header h2 { margin-bottom: 12px; }
-.precos-header p { color: var(--text-secondary); max-width: 480px; margin: 0 auto; }
-
-.precos-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
-  align-items: start;
-}
-.preco-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 36px 30px;
-  position: relative;
-  overflow: hidden;
-  transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition);
-}
-.preco-card:hover { transform: translateY(-4px); }
-
-.preco-card-featured {
-  border-color: var(--border-active);
-  background: rgba(14, 165, 233, 0.05);
-  box-shadow: 0 12px 32px rgba(14, 165, 233, 0.08);
-}
-.preco-card-featured:hover {
-  box-shadow: 0 16px 40px rgba(14, 165, 233, 0.15);
-}
-
-.featured-tag {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  padding: 4px 10px;
-  border-radius: 0px;
-  background: var(--cyan);
-  color: #FFFFFF;
-}
-
-.plan-name {
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--text-secondary);
-  margin-bottom: 16px;
-}
-.plan-name.featured { color: var(--cyan); }
-
-.plan-price {
-  margin-bottom: 6px;
-  display: flex;
-  align-items: baseline;
-  gap: 4px;
-}
-.plan-currency { font-size: 1.2rem; font-weight: 700; color: var(--text-primary); }
-.plan-amount { font-size: 2.8rem; font-weight: 800; line-height: 1; letter-spacing: -0.04em; color: var(--text-primary); }
-.plan-period { font-size: 0.85rem; color: var(--text-secondary); }
-.plan-consult {
-  font-size: 1.6rem;
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  color: var(--text-primary);
-  margin-bottom: 6px;
-}
-
-.plan-description {
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-  margin-bottom: 28px;
-  line-height: 1.5;
-}
-
-.plan-divider {
-  height: 1px;
-  background: var(--border);
-  margin-bottom: 22px;
-}
-.preco-card-featured .plan-divider { background: var(--border); }
-
-.plan-features {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-bottom: 28px;
-}
-.plan-feature {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 0.875rem;
-  color: var(--text-secondary);
-}
-.plan-check {
-  width: 18px; height: 18px;
-  flex-shrink: 0;
-  border-radius: 50%;
-  background: var(--cyan-dim);
-  border: 1px solid rgba(14, 165, 233, 0.25);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.plan-check svg, .plan-check i { width: 10px; height: 10px; color: var(--cyan); }
-
-.btn-plan {
-  width: 100%;
-  justify-content: center;
-  border: none;
-}
-.btn-plan-featured {
-  background: var(--cyan);
-  color: #FFFFFF;
-  font-weight: 700;
-}
-.btn-plan-featured:hover {
-  background: var(--cyan-hover);
-  transform: translateY(-1px);
-  box-shadow: var(--cyan-glow);
-}
-.btn-plan-outline {
-  background: transparent;
-  color: var(--text-secondary);
-  border: 1px solid var(--border);
-}
-.btn-plan-outline:hover {
-  border-color: #94a3b8;
-  color: var(--text-primary);
-  background: rgba(148, 163, 184, 0.08);
-}
-
-/* ═══════════════════════════════════════════
-   FOOTER CTA STRIP
-   ═══════════════════════════════════════════ */
-/* Era `linear-gradient(#0284c7 → #0ea5e9 → #38bdf8)` com texto branco por cima.
-   No fim claro do gradiente isso dava 1,90:1 — a pior medição da página, e
-   justamente no último pedido de ação antes do rodapé. Um gradiente é um fundo
-   de contraste VARIÁVEL: o texto por cima só é legível na ponta escura, e
-   nenhuma ferramenta automática acusa porque elas amostram uma cor só.
-
-   Virou painel escuro: é onde a ideia de "vitrine acesa" fecha a página, o
-   branco sobe para 16,4:1, e o botão branco com texto azul ganha o destaque
-   que o gradiente diluía. O azul não sumiu — passou a ser luz (o brilho radial
-   e a linha superior), que é o papel de --brand-lit. */
-.cta-strip {
-  padding: 96px 0;
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-  background:
-    radial-gradient(120% 140% at 50% 0%, var(--panel-2) 0%, var(--panel) 62%),
-    var(--panel);
-  color: var(--on-panel);
-}
-
-/* Fio de luz no topo — a borda superior de uma tela acesa. */
-.cta-strip::before {
-  content: '';
-  position: absolute;
-  inset: 0 0 auto 0;
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    var(--brand-lit) 50%,
-    transparent 100%
-  );
-  opacity: 0.7;
-}
-
-.cta-strip h2 {
-  max-width: 600px;
-  margin: 0 auto 16px;
-  color: var(--on-panel);
-  letter-spacing: -0.02em;
-}
-.cta-strip p {
-  color: var(--on-panel-2); /* 9,52:1 — era branco a 80%, que sobre o azul
-                               claro do gradiente ficava em 1,6:1 */
-  max-width: 480px;
-  margin: 0 auto 32px;
-  font-size: 1rem;
-}
-.cta-strip-actions {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
-  flex-wrap: wrap;
-}
-
-/* ═══════════════════════════════════════════
-   LEAD FORM MODAL
-   ═══════════════════════════════════════════ */
-.lead-modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(17, 24, 39, 0.6);
-  backdrop-filter: blur(8px);
-  z-index: 10000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-}
-.lead-modal {
-  width: 100%;
-  max-width: 460px;
-  /* Painel escuro do sistema novo. Antes era #1e293b com o texto herdando os
-     tokens de tinta ESCURA (--text-secondary, --text-muted): tinta escura
-     sobre fundo escuro, entre 1,6:1 e 2,2:1. O modal é a captura de lead do
-     Enterprise — o formulário mais caro da página estava ilegível. */
-  background: var(--panel);
-  border: 1px solid rgba(56, 189, 248, 0.22);
-  border-radius: var(--radius-lg);
-  padding: 36px;
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
-  position: relative;
-  animation: modal-entrance 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-@keyframes modal-entrance {
-  from { transform: scale(0.95); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
-}
-.modal-close {
-  position: absolute;
-  top: 20px; right: 20px;
-  background: transparent;
-  border: none;
-  color: var(--on-panel-2);
-  cursor: pointer;
-  transition: color var(--transition);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.modal-close:hover { color: var(--on-panel); }
-.modal-close svg, .modal-close i { width: 20px; height: 20px; }
-
-.lead-modal h3 { font-size: 1.5rem; font-weight: 700; margin-bottom: 8px; color: var(--on-panel); }
-.lead-modal p { font-size: 0.88rem; color: var(--on-panel-2); margin-bottom: 24px; }
+/* ── Formulário (usado pelo modal de contato) ────────────────────────────── */
 
 .form-group {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  margin-bottom: 16px;
-}
-.form-group label {
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--text-secondary);
-}
-.form-input {
-  background: rgba(3, 10, 20, 0.55);
-  /* 3:1 contra o painel — o que a WCAG 1.4.11 exige do limite de um campo. */
-  border: 1px solid #6d7f97;
-  border-radius: var(--radius-sm);
-  padding: 12px 16px;
-  color: var(--on-panel);
-  font-family: var(--font);
-  font-size: 0.9rem;
-  outline: none;
-  transition: var(--transition);
-}
-.form-input::placeholder {
-  color: var(--on-panel-3); /* 5,88:1 — dica de preenchimento ainda é texto */
-}
-.form-input:focus {
-  border-color: var(--brand-lit);
-  background: rgba(3, 10, 20, 0.75);
-  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25);
-}
-.lead-modal .form-group label {
-  color: var(--on-panel-2);
-}
-
-/* Success lead checkmark card */
-.lead-success-card {
-  text-align: center;
-  padding: 24px 0;
-}
-.success-icon-wrapper {
-  width: 64px; height: 64px;
-  border-radius: 50%;
-  background: var(--emerald-dim);
-  border: 1px solid rgba(14, 165, 233, 0.25);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 20px;
-  color: var(--emerald);
-}
-.success-icon-wrapper i, .success-icon-wrapper svg { width: 32px; height: 32px; }
-
-/* ═══════════════════════════════════════════
-   FOOTER
-   ═══════════════════════════════════════════ */
-/* O rodapé sempre foi escuro (#111827) mas o texto dentro dele usava a paleta
-   CLARA: #64748B para os links (2,93:1), #475569 para o aviso de copyright
-   (2,34:1) e, no logotipo, a cor herdada de --text-primary — preto sobre
-   quase-preto, 1,18:1. É o mesmo erro do modal de lead: superfície escura
-   herdando tinta de superfície clara.
-
-   Passa a usar os tokens de painel, que existem exatamente para isto. O
-   rodapé é onde moram a política de privacidade, os termos e o CNPJ: texto
-   que precisa ser legível não é opinião de design, é o que torna a
-   informação legalmente disponível. */
-footer {
-  padding: 56px 0 36px;
-  background: var(--panel);
-  color: var(--on-panel-2);
-}
-
-/* O logotipo herdava --text-primary (tinta escura) do body. */
-footer .nav-logo,
-footer .nav-logo * { color: var(--on-panel); }
-.footer-inner {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 40px;
-  flex-wrap: wrap;
-}
-.footer-brand { max-width: 220px; }
-.nav-logo-icon.footer-logo-icon {
-  background: var(--cyan);
-}
-.footer-brand p {
-  margin-top: 12px;
-  font-size: 0.8rem;
-  color: var(--on-panel-2); /* 9,52:1 — era #64748B, 2,93:1 */
-  line-height: 1.6;
-}
-.footer-links { display: flex; gap: 48px; flex-wrap: wrap; }
-.footer-col h4 {
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--on-panel);
   margin-bottom: 14px;
 }
-.footer-col ul { display: flex; flex-direction: column; gap: 8px; }
-.footer-col ul li a,
-.footer-col ul li button {
-  font-size: 0.85rem;
-  color: var(--on-panel-2);
-  transition: color var(--transition);
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  font-family: var(--font);
-}
-.footer-col ul li a:hover,
-.footer-col ul li button:hover { color: var(--on-panel); }
-.footer-bottom {
-  margin-top: 40px;
-  padding-top: 24px;
-  border-top: 1px solid rgba(168, 188, 214, 0.18);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-.footer-bottom p { font-size: 0.78rem; color: var(--on-panel-3); } /* 5,88:1 — era #475569, 2,34:1 */
 
-/* ═══════════════════════════════════════════
-   MOBILE-FIRST RESPONSIVENESS
-   Base = telefones pequenos (sem media query).
-   Cada tier min-width abaixo ACRESCENTA complexidade
-   conforme a tela cresce — nunca o contrário.
-   Tiers: 640px (phone grande/tablet pequeno), 1024px (desktop).
-   ═══════════════════════════════════════════ */
-
-/* ── HERO: texto primeiro, mockup depois (mobile) ── */
-#hero {
-  padding: 80px 0 32px;
-}
-.hero-inner {
-  grid-template-columns: 1fr;
-  gap: 24px;
-}
-.hero-content {
-  max-width: 100%;
-  text-align: center;
-  order: 1; /* Texto sempre primeiro */
-}
-.hero-visual {
-  order: 2; /* Mockup depois */
-  max-width: 100%;
-  margin: 0 auto;
-}
-.hero-content .label {
-  margin: 0 auto 16px;
-  font-size: 10px;
-  padding: 5px 12px;
-}
-.hero-subheadline {
-  margin-left: auto;
-  margin-right: auto;
-  font-size: 0.85rem !important; /* !important: sobrescreve font-size inline do componente */
-  margin-bottom: 24px !important;
-}
-.hero-headline {
-  font-size: 1.45rem !important; /* !important: sobrescreve font-size/clamp inline do componente */
-  margin-bottom: 14px !important;
-}
-.hero-actions {
-  justify-content: center;
-  flex-direction: column;
-  align-items: stretch;
-  width: 100%;
-  gap: 10px;
-}
-.hero-actions .btn {
-  width: 100%;
-  justify-content: center;
-  padding: 14px 20px;
-}
-.hero-trust {
-  justify-content: center;
-}
-/* .hero-objection-banner usa estilo inline (row/left) — !important necessário para sobrescrever em telas pequenas */
-.hero-objection-banner {
-  margin-top: 40px !important;
-  flex-direction: column !important;
-  text-align: center !important;
-  gap: 16px !important;
-  padding: 20px !important;
-}
-.hero-objection-banner .objection-text {
-  flex: 1 1 100% !important;
-  max-width: 100% !important;
-}
-.hero-objection-banner .btn {
-  max-width: 100% !important;
-  width: 100% !important;
-}
-
-/* ── Mockup compacto no mobile ── */
-.hero-mockup {
-  border-radius: 0;
-  margin: 0 -16px; /* full-bleed, acompanha o padding do container */
-  border-left: none;
-  border-right: none;
-}
-.mockup-grid {
-  grid-template-columns: repeat(2, 1fr);
-  gap: 6px;
-}
-.mockup-body {
-  padding: 12px;
-}
-.mockup-display-card {
-  padding: 6px;
-}
-.mockup-screen {
-  margin-bottom: 6px;
-}
-.mockup-display-name {
-  font-size: 0.6rem;
-}
-.badge {
-  font-size: 0.5rem;
-  padding: 1px 4px;
-}
-.mockup-stat-row {
-  flex-wrap: wrap;
-}
-.mockup-stat {
-  flex: 1 1 calc(50% - 4px);
-  min-width: 0;
-  padding: 6px 8px;
-}
-.mockup-stat-label {
-  font-size: 0.52rem;
-}
-.mockup-stat-value {
-  font-size: 0.72rem;
-}
-.hero-float-badge {
-  display: none;
-}
-
-/* ── Seções gerais (mobile) ── */
-.tab-panel.active { grid-template-columns: 1fr; gap: 24px; }
-.footer-links { gap: 24px; }
-.nav-links { display: none; }
-.nav-cta { display: none; }
-.mobile-menu-toggle { display: flex; }
-
-.cta-strip-actions { flex-direction: column; }
-.btn { width: 100%; justify-content: center; }
-
-/* ── Dock de navegação fixo (mobile) ── */
-footer {
-  padding-bottom: 110px;
-}
-.mobile-dock {
-  display: flex;
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translate(-50%, 0);
-  width: calc(100% - 32px);
-  max-width: 390px;
-  height: 62px;
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  border: 1px solid var(--border);
-  border-radius: 99px;
-  z-index: 9999;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 8px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
-  animation: dock-entrance 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-.mobile-dock-btn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
-  flex: 1;
-  height: 100%;
-  color: var(--text-secondary);
-  font-size: 0.62rem;
+.form-group label {
+  font-size: 0.8125rem;
   font-weight: 600;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  transition: var(--transition);
+  color: var(--tinta-2);
 }
-.mobile-dock-btn.active {
-  color: var(--cyan);
+
+.form-input {
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 14px;
+  border: 1.5px solid var(--borda-2);
+  border-radius: var(--raio-8);
+  background: var(--papel);
+  font-family: inherit;
+  font-size: 1rem;
+  color: var(--tinta);
 }
-.mobile-dock-btn i, .mobile-dock-btn svg {
-  width: 18px;
-  height: 18px;
+
+.form-input::placeholder {
+  color: var(--tinta-3);
 }
-.mobile-dock-cta {
-  background: var(--cyan);
-  color: #FFFFFF;
-  border-radius: 99px;
-  padding: 8px 16px;
-  font-weight: 700;
-  font-size: 0.75rem;
+
+.form-input:focus {
+  border-color: var(--marca);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(3, 105, 161, 0.18);
+}
+
+/* ── Modal de contato ────────────────────────────────────────────────────── */
+
+.lead-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(7, 20, 38, 0.55);
   display: flex;
   align-items: center;
-  gap: 5px;
-  margin-right: 4px;
-  text-decoration: none;
+  justify-content: center;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.lead-modal {
+  position: relative;
+  width: 100%;
+  max-width: 460px;
+  background: var(--papel);
+  border-radius: var(--raio-16);
+  box-shadow: 0 30px 70px rgba(7, 20, 38, 0.3);
+  padding: 32px;
+  max-height: 92vh;
+  overflow-y: auto;
+}
+
+.lead-modal h3 {
+  font-size: 1.375rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.lead-modal p {
+  color: var(--tinta-2);
+}
+
+.modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: none;
+  border-radius: 99px;
+  background: transparent;
+  color: var(--tinta-3);
   cursor: pointer;
 }
-.mobile-dock-cta i, .mobile-dock-cta svg {
-  width: 13px;
-  height: 13px;
+
+.modal-close:hover {
+  background: var(--papel-2);
+  color: var(--tinta);
 }
 
-@keyframes dock-entrance {
-  from { transform: translate(-50%, 50px); opacity: 0; }
-  to { transform: translate(-50%, 0); opacity: 1; }
+.lead-success-card {
+  text-align: center;
 }
 
-/* ═══ TIER 1 — min-width: 640px (phones grandes / tablets pequenos) ═══ */
-@media (min-width: 640px) {
-  #hero { padding: 100px 0 48px; }
-  .hero-inner { gap: 32px; }
-  .hero-content .label { font-size: 12px; }
-  .hero-subheadline {
-    font-size: 0.92rem !important;
-    margin-bottom: 24px !important;
-  }
-  .hero-headline {
-    font-size: 1.65rem !important;
-    margin-bottom: 14px !important;
-  }
-  .hero-actions {
-    flex-direction: row;
-    align-items: center;
-    width: auto;
-    gap: 14px;
-  }
-  .hero-actions .btn {
-    width: auto;
-    padding: 12px 24px;
-  }
-  .hero-visual { max-width: 480px; }
-  .hero-mockup {
-    margin: 0 -24px;
-  }
-  .mockup-body { padding: 14px; }
-
-  .cta-strip-actions { flex-direction: row; }
-  .btn { width: auto; justify-content: center; }
+.success-icon-wrapper {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 8px;
+  border-radius: 99px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 122, 90, 0.12);
+  color: var(--ok);
 }
 
-/* ═══ TIER 2 — min-width: 1024px (desktop) ═══ */
-@media (min-width: 1024px) {
-  #hero { padding: 140px 0 64px; }
-  .hero-inner {
-    grid-template-columns: 1fr 1fr;
-    gap: 64px;
-  }
-  .hero-content {
-    max-width: 600px;
-    text-align: left;
-    order: 0;
-  }
-  .hero-visual {
-    order: 0;
-    max-width: none;
-    margin: 0;
-  }
-  .hero-content .label { margin: 0 0 20px; }
-  .hero-subheadline {
-    margin-left: 0;
-    margin-right: 0;
-    font-size: 1.05rem !important;
-    margin-bottom: 36px !important;
-  }
-  .hero-headline {
-    font-size: clamp(1.9rem, 3.5vw, 2.75rem) !important;
-    margin-bottom: 20px !important;
-  }
-  .hero-actions { justify-content: flex-start; }
-  .hero-trust { justify-content: flex-start; }
-
-  .hero-mockup {
-    border-radius: var(--radius-lg);
-    margin: 0;
-    border-left: 1px solid var(--border);
-    border-right: 1px solid var(--border);
-  }
-  .mockup-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; }
-  .mockup-body { padding: 20px; }
-  .mockup-display-card { padding: 10px; }
-  .mockup-screen { margin-bottom: 8px; }
-  .mockup-display-name { font-size: 0.65rem; }
-  .badge { font-size: 0.58rem; padding: 2px 6px; }
-  .mockup-stat { padding: 8px 10px; }
-  .mockup-stat-label { font-size: 0.58rem; }
-  .mockup-stat-value { font-size: 0.8rem; }
-  .hero-float-badge { display: flex; }
-
-  .tab-panel.active { grid-template-columns: 1fr 1fr; gap: 32px; }
-  .footer-links { gap: 48px; }
-  .nav-links { display: flex; }
-  .nav-cta { display: flex; }
-  .mobile-menu-toggle { display: none; }
-
-  footer { padding-bottom: 36px; }
-  .mobile-dock { display: none; }
+.animate-spin {
+  animation: girar 0.9s linear infinite;
 }
 
-/* ═══════════════════════════════════════════
-   CONSENT BANNER (LGPD/GDPR)
-   ═══════════════════════════════════════════ */
+@keyframes girar {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ── Faixa de consentimento ──────────────────────────────────────────────── */
+
 .consent-banner {
   position: fixed;
   left: 16px;
   right: 16px;
-  bottom: 92px; /* mobile-first: acima do mobile-dock por padrão */
-  z-index: 9000;
-  max-width: 640px;
-  margin: 0 auto;
-  background: #111827;
-  color: #e2e8f0;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 20px 24px;
+  bottom: 16px;
+  z-index: 55;
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
   gap: 16px;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+  padding: 16px 20px;
+  background: var(--papel);
+  border: 1px solid var(--borda-2);
+  border-radius: var(--raio-12);
+  box-shadow: 0 18px 46px rgba(7, 20, 38, 0.18);
 }
+
 .consent-banner-text {
-  font-size: 0.85rem;
-  line-height: 1.6;
-  color: #cbd5e1;
+  flex: 1 1 320px;
+  font-size: 0.875rem;
+  color: var(--tinta-2);
   margin: 0;
 }
+
 .consent-banner-actions {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   flex-wrap: wrap;
 }
+
 .consent-banner-actions .btn {
-  flex: 1 1 140px;
+  min-height: 44px;
+  padding: 0 18px;
+  font-size: 0.9375rem;
 }
-.consent-banner-actions .btn-ghost {
-  color: #e2e8f0;
-  border-color: rgba(255, 255, 255, 0.25);
+
+/* ── Pular para o conteúdo ───────────────────────────────────────────────── */
+
+.pular {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 100;
 }
-.consent-banner-actions .btn-ghost:hover {
-  color: #ffffff;
-  border-color: #ffffff;
+
+.pular:focus {
+  left: 12px;
+  top: 12px;
+  padding: 10px 16px;
+  background: var(--papel);
+  border: 2px solid var(--marca);
+  border-radius: var(--raio-8);
 }
-@media (min-width: 1024px) {
-  .consent-banner {
-    bottom: 16px; /* dock desaparece no desktop */
+
+/* ── Respiro por largura ─────────────────────────────────────────────────── */
+
+/* O gutter de 160px é do artboard de 1440px. Ele encolhe em degraus para que
+   nenhuma tela intermediária (notebook de 1280, tablet) fique com o conteúdo
+   espremido no meio ou colado na borda. */
+@media (max-width: 1280px) {
+  :root {
+    --gutter: 80px;
   }
 }
 
+@media (max-width: 980px) {
+  :root {
+    --gutter: 40px;
+  }
+
+  .secao {
+    padding-block: 64px;
+    gap: 32px;
+  }
+
+  .split,
+  .split--midia {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 36px;
+  }
+}
+
+@media (max-width: 900px) {
+  .grid-3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  :root {
+    --gutter: 20px;
+  }
+
+  .secao {
+    padding-block: 44px;
+    gap: 24px;
+  }
+
+  .grid-2,
+  .grid-3 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .lead-modal {
+    padding: 24px 20px;
+  }
+}

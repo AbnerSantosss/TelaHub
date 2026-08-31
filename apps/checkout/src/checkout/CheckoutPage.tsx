@@ -15,6 +15,7 @@ import { PaymentStep } from './PaymentStep';
 import { PrimaryButton, SecondaryButton } from './primitives';
 import { StepCard } from './StepCard';
 import { SubscriptionStep } from './SubscriptionStep';
+import { ThankYouScreen } from './ThankYouScreen';
 import { TrustBar } from './TrustBar';
 import { useCheckout, type StepId } from './useCheckout';
 import { billedScreens } from '../lib/plans';
@@ -92,6 +93,8 @@ const CheckoutPage = () => {
     selectedPlan,
     screens,
     totalCents,
+    yearCents,
+    billingInterval,
     catalogError,
     catalogLoading,
     sessionError,
@@ -184,7 +187,11 @@ const CheckoutPage = () => {
         <ErrorState
           icon={<MonitorPlay size={24} />}
           title="Esta contratação já está concluída"
-          description="O pagamento desta sessão já foi confirmado. Se precisar mudar o plano ou o número de telas, faça isso pelo painel ou fale com o nosso time."
+          // Quem reabre um link pago quase sempre volta pela MESMA dúvida de
+          // quem acabou de pagar ("e o acesso?"). Antes esta tela não dizia
+          // nada sobre o e-mail e mandava a pessoa para o painel, onde ela não
+          // consegue entrar sem a senha provisória que veio por e-mail.
+          description="O pagamento desta sessão já foi confirmado, e as credenciais de acesso são enviadas por e-mail para o endereço informado na contratação. Se elas não chegaram, confira o spam antes de falar com o nosso time."
           actionLabel="Iniciar outra contratação"
           onAction={startOver}
         />
@@ -196,6 +203,22 @@ const CheckoutPage = () => {
     return (
       <Shell>
         <LoadingState />
+      </Shell>
+    );
+  }
+
+  // Pagou: a página inteira vira a tela de obrigado.
+  //
+  // Vem DEPOIS de `concluded` de propósito. Os dois falam de sessão paga, mas
+  // respondem a perguntas diferentes: `concluded` é quem REABRE um link já
+  // pago (`session.status === 'paid'`, vindo do servidor) e precisa de uma
+  // saída; este aqui é quem ACABOU de pagar nesta visita (`payment.paid`, do
+  // resultado da cobrança) e precisa saber o que acontece a seguir. Inverter a
+  // ordem faria quem paga cair no aviso seco de "contratação já concluída".
+  if (checkout.payment?.paid) {
+    return (
+      <Shell>
+        <ThankYouScreen checkout={checkout} />
       </Shell>
     );
   }
@@ -212,10 +235,20 @@ const CheckoutPage = () => {
     .filter((part): part is string => !!part && part.trim() !== '')
     .join(' · ');
 
+  // O resumo fechado do passo 2 precisa dizer o MESMO valor do resumo lateral:
+  // no anual, o do ano. Dois números diferentes para a mesma contratação, na
+  // mesma página, é o que faz a pessoa parar e desistir de conferir.
+  const yearly = billingInterval === 'yearly';
   const planSummary = selectedPlan
     ? `Plano ${selectedPlan.name} · ${pluralScreens(billed)} ${
         billed === 1 ? 'cobrada' : 'cobradas'
-      }${selectedPlan.quoteOnly ? ' · sob consulta' : ` · ${formatBRL(totalCents)}/mês`}`
+      }${
+        selectedPlan.quoteOnly
+          ? ' · sob consulta'
+          : yearly
+            ? ` · ${formatBRL(yearCents)}/ano (12 meses)`
+            : ` · ${formatBRL(totalCents)}/mês`
+      }`
     : '';
 
   const actions: Record<StepId, { label: string; run: () => void; busy: boolean }> = {
@@ -269,7 +302,11 @@ const CheckoutPage = () => {
               title="Sua assinatura"
               state={stepState('plan')}
               summary={planSummary}
-              caption="Você paga por tela ativa, por mês. Pode mudar depois."
+              caption={
+                yearly
+                  ? 'Você paga por tela ativa. No anual, os 12 meses vêm em uma contratação só.'
+                  : 'Você paga por tela ativa, por mês. Pode mudar depois.'
+              }
               onEdit={() => editStep('plan')}
               panelId="checkout-step-plan"
               panelRef={panels.plan}

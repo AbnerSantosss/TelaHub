@@ -18,13 +18,18 @@ const createdUserIds: string[] = [];
 async function makePlan(
   code: string,
   maxDevices: number | null,
-  opts: { pricePerScreenCents?: number; minScreens?: number } = {}
+  opts: {
+    pricePerScreenCents?: number;
+    priceAnnualPerScreenCents?: number;
+    minScreens?: number;
+  } = {}
 ) {
   const plan = await prisma.plan.create({
     data: {
       code: `${code}-${SUFFIX}`,
       name: code.toUpperCase(),
       pricePerScreenCents: opts.pricePerScreenCents ?? 4900,
+      priceAnnualPerScreenCents: opts.priceAnnualPerScreenCents ?? 0,
       minScreens: opts.minScreens ?? 1,
       maxDevices,
       maxUsers: null,
@@ -37,12 +42,16 @@ async function makePlan(
   return plan;
 }
 
-async function makeTenant(planId: string, linkedDevices = 0) {
+async function makeTenant(
+  planId: string,
+  linkedDevices = 0,
+  billingInterval: 'monthly' | 'yearly' = 'monthly'
+) {
   const org = await prisma.organization.create({ data: { name: `Org ${SUFFIX}` } });
   createdOrgIds.push(org.id);
 
   await prisma.subscription.create({
-    data: { organizationId: org.id, planId, status: 'active', gateway: null },
+    data: { organizationId: org.id, planId, status: 'active', gateway: null, billingInterval },
   });
 
   const user = await prisma.user.create({
@@ -142,6 +151,75 @@ describe('GET /api/billing/subscription', () => {
   });
 });
 
+describe('GET /api/billing/subscription — oferta anual', () => {
+  it('expõe o anual mesmo para quem está no mensal — é o que faz migrar', async () => {
+    const plan = await makePlan('anual-oferta', null, {
+      pricePerScreenCents: 4900,
+      priceAnnualPerScreenCents: 3900,
+    });
+    const { authHeader } = await makeTenant(plan.id, 2);
+
+    const res = await request(app).get('/api/billing/subscription').set('Authorization', authHeader);
+
+    expect(res.status).toBe(200);
+    expect(res.body.subscription.billingInterval).toBe('monthly');
+    // Quem está no mensal continua sendo cobrado no mensal.
+    expect(res.body.subscription.estimatedMonthly.cents).toBe(9800);
+    expect(res.body.subscription.estimatedAnnual).toMatchObject({
+      available: true,
+      unitCents: 3900,
+      monthlyEquivalentCents: 7800,
+      totalCents: 93600,
+      // 2 telas: R$ 98/mês × 12 = R$ 1.176 contra R$ 936 no anual.
+      savingsCents: 24000,
+    });
+  });
+
+  it('a assinatura anual é cobrada pelo preço anual', async () => {
+    const plan = await makePlan('anual-ativo', null, {
+      pricePerScreenCents: 4900,
+      priceAnnualPerScreenCents: 3900,
+    });
+    const { authHeader } = await makeTenant(plan.id, 2, 'yearly');
+
+    const res = await request(app).get('/api/billing/subscription').set('Authorization', authHeader);
+
+    expect(res.status).toBe(200);
+    expect(res.body.subscription.billingInterval).toBe('yearly');
+    expect(res.body.subscription.estimatedMonthly.cents).toBe(7800);
+  });
+
+  it('plano sem oferta anual marca `available: false` e não inventa economia', async () => {
+    const plan = await makePlan('sem-anual', null, { pricePerScreenCents: 4900 });
+    const { authHeader } = await makeTenant(plan.id, 1);
+
+    const res = await request(app).get('/api/billing/subscription').set('Authorization', authHeader);
+
+    expect(res.status).toBe(200);
+    expect(res.body.subscription.estimatedAnnual).toMatchObject({
+      available: false,
+      savingsCents: 0,
+    });
+    // Sem oferta, o "anual" é o próprio mensal — nunca R$ 0,00.
+    expect(res.body.subscription.estimatedAnnual.monthlyEquivalentCents).toBe(4900);
+  });
+
+  it('o preço anual do plano viaja no payload — a landing não escreve preço à mão', async () => {
+    const plan = await makePlan('anual-publico', null, {
+      pricePerScreenCents: 4900,
+      priceAnnualPerScreenCents: 3900,
+    });
+    const { authHeader } = await makeTenant(plan.id, 1);
+
+    const res = await request(app).get('/api/billing/subscription').set('Authorization', authHeader);
+
+    expect(res.body.subscription.plan).toMatchObject({
+      priceAnnualPerScreenCents: 3900,
+      priceAnnualPerScreen: 39,
+    });
+  });
+});
+
 describe('POST /api/billing/plan', () => {
   it('recusa com 400 o downgrade que estoura o limite do plano novo', async () => {
     const big = await makePlan('grande', 10);
@@ -158,7 +236,10 @@ describe('POST /api/billing/plan', () => {
     expect(res.body.error).toMatch(/telas ativas/);
   });
 
-  it('aceita upgrade e devolve o plano novo', async () => {
+  // Antes desta guarda, o teste aqui afirmava que o upgrade era aceito com 200:
+  // era o próprio buraco de receita virando comportamento fixado. Subir de
+  // plano é compra e passa pelo checkout.
+  it('recusa com 402 o upgrade que relaxa limites (sem pagamento confirmado)', async () => {
     const from = await makePlan('de', 1);
     const to = await makePlan('para', 20);
     const { authHeader } = await makeTenant(from.id, 1);
@@ -168,8 +249,59 @@ describe('POST /api/billing/plan', () => {
       .set('Authorization', authHeader)
       .send({ planCode: to.code });
 
+    expect(res.status).toBe(402);
+    expect(res.body.code).toBe('payment_required');
+
+    // E o plano no banco continua o antigo — nada de "quase trocou".
+    const after = await prisma.subscription.findFirst({
+      where: { planId: to.id },
+    });
+    expect(after).toBeNull();
+  });
+
+  it('recusa com 402 o upgrade que aumenta a fatura estimada', async () => {
+    const barato = await makePlan('barato', null, { pricePerScreenCents: 1000 });
+    const caro = await makePlan('caro', null, { pricePerScreenCents: 4900 });
+    const { authHeader } = await makeTenant(barato.id, 2);
+
+    const res = await request(app)
+      .post('/api/billing/plan')
+      .set('Authorization', authHeader)
+      .send({ planCode: caro.code });
+
+    expect(res.status).toBe(402);
+    expect(res.body.code).toBe('payment_required');
+  });
+
+  // O Rede custa MENOS por tela que o Loja (R$ 39 x R$ 49) mas tem piso de 5
+  // telas: comparar só o preço unitário leria isso como downgrade e entregaria
+  // o plano superior de graça.
+  it('recusa com 402 o upgrade para plano com preço unitário menor e piso maior', async () => {
+    const loja = await makePlan('loja-sim', 3, { pricePerScreenCents: 4900, minScreens: 1 });
+    const rede = await makePlan('rede-sim', 50, { pricePerScreenCents: 3900, minScreens: 5 });
+    const { authHeader } = await makeTenant(loja.id, 2);
+
+    const res = await request(app)
+      .post('/api/billing/plan')
+      .set('Authorization', authHeader)
+      .send({ planCode: rede.code });
+
+    expect(res.status).toBe(402);
+    expect(res.body.code).toBe('payment_required');
+  });
+
+  it('aceita o downgrade que cabe no plano de destino', async () => {
+    const caro = await makePlan('caro-down', 10, { pricePerScreenCents: 4900 });
+    const barato = await makePlan('barato-down', 5, { pricePerScreenCents: 1900 });
+    const { authHeader } = await makeTenant(caro.id, 1);
+
+    const res = await request(app)
+      .post('/api/billing/plan')
+      .set('Authorization', authHeader)
+      .send({ planCode: barato.code });
+
     expect(res.status).toBe(200);
-    expect(res.body.subscription.plan.code).toBe(to.code);
+    expect(res.body.subscription.plan.code).toBe(barato.code);
   });
 
   it('recusa plano inexistente com 400', async () => {

@@ -28,6 +28,16 @@
  */
 const DEFAULT_CHECKOUT_URL = 'https://checkout.proxserverabner.site';
 const DEFAULT_APP_URL = 'https://telahub.proxserverabner.site';
+/**
+ * A LP passou a ter UMA chamada de backend: `POST /api/leads`, do formulário
+ * "Falar com a gente". Antes o envio era um `setTimeout` que mostrava
+ * "Recebemos seu contato!" sem gravar nada — todo lead de plano sob consulta
+ * era perdido.
+ *
+ * ⚠️ A origem do site precisa estar em `CORS_ORIGINS` na API, senão o
+ * navegador bloqueia o envio.
+ */
+const DEFAULT_API_URL = 'https://telahub.proxserverabner.site/api';
 
 const env = typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env : {};
 
@@ -35,6 +45,7 @@ const stripTrailingSlash = (value) => String(value || '').replace(/\/+$/, '');
 
 export const CHECKOUT_URL = stripTrailingSlash(env.VITE_CHECKOUT_URL || DEFAULT_CHECKOUT_URL);
 export const APP_URL = stripTrailingSlash(env.VITE_APP_URL || DEFAULT_APP_URL);
+export const API_URL = stripTrailingSlash(env.VITE_API_URL || DEFAULT_API_URL);
 
 /**
  * Parâmetros de atribuição repassados na travessia entre domínios.
@@ -78,16 +89,41 @@ function attributionParams() {
 }
 
 /**
+ * Atribuição em objeto, para enviar no corpo de `POST /api/leads`.
+ *
+ * Sem isto, todo lead vindo de campanha chegaria como tráfego direto e não
+ * daria para saber qual canal traz cliente que fala com o comercial.
+ */
+export function attributionFields() {
+  const params = attributionParams();
+  return {
+    utmSource: params.get('utm_source') || undefined,
+    utmMedium: params.get('utm_medium') || undefined,
+    utmCampaign: params.get('utm_campaign') || undefined,
+    referrer: typeof document !== 'undefined' ? document.referrer || undefined : undefined,
+  };
+}
+
+/**
  * URL do checkout com plano e telas sugeridos.
  *
  * `plan` e `screens` são exatamente os nomes que `readSelectionHint()` já lê do
  * outro lado. São SUGESTÃO: quem calcula o valor é o servidor, no PATCH da
  * sessão — a URL não decide preço.
  */
-export function checkoutUrl(planCode, screens) {
+export function checkoutUrl(planCode, screens, intervalo) {
   const params = attributionParams();
   params.set('plan', planCode);
   if (Number.isFinite(screens) && screens > 0) params.set('screens', String(screens));
+
+  // O nome do intervalo no site é em português (`mensal`/`anual`, porque é o
+  // que a copy usa); o do checkout e o do banco é em inglês (`monthly`/
+  // `yearly`, que é o vocabulário de `Subscription.billingInterval`). A
+  // tradução mora AQUI, no único ponto onde os dois mundos se tocam — espalhar
+  // os dois vocabulários pelos componentes é como nascem os bugs de "o cliente
+  // escolheu anual e a fatura veio mensal".
+  if (intervalo === 'anual' || intervalo === 'yearly') params.set('interval', 'yearly');
+
   return `${CHECKOUT_URL}/c?${params.toString()}`;
 }
 
@@ -106,13 +142,13 @@ export function signupUrl() {
  * Para onde vai um plano. `null` = não há destino self-service; quem chamou
  * deve abrir o caminho comercial (Enterprise).
  */
-export function conversionDestination(planCode, screens) {
+export function conversionDestination(planCode, screens, intervalo) {
   switch (planCode) {
     case 'gratis':
       return signupUrl();
     case 'loja':
     case 'rede':
-      return checkoutUrl(planCode, screens);
+      return checkoutUrl(planCode, screens, intervalo);
     default:
       return null;
   }

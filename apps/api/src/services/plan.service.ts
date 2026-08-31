@@ -16,6 +16,18 @@ export interface PublicPlan {
   pricePerScreenCents: number;
   /** Mesmo valor em reais, para exibição direta (ex.: 29). */
   pricePerScreen: number;
+  /**
+   * Preço por tela/MÊS no pagamento anual, em centavos. `0` = plano sem oferta
+   * anual (grátis e Enterprise) — o front deve esconder o seletor, não exibir
+   * "R$ 0,00".
+   *
+   * Este campo existe para que a landing e o checkout NUNCA escrevam preço à
+   * mão: o número anual da vitrine é o mesmo que a fatura vai usar. O preço da
+   * landing já divergiu do catálogo uma vez por ter sido digitado no HTML.
+   */
+  priceAnnualPerScreenCents: number;
+  /** Mesmo valor em reais, para exibição direta (ex.: 39). */
+  priceAnnualPerScreen: number;
   /** `true` quando o preço não é público (Enterprise). */
   quoteOnly: boolean;
   /**
@@ -74,6 +86,8 @@ export function toPublicPlan(plan: Plan): PublicPlan {
     name: plan.name,
     pricePerScreenCents: plan.pricePerScreenCents,
     pricePerScreen: plan.pricePerScreenCents / 100,
+    priceAnnualPerScreenCents: plan.priceAnnualPerScreenCents,
+    priceAnnualPerScreen: plan.priceAnnualPerScreenCents / 100,
     quoteOnly,
     free: !quoteOnly && plan.pricePerScreenCents === 0,
     minScreens: plan.minScreens,

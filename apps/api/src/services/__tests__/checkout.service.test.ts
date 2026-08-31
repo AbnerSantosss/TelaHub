@@ -19,6 +19,8 @@ const PLAN_REDE = `rede-${SUFFIX}`;
 const PLAN_GRATIS = `gratis-${SUFFIX}`;
 const PLAN_ENTERPRISE = `enterprise-${SUFFIX}`;
 const PLAN_INATIVO = `inativo-${SUFFIX}`;
+/** Plano ATIVO e pago, mas sem oferta anual — o caso do "cai no mensal". */
+const PLAN_SEM_ANUAL = `sem-anual-${SUFFIX}`;
 
 const createdPlanIds: string[] = [];
 const sessionIds: string[] = [];
@@ -27,13 +29,14 @@ async function makePlan(
   code: string,
   pricePerScreenCents: number,
   minScreens: number,
-  opts: { features?: string; active?: boolean } = {}
+  opts: { features?: string; active?: boolean; priceAnnualPerScreenCents?: number } = {}
 ) {
   const plan = await prisma.plan.create({
     data: {
       code,
       name: code,
       pricePerScreenCents,
+      priceAnnualPerScreenCents: opts.priceAnnualPerScreenCents ?? 0,
       minScreens,
       maxDevices: null,
       maxUsers: null,
@@ -59,11 +62,12 @@ async function seedSession(data: Record<string, unknown>) {
 }
 
 beforeAll(async () => {
-  await makePlan(PLAN_LOJA, 4900, 1);
-  await makePlan(PLAN_REDE, 3900, 5);
+  await makePlan(PLAN_LOJA, 4900, 1, { priceAnnualPerScreenCents: 3900 });
+  await makePlan(PLAN_REDE, 3900, 5, { priceAnnualPerScreenCents: 3200 });
   await makePlan(PLAN_GRATIS, 0, 1);
   await makePlan(PLAN_ENTERPRISE, 0, 1, { features: JSON.stringify([FEATURE_QUOTE_ONLY]) });
   await makePlan(PLAN_INATIVO, 4900, 1, { active: false });
+  await makePlan(PLAN_SEM_ANUAL, 2900, 1);
 });
 
 afterAll(async () => {
@@ -103,6 +107,18 @@ describe('computeAmountCents', () => {
     expect(await checkoutService.computeAmountCents(PLAN_GRATIS, 10)).toBe(0);
     expect(await checkoutService.computeAmountCents(PLAN_ENTERPRISE, 10)).toBe(0);
     expect(await checkoutService.computeAmountCents(null, 10)).toBe(0);
+  });
+
+  it('no anual usa o preço anual, mantendo a mesma fórmula', async () => {
+    expect(await checkoutService.computeAmountCents(PLAN_LOJA, 3, 'yearly')).toBe(3 * 3900);
+    // O piso de 5 telas do rede não some no anual.
+    expect(await checkoutService.computeAmountCents(PLAN_REDE, 2, 'yearly')).toBe(5 * 3200);
+  });
+
+  it('o intervalo é opcional e o default é mensal', async () => {
+    expect(await checkoutService.computeAmountCents(PLAN_LOJA, 3)).toBe(
+      await checkoutService.computeAmountCents(PLAN_LOJA, 3, 'monthly')
+    );
   });
 
   it('recusa plano inexistente ou inativo', async () => {
@@ -303,5 +319,67 @@ describe('expiração e purga LGPD', () => {
     await expect(
       checkoutService.getPublicSession(crypto.randomBytes(32).toString('hex'))
     ).rejects.toMatchObject({ status: 404, code: 'session_not_found' });
+  });
+});
+
+describe('sessão com intervalo anual', () => {
+  it('nasce mensal por padrão e o valor é o de tabela', async () => {
+    const session = await checkoutService.createSession({ planCode: PLAN_LOJA, screens: 2 });
+    sessionIds.push((await prisma.checkoutSession.findUnique({ where: { publicToken: session.publicToken } }))!.id);
+
+    expect(session.billingInterval).toBe('monthly');
+    expect(session.amountCents).toBe(9800);
+  });
+
+  it('aceita `yearly` na criação e congela o mensal-equivalente do anual', async () => {
+    const session = await checkoutService.createSession({
+      planCode: PLAN_LOJA,
+      screens: 2,
+      interval: 'yearly',
+    });
+    sessionIds.push((await prisma.checkoutSession.findUnique({ where: { publicToken: session.publicToken } }))!.id);
+
+    expect(session.billingInterval).toBe('yearly');
+    // Mensal EQUIVALENTE (2 × R$ 39), não o boleto do ano.
+    expect(session.amountCents).toBe(7800);
+  });
+
+  it('o PATCH troca o intervalo e recalcula o valor nos dois sentidos', async () => {
+    const created = await checkoutService.createSession({ planCode: PLAN_LOJA, screens: 2 });
+    sessionIds.push((await prisma.checkoutSession.findUnique({ where: { publicToken: created.publicToken } }))!.id);
+
+    const anual = await checkoutService.updateSession(created.publicToken, { interval: 'yearly' });
+    expect(anual.billingInterval).toBe('yearly');
+    expect(anual.amountCents).toBe(7800);
+
+    // Voltar para o mensal não é bloqueado: intervalo é forma de pagamento.
+    const mensal = await checkoutService.updateSession(created.publicToken, { interval: 'monthly' });
+    expect(mensal.billingInterval).toBe('monthly');
+    expect(mensal.amountCents).toBe(9800);
+  });
+
+  it('o PATCH que não fala de intervalo preserva o que já estava escolhido', async () => {
+    const created = await checkoutService.createSession({
+      planCode: PLAN_LOJA,
+      screens: 1,
+      interval: 'yearly',
+    });
+    sessionIds.push((await prisma.checkoutSession.findUnique({ where: { publicToken: created.publicToken } }))!.id);
+
+    const updated = await checkoutService.updateSession(created.publicToken, { screens: 3 });
+    expect(updated.billingInterval).toBe('yearly');
+    expect(updated.amountCents).toBe(3 * 3900);
+  });
+
+  it('plano sem oferta anual cobra o mensal mesmo com `yearly` — nunca zero', async () => {
+    const created = await checkoutService.createSession({
+      planCode: PLAN_SEM_ANUAL,
+      screens: 2,
+      interval: 'yearly',
+    });
+    sessionIds.push((await prisma.checkoutSession.findUnique({ where: { publicToken: created.publicToken } }))!.id);
+
+    expect(created.billingInterval).toBe('yearly');
+    expect(created.amountCents).toBe(2 * 2900);
   });
 });

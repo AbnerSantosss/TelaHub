@@ -1,0 +1,68 @@
+/* RODAPÉ — estilo próprio. Só tokens do sistema (index.css). */
+
+.rodape {
+  /* .secao dá o recuo lateral fluido, que precisa ser o mesmo do resto da
+     página; o vertical encolhe porque o rodapé é uma linha, não uma seção. */
+  padding-block: clamp(24px, 3vw, 40px);
+  border-top: 1px solid var(--borda);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  font-size: 13px;
+  color: var(--tinta-3);
+}
+
+.rodape__linha {
+  margin: 0;
+}
+
+.rodape__links {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 20px;
+}
+
+/* Privacidade e Termos: texto, sem cursor de link e sem sublinhado, para que
+   ninguém tente clicar no que ainda não existe. */
+.rodape__pendente {
+  color: var(--tinta-3);
+  font-style: italic;
+}
+
+/* Âncoras da própria página. São <button> porque rolam a página em vez de
+   navegar; o visual é de link, o alvo de toque tem 44px de altura. */
+.rodape__link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--tinta-3);
+  cursor: pointer;
+  border-radius: var(--raio-8);
+}
+
+.rodape__link:hover {
+  color: var(--marca);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.rodape__link:focus-visible {
+  outline: 2px solid var(--marca);
+  outline-offset: 3px;
+}
+
+@media (max-width: 720px) {
+  .rodape {
+    justify-content: flex-start;
+  }
+}

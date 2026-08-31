@@ -13,11 +13,19 @@ import { isFreePlan, SubscriptionWithPlan } from './subscription.service';
  * assinatura: dá tempo de o cliente ver o vídeo rodando na TV da própria loja
  * antes de decidir, o que é bem mais convincente que uma página de vendas.
  *
- * ── Regra dos widgets de BI ─────────────────────────────────────────────────
- * Power BI, Airtable, Google Docs, Office e PDF são o que a página de vendas
- * anuncia como recurso do plano Rede. Aqui a regra é por PLANO (feature
- * `powerbi`), sem degustação: quem não tem a feature não publica. Diferente do
- * vídeo, que é por tempo.
+ * ── Regra dos widgets de documento e de painel ──────────────────────────────
+ * Duas features, não uma. O plano comercial v2 (§5.1b) separou o que antes era
+ * um gate só:
+ *
+ *   `documentos` (Loja+) → PDF, Google Docs, Office. Documento na parede é a
+ *      cena de uma clínica ou de uma empresa de 1 tela; cobrá-lo como Rede
+ *      vendia o degrau errado.
+ *   `powerbi`    (Rede+) → Power BI, Airtable, cotações da bolsa, snapshot de
+ *      página e HTML próprio — o painel de gestão, que é o que caracteriza o
+ *      Rede.
+ *
+ * Nas duas a regra é por PLANO, sem degustação: quem não tem a feature não
+ * publica. Diferente do vídeo, que é por tempo.
  *
  * ── Por que a checagem é na ESCRITA e não na leitura ────────────────────────
  * O gate roda quando o display é salvo (`POST /api/displays`), nunca quando o
@@ -27,12 +35,14 @@ import { isFreePlan, SubscriptionWithPlan } from './subscription.service';
  * aceita: um display já publicado com vídeo continua tocando depois do 7º dia; a
  * pressão de upgrade aparece no momento em que a pessoa tenta editar/republicar.
  *
- * Isso vale igual para os widgets de BI, e ali a consequência é ainda mais
- * importante: quando o gate de `powerbi` foi ligado (2026-07-31) já havia
- * contas usando esses widgets de graça, porque a feature era vendida mas nunca
- * aplicada. Bloquear na leitura apagaria o painel dessas telas de uma hora para
- * outra. Bloqueando só na escrita, a tela publicada continua funcionando e a
- * conversa de upgrade acontece quando a pessoa vai editar.
+ * Isso vale igual para os widgets de BI e de documento, e ali a consequência é
+ * ainda mais importante: quando o gate de `powerbi` foi ligado (2026-07-31) já
+ * havia contas usando esses widgets de graça, porque a feature era vendida mas
+ * nunca aplicada. Bloquear na leitura apagaria o painel dessas telas de uma hora
+ * para outra. Bloqueando só na escrita, a tela publicada continua funcionando e
+ * a conversa de upgrade acontece quando a pessoa vai editar. Esta regra não se
+ * afrouxa: a cada ampliação do gate (a de 2026-08-30 incluída) ela é o que
+ * garante que ninguém acorda com a TV em branco.
  */
 
 /** Janela de degustação de vídeo no plano Grátis, em dias. */
@@ -49,25 +59,43 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 export const PAID_WIDGET_TYPES = new Set(['VIDEO']);
 
 /**
- * Widgets de BI/documento, cobertos pela feature `powerbi` (plano Rede).
+ * Widgets de DOCUMENTO, cobertos pela feature `documentos` (plano Loja).
  *
- * Exatamente os cinco que a página de vendas anuncia como recurso do Rede
- * ("Power BI, Airtable e planilhas na TV" + "Google Docs, Office e PDF na
- * tela"). A lista é essa e não a categoria "Integrações" inteira de propósito:
- * `MARKET_WATCH`, `BROWSER_SNAPSHOT` e `EMBED_HTML` estão no mesmo grupo do
- * editor mas **nunca foram vendidos como recurso de plano pago** — cobrá-los
- * agora seria tirar do cliente algo que nenhuma página prometeu cobrar. Gate
- * novo só pode alcançar o que a oferta já dizia que era pago.
+ * Saíram do conjunto de BI em 2026-08-30 (§5.1b do plano comercial v2): PDF,
+ * Google Docs e Office não são painel de gestão, são o mural de uma clínica ou
+ * de um escritório. Continuam pagos — o que muda é o degrau, que passa a ser o
+ * Loja em vez do Rede.
  *
- * Grafia conferida contra o enum `WidgetType` do frontend (`frontend/types.ts`):
+ * Grafia conferida contra o enum `WidgetType` do painel (`apps/painel/types.ts`).
+ */
+export const DOC_WIDGET_TYPES = new Set(['GOOGLE_DOCS', 'OFFICE_DOCS', 'PDF_DOCUMENT']);
+
+/** Feature do catálogo que libera os widgets de `DOC_WIDGET_TYPES`. */
+export const DOC_FEATURE_KEY = 'documentos';
+
+/**
+ * Widgets de PAINEL DE GESTÃO, cobertos pela feature `powerbi` (plano Rede).
+ *
+ * ⚠️ REVERSÃO DELIBERADA (2026-08-30) — leia antes de "consertar" esta lista.
+ * O comentário que estava aqui defendia deixar `MARKET_WATCH`,
+ * `BROWSER_SNAPSHOT` e `EMBED_HTML` DE FORA do gate, com o argumento de que
+ * nenhuma página de vendas os anunciava como recurso pago e que gate novo só
+ * pode alcançar o que a oferta já dizia ser pago. O argumento continua correto;
+ * o que mudou foi o antecedente: a landing v2 passou a vendê-los explicitamente
+ * na linha "Power BI, Bolsa, Snapshot, Airtable, HTML próprio — plano Rede"
+ * (§5.1b). A oferta agora diz que são pagos, então o gate os alcança. Se um dia
+ * a landing voltar a não anunciá-los, a lista tem que encolher junto — o
+ * critério é a oferta publicada, não a conveniência de cobrar.
+ *
+ * Grafia conferida contra o enum `WidgetType` do painel (`apps/painel/types.ts`):
  * é `POWER_BI` com underscore, não `POWERBI` — que é o nome da FEATURE.
  */
 export const BI_WIDGET_TYPES = new Set([
   'POWER_BI',
   'AIRTABLE',
-  'GOOGLE_DOCS',
-  'OFFICE_DOCS',
-  'PDF_DOCUMENT',
+  'MARKET_WATCH',
+  'BROWSER_SNAPSHOT',
+  'EMBED_HTML',
 ]);
 
 /** Feature do catálogo que libera os widgets de `BI_WIDGET_TYPES`. */
@@ -163,9 +191,14 @@ export function findPaidWidgetTypes(pages: unknown): string[] {
   return findWidgetTypes(pages, PAID_WIDGET_TYPES);
 }
 
-/** Widgets de BI/documento presentes no payload (feature `powerbi`). */
+/** Widgets de painel de gestão presentes no payload (feature `powerbi`). */
 export function findBiWidgetTypes(pages: unknown): string[] {
   return findWidgetTypes(pages, BI_WIDGET_TYPES);
+}
+
+/** Widgets de documento presentes no payload (feature `documentos`). */
+export function findDocWidgetTypes(pages: unknown): string[] {
+  return findWidgetTypes(pages, DOC_WIDGET_TYPES);
 }
 
 /** Erro de direito de uso — a rota traduz para 402/403. */

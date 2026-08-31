@@ -3,15 +3,18 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#0ea5e9" />
+    <meta name="theme-color" content="#0369a1" />
 
-    <title>TelaHub — Transforme qualquer Smart TV em vitrine de ofertas | 1ª tela grátis</title>
-    <meta name="description" content="Troque preços, cardápios e avisos nas TVs do seu negócio em 30 segundos, pelo celular. Sem pen-drive, sem técnico e sem comprar hardware. A primeira tela é grátis para sempre; depois R$ 49 por tela ativa. Se uma tela parar, você recebe aviso por e-mail." />
+    <title>TelaHub — coloque seus avisos, ofertas e agenda na TV que você já tem</title>
+    <meta name="description" content="Portaria de condomínio, recepção de empresa, sala de espera, balcão de loja: a TV que já está ligada passa a mostrar o seu aviso, sua oferta e sua agenda — trocados do celular em 30 segundos. Sem pen-drive, sem técnico e sem comprar equipamento. A primeira tela é grátis para sempre; depois, a partir de R$ 39 por tela/mês no plano anual." />
     <!-- Lei da Categoria (Ries & Trout): "digital signage" é o termo do mercado
-         corporativo, dominado por integradores. O dono de padaria, clínica ou loja
-         de bairro busca em português concreto. Termos de SMB primeiro; os termos de
-         categoria corporativa seguem depois, para não perder quem já os conhece. -->
-    <meta name="keywords" content="tv com cardápio digital, tela de ofertas para loja, cardápio digital para TV, painel de avisos para condomínio, transformar smart tv em vitrine, mural digital para recepção, digital signage, gerenciamento de telas, telahub" />
+         corporativo, dominado por integradores. Síndico, gerente de escritório e
+         dono de loja buscam em português concreto — e buscam pela CENA deles, não
+         pela categoria. Por isso os termos de porte/ambiente vêm primeiro e os de
+         categoria corporativa depois, para não perder quem já os conhece.
+         Decisão de 2026-08-30: o produto é HORIZONTAL por porte. Termo de comida
+         não abre a lista (é dominado por QR/delivery) e não abre a página. -->
+    <meta name="keywords" content="painel de avisos para condomínio, mural digital para portaria, tv de recepção para empresa, tela para sala de espera de clínica, tv de ofertas para loja, grade de aulas na tv da academia, avisos na tv por celular, totem vertical para vitrine, digital signage, telahub" />
     <link rel="canonical" href="https://telahub.com.br/" />
     <link rel="manifest" href="/manifest.webmanifest" />
 
@@ -19,16 +22,20 @@
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="pt_BR" />
     <meta property="og:site_name" content="TelaHub" />
-    <meta property="og:title" content="TelaHub — Transforme qualquer Smart TV em vitrine de ofertas" />
-    <meta property="og:description" content="Troque preços, cardápios e avisos nas TVs do seu negócio em 30 segundos, pelo celular. Sem pen-drive, sem técnico e sem comprar hardware. A primeira tela é grátis para sempre." />
-    <meta property="og:image" content="https://telahub.com.br/dashboard-hero.png" />
+    <meta property="og:title" content="Sua TV está ligada. E não está dizendo nada." />
+    <meta property="og:description" content="Avisos, ofertas, agenda e informação na TV que você já tem — trocados do celular. Primeira tela grátis para sempre, sem cartão e sem técnico." />
+    <meta property="og:image" content="https://telahub.com.br/capturas/real-painel.jpg" />
     <meta property="og:url" content="https://telahub.com.br/" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="TelaHub — Transforme qualquer Smart TV em vitrine de ofertas" />
-    <meta name="twitter:description" content="Troque preços e cardápios nas TVs do seu negócio em 30 segundos, pelo celular. Sem pen-drive e sem técnico." />
-    <meta name="twitter:image" content="https://telahub.com.br/dashboard-hero.png" />
+    <meta name="twitter:title" content="Sua TV está ligada. E não está dizendo nada." />
+    <meta name="twitter:description" content="Avisos, ofertas e agenda na TV que você já tem, trocados do celular. A primeira tela é grátis para sempre." />
+    <meta name="twitter:image" content="https://telahub.com.br/capturas/real-painel.jpg" />
 
-    <!-- Dados estruturados (SEO/AEO/GEO): entidade da organização e do produto -->
+    <!-- Dados estruturados (SEO/AEO/GEO): entidade da organização e do produto.
+         Os preços aqui precisam bater com `src/data/planos.json` — que é o
+         snapshot de `GET /api/plans`. Rich snippet com preço divergente do
+         cobrado é o mesmo problema de CDC (arts. 30 e 37) que a página já
+         corrigiu uma vez, só que exibido direto no Google. -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -46,7 +53,7 @@
           "name": "TelaHub",
           "applicationCategory": "BusinessApplication",
           "operatingSystem": "Web",
-          "description": "Plataforma de gerenciamento remoto de telas digitais (digital signage) para empresas no Brasil, sem hardware proprietário, com atualização de conteúdo em tempo real e alerta por e-mail quando uma tela para de responder.",
+          "description": "Sistema brasileiro para colocar avisos, ofertas, agenda e informação nas telas de um negócio — condomínio, escritório, clínica, loja, academia ou rede de unidades — usando a TV que já existe no lugar, com troca de conteúdo pelo celular e aviso por e-mail quando uma tela para de responder.",
           "publisher": { "@id": "https://telahub.com.br/#organization" },
           "offers": [
             {
@@ -59,28 +66,28 @@
             {
               "@type": "Offer",
               "name": "Loja",
-              "price": "49",
+              "price": "39",
               "priceCurrency": "BRL",
-              "description": "Por tela ativa/mês, a partir de 1 tela. Telas ilimitadas.",
+              "description": "Por tela ativa/mês no plano anual (R$ 49 no mensal, sem fidelidade). Telas ilimitadas, cobrança só pelas telas ligadas.",
               "priceSpecification": {
                 "@type": "UnitPriceSpecification",
-                "price": "49",
+                "price": "39",
                 "priceCurrency": "BRL",
-                "unitText": "tela ativa por mês"
+                "unitText": "tela ativa por mês, no plano anual"
               }
             },
             {
               "@type": "Offer",
               "name": "Rede",
-              "price": "39",
+              "price": "32",
               "priceCurrency": "BRL",
-              "description": "Por tela ativa/mês, com piso de 5 telas na fatura. Inclui Power BI, Airtable e documentos na TV.",
+              "description": "Por tela ativa/mês no plano anual (R$ 39 no mensal), com piso de 5 telas na fatura. Inclui painéis de gestão e auditoria de publicação.",
               "priceSpecification": {
                 "@type": "UnitPriceSpecification",
-                "price": "39",
+                "price": "32",
                 "priceCurrency": "BRL",
-                "unitText": "tela ativa por mês",
-                "minPrice": "195"
+                "unitText": "tela ativa por mês, no plano anual",
+                "minPrice": "160"
               }
             }
           ]
@@ -89,7 +96,7 @@
           "@type": "WebPage",
           "@id": "https://telahub.com.br/#webpage",
           "url": "https://telahub.com.br/",
-          "name": "TelaHub — Transforme qualquer Smart TV em vitrine de ofertas",
+          "name": "TelaHub — coloque seus avisos, ofertas e agenda na TV que você já tem",
           "isPartOf": { "@id": "https://telahub.com.br/#organization" },
           "inLanguage": "pt-BR"
         }
@@ -97,10 +104,13 @@
     }
     </script>
 
-    <!-- Google Fonts (Geist/Outfit carregadas via index.css; Inter aqui para uso imediato no <head>) -->
+    <!-- Uma família só (§3.5 do plano v2: o painel importava dez). Geist é a
+         fonte do sistema visual; Inter e a do sistema operacional são a reserva
+         declarada em `--fonte`, então a página não muda de layout se o Google
+         Fonts estiver fora do ar — só troca o desenho da letra. -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 
     <!-- Consent Mode v2 — padrão negado ANTES de qualquer tag carregar (LGPD/GDPR) -->
     <script>

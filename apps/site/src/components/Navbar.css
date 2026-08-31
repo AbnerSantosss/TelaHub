@@ -1,0 +1,116 @@
+/* Barra fixa da landing. O `scroll-padding-top` de `index.css` compensa a
+   altura dela na chegada por âncora — se mudar a altura aqui, ajuste lá. */
+
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--papel);
+  border-bottom: 1px solid var(--borda);
+  transition: box-shadow 0.2s ease;
+}
+
+.navbar--descolada {
+  box-shadow: 0 6px 20px rgba(7, 20, 38, 0.07);
+}
+
+.navbar__inner {
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 0 var(--gutter);
+}
+
+.navbar__marca {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 800;
+  font-size: 1.125rem;
+  letter-spacing: -0.01em;
+  color: var(--tinta);
+}
+
+.navbar__marca:hover {
+  color: var(--tinta);
+  text-decoration: none;
+}
+
+.navbar__logo {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--raio-8);
+  background: var(--marca);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+
+.navbar__links {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.navbar__links button {
+  border: none;
+  background: none;
+  padding: 8px 0;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--tinta-2);
+  cursor: pointer;
+}
+
+.navbar__links button:hover {
+  color: var(--marca);
+}
+
+.navbar__acoes {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.navbar__entrar {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--marca);
+}
+
+.navbar__btn {
+  min-height: 44px;
+  padding: 0 20px;
+  font-size: 0.9375rem;
+}
+
+/* Abaixo de 1100px os quatro links não cabem sem espremer a marca contra o
+   botão. Eles saem; o rodapé repete os atalhos e a página continua rolável. */
+@media (max-width: 1100px) {
+  .navbar__links {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .navbar__inner {
+    height: 60px;
+    gap: 12px;
+  }
+
+  .navbar__entrar {
+    display: none;
+  }
+
+  .navbar__btn {
+    min-height: 40px;
+    padding: 0 14px;
+    font-size: 0.875rem;
+  }
+}

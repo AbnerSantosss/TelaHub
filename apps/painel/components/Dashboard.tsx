@@ -746,8 +746,13 @@ const Dashboard: React.FC = () => {
     return `${window.location.origin}${window.location.pathname}#/player/${slug}`;
   };
 
-  const copyPlayerLink = async (slug: string, id: string) => {
-    const url = getPlayerUrl(slug);
+  /**
+   * `ref` é o token público quando existe, e o slug como reserva — quem chama
+   * já resolve essa escolha (ver `DisplayCard`). Link novo nunca deve sair com
+   * slug: ele é adivinhável.
+   */
+  const copyPlayerLink = async (ref: string, id: string) => {
+    const url = getPlayerUrl(ref);
     try {
       await navigator.clipboard.writeText(url);
       setCopiedId(id);
@@ -758,8 +763,8 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  const openPlayer = (slug: string) => {
-    window.open(getPlayerUrl(slug), '_blank');
+  const openPlayer = (ref: string) => {
+    window.open(getPlayerUrl(ref), '_blank');
   };
 
   const handleResendInvite = async (email: string) => {

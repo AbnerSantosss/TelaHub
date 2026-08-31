@@ -47,14 +47,14 @@ const ConsentBanner = () => {
       <div className="consent-banner-actions">
         <button
           type="button"
-          className="btn btn-ghost"
+          className="btn btn--fantasma"
           onClick={() => decide(false)}
         >
           Recusar
         </button>
         <button
           type="button"
-          className="btn btn-primary"
+          className="btn"
           onClick={() => decide(true)}
         >
           Aceitar tudo
