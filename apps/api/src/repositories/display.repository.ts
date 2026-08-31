@@ -1,3 +1,5 @@
+import { randomBytes } from 'node:crypto';
+
 import prisma from '../lib/prisma';
 
 /** `null`/`undefined` = sem filtro de tenant (apenas master). */
@@ -39,12 +41,35 @@ export class DisplayRepository {
     return prisma.display.findUnique({ where: { slug } });
   }
 
+  /**
+   * Busca por token público OU slug, nessa ordem.
+   *
+   * O player aceita os dois: o slug é adivinhável (`loja-centro`) e continua
+   * valendo só para não apagar TV já pareada; URL nova usa o token.
+   */
+  async findByPublicRef(ref: string) {
+    const porToken = await prisma.display.findUnique({ where: { publicToken: ref } });
+    return porToken ?? prisma.display.findUnique({ where: { slug: ref } });
+  }
+
   // Query ultra-leve: retorna apenas o timestamp de atualização
   async findVersionBySlug(slug: string) {
     return prisma.display.findUnique({
       where: { slug },
       select: { updatedAt: true },
     });
+  }
+
+  /** Versão por token público ou slug — mesma regra de `findByPublicRef`. */
+  async findVersionByPublicRef(ref: string) {
+    const porToken = await prisma.display.findUnique({
+      where: { publicToken: ref },
+      select: { updatedAt: true },
+    });
+    return (
+      porToken ??
+      prisma.display.findUnique({ where: { slug: ref }, select: { updatedAt: true } })
+    );
   }
 
   async upsert(data: {
@@ -71,6 +96,8 @@ export class DisplayRepository {
         id: data.id,
         name: data.name,
         slug: data.slug,
+        // Toda tela nova nasce com endereço público não adivinhável.
+        publicToken: randomBytes(16).toString('hex'),
         pages: data.pages,
         coverImage: data.coverImage ?? null,
         organizationId: data.organizationId ?? null,

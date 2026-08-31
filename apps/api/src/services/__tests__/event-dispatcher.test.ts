@@ -86,6 +86,37 @@ describe('backoffMs', () => {
   });
 });
 
+describe('dispatchPending — evento sem sessão', () => {
+  /**
+   * `session` é relação obrigatória. Com `include: { session: true }`, um
+   * evento cuja sessão sumiu fazia o Prisma lançar "Inconsistent query result"
+   * e derrubar a varredura INTEIRA — e como a busca acontece fora do try, o
+   * cinto de segurança do lote não pegava. Aqui o evento órfão é só ignorado,
+   * e os outros continuam sendo entregues.
+   */
+  it('ignora o órfão e continua entregando os demais', async () => {
+    const c = newCase([{ name: 'ok', behavior: 'ok' }]);
+    const saudavel = await seedEvent(c.type);
+
+    // Cria um evento e apaga a sessão dele por baixo, sem cascade no evento.
+    const sessaoOrfa = await seedSession();
+    const orfao = await prisma.checkoutEvent.create({
+      data: { sessionId: sessaoOrfa.id, type: c.type, metadata: null },
+    });
+    await prisma.$executeRaw`DELETE FROM "CheckoutSession" WHERE id = ${sessaoOrfa.id}`;
+
+    const result = await eventDispatcherService.dispatchPending({
+      resolveHandlers: c.resolve,
+      batchSize: 200,
+    });
+
+    // O saudável foi entregue...
+    expect(result.outcomes.find((o) => o.eventId === saudavel.id)?.status).toBe('delivered');
+    // ...e o órfão nem entrou no lote.
+    expect(result.outcomes.find((o) => o.eventId === orfao.id)).toBeUndefined();
+  });
+});
+
 describe('dispatchPending — entrega', () => {
   it('marca `delivered`, carimba `dispatchedAt` e limpa a retentativa', async () => {
     const c = newCase([{ name: 'ok', behavior: 'ok' }]);

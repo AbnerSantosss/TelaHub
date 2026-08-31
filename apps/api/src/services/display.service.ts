@@ -124,9 +124,31 @@ export class DisplayService {
     };
   }
 
+  /**
+   * Conteúdo do player por token público OU slug.
+   *
+   * O slug é adivinhável e segue aceito só para não derrubar TV já pareada;
+   * URL nova usa `publicToken`.
+   */
+  async getByPublicRef(ref: string) {
+    const display = await displayRepository.findByPublicRef(ref);
+    if (!display) return null;
+    const { pages, orientation } = parsePagesField(display.pages);
+    return {
+      ...display,
+      pages,
+      orientation,
+    };
+  }
+
   // Retorna apenas o updatedAt — query ultra-leve para o Player checar versão
   async getVersionBySlug(slug: string) {
     return displayRepository.findVersionBySlug(slug);
+  }
+
+  /** Versão por token público ou slug. */
+  async getVersionByPublicRef(ref: string) {
+    return displayRepository.findVersionByPublicRef(ref);
   }
 
   /**

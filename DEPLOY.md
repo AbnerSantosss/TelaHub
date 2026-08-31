@@ -142,7 +142,58 @@ a configuração antiga (só usuário e senha) continua sendo lida como Gmail.
 
 Configure no Portainer, em "Environment variables" da stack — nunca no código.
 
+## Migrações versionadas (2026-08-29) — LEIA ANTES DO PRÓXIMO DEPLOY
+
+Até esta data o deploy rodava `prisma db push`. Isso sincroniza o schema
+comparando o banco com o arquivo, **sem histórico**, e quando encontra
+divergência resolve APAGANDO dado — o `start` da raiz chegava a passar
+`--accept-data-loss` explicitamente. Era a dívida mais perigosa do deploy.
+
+Agora existe `prisma/migrations/` e o boot roda `node prisma/migrate-deploy.js`.
+
+### O que acontece sozinho no próximo deploy
+
+O banco de produção já tem as tabelas (criadas por `db push`) mas **não tem** a
+tabela de controle `_prisma_migrations`. Nesse estado, um `migrate deploy`
+puro tentaria criar tudo de novo e falharia com "already exists".
+
+`migrate-deploy.js` detecta isso e faz o *baseline* sozinho:
+
+| Estado do banco | O que o script faz |
+|---|---|
+| Vazio (sem `User`) | `migrate deploy` cria tudo |
+| Com tabelas, sem histórico (**produção hoje**) | marca `00000000000000_baseline` como aplicada e só então roda `deploy` |
+| Já com histórico | `migrate deploy` normal |
+
+É idempotente — pode rodar em todo boot. Os três cenários foram exercitados
+contra bancos descartáveis antes da troca, inclusive verificando que o dado
+pré-existente sobrevive ao baseline.
+
+### O que muda no dia a dia
+
+- Mudou o schema? `npm --prefix apps/api run db:migrate -- --name descricao`
+  gera a migração; ela vai versionada no git e é aplicada no deploy.
+- `db push` continua no `package.json` para experimento local, mas **não é mais
+  o caminho de produção**.
+- Antes de subir uma migração destrutiva (drop/rename de coluna com dado),
+  siga expand/contract: adicione o novo, migre o dado, só remova o antigo num
+  deploy seguinte.
+
+### Backup antes do primeiro deploy com migração
+
+O baseline não escreve nas tabelas de negócio, mas é a primeira vez que o
+histórico é criado. Rode o backup manual (`infra/backup-compose.yml`) e
+confirme o dump antes de promover.
+
 ## Pendências (não automatizáveis remotamente)
 
+- **Rotação de segredos no Portainer** (US-P0-05): as senhas novas foram geradas em 2026-07-26 mas **não há confirmação de que foram aplicadas** nas variáveis de ambiente das stacks. Exige acesso ao Portainer. Enquanto não for feito, o histórico público do repositório contém as credenciais antigas ainda válidas.
+- **Repositório GitHub privado** (US-P0-05): o histórico contém a wiki inteira e credenciais. Tornar privado é um clique nas configurações do repositório; limpar o histórico exige `git filter-repo` + force-push coordenado.
+- **Variáveis novas desta rodada** (definir na stack antes do deploy):
+  - `COMMERCIAL_EMAIL` — para onde vai o aviso de lead novo do site. Sem ela, o aviso cai no próprio remetente do SMTP.
+  - `CORS_ORIGINS` — precisa incluir a origem do **site** agora que a LP chama `POST /api/leads`. Sem isso, o formulário de contato é bloqueado pelo navegador.
+  - `VITE_API_URL` (build arg do site) — base da API para o formulário de lead.
+  - Opcionais de ajuste fino: `HTTP_PROXY_ALLOWED_HOSTS`, `DEVICE_REGISTER_RATE_LIMIT`, `DEVICE_TELEMETRY_RATE_LIMIT`, `PROXY_RATE_LIMIT`, `LEAD_RATE_LIMIT`.
+- **Placeholders do site** (US-P0-07, parcial): WhatsApp `wa.me/5500000000000`, `CNPJ 00.000.000/0001-00`, `GTM-XXXXXXX` e o domínio `telahub.com.br` (que não existe) seguem no código — dependem de dados que só o dono tem. O formulário de lead, que era um `setTimeout` sem gravar nada, **já foi ligado ao backend**.
 - **Ambiente de staging separado de produção**: exige provisionar um novo stack/container na VPS (ou um segundo Portainer environment) e um subdomínio próprio no Cloudflare Tunnel. Requer acesso direto à VPS/Portainer/Cloudflare — não foi executado nesta sessão, apenas planejado aqui.
 - Quando o staging existir, o fluxo de promoção passa a ser: `PR → CI → merge em main → deploy automático em staging → validação manual → promoção manual/tag para produção`.

@@ -77,7 +77,12 @@ services:
     networks:
       - display_network
 
-  # 4. pgAdmin — Interface visual para o banco de dados
+  # 4. pgAdmin — Interface visual para o banco de dados (SOMENTE DESENVOLVIMENTO)
+  #
+  # A porta é publicada em 127.0.0.1 de propósito. Publicada em 0.0.0.0, como
+  # era antes, um administrador completo do banco ficava exposto para toda a
+  # rede local — e, em máquina com porta aberta para fora, para a internet.
+  # A stack de produção não sobe este serviço (ver docker-compose.prod.yml).
   pgadmin:
     image: dpage/pgadmin4:latest
     restart: unless-stopped
@@ -85,7 +90,7 @@ services:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
     ports:
-      - "5053:80"
+      - "127.0.0.1:5053:80"
     volumes:
       - pgadmin_data:/var/lib/pgadmin
     depends_on:

@@ -126,17 +126,51 @@ export class EventDispatcherService {
     const batchSize = options.batchSize ?? DISPATCH_BATCH_SIZE;
     const resolve = options.resolveHandlers ?? getHandlersFor;
 
-    const events = (await prisma.checkoutEvent.findMany({
+    // Duas consultas em vez de um `include`, de propósito.
+    //
+    // `session` é uma relação OBRIGATÓRIA no schema. Com `include: { session:
+    // true }`, se a sessão sumir entre a leitura do evento e a da relação — e
+    // ela some: `Cascade` no delete, mais o job de expiração de sessão —, o
+    // Prisma lança "Inconsistent query result: Field session is required" e
+    // derruba a varredura INTEIRA. Como este `findMany` fica fora do try
+    // abaixo, o cinto de segurança que promete que "nem uma falha de infra
+    // interrompe a varredura" não pegava esse caso: um evento órfão parava o
+    // despacho de todos os outros.
+    //
+    // Buscando em separado, o evento sem sessão é apenas ignorado.
+    const pendentes = await prisma.checkoutEvent.findMany({
       where: {
         dispatchStatus: 'pending',
         OR: [{ nextAttemptAt: null }, { nextAttemptAt: { lte: now } }],
       },
-      include: { session: true },
       // Ordem de acontecimento: um `submit` nunca é entregue antes do
       // `identify` da mesma sessão.
       orderBy: { createdAt: 'asc' },
       take: batchSize,
-    })) as EventWithSession[];
+    });
+
+    const sessoes = pendentes.length
+      ? await prisma.checkoutSession.findMany({
+          where: { id: { in: [...new Set(pendentes.map((evento) => evento.sessionId))] } },
+        })
+      : [];
+    const sessaoPorId = new Map(sessoes.map((sessao) => [sessao.id, sessao]));
+
+    const events: EventWithSession[] = [];
+    for (const evento of pendentes) {
+      const sessao = sessaoPorId.get(evento.sessionId);
+      if (!sessao) {
+        log({
+          eventId: evento.id,
+          type: evento.type,
+          result: 'skipped',
+          scope: 'dispatcher',
+          error: 'sessão do evento não existe mais',
+        });
+        continue;
+      }
+      events.push({ ...evento, session: sessao });
+    }
 
     const result: DispatchSweepResult = {
       processed: 0,

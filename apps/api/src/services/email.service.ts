@@ -647,3 +647,59 @@ export async function sendResetPasswordEmail(to: string, token: string): Promise
     attachments: getLogoAttachment(),
   });
 }
+
+/**
+ * Avisa o comercial que um lead novo chegou pelo site.
+ *
+ * Destino: `COMMERCIAL_EMAIL` e, sem ele, o próprio remetente configurado no
+ * SMTP — assim o aviso nunca some por falta de uma variável, ele só cai na
+ * caixa de quem já é dono do envio.
+ */
+export async function sendLeadNotificationEmail(lead: {
+  id: string;
+  name: string;
+  email: string;
+  company: string | null;
+  phone: string | null;
+  planCode: string | null;
+  utmSource: string | null;
+  referrer: string | null;
+  createdAt: Date;
+}): Promise<void> {
+  const transporter = await createTransporter();
+  if (!transporter) {
+    throw new Error('Provedor de e-mail não configurado. Configure nas Configurações do sistema.');
+  }
+
+  const smtp = await settingsService.getSmtpConfig();
+  const destino = process.env.COMMERCIAL_EMAIL || smtp!.fromEmail;
+
+  const linha = (rotulo: string, valor: string | null) =>
+    valor ? `<tr><td style="padding:6px 12px;color:#55637d">${rotulo}</td><td style="padding:6px 12px;color:#0a1223"><strong>${valor}</strong></td></tr>` : '';
+
+  const html = `
+    <div style="font-family:Arial,Helvetica,sans-serif;max-width:560px;margin:0 auto">
+      <h2 style="color:#0a1223;margin:0 0 4px">Novo lead pelo site</h2>
+      <p style="color:#55637d;margin:0 0 16px">Recebido em ${lead.createdAt.toLocaleString('pt-BR')}.</p>
+      <table style="width:100%;border-collapse:collapse;border:1px solid #dbe4ef;border-radius:8px">
+        ${linha('Nome', lead.name)}
+        ${linha('E-mail', lead.email)}
+        ${linha('Empresa', lead.company)}
+        ${linha('Telefone', lead.phone)}
+        ${linha('Plano de interesse', lead.planCode)}
+        ${linha('Origem (utm_source)', lead.utmSource)}
+        ${linha('Veio de', lead.referrer)}
+      </table>
+      <p style="color:#55637d;font-size:12px;margin-top:16px">Lead ${lead.id}</p>
+    </div>
+  `;
+
+  await transporter.sendMail({
+    from: formatFrom(smtp!),
+    to: destino,
+    replyTo: lead.email,
+    subject: `📩 Novo lead: ${lead.name}${lead.company ? ` (${lead.company})` : ''}`,
+    html,
+    attachments: getLogoAttachment(),
+  });
+}

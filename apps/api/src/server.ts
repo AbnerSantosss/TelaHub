@@ -23,6 +23,7 @@ if (process.env.NODE_ENV === 'production') {
 
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
 import path from 'path';
 
 import authRoutes from './routes/auth.routes';
@@ -40,6 +41,8 @@ import billingRoutes from './routes/billing.routes';
 import uptimeRoutes from './routes/uptime.routes';
 import checkoutRoutes from './routes/checkout.routes';
 import checkoutAdminRoutes from './routes/checkout-admin.routes';
+import proxyRoutes from './routes/proxy.routes';
+import leadsRoutes from './routes/leads.routes';
 import { startCheckoutAbandonJob } from './jobs/checkout-abandon.job';
 import { startEventDispatchJob } from './jobs/event-dispatch.job';
 import { errorMiddleware } from './middlewares/error.middleware';
@@ -106,6 +109,40 @@ app.use(cors({
   credentials: true,
 }));
 
+// Cabeçalhos de segurança. A API só devolve JSON, então a CSP pode ser
+// mínima e restritiva: nada é renderizado a partir daqui.
+//
+// Duas exceções deliberadas, e o motivo de cada uma:
+//   • `crossOriginResourcePolicy: 'cross-origin'` — o painel, o site e o player
+//     rodam em origens diferentes da API e carregam imagem/vídeo de
+//     `/uploads`. O padrão do helmet (`same-origin`) faria toda mídia sumir das
+//     telas.
+//   • `contentSecurityPolicy` com `frame-ancestors 'none'` e `default-src
+//     'none'` — resposta de API não deve ser enquadrada nem carregar nada.
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      useDefaults: false,
+      directives: {
+        'default-src': ["'none'"],
+        'frame-ancestors': ["'none'"],
+        'base-uri': ["'none'"],
+        'form-action': ["'none'"],
+        // `/uploads` e `/assets/system` servem imagem para outras origens.
+        'img-src': ["'self'", 'data:', 'blob:'],
+        'media-src': ["'self'", 'blob:'],
+      },
+    },
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+    // A API não abre janelas nem usa isolamento de origem cruzada; ligar isso
+    // sem necessidade quebra `window.open` do checkout.
+    crossOriginOpenerPolicy: false,
+    crossOriginEmbedderPolicy: false,
+    // HSTS só faz sentido atrás do TLS do Cloudflare Tunnel, em produção.
+    hsts: process.env.NODE_ENV === 'production',
+  })
+);
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
@@ -127,12 +164,14 @@ app.use('/assets/system', express.static(iconsPath, {
 // autenticação/tenant: quem se cadastra ainda não tem conta nem organização.
 app.use('/api/signup', signupRoutes);
 app.use('/api/plans', plansRoutes);
+app.use('/api/leads', leadsRoutes);
 
 // Funil de checkout. O painel vem antes por clareza de leitura — os caminhos não
 // colidem. As rotas públicas de `/api/checkout` são anônimas de propósito: a
 // sessão nasce antes de qualquer login, e é isso que torna abandono mensurável.
 app.use('/api/checkout/admin', checkoutAdminRoutes);
 app.use('/api/checkout', checkoutRoutes);
+app.use('/api/proxy', proxyRoutes);
 
 // Rotas
 app.use('/api/auth', authRoutes);

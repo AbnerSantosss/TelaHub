@@ -25,7 +25,7 @@
     "test:api": "npm --prefix apps/api test",
 
     "build": "npm --prefix apps/api install && npm --prefix apps/api run prisma:generate && npm --prefix apps/api run build",
-    "start": "npm --prefix apps/api run db:push -- --accept-data-loss && npm --prefix apps/api start",
+    "start": "npm --prefix apps/api run db:deploy && npm --prefix apps/api start",
     "seed": "npm --prefix apps/api run db:seed",
     "prepare": "husky"
   }

@@ -96,7 +96,10 @@ services:
     networks:
       - telahub_net
     # Sequência de boot. A ORDEM IMPORTA:
-    #   1. db push         — aplica o schema
+    #   1. migrate-deploy  — aplica as MIGRAÇÕES versionadas (com baseline
+    #                        automático em banco que veio da era do `db push`).
+    #                        Trocado de `db push` em 2026-08-29: `db push`
+    #                        resolve divergência apagando dado.
     #   2. backfill-tenant — vincula registros pré-existentes a uma organização.
     #                        Num banco novo não faz nada; é idempotente e fica
     #                        aqui para o dia em que esta stack não for mais nova.
@@ -105,7 +108,7 @@ services:
     # Encadeado com `&&`: se o seed falhar por falta de ADMIN_PASSWORD, o
     # container NÃO sobe. É melhor do que subir sem admin.
     command: >
-      sh -c "npx prisma db push --skip-generate &&
+      sh -c "node prisma/migrate-deploy.js &&
       npx tsx prisma/backfill-tenant-scope.ts &&
       npx tsx prisma/seed-plans.ts &&
       node prisma/seed-prod.js &&
