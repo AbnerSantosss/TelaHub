@@ -1,0 +1,1300 @@
+@import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700;800&family=Geist:wght@100..900&family=Geist+Mono:wght@100..900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Syncopate:wght@400;700&family=Manrope:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap');
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@fontsource-variable/geist";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --font-sans: 'Exo 2', 'Geist', 'Outfit', 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Geist Mono', monospace;
+  
+  /* Eldora UI custom animations & keyframes */
+  --animate-gradient-x: gradient-x 6s ease infinite;
+  --animate-pulse-glow: pulse-glow 2s ease-in-out infinite;
+
+  @keyframes gradient-x {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+  @keyframes pulse-glow {
+    0%, 100% { opacity: 0.35; transform: translate(-50%, -50%) scale(0.98); }
+    50% { opacity: 0.55; transform: translate(-50%, -50%) scale(1.02); }
+  }
+
+  /* Shadcn UI tailwind v4 color variables */
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  /* Superfícies dark premium */
+  --color-bg:          #0a0d16;
+  --color-surface:     rgba(255,255,255,0.025);
+  --color-surface-2:   rgba(255,255,255,0.045);
+  --color-border-hover:rgba(var(--th-accent-soft-rgb),0.40);
+
+  /* Texto */
+  --color-text:        #e8edf5;
+  --color-text-muted:  #7b8794;
+
+  /* Marca / acentos */
+  --color-accent-2:    #2563eb;   /* azul ação  */
+  --color-success:     #34d399;
+  --color-danger:      #f87171;
+  --color-warning:     #fbbf24;
+  --color-violet:      #e879f9;
+
+  /* Raio (cantos suaves consistentes) */
+  --radius-sm: 0.625rem;  /* 10px */
+  --radius:    0.875rem;  /* 14px */
+  --radius-lg: 1.125rem;  /* 18px */
+  --radius-xl: 1.25rem;   /* 20px */
+
+  /* Easing/Spring */
+  --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.react-grid-layout {
+  position: relative;
+  transition: height 200ms ease;
+}
+.react-grid-item {
+  transition: all 200ms ease;
+  transition-property: left, top;
+}
+.react-grid-item.cssTransforms {
+  transition-property: transform;
+}
+.react-grid-item.resizing {
+  z-index: 100;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+.react-grid-item.react-grid-placeholder {
+  background: rgba(var(--th-accent-rgb),0.1) !important;
+  border: 1px dashed rgba(var(--th-accent-rgb),0.5) !important;
+  border-radius: 8px !important;
+  opacity: 0.8 !important;
+  z-index: 2 !important;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -o-user-select: none;
+  user-select: none;
+}
+/* Widget Background Animations */
+@keyframes gradient-flow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.bg-anim-gradient-flow {
+  background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+  background-size: 400% 400%;
+  animation: gradient-flow 15s ease infinite;
+}
+
+@keyframes clouds-move {
+  0% { background-position: 0 0; }
+  100% { background-position: 100% 0; }
+}
+
+.bg-anim-clouds {
+  background: #87CEEB;
+  background-image: 
+    radial-gradient(circle at 50% 50%, rgba(255,255,255,0.8) 0%, transparent 60%),
+    radial-gradient(circle at 20% 80%, rgba(255,255,255,0.8) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255,255,255,0.8) 0%, transparent 50%);
+  background-size: 200% 200%;
+  animation: clouds-move 20s linear infinite;
+}
+
+@keyframes rain-fall {
+  0% { background-position: 0 0; }
+  100% { background-position: 0 100%; }
+}
+
+.bg-anim-rain {
+  background-color: #0f172a;
+  background-image: linear-gradient(to bottom, rgba(255,255,255,0.1) 1px, transparent 1px);
+  background-size: 20px 20px;
+  animation: rain-fall 1s linear infinite;
+}
+
+@keyframes snow-fall {
+  0% { background-position: 0 0, 0 0, 0 0; }
+  100% { background-position: 400px 1100px, 400px 400px, 300px 300px; }
+}
+
+.bg-anim-snow {
+  background-color: #0f172a;
+  background-image: 
+    radial-gradient(white 2px, transparent 3px),
+    radial-gradient(white 1px, transparent 2px),
+    radial-gradient(rgba(255,255,255,0.5) 2px, transparent 3px);
+  background-size: 400px 400px, 300px 300px, 200px 200px;
+  animation: snow-fall 10s linear infinite;
+}
+
+@keyframes fire-rise {
+  0% { background-position: 0% 100%; }
+  100% { background-position: 0% 0%; }
+}
+
+.bg-anim-fire {
+  background: linear-gradient(to top, #7f1d1d, #b91c1c, #ef4444, transparent);
+  background-size: 100% 200%;
+  animation: fire-rise 3s linear infinite;
+}
+
+@keyframes tech-grid-move {
+  0% { background-position: 0 0; }
+  100% { background-position: 40px 40px; }
+}
+
+.bg-anim-tech-grid {
+  background-color: #000;
+  background-image: 
+    linear-gradient(rgba(124, 58, 237, 0.15) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(124, 58, 237, 0.15) 1px, transparent 1px);
+  background-size: 40px 40px;
+  animation: tech-grid-move 4s linear infinite;
+}
+
+@keyframes pulse-red {
+  0%, 100% { background-color: rgba(220, 38, 38, 0.2); }
+  50% { background-color: rgba(220, 38, 38, 0.6); }
+}
+
+.bg-anim-pulse-red {
+  animation: pulse-red 2s ease-in-out infinite;
+}
+
+@keyframes pulse-blue {
+  0%, 100% { background-color: rgba(37, 99, 235, 0.2); }
+  50% { background-color: rgba(37, 99, 235, 0.6); }
+}
+
+.bg-anim-pulse-blue {
+  animation: pulse-blue 2s ease-in-out infinite;
+}
+
+@keyframes pulse-green {
+  0%, 100% { background-color: rgba(22, 163, 74, 0.2); }
+  50% { background-color: rgba(22, 163, 74, 0.6); }
+}
+
+.bg-anim-pulse-green {
+  animation: pulse-green 2s ease-in-out infinite;
+}
+
+@keyframes aurora-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.bg-anim-aurora {
+  background: linear-gradient(120deg, #000000, #1a2a6c, #b21f1f, #fdbb2d);
+  background-size: 400% 400%;
+  animation: aurora-shift 10s ease infinite;
+}
+
+/* --- Day/Night Weather Variations --- */
+
+/* Clear Day */
+.bg-anim-clear-day {
+  background: linear-gradient(to bottom, var(--th-accent-soft), #bae6fd);
+  background-size: 100% 100%;
+  animation: gradient-flow 20s ease infinite;
+}
+
+/* Clear Night */
+@keyframes twinkle {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 0.4; }
+}
+.bg-anim-clear-night {
+  background-color: #020617;
+  background-image: 
+    radial-gradient(white 1px, transparent 2px),
+    radial-gradient(white 1px, transparent 2px);
+  background-size: 50px 50px, 100px 100px;
+  background-position: 0 0, 25px 25px;
+  animation: twinkle 3s ease-in-out infinite;
+}
+
+/* Clouds Night */
+.bg-anim-clouds-night {
+  background: #1e293b;
+  background-image: 
+    radial-gradient(circle at 50% 50%, rgba(255,255,255,0.1) 0%, transparent 60%),
+    radial-gradient(circle at 20% 80%, rgba(255,255,255,0.1) 0%, transparent 50%);
+  background-size: 200% 200%;
+  animation: clouds-move 30s linear infinite;
+}
+
+/* Rain Day */
+.bg-anim-rain-day {
+  background-color: #64748b;
+  background-image: linear-gradient(to bottom, rgba(255,255,255,0.3) 1px, transparent 1px);
+  background-size: 20px 20px;
+  animation: rain-fall 0.8s linear infinite;
+}
+
+/* Rain Night */
+.bg-anim-rain-night {
+  background-color: #020617;
+  background-image: linear-gradient(to bottom, rgba(255,255,255,0.1) 1px, transparent 1px);
+  background-size: 20px 20px;
+  animation: rain-fall 0.8s linear infinite;
+}
+
+/* Snow Day */
+.bg-anim-snow-day {
+  background-color: #cbd5e1;
+  background-image: 
+    radial-gradient(white 2px, transparent 3px),
+    radial-gradient(white 1px, transparent 2px);
+  background-size: 400px 400px, 300px 300px;
+  animation: snow-fall 10s linear infinite;
+}
+
+/* Snow Night */
+.bg-anim-snow-night {
+  background-color: #0f172a;
+  background-image: 
+    radial-gradient(white 2px, transparent 3px),
+    radial-gradient(white 1px, transparent 2px);
+  background-size: 400px 400px, 300px 300px;
+  animation: snow-fall 10s linear infinite;
+}
+
+/* Storm */
+@keyframes lightning {
+  0%, 90%, 100% { background-color: #0f172a; }
+  92%, 96% { background-color: #334155; }
+  94% { background-color: #475569; }
+}
+.bg-anim-storm {
+  background-color: #0f172a;
+  background-image: linear-gradient(to bottom, rgba(255,255,255,0.2) 2px, transparent 1px);
+  background-size: 30px 30px;
+  animation: rain-fall 0.5s linear infinite, lightning 5s infinite;
+}
+
+/* --- Cor de destaque (accent) configurável --- */
+/*
+ * Todo o chrome do painel referencia estas variáveis em vez de hex fixo.
+ * Elas são sobrescritas em runtime por `libs/theme.ts` (preset salvo em
+ * localStorage). Os triplets *-rgb existem porque os glows/bordas usam
+ * rgba(var(--th-accent-rgb), alpha). Widgets e Player ficam fora disso de
+ * propósito: cor de conteúdo exibido na TV não deve seguir o tema do admin.
+ */
+:root {
+  --th-accent:            #0ea5e9;
+  --th-accent-soft:       #38bdf8;
+  --th-accent-strong:     #0284c7;
+  --th-accent-rgb:        14, 165, 233;
+  --th-accent-soft-rgb:   56, 189, 248;
+  --th-accent-strong-rgb: 2, 132, 199;
+}
+
+/* --- Shadcn UI core CSS variables --- */
+:root {
+  --card:        #111827;
+  --border:      #334155;
+  --border-hover:var(--th-accent);
+  --accent:      var(--th-accent);
+  --accent2:     #2563eb;
+  --accent-dim:  rgba(var(--th-accent-rgb),0.08);
+  --txt:         #f8fafc;
+  --txt2:        #cbd5e1;
+  --txt3:        #64748b;
+  --scanline:    rgba(255, 255, 255, 0.008);
+
+  --background: 225 36.8% 6.1%;
+  --foreground: 216 35.3% 93.3%;
+  --card: 225 30% 9%;
+  --card-foreground: 216 35.3% 93.3%;
+  --popover: 225 30% 7.5%;
+  --popover-foreground: 216 35.3% 93.3%;
+  --primary: 198.6 92.8% 48.4%;
+  --primary-foreground: 225 36.8% 6.1%;
+  --secondary: 225 26.8% 12.7%;
+  --secondary-foreground: 216 35.3% 93.3%;
+  --muted: 225 26.8% 12.7%;
+  --muted-foreground: 212 11% 53%;
+  --accent: 198.6 92.8% 48.4%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 91.3% 70.2%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 225 20% 15%;
+  --input: 225 20% 15%;
+  --ring: 198.6 92.8% 48.4%;
+  --radius: 0.875rem;
+
+  /* Mapeamento de compatibilidade para código legante anterior */
+  --brand-bg: #0a0d16;
+  --brand-surface: #111420;
+  --brand-accent: var(--th-accent);
+  --brand-text-high: #e8edf5;
+  --brand-text-sec: #7b8794;
+}
+
+/* Custom utility overrides */
+.bg-brand-bg {
+  background-color: var(--brand-bg) !important;
+}
+
+.bg-brand-surface {
+  background-color: var(--brand-surface) !important;
+}
+
+.bg-brand-accent {
+  background-color: var(--brand-accent) !important;
+}
+
+.text-brand-accent {
+  color: var(--brand-accent) !important;
+}
+
+.text-brand-high {
+  color: var(--brand-text-high) !important;
+}
+
+.text-brand-sec {
+  color: var(--brand-text-sec) !important;
+}
+
+.border-brand-accent {
+  border-color: var(--brand-accent) !important;
+}
+
+.border-brand-surface {
+  border-color: var(--brand-surface) !important;
+}
+
+.border-brand-sec {
+  border-color: var(--brand-text-sec) !important;
+}
+
+/* Premium Buttons Styling */
+.btn-brand-primary {
+  background-color: var(--brand-accent) !important;
+  color: var(--brand-text-high) !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 0 15px rgba(var(--th-accent-rgb),0.15);
+  border-radius: 8px !important;
+}
+
+.btn-brand-primary:hover:not(:disabled) {
+  background-color: var(--th-accent-strong) !important;
+  box-shadow: 0 0 25px rgba(var(--th-accent-rgb),0.35);
+  transform: translateY(-1px);
+}
+
+.btn-brand-primary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-brand-secondary {
+  background-color: transparent !important;
+  border: 1px solid var(--brand-text-sec) !important;
+  color: var(--brand-text-high) !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 8px !important;
+}
+
+.btn-brand-secondary:hover:not(:disabled) {
+  border-color: var(--brand-text-high) !important;
+  background-color: rgba(148, 163, 184, 0.08) !important;
+}
+
+/* Corporate Solid Button — Clean Geometric Premium */
+.liquid-metal-btn {
+  background-color: var(--th-accent);
+  transition: background-color 0.2s ease-out, transform 0.15s ease-out, box-shadow 0.2s ease-out;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  border-radius: 8px !important;
+}
+
+.liquid-metal-btn:hover:not(:disabled) {
+  background-color: var(--th-accent-strong);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(var(--th-accent-rgb),0.25);
+}
+
+.liquid-metal-btn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Dot Matrix Loader Animations */
+@keyframes dot-matrix-pulse {
+  0%, 100% {
+    opacity: 0.25;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+.dot-matrix-dot {
+  animation: dot-matrix-pulse 1.2s ease-in-out infinite;
+}
+
+.dot-matrix-dot:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.dot-matrix-dot:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+.dot-matrix-dot:nth-child(4) {
+  animation-delay: 0.45s;
+}
+
+.dot-matrix-dot:nth-child(5) {
+  animation-delay: 0.6s;
+}
+
+.dot-matrix-dot:nth-child(6) {
+  animation-delay: 0.75s;
+}
+
+/* Sombras em camadas (utilitários) */
+.shadow-soft { box-shadow: 0 8px 32px rgba(0,0,0,0.30); }
+.shadow-lift { box-shadow: 0 20px 48px rgba(0,0,0,0.40), 0 0 0 1px rgba(var(--th-accent-rgb),0.15); }
+.shadow-glow { box-shadow: 0 6px 18px rgba(var(--th-accent-rgb),0.35); }
+
+/* Glows ambientes (decorativos, position fixed nos containers) */
+.glow { position: fixed; border-radius: 50%; filter: blur(120px); pointer-events: none; z-index: 0; }
+
+/* Status pulse */
+@keyframes pulse-dot { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+.dot-pulse { animation: pulse-dot 2s infinite; }
+
+/* Acessibilidade — OBRIGATÓRIO com as novas animações */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.dark {
+  --background: 225 36.8% 5%;
+  --foreground: 216 35.3% 93.3%;
+  --card: 225 30% 9%;
+  --card-foreground: 216 35.3% 93.3%;
+  --popover: 225 30% 7.5%;
+  --popover-foreground: 216 35.3% 93.3%;
+  --primary: 198.6 92.8% 48.4%;
+  --primary-foreground: 225 36.8% 6.1%;
+  --secondary: 225 26.8% 12.7%;
+  --secondary-foreground: 216 35.3% 93.3%;
+  --muted: 225 26.8% 12.7%;
+  --muted-foreground: 212 11% 53%;
+  --accent: 198.6 92.8% 48.4%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 91.3% 70.2%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 225 20% 15%;
+  --input: 225 20% 15%;
+  --ring: 198.6 92.8% 48.4%;
+  --radius: 0.875rem;
+
+  --chart-1: var(--th-accent);
+  --chart-2: #2563eb;
+  --chart-3: #34d399;
+  --chart-4: #e879f9;
+  --chart-5: #fbbf24;
+  --sidebar: #0a0e1a;
+  --sidebar-foreground: #e8edf5;
+  --sidebar-primary: var(--th-accent);
+  --sidebar-primary-foreground: #0a0d16;
+  --sidebar-accent: #11172a;
+  --sidebar-accent-foreground: #e8edf5;
+  --sidebar-border: rgba(255,255,255,0.07);
+  --sidebar-ring: var(--th-accent);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+    box-sizing: border-box;
+  }
+  /* Fundo base estático. O movimento (grade com brilho) mora no componente
+     `GridGlowBackground`, montado no App — ele fica de fora do Player (TV) e
+     pausa quando a aba está oculta. O antigo gradiente animado `corporate-flow`
+     repintava a página inteira a cada frame, inclusive com a aba em segundo
+     plano. */
+  body {
+    background: #070a12;
+    color: var(--color-text, var(--txt, #e8edf5));
+    -webkit-font-smoothing: antialiased;
+    font-family: 'Exo 2', sans-serif;
+    position: relative;
+    min-height: 100vh;
+  }
+  body::before {
+    display: none;
+  }
+  body::after {
+    display: none;
+  }
+  html {
+    @apply font-sans;
+  }
+}
+
+/* ========================================
+   TELAHUB 3.0 — DISPLAY GRID & CARDS
+   ======================================== */
+
+/* Container — max-width centralizado */
+.th-container {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+@media (min-width: 640px)  { .th-container { padding: 0 24px; } }
+@media (min-width: 1024px) { .th-container { padding: 0 32px; } }
+
+/* GRID — colunas iguais, cards de mesma altura */
+.displays-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+  margin-top: 24px;
+  align-items: stretch;
+}
+@media (max-width: 639px) {
+  .displays-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+}
+@media (min-width: 640px) and (max-width: 1023px) {
+  .displays-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (min-width: 1440px) {
+  .displays-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* LIST VIEW — single column, compact cards */
+.displays-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 24px;
+}
+.displays-list .display-card {
+  flex-direction: row;
+  height: auto;
+  min-height: 90px;
+}
+.displays-list .display-preview {
+  width: 140px;
+  min-width: 140px;
+  height: auto;
+  border-bottom: none;
+  border-right: 1px solid var(--color-border, rgba(255,255,255,0.07));
+  padding-top: 0;
+}
+.displays-list .display-body {
+  flex: 1;
+  padding: 12px 14px;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+.displays-list .display-title {
+  font-size: 14px;
+  flex: 1;
+  min-width: 120px;
+}
+.displays-list .display-actions {
+  grid-template-columns: auto auto;
+  gap: 6px;
+}
+.displays-list .display-open {
+  margin-top: 0;
+  width: auto;
+}
+.displays-list .display-code {
+  width: 100%;
+  font-size: 11px;
+}
+
+/* CARD — flex column, ocupa 100% da altura da célula */
+.display-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--color-surface, rgba(255,255,255,0.025));
+  border: 1px solid var(--color-border, rgba(255,255,255,0.07));
+  border-radius: var(--radius-xl, 1.25rem);
+  overflow: hidden;
+  transition: transform 0.3s var(--ease-spring, cubic-bezier(0.16, 1, 0.3, 1)),
+              border-color 0.3s,
+              box-shadow 0.3s;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+  cursor: default;
+}
+.display-card:hover {
+  transform: translateY(-5px);
+  border-color: var(--color-border-hover, rgba(var(--th-accent-soft-rgb),0.35));
+  box-shadow: 0 20px 48px rgba(0,0,0,0.45), 0 0 0 1px rgba(var(--th-accent-soft-rgb),0.12);
+}
+
+/* PREVIEW — ALTURA FIXA igual para todos */
+.display-preview {
+  position: relative;
+  height: 150px;
+  background:
+    radial-gradient(circle at 50% 45%, rgba(var(--th-accent-soft-rgb),0.06), transparent 70%),
+    rgba(0,0,0,0.22);
+  border-bottom: 1px solid var(--color-border, rgba(255,255,255,0.07));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* top padding reserves space for the status badge */
+  padding-top: 28px;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+/* MOLDURA DE TV dentro do preview */
+.tv-frame {
+  height: 62%;
+  aspect-ratio: 16 / 9;
+  border: 2px solid rgba(255,255,255,0.10);
+  border-radius: 10px;
+  background: rgba(0,0,0,0.25);
+  display: grid;
+  place-items: center;
+  transition: border-color 0.3s, transform 0.3s var(--ease-spring, cubic-bezier(0.16, 1, 0.3, 1));
+  overflow: hidden;
+}
+.tv-frame.vertical {
+  height: 76%;
+  aspect-ratio: 9 / 16;
+}
+.display-card:hover .tv-frame {
+  border-color: rgba(var(--th-accent-soft-rgb),0.30);
+  transform: scale(1.04);
+}
+.tv-frame svg {
+  color: rgba(255,255,255,0.18);
+}
+.display-card:hover .tv-frame svg {
+  color: rgba(var(--th-accent-soft-rgb),0.35);
+}
+.tv-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* BADGE STATUS */
+.status-badge {
+  position: absolute;
+  top: 8px;
+  left: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  z-index: 10;
+  text-transform: uppercase;
+  /* prevent badge from growing too wide */
+  max-width: calc(100% - 52px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.status-badge.online {
+  background: rgba(52,211,153,0.12);
+  color: #34d399;
+  border: 1px solid rgba(52,211,153,0.3);
+}
+.status-badge.offline {
+  background: rgba(123,135,148,0.12);
+  color: #8b96a3;
+  border: 1px solid rgba(123,135,148,0.25);
+}
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.status-badge.online .status-dot {
+  box-shadow: 0 0 8px currentColor;
+}
+
+/* MENU (⋮) */
+.menu-button {
+  position: absolute;
+  top: 11px;
+  right: 11px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.35);
+  border: 1px solid var(--color-border, rgba(255,255,255,0.07));
+  color: var(--color-text-muted, #7b8794);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  z-index: 20;
+  opacity: 0;
+}
+.display-card:hover .menu-button {
+  opacity: 1;
+}
+.menu-button:hover {
+  color: var(--color-text, #e8edf5);
+  border-color: var(--color-border-hover, rgba(var(--th-accent-soft-rgb),0.35));
+}
+
+/* GEAR settings button */
+.gear-button {
+  position: absolute;
+  bottom: 11px;
+  left: 11px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.35);
+  border: 1px solid var(--color-border, rgba(255,255,255,0.07));
+  color: var(--color-text-muted, #7b8794);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  z-index: 20;
+  opacity: 0;
+}
+.display-card:hover .gear-button {
+  opacity: 1;
+}
+.gear-button:hover {
+  color: var(--color-accent, var(--th-accent-soft));
+  border-color: var(--color-border-hover, rgba(var(--th-accent-soft-rgb),0.35));
+}
+
+/* BODY — flex:1 empurra rodapé pra baixo, alinhando todos os cards */
+.display-body {
+  padding: 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  flex: 1;
+}
+.display-title {
+  font-size: 15px;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.2;
+  color: var(--color-text, #e8edf5);
+}
+.display-code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  color: var(--color-text-muted, #7b8794);
+  text-transform: uppercase;
+}
+
+/* Orientation badge */
+.orientation-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: rgba(var(--th-accent-soft-rgb),0.08);
+  border: 1px solid rgba(var(--th-accent-soft-rgb),0.2);
+  color: var(--color-accent, var(--th-accent-soft));
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* Ações do card — os botões em si são <Button variant="glow|shimmer"> */
+.display-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+/* Dashboard Nav Items (Módulos) styling classes */
+.nav-item-dashboard {
+  background-color: rgba(255, 255, 255, 0.045) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: #cbd5e1 !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+.nav-item-dashboard:hover {
+  background-color: var(--th-accent) !important; /* Solid blue on hover! */
+  border-color: var(--th-accent-soft) !important;
+  color: #ffffff !important;
+  transform: translateY(-0.5px);
+  box-shadow: 0 4px 12px rgba(var(--th-accent-rgb),0.25) !important;
+}
+.nav-item-dashboard.active {
+  background-color: rgba(var(--th-accent-rgb),0.15) !important;
+  border-color: rgba(var(--th-accent-rgb),0.45) !important;
+  color: var(--th-accent) !important;
+  font-weight: 700 !important;
+}
+
+/* Card "Nova Tela" placeholder — mesma altura que os outros */
+.new-display-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 250px;
+  border: 2px dashed var(--color-border, rgba(255,255,255,0.07));
+  border-radius: var(--radius-xl, 1.25rem);
+  background: rgba(255,255,255,0.015);
+  cursor: pointer;
+  transition: all 0.3s var(--ease-spring, cubic-bezier(0.16, 1, 0.3, 1));
+  gap: 12px;
+  padding: 24px;
+}
+.new-display-card:hover {
+  border-color: var(--color-accent, var(--th-accent-soft));
+  background: rgba(var(--th-accent-soft-rgb),0.04);
+  transform: translateY(-5px);
+}
+.new-display-card .icon-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 2px dashed rgba(255,255,255,0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+}
+.new-display-card:hover .icon-circle {
+  border-color: var(--color-accent, var(--th-accent-soft));
+  transform: scale(1.05);
+}
+.new-display-card .label {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted, #7b8794);
+  transition: color 0.3s;
+}
+.new-display-card:hover .label {
+  color: var(--color-accent, var(--th-accent-soft));
+}
+
+/* Section Header */
+.section-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-text, #e8edf5);
+}
+.section-title .icon-box {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: rgba(var(--th-accent-soft-rgb),0.08);
+  border: 1px solid rgba(var(--th-accent-soft-rgb),0.2);
+}
+
+/* Filter Chips */
+.filter-chips {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 4px 0;
+}
+.filter-chips::-webkit-scrollbar { display: none; }
+.filter-chip {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  border: 1px solid var(--color-border, rgba(255,255,255,0.07));
+  background: transparent;
+  color: var(--color-text-muted, #7b8794);
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.filter-chip:hover {
+  border-color: rgba(var(--th-accent-soft-rgb),0.25);
+  color: var(--color-text, #e8edf5);
+}
+.filter-chip.active {
+  background: rgba(var(--th-accent-soft-rgb),0.08);
+  border-color: rgba(var(--th-accent-soft-rgb),0.35);
+  color: var(--color-accent, var(--th-accent-soft));
+}
+
+/* ========================================
+   TELAHUB 3.0 — MODAL FIX
+   ======================================== */
+.modal-content-th {
+  width: 95vw;
+  max-width: 560px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: #0e121c;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: var(--radius-xl, 1.25rem);
+  box-shadow: 0 24px 56px rgba(0,0,0,0.55);
+  padding: 0;
+}
+.modal-header-th {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.modal-body-th {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.modal-footer-th {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 16px 20px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+/* Card de Orientação do Modal */
+.orientation-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 16px;
+  border-radius: var(--radius, 0.875rem);
+  border: 2px solid rgba(255, 255, 255, 0.06) !important;
+  background: rgba(255, 255, 255, 0.015) !important;
+  color: var(--color-text-muted, #7b8794);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+.orientation-btn:hover {
+  border-color: rgba(var(--th-accent-rgb),0.4) !important;
+  background: rgba(var(--th-accent-rgb),0.04) !important;
+  transform: translateY(-2px);
+  color: var(--color-text, #e8edf5);
+}
+.orientation-btn.active {
+  border-color: var(--th-accent) !important;
+  background: linear-gradient(135deg, rgba(var(--th-accent-rgb),0.15), rgba(37, 99, 235, 0.05)) !important;
+  color: var(--th-accent) !important;
+  box-shadow: 0 0 20px rgba(var(--th-accent-rgb),0.25) !important;
+  transform: scale(1.02);
+}
+
+.orientation-preview-box {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.3);
+  display: grid;
+  place-items: center;
+  transition: all 0.3s;
+}
+.orientation-btn:hover .orientation-preview-box {
+  border-color: rgba(var(--th-accent-rgb),0.4);
+}
+.orientation-btn.active .orientation-preview-box {
+  border-color: rgba(var(--th-accent-rgb),0.7);
+  background: rgba(var(--th-accent-rgb),0.08);
+  box-shadow: inset 0 0 8px rgba(var(--th-accent-rgb),0.2);
+}
+
+/* ========================================
+   UX REFACTORING UTILITIES (Design System v1.0)
+   ======================================== */
+
+/* Área de toque ativa de 48px para elementos interativos menores */
+.touch-target-48 {
+  position: relative;
+}
+.touch-target-48::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  min-height: 48px;
+  z-index: 10;
+}
+
+.menu-button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 48px;
+  height: 48px;
+}
+
+.gear-button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 48px;
+  height: 48px;
+}
+
+/* Acessibilidade de foco global */
+:focus {
+  outline: none;
+}
+:focus-visible {
+  outline: 2px solid var(--color-accent, var(--th-accent));
+  outline-offset: 2px;
+}
+
+
+/* ========================================
+   EFEITOS DO PAINEL (redesign 09/2026)
+   Adaptados do 21st.dev: Glow Button (reflexo + press), Glow Card Grid
+   (borda que acende seguindo o ponteiro) e GridGlowBackground (grade com
+   brilho). Tudo segue --th-accent, então funciona com os 6 presets de
+   `libs/theme.ts`. Hover/cursor só existem com ponteiro fino; com
+   prefers-reduced-motion nada se move (só muda cor).
+   ======================================== */
+
+/* --- Fundo: grade com brilho (ver components/GridGlowBackground.tsx) --- */
+.th-grid-bg {
+  position: fixed;
+  inset: 0;
+  /* -1 no contexto raiz: fica acima do fundo do body e abaixo de todo o
+     conteúdo, sem precisar mexer no z-index de ninguém. */
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse 70% 45% at 50% -8%, rgba(var(--th-accent-rgb), 0.10), transparent 70%),
+    #070a12;
+}
+.th-grid-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 48px 48px;
+  /* a grade some nas bordas: sóbria, não "papel quadriculado" */
+  -webkit-mask-image: radial-gradient(ellipse 85% 70% at 50% 30%, #000 30%, transparent 100%);
+  mask-image: radial-gradient(ellipse 85% 70% at 50% 30%, #000 30%, transparent 100%);
+}
+.th-grid-bg canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.55;
+}
+
+/* --- Botão glow: cor de destaque + reflexo que segue o cursor --- */
+/* Texto escuro (#0a0d16) e não branco: branco sobre sky/esmeralda/âmbar fica
+   entre 2,1:1 e 2,8:1. Escuro sobre qualquer preset base dá ≥ 4,6:1. */
+.btn-fx-glow {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: var(--th-accent);
+  color: #0a0d16;
+  font-weight: 700;
+  border: 1px solid rgba(var(--th-accent-soft-rgb), 0.55);
+  box-shadow:
+    0 0 0 1px rgba(var(--th-accent-rgb), 0.15),
+    0 6px 18px -6px rgba(var(--th-accent-rgb), 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  transition: transform 160ms var(--ease-spring), box-shadow 220ms ease, background-color 220ms ease;
+}
+.btn-fx-glow::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: radial-gradient(120px circle at var(--mx, 50%) var(--my, 50%), rgba(255, 255, 255, 0.38), transparent 70%);
+  opacity: 0;
+  transition: opacity 220ms ease;
+  pointer-events: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  .btn-fx-glow:hover:not(:disabled) {
+    background: var(--th-accent-soft);
+    box-shadow:
+      0 0 0 1px rgba(var(--th-accent-soft-rgb), 0.35),
+      0 10px 28px -6px rgba(var(--th-accent-rgb), 0.7),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+  .btn-fx-glow:hover:not(:disabled)::before { opacity: 1; }
+}
+.btn-fx-glow:active:not(:disabled) {
+  transform: translateY(1px) scale(0.97);
+  box-shadow: 0 2px 8px -2px rgba(var(--th-accent-rgb), 0.5), inset 0 2px 4px rgba(0, 0, 0, 0.18);
+}
+
+/* --- Botão shimmer: superfície discreta + faixa de luz no hover --- */
+.btn-fx-shimmer {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  color: #cbd5e1;
+  font-weight: 600;
+  transition: transform 160ms var(--ease-spring), border-color 200ms ease, background-color 200ms ease, color 200ms ease;
+}
+.btn-fx-shimmer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 60%;
+  z-index: -1;
+  background: linear-gradient(100deg, transparent, rgba(var(--th-accent-soft-rgb), 0.22), rgba(255, 255, 255, 0.10), transparent);
+  transform: translateX(-120%) skewX(-12deg);
+  pointer-events: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  .btn-fx-shimmer:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(var(--th-accent-soft-rgb), 0.45);
+    color: #ffffff;
+  }
+  .btn-fx-shimmer:hover:not(:disabled)::after {
+    transform: translateX(230%) skewX(-12deg);
+    transition: transform 700ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+.btn-fx-shimmer:active:not(:disabled) {
+  transform: translateY(1px) scale(0.97);
+  background: rgba(255, 255, 255, 0.06);
+}
+/* estado "Copiado!" do card de tela */
+.btn-fx-shimmer[data-copied='true'] {
+  background: rgba(52, 211, 153, 0.12);
+  color: #34d399;
+  border-color: rgba(52, 211, 153, 0.45);
+}
+
+/* --- Card: spotlight que segue o mouse + borda com brilho --- */
+/* As coordenadas (--spot-x/--spot-y, em px) vêm de `lib/spotlight.ts`. */
+.fx-spotlight {
+  position: relative;
+  isolation: isolate;
+}
+.fx-spotlight::before,
+.fx-spotlight::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 300ms ease;
+}
+/* luz sobre a superfície */
+.fx-spotlight::before {
+  z-index: 1;
+  background: radial-gradient(var(--spot-size, 320px) circle at var(--spot-x, 50%) var(--spot-y, 50%), rgba(var(--th-accent-soft-rgb), 0.09), transparent 65%);
+}
+/* anel da borda que acende perto do ponteiro (máscara que vaza só 1px) */
+.fx-spotlight::after {
+  z-index: 30;
+  padding: 1px;
+  background: radial-gradient(calc(var(--spot-size, 320px) * 0.75) circle at var(--spot-x, 50%) var(--spot-y, 50%), rgba(var(--th-accent-soft-rgb), 0.85), transparent 70%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+@media (hover: hover) and (pointer: fine) {
+  .fx-spotlight:hover::before,
+  .fx-spotlight:hover::after { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-fx-glow,
+  .btn-fx-shimmer { transition: none; }
+  .btn-fx-glow:active:not(:disabled),
+  .btn-fx-shimmer:active:not(:disabled) { transform: none; }
+  .btn-fx-shimmer::after { display: none; }
+  /* o brilho continua (é cor, não movimento), mas sem esmaecer */
+  .fx-spotlight::before,
+  .fx-spotlight::after { transition: none; }
+}

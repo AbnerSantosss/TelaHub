@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Checkout não deve ser indexado: é página de transação, e links de
+         recuperação de abandono carregam token na URL. -->
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Contratar TelaHub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Consent Mode v2 — padrão NEGADO antes de qualquer tag carregar (LGPD/GDPR).
+         Precisa vir antes do GTM e do Pixel: consentimento que chega depois da
+         tag já carregada não desfaz o cookie que ela gravou. -->
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){ window.dataLayer.push(arguments); }
+      gtag('consent', 'default', {
+        ad_storage: 'denied',
+        analytics_storage: 'denied',
+        ad_user_data: 'denied',
+        ad_personalization: 'denied',
+        wait_for_update: 500
+      });
+    </script>
+
+    <!-- Google Tag Manager — container GTM-W7K6QK7Z.
+         O MESMO container do site e do painel, de propósito. A jornada atravessa
+         três domínios; um container por app produziria três relatórios que não
+         se somam, e a única pergunta que importa ("quanto custou o pagante que
+         veio deste anúncio") não teria resposta em lugar nenhum. -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-W7K6QK7Z');</script>
+    <!-- End Google Tag Manager -->
+
+    <!-- Pixel do Meta — 1119943063690657. O MESMO Pixel dos outros dois apps.
+         Carregado FORA do GTM de propósito: cada evento de dinheiro daqui também
+         sai pelo servidor (Conversions API) e os dois precisam do MESMO
+         `eventID` para a Meta descartar a cópia. Com o Pixel dentro do GTM esse
+         id vira um campo que alguém pode desconfigurar pela interface — e a
+         duplicata não dá erro nenhum, só divide por dois todo custo por
+         resultado do painel.
+
+         `consent revoke` ANTES do `init` é o equivalente Meta do Consent Mode
+         v2: o Pixel carrega mas não grava cookie nem envia nada até haver
+         consentimento (LGPD art. 7º). -->
+    <script>
+      !function(f,b,e,v,n,t,s)
+      {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+      n.queue=[];t=b.createElement(e);t.async=!0;
+      t.src=v;s=b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t,s)}(window,document,'script',
+      'https://connect.facebook.net/en_US/fbevents.js');
+      fbq('consent', 'revoke');
+      fbq('init', '1119943063690657');
+      fbq('track', 'PageView');
+    </script>
+    <!-- O `<noscript>` do Pixel fica no BODY, junto com o do GTM: dentro do
+         `<head>`, um `<noscript>` só aceita link/style/meta, e a `<img>` ali
+         quebra o build do Vite (parse5:
+         `disallowed-content-in-noscript-in-head`). O erro é de parser, não de
+         medição — mas derruba o build inteiro. -->
+    <!-- End Meta Pixel -->
+
+    <!-- Reaplica uma decisão de consentimento JÁ TOMADA, se existir nesta origem.
+         A faixa de cookies mora na landing (`apps/site`), que grava
+         `telahub_consent` no localStorage — e localStorage é POR ORIGEM: quando
+         o checkout roda em domínio próprio, esta leitura volta vazia e a medição
+         do navegador continua negada (que é o lado seguro e legal). É por isso
+         que o `Purchase` do servidor não é redundância: hoje ele é, em muitos
+         casos, o único que chega. Se o checkout passar a ser servido na MESMA
+         origem do site, a decisão da faixa já vale aqui sem nenhum código novo.
+
+         ⚠️ Armadilha: não transforme isto em "aceite implícito". Só reaplica o
+         que a pessoa escolheu; sem escolha registrada, nada muda. -->
+    <script>
+      (function () {
+        try {
+          var raw = window.localStorage.getItem('telahub_consent');
+          if (!raw) return;
+          var stored = JSON.parse(raw);
+          if (!stored || typeof stored !== 'object') return;
+          var state = {
+            ad_storage: stored.ad_storage === 'granted' ? 'granted' : 'denied',
+            analytics_storage: stored.analytics_storage === 'granted' ? 'granted' : 'denied',
+            ad_user_data: stored.ad_user_data === 'granted' ? 'granted' : 'denied',
+            ad_personalization: stored.ad_personalization === 'granted' ? 'granted' : 'denied'
+          };
+          gtag('consent', 'update', state);
+          if (typeof window.fbq === 'function' && state.ad_storage === 'granted') {
+            window.fbq('consent', 'grant');
+          }
+        } catch (e) {
+          // Storage bloqueado (navegação privada) ou JSON corrompido: segue
+          // negado. Medição quebrada nunca pode impedir um pagamento.
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-W7K6QK7Z"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+
+    <!-- Meta Pixel (noscript) -->
+    <noscript
+      ><img
+        height="1"
+        width="1"
+        style="display: none"
+        alt=""
+        src="https://www.facebook.com/tr?id=1119943063690657&ev=PageView&noscript=1"
+    /></noscript>
+    <!-- End Meta Pixel (noscript) -->
+
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

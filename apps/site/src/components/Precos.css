@@ -1,0 +1,343 @@
+/* Grade de preços. Três cards iguais em altura, com o do meio destacado por
+   borda (não por escala): card maior que os vizinhos desalinha o preço e o
+   botão, e é justamente a linha do preço que precisa ser comparável de relance. */
+
+.precos__cabeca {
+  max-width: 820px;
+  gap: 16px;
+}
+
+/* ── Mensal × anual ──────────────────────────────────────────────────────── */
+
+/* As abas NOMEIAM o compromisso ("Mensal — sem fidelidade", "Anual — 12 meses,
+   menor preço por tela"), então são rótulos longos: o grupo precisa poder
+   quebrar em vez de empurrar a seção de lado. `max-width: 100%` é o que impede
+   o estouro em telas intermediárias, onde `fit-content` sozinho passaria da
+   largura do contêiner. */
+.precos__intervalo {
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  flex-wrap: wrap;
+  padding: 4px;
+  border: 1.5px solid var(--borda-3);
+  border-radius: 99px;
+  background: var(--papel);
+  width: fit-content;
+  max-width: 100%;
+}
+
+/* 44px: alvo mínimo de toque (era 40px). */
+.precos__aba {
+  position: relative;
+  z-index: 1;
+  border: none;
+  background: none;
+  padding: 8px 18px;
+  min-height: 44px;
+  border-radius: 99px;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  color: var(--tinta-2);
+  cursor: pointer;
+  text-align: center;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.precos__aba:not(.precos__aba--ativa):hover {
+  background: var(--papel-2);
+  color: var(--tinta);
+}
+
+.precos__aba--ativa {
+  background: var(--marca);
+  color: #ffffff;
+  font-weight: 700;
+}
+
+/* A pílula que desliza (posição e tamanho escritos por Precos.jsx). Fica
+   invisível até a primeira medida; a partir daí ELA pinta o fundo da aba
+   ativa, e a aba fica transparente por cima. */
+.precos__indicador {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  border-radius: 99px;
+  background: var(--marca);
+  box-shadow: var(--sombra-btn);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform 0.35s var(--ease-saida),
+    width 0.35s var(--ease-saida),
+    height 0.35s var(--ease-saida);
+}
+
+.precos__intervalo--deslizante .precos__indicador {
+  opacity: 1;
+}
+
+.precos__intervalo--deslizante .precos__aba--ativa {
+  background: transparent;
+}
+
+/* ── Cards ───────────────────────────────────────────────────────────────── */
+
+.precos__grade {
+  align-items: stretch;
+}
+
+.precos__card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 28px;
+}
+
+/* Destaque: a borda sólida de 2px em --marca continua sendo o sinal (contraste
+   de 3:1 contra o papel, sem depender de efeito). Por cima dela, um halo de
+   --marca na sombra e, com mouse, uma borda de luz que acompanha o cursor
+   (::after mascarado para pintar só o anel de 2px). Os DOIS cards com
+   destaque (Grátis e Loja) ganham o mesmo tratamento, de propósito. */
+.precos__card--destaque {
+  border: 2px solid var(--marca);
+  box-shadow: var(--sombra-glow);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.3s ease;
+}
+
+.precos__card--destaque::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  z-index: 1;
+  padding: 2px;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(260px circle at var(--mx) var(--my), var(--luz-2), transparent 70%);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .precos__card--destaque:hover {
+    border-color: var(--marca);
+    box-shadow: var(--sombra-glow-forte);
+  }
+
+  .precos__card--destaque:hover::after {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .precos__card--destaque::after {
+    display: none;
+  }
+
+  .precos__indicador {
+    transition: none;
+  }
+}
+
+.precos__topo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.precos__nome {
+  font-size: 1.25rem;
+  font-weight: 800;
+  margin: 0;
+}
+
+.precos__valor {
+  font-size: 2.5rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.precos__unidade {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--tinta-3);
+  letter-spacing: 0;
+  line-height: 1.4;
+}
+
+.precos__inclui {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 0.9375rem;
+  color: var(--tinta-2);
+  /* Empurra botão e letra miúda para a base: com listas de tamanhos diferentes,
+     os três CTAs precisam ficar na mesma linha para serem comparáveis. */
+  flex: 1;
+}
+
+.precos__inclui li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  line-height: 1.45;
+}
+
+.precos__marca {
+  flex: none;
+  margin-top: 3px;
+  color: var(--ok);
+}
+
+/* ── Simulador ───────────────────────────────────────────────────────────── */
+
+.precos__simulador {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr) auto;
+  gap: 24px;
+  align-items: center;
+  padding: 24px 28px;
+}
+
+.precos__simulador-campo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.precos__simulador-rotulo {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--tinta-2);
+}
+
+.precos__simulador-input {
+  max-width: 140px;
+}
+
+.precos__simulador-conta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.precos__simulador-total {
+  font-size: 1.75rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.precos__simulador-total span {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--tinta-3);
+  letter-spacing: 0;
+}
+
+/* ── Parceiro e Enterprise ───────────────────────────────────────────────── */
+
+.precos__secundario {
+  padding: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+}
+
+.precos__secundario-nome {
+  font-size: 1.125rem;
+  font-weight: 800;
+  margin: 0 0 4px;
+}
+
+.precos__secundario-texto {
+  font-size: 0.9375rem;
+}
+
+.precos__secundario .btn {
+  flex: none;
+}
+
+.precos__promessa {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--tinta);
+  max-width: 820px;
+}
+
+/* ── Larguras ────────────────────────────────────────────────────────────── */
+
+@media (max-width: 900px) {
+  .precos__grade {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .precos__simulador {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+
+  .precos__simulador .btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .precos__card {
+    padding: 22px 20px;
+  }
+
+  .precos__valor {
+    font-size: 2rem;
+  }
+
+  .precos__secundario {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .precos__secundario .btn {
+    width: 100%;
+  }
+
+  /* No celular as duas abas empilham. Lado a lado, os rótulos que nomeiam o
+     compromisso ficariam com duas ou três palavras por linha dentro de uma
+     pílula de 160px — ilegíveis justamente onde a pessoa escolhe entre pagar
+     por mês e assumir 12 meses. */
+  .precos__intervalo {
+    width: 100%;
+    flex-direction: column;
+    border-radius: var(--raio-12);
+  }
+
+  .precos__aba {
+    width: 100%;
+    padding: 8px 12px;
+    font-size: 0.9375rem;
+  }
+}

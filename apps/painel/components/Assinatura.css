@@ -1,0 +1,373 @@
+/* ============================================================================
+   ASSINATURA — estilo local da página.
+   Fora do `index.css` de propósito (vários agentes editando o painel em
+   paralelo). Tokens do sistema visual vêm de `claro.css` (aliases `--asn-*`).
+   ============================================================================ */
+
+.asn {
+  /* Tokens (papel/tinta/linha/marca/sinais) vêm de `claro.css` — os
+     `--asn-*` são aliases definidos lá. */
+
+  font-family: 'Geist', 'Geist Variable', system-ui, -apple-system, sans-serif;
+  color: var(--asn-tinta);
+  /* grade clara sutil (claro.css) sobre o papel */
+  background: var(--claro-grade), var(--asn-papel-2);
+  min-height: 100vh;
+  padding: 28px 20px 56px;
+}
+
+.asn *,
+.asn *::before,
+.asn *::after {
+  box-sizing: border-box;
+}
+
+.asn-wrap {
+  max-width: 860px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* ─── Cabeçalho ───────────────────────────────────────────────────────────── */
+
+.asn-topo {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.asn-titulo {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0;
+  line-height: 1.15;
+}
+
+.asn-subtitulo {
+  font-size: 14px;
+  color: var(--asn-tinta-2);
+  margin: 6px 0 0;
+  line-height: 1.55;
+  max-width: 58ch;
+}
+
+/* ─── Cartão ──────────────────────────────────────────────────────────────── */
+
+.asn-cartao {
+  background: var(--asn-papel);
+  border: 1px solid var(--asn-linha);
+  border-radius: 24px;
+  padding: 22px;
+}
+
+.asn-cartao-titulo {
+  font-size: 17px;
+  font-weight: 700;
+  margin: 0 0 14px;
+  color: var(--asn-tinta);
+}
+
+/* ─── Selo de status ──────────────────────────────────────────────────────── */
+
+.asn-selo {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  border: 1px solid transparent;
+}
+
+.asn-selo-ok {
+  background: #e6f5ef;
+  color: var(--asn-ok);
+}
+
+.asn-selo-atencao {
+  background: #fdf1e3;
+  color: var(--asn-atencao);
+}
+
+.asn-selo-erro {
+  background: #fdecea;
+  color: var(--asn-erro);
+}
+
+.asn-selo-neutro {
+  background: var(--asn-papel-3);
+  color: var(--asn-tinta-2);
+}
+
+/* ─── Grade de dados ──────────────────────────────────────────────────────── */
+
+.asn-dados {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.asn-dado-rotulo {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--asn-tinta-3);
+  margin: 0 0 4px;
+}
+
+.asn-dado-valor {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--asn-tinta);
+  margin: 0;
+  line-height: 1.3;
+}
+
+.asn-dado-apoio {
+  font-size: 12px;
+  color: var(--asn-tinta-3);
+  margin: 3px 0 0;
+  line-height: 1.45;
+}
+
+/* ─── Faixas de aviso ─────────────────────────────────────────────────────── */
+
+.asn-aviso {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  border-radius: 16px;
+  padding: 14px 16px;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.asn-aviso-atencao {
+  background: #fdf1e3;
+  color: #7a4305;
+}
+
+.asn-aviso-erro {
+  background: #fdecea;
+  color: #8c1e18;
+}
+
+.asn-aviso-neutro {
+  background: var(--asn-papel-3);
+  color: var(--asn-tinta-2);
+}
+
+.asn-aviso strong {
+  font-weight: 700;
+}
+
+.asn-aviso-icone {
+  flex: 0 0 auto;
+  margin-top: 2px;
+}
+
+/* ─── Pagamentos ──────────────────────────────────────────────────────────── */
+
+.asn-tabela-rolagem {
+  overflow-x: auto;
+}
+
+.asn-tabela {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  min-width: 520px;
+}
+
+.asn-tabela th {
+  text-align: left;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--asn-tinta-3);
+  padding: 0 12px 8px 0;
+  border-bottom: 1px solid var(--asn-linha);
+  white-space: nowrap;
+}
+
+.asn-tabela td {
+  padding: 11px 12px 11px 0;
+  border-bottom: 1px solid var(--asn-papel-3);
+  color: var(--asn-tinta-2);
+  vertical-align: middle;
+}
+
+.asn-tabela tr:last-child td {
+  border-bottom: none;
+}
+
+.asn-link {
+  color: var(--asn-marca);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.asn-link:hover {
+  color: var(--asn-marca-forte);
+  text-decoration: underline;
+}
+
+.asn-link:focus-visible {
+  outline: 3px solid var(--asn-marca);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.asn-vazio {
+  font-size: 13px;
+  color: var(--asn-tinta-3);
+  line-height: 1.55;
+  margin: 0;
+}
+
+/* ─── Botões ──────────────────────────────────────────────────────────────── */
+
+.asn-acoes {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+}
+
+.asn-btn {
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 12px;
+  padding: 10px 18px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease,
+    box-shadow 160ms ease, transform 160ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.asn-btn:focus-visible {
+  outline: 3px solid var(--asn-marca);
+  outline-offset: 2px;
+}
+
+.asn-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Branco sobre #0369a1 = 5,8:1 — passa em AA. */
+.asn-btn-primario {
+  background: var(--asn-marca);
+  color: var(--asn-papel);
+}
+
+.asn-btn-primario:hover:not(:disabled) {
+  background: var(--asn-marca-forte);
+}
+
+.asn-btn-secundario {
+  background: var(--asn-papel);
+  color: var(--asn-tinta-2);
+  border-color: var(--asn-linha);
+}
+
+.asn-btn-secundario:hover:not(:disabled) {
+  background: var(--asn-papel-3);
+  color: var(--asn-tinta);
+}
+
+/* Cancelar é destrutivo, mas não é o botão da tela: fica discreto e nomeado. */
+.asn-btn-cancelar {
+  background: transparent;
+  color: var(--asn-erro);
+  border-color: var(--asn-linha);
+}
+
+.asn-btn-cancelar:hover:not(:disabled) {
+  background: #fdecea;
+  border-color: #f2c4c0;
+}
+
+/* ─── Confirmação de cancelamento ─────────────────────────────────────────── */
+
+.asn-confirma {
+  background: var(--asn-papel-2);
+  border: 1px solid var(--asn-linha);
+  border-radius: 16px;
+  padding: 18px;
+  margin-top: 16px;
+}
+
+.asn-confirma-titulo {
+  font-size: 15px;
+  font-weight: 700;
+  margin: 0 0 8px;
+  color: var(--asn-tinta);
+}
+
+.asn-lista {
+  margin: 0 0 14px;
+  padding-left: 18px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--asn-tinta-2);
+}
+
+.asn-rotulo {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--asn-tinta-3);
+  margin-bottom: 6px;
+}
+
+.asn-textarea {
+  font: inherit;
+  font-size: 14px;
+  width: 100%;
+  min-height: 74px;
+  resize: vertical;
+  color: var(--asn-tinta);
+  background: var(--asn-papel);
+  border: 1px solid var(--asn-linha);
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+
+.asn-textarea:focus-visible {
+  outline: 3px solid var(--asn-marca);
+  outline-offset: 1px;
+  border-color: var(--asn-marca);
+}
+
+.asn-nota {
+  font-size: 12px;
+  color: var(--asn-tinta-3);
+  line-height: 1.55;
+  margin: 12px 0 0;
+}
+
+.asn-carregando {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--asn-tinta-2);
+  padding: 40px 0;
+  justify-content: center;
+}

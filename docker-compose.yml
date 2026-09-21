@@ -1,3 +1,17 @@
+# Stack de DESENVOLVIMENTO (e a que a stack legada `telahub-novo` ainda puxa).
+#
+# ⚠️ NÃO APONTE UMA STACK NOVA DE PRODUÇÃO PARA ESTE ARQUIVO.
+# O `command` do backend aqui roda `prisma db push`, que sincroniza o schema
+# comparando banco e arquivo SEM histórico e, ao achar divergência, resolve
+# APAGANDO dado. É a dívida mais perigosa já registrada na wiki. A stack de
+# produção é `docker-compose.prod.yml`, que roda `prisma/migrate-deploy.js`
+# (migrações versionadas, com baseline automático).
+#
+# `db push` continua aqui porque em desenvolvimento se mexe no schema o tempo
+# todo sem gerar migração — e porque trocar o comando desta stack mudaria, no
+# próximo pull, o comportamento da stack legada que ainda está registrada no
+# Portainer. A saída para a legada é APOSENTÁ-LA, não repuxá-la: o procedimento
+# está em DEPLOY.md.
 
 services:
   # 1. Banco de Dados PostgreSQL
@@ -16,7 +30,7 @@ services:
   # 2. Backend (Node.js API)
   backend:
     build:
-      context: ./backend
+      context: ./apps/api
       dockerfile: Dockerfile
     restart: unless-stopped
     ports:
@@ -49,6 +63,28 @@ services:
       - SMTP_SECURE=${SMTP_SECURE:-}
       - SMTP_FROM_EMAIL=${SMTP_FROM_EMAIL:-}
       - SMTP_FROM_NAME=${SMTP_FROM_NAME:-TelaHub}
+      # Pagamento — ver a nota em `docker-compose.prod.yml`. Aqui o padrão
+      # simulado é o esperado: esta stack não é produção.
+      - PAYMENT_PROVIDER=${PAYMENT_PROVIDER:-simulado}
+      - ALLOW_SIMULATED_PAYMENTS=${ALLOW_SIMULATED_PAYMENTS:-}
+      # Asaas: aqui SEMPRE sandbox. Esta stack não é produção, e uma chave de
+      # produção nesta máquina cobra dinheiro de verdade em teste de mesa.
+      - ASAAS_ENV=${ASAAS_ENV:-sandbox}
+      - ASAAS_API_KEY=${ASAAS_API_KEY:-}
+      - ASAAS_WEBHOOK_TOKEN=${ASAAS_WEBHOOK_TOKEN:-}
+      - ASAAS_NFSE_ENABLED=${ASAAS_NFSE_ENABLED:-false}
+      # Medição. Vazio no dev de propósito: evento de desenvolvimento entrando
+      # na conta de anúncios suja a otimização da campanha real.
+      - GTM_CONTAINER_ID=${GTM_CONTAINER_ID:-}
+      - META_PIXEL_ID=${META_PIXEL_ID:-}
+      - META_CAPI_ACCESS_TOKEN=${META_CAPI_ACCESS_TOKEN:-}
+      # No dev, PREENCHIDO é o certo (o inverso de produção): com o código de
+      # teste os eventos aparecem em "Test Events" e não contam como conversão.
+      - META_CAPI_TEST_EVENT_CODE=${META_CAPI_TEST_EVENT_CODE:-}
+      # Identificação do fornecedor e canal do titular (CDC/LGPD).
+      - COMPANY_CNPJ=${COMPANY_CNPJ:-}
+      - PRIVACY_CONTACT_EMAIL=${PRIVACY_CONTACT_EMAIL:-}
+      - SITE_PUBLIC_URL=${SITE_PUBLIC_URL:-http://localhost:3030}
     depends_on:
       - db
     volumes:
@@ -62,7 +98,7 @@ services:
   # 3. Frontend (React + Vite servido pelo Nginx)
   frontend:
     build:
-      context: ./frontend
+      context: ./apps/painel
       dockerfile: Dockerfile
       args:
         # Usamos rota relativa /api para que o NGINX faça o proxy reverso
@@ -73,15 +109,31 @@ services:
     networks:
       - display_network
 
-  # 4. pgAdmin — Interface visual para o banco de dados
+  # 4. pgAdmin — Interface visual para o banco de dados (SOMENTE DESENVOLVIMENTO)
+  #
+  # A porta é publicada em 127.0.0.1 de propósito. Publicada em 0.0.0.0, como
+  # era antes, um administrador completo do banco ficava exposto para toda a
+  # rede local — e, em máquina com porta aberta para fora, para a internet.
+  # A stack de produção não sobe este serviço (ver docker-compose.prod.yml).
+  #
+  # Agora está atrás de um PROFILE: `docker compose up` NÃO o inicia mais.
+  # Motivo: este mesmo arquivo é o que a stack legada puxa do Git, então
+  # enquanto o serviço estivesse aqui solto havia um administrador de banco
+  # subindo junto em produção sem ninguém pedir. Superfície de ataque que não
+  # serve para nada num servidor — no servidor o caminho é
+  # `docker exec -it <db> psql`.
+  #
+  # Para usar no seu micro:
+  #     docker compose --profile db-admin up -d pgadmin
   pgadmin:
+    profiles: ["db-admin"]
     image: dpage/pgadmin4:latest
     restart: unless-stopped
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
     ports:
-      - "5053:80"
+      - "127.0.0.1:5053:80"
     volumes:
       - pgadmin_data:/var/lib/pgadmin
     depends_on:

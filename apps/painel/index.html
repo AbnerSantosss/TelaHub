@@ -1,0 +1,329 @@
+
+<!DOCTYPE html>
+<!-- `lang="pt-BR"`: o painel é todo em português. Com `lang="en"` o leitor de
+     tela lê "Condomínio Jardins" com fonemas ingleses, o Chrome oferece
+     traduzir a própria interface, e a correção automática do teclado do celular
+     briga com cada palavra digitada nos avisos. -->
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Título por app: os três (site, painel, checkout) ficam abertos em abas
+       vizinhas na mesma jornada. "TelaHub" em todas as três é indistinguível. -->
+  <title>Painel TelaHub</title>
+  <link rel="icon" type="image/png" href="/logo.png">
+  <link rel="apple-touch-icon" href="/logo.png">
+  <meta name="theme-color" content="#0a0d16">
+
+  <!-- Uma família só. Este arquivo pedia Inter, o `index.css` importava outras
+       nove, e a folha do Google Fonts está no caminho crítico da PRIMEIRA tela
+       que quem clicou no anúncio vê. Geist é a fonte do sistema visual da
+       landing; a reserva do sistema operacional está declarada em `Auth.css`,
+       então a página não muda de layout se o Google Fonts cair — só troca o
+       desenho da letra. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Consent Mode v2 — padrão NEGADO antes de qualquer tag carregar (LGPD/GDPR) -->
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ window.dataLayer.push(arguments); }
+    gtag('consent', 'default', {
+      ad_storage: 'denied',
+      analytics_storage: 'denied',
+      ad_user_data: 'denied',
+      ad_personalization: 'denied',
+      wait_for_update: 500
+    });
+  </script>
+
+  <!-- Google Tag Manager — container GTM-W7K6QK7Z.
+       O MESMO container do site e do checkout, de propósito: a jornada
+       atravessa três domínios (anúncio → site → painel → checkout). Um
+       container por app produziria três relatórios que não se somam, e a única
+       pergunta que importa — "quanto custou o pagante que veio deste anúncio" —
+       não teria resposta em lugar nenhum. É aqui que nasce `sign_up`. -->
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-W7K6QK7Z');</script>
+  <!-- End Google Tag Manager -->
+
+  <!-- Pixel do Meta — 1119943063690657.
+       Carregado FORA do GTM de propósito. Cada evento daqui também sai pelo
+       servidor (Conversions API) e os dois precisam do mesmo `eventID` para a
+       Meta descartar a cópia; com o Pixel dentro do GTM, esse id vira um campo
+       que alguém pode desconfigurar pela interface — e a duplicata não dá erro,
+       só divide por dois todo custo por resultado do painel.
+
+       `consent revoke` ANTES do init é o equivalente Meta do Consent Mode v2: o
+       Pixel carrega mas não grava cookie nem envia nada até a pessoa aceitar na
+       faixa (LGPD art. 7º); a faixa chama fbq('consent','grant'). -->
+  <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window,document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('consent', 'revoke');
+    fbq('init', '1119943063690657');
+    fbq('track', 'PageView');
+  </script>
+  <!-- O `<noscript>` de imagem do Pixel fica no `<body>` (logo abaixo): o HTML
+       proíbe conteúdo renderizável dentro de `<noscript>` no `<head>` e o
+       parser do Vite recusa o build inteiro por causa disso. -->
+  <!-- End Meta Pixel -->
+
+  <style>
+    body {
+      font-family: 'Geist', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #1C1D22; /* Cinza Corporativo */
+      color: #f8fafc;
+      overflow-x: hidden;
+    }
+    /* Hide scrollbars for player mode */
+    .kiosk-mode {
+      overflow: hidden !important;
+      cursor: none;
+    }
+    .kiosk-mode ::-webkit-scrollbar {
+      display: none;
+    }
+    /* Custom Scrollbar for Dashboard/Editor */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0f172a; 
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #334155; 
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #475569; 
+    }
+
+    /* React Grid Layout Essential Styles */
+    .react-grid-layout {
+      position: relative;
+      transition: height 200ms ease;
+    }
+    .react-grid-item {
+      transition: all 200ms ease;
+      transition-property: left, top;
+      touch-action: none;
+    }
+    .react-grid-item.resizing {
+      z-index: 1000;
+      will-change: width, height;
+    }
+    .react-grid-item.react-draggable-dragging {
+      transition: none;
+      z-index: 1000;
+      will-change: left, top;
+    }
+    .react-grid-item.react-grid-placeholder {
+      background: rgba(34, 211, 238, 0.1) !important; /* Cyan glow */
+      border: 1px dashed rgba(34, 211, 238, 0.5) !important;
+      border-radius: 8px !important;
+      opacity: 0.8 !important;
+      transition-duration: 100ms !important;
+      z-index: 2 !important;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+    
+    /* Custom Resize Handle Styles */
+    .react-grid-item > .react-resizable-handle {
+      position: absolute;
+      z-index: 50;
+    }
+    .react-grid-item > .react-resizable-handle::after {
+      content: "";
+      position: absolute;
+      border-color: #22d3ee; /* Neon Cyan */
+      opacity: 0.6;
+      transition: opacity 0.2s;
+    }
+    .react-grid-item:hover > .react-resizable-handle::after,
+    .react-grid-item.resizing > .react-resizable-handle::after {
+      opacity: 1;
+    }
+
+    /* SE Handle (Default/Corner) */
+    .react-resizable-handle-se {
+      bottom: 0;
+      right: 0;
+      cursor: se-resize;
+      width: 20px;
+      height: 20px;
+    }
+    .react-resizable-handle-se::after {
+      bottom: 4px;
+      right: 4px;
+      width: 12px;
+      height: 12px;
+      border-right: 3px solid #22d3ee;
+      border-bottom: 3px solid #22d3ee;
+      border-radius: 2px;
+      box-shadow: 0 0 10px #22d3ee;
+    }
+
+    /* SW Handle */
+    .react-resizable-handle-sw {
+      bottom: 0;
+      left: 0;
+      cursor: sw-resize;
+      width: 20px;
+      height: 20px;
+    }
+    .react-resizable-handle-sw::after {
+      bottom: 4px;
+      left: 4px;
+      width: 12px;
+      height: 12px;
+      border-left: 3px solid #22d3ee;
+      border-bottom: 3px solid #22d3ee;
+      border-radius: 2px;
+    }
+
+    /* NE Handle */
+    .react-resizable-handle-ne {
+      top: 0;
+      right: 0;
+      cursor: ne-resize;
+      width: 20px;
+      height: 20px;
+    }
+    .react-resizable-handle-ne::after {
+      top: 4px;
+      right: 4px;
+      width: 12px;
+      height: 12px;
+      border-right: 3px solid #22d3ee;
+      border-top: 3px solid #22d3ee;
+      border-radius: 2px;
+    }
+
+    /* NW Handle */
+    .react-resizable-handle-nw {
+      top: 0;
+      left: 0;
+      cursor: nw-resize;
+      width: 20px;
+      height: 20px;
+    }
+    .react-resizable-handle-nw::after {
+      top: 4px;
+      left: 4px;
+      width: 12px;
+      height: 12px;
+      border-left: 3px solid #22d3ee;
+      border-top: 3px solid #22d3ee;
+      border-radius: 2px;
+    }
+
+    /* N Handle */
+    .react-resizable-handle-n {
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      cursor: n-resize;
+      width: 40px;
+      height: 10px;
+    }
+    .react-resizable-handle-n::after {
+      top: 2px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 20px;
+      height: 4px;
+      border-top: 3px solid #22d3ee;
+      border-radius: 2px;
+    }
+
+    /* S Handle */
+    .react-resizable-handle-s {
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      cursor: s-resize;
+      width: 40px;
+      height: 10px;
+    }
+    .react-resizable-handle-s::after {
+      bottom: 2px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 20px;
+      height: 4px;
+      border-bottom: 3px solid #22d3ee;
+      border-radius: 2px;
+    }
+
+    /* E Handle */
+    .react-resizable-handle-e {
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: e-resize;
+      width: 10px;
+      height: 40px;
+    }
+    .react-resizable-handle-e::after {
+      right: 2px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 4px;
+      height: 20px;
+      border-right: 3px solid #22d3ee;
+      border-radius: 2px;
+    }
+
+    /* W Handle */
+    .react-resizable-handle-w {
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: w-resize;
+      width: 10px;
+      height: 40px;
+    }
+    .react-resizable-handle-w::after {
+      left: 2px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 4px;
+      height: 20px;
+      border-left: 3px solid #22d3ee;
+      border-radius: 2px;
+    }
+  </style>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body>
+  <!-- Google Tag Manager (noscript) -->
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-W7K6QK7Z"
+  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <!-- End Google Tag Manager (noscript) -->
+
+  <!-- Meta Pixel (noscript) -->
+  <noscript><img height="1" width="1" style="display:none" alt=""
+    src="https://www.facebook.com/tr?id=1119943063690657&ev=PageView&noscript=1" /></noscript>
+  <!-- End Meta Pixel (noscript) -->
+
+  <div id="root"></div>
+<script type="module" src="/index.tsx"></script>
+</body>
+</html>

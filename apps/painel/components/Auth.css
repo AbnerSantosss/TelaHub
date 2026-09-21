@@ -1,0 +1,629 @@
+/**
+ * Estilo das telas de Entrar e Criar conta ("Vitrine Acesa").
+ *
+ * POR QUE UM CSS PRÓPRIO, AO LADO DO COMPONENTE
+ * O painel inteiro herda `index.css` — tema escuro, dez famílias de fonte e
+ * utilitários do Tailwind/shadcn que outra parte do time mexe ao mesmo tempo.
+ * Estas duas telas são a PRIMEIRA coisa que o visitante vê depois de clicar no
+ * anúncio, e precisam parecer a mesma empresa da landing (fundo claro, Geist,
+ * azul #0369a1). Deixar isso no CSS global significaria: (a) brigar com quem
+ * está redesenhando o dashboard no mesmo arquivo, e (b) empurrar o tema claro
+ * para dentro do app, que é escuro de propósito. Por isso tudo aqui está
+ * prefixado com `auth-` e nada vaza para fora de `.auth-page`.
+ *
+ * ARMADILHA: os valores (hoje em `claro.css`, compartilhado com as outras
+ * telas claras) são uma CÓPIA do sistema visual da landing, não um import. Se o azul da marca mudar lá, alguém precisa mudar aqui também —
+ * importar o CSS do site (outro app, outro build, outro domínio) traria junto
+ * o reset e o layout dele e quebraria o painel. A cópia é a escolha barata;
+ * a divergência é o preço, e ele é pago em uma linha.
+ */
+
+.auth-page {
+  /* Tokens (papel/tinta/linha/marca/sinais/raios) vêm de `claro.css` — os
+     `--auth-*` são aliases definidos lá. */
+
+  /* O logo (`LogoHub`, compartilhado com o Toolbar do editor, que é escuro)
+     pinta os traços com `var(--brand-accent)`. Redefinir a variável AQUI deixa
+     o mesmo SVG legível no fundo claro sem tocar em quem o usa lá fora. */
+  --brand-accent: #0369a1;
+
+  /* Geist já vem do `index.html`. A reserva é declarada de propósito: se o
+     Google Fonts cair, a tela troca o desenho da letra e não o layout. */
+  font-family: 'Geist', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  color: var(--auth-tinta);
+  background: var(--auth-papel-2);
+
+  /* `100dvh` e não `100vh`: no Chrome do Android a barra de endereço come
+     ~60 px de `vh` e o botão de criar conta nasce fora da tela. */
+  min-height: 100dvh;
+  display: flex;
+  align-items: stretch;
+  -webkit-font-smoothing: antialiased;
+}
+
+.auth-page *,
+.auth-page *::before,
+.auth-page *::after {
+  box-sizing: border-box;
+}
+
+/* ---------------------------------------------------------------- estrutura */
+
+.auth-shell {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 1000px) {
+  .auth-shell {
+    grid-template-columns: minmax(0, 1fr) minmax(480px, 46%);
+  }
+}
+
+/* Coluna da esquerda: continuidade com a landing. Some no celular — lá a
+   pessoa já leu a promessa na página anterior e quer o formulário. */
+.auth-vitrine {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 32px;
+  padding: 56px 56px 56px 64px;
+  /* grade clara sutil (claro.css) sobre o degradê da marca */
+  background: var(--claro-grade), linear-gradient(180deg, var(--auth-marca-fundo) 0%, var(--auth-papel-2) 100%);
+  border-right: 1px solid var(--auth-linha);
+}
+
+@media (min-width: 1000px) {
+  .auth-vitrine {
+    display: flex;
+  }
+}
+
+.auth-marca {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.auth-marca-nome {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--auth-tinta);
+}
+
+.auth-marca-nome em {
+  font-style: normal;
+  color: var(--auth-marca);
+}
+
+.auth-vitrine-titulo {
+  margin: 0;
+  max-width: 15ch;
+  font-size: clamp(30px, 3.2vw, 42px);
+  line-height: 1.12;
+  letter-spacing: -0.03em;
+  font-weight: 700;
+  color: var(--auth-tinta);
+}
+
+.auth-vitrine-texto {
+  margin: 0;
+  max-width: 46ch;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--auth-tinta-2);
+}
+
+/* Lista de lugares onde a tela funciona. A ORDEM importa: condomínio primeiro,
+   comida no fim e sem destaque — o produto é horizontal e a auditoria de
+   posicionamento proíbe abrir por lanchonete. */
+.auth-lugares {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.auth-lugares li {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--auth-tinta-2);
+  background: var(--auth-papel);
+  border: 1px solid var(--auth-linha);
+  border-radius: 999px;
+  padding: 6px 12px;
+}
+
+.auth-provas {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.auth-provas li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--auth-tinta-2);
+}
+
+.auth-provas svg {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: var(--auth-ok);
+}
+
+/* --------------------------------------------------------------- formulário */
+
+.auth-coluna {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 20px 48px;
+  /* no celular a coluna do formulário é a tela inteira: leva a grade */
+  background: var(--claro-grade), var(--auth-papel-2);
+}
+
+@media (min-width: 1000px) {
+  .auth-coluna {
+    padding: 48px;
+    background: var(--auth-papel);
+  }
+}
+
+.auth-cartao {
+  width: 100%;
+  max-width: 440px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Cabeçalho compacto que só aparece no celular: leva o logo e a promessa que a
+   pessoa acabou de ler na landing. */
+.auth-topo-mobile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+}
+
+@media (min-width: 1000px) {
+  .auth-topo-mobile {
+    display: none;
+  }
+}
+
+.auth-titulo {
+  margin: 0;
+  font-size: 26px;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+  color: var(--auth-tinta);
+}
+
+.auth-subtitulo {
+  margin: 6px 0 0;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--auth-tinta-3);
+}
+
+/* A promessa da landing, repetida literalmente. É verdadeira (não é teste com
+   prazo) e é a última frase que a pessoa leu antes de clicar. */
+.auth-promessa {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: var(--auth-r-12);
+  border: 1px solid #bfe0f2;
+  background: var(--auth-marca-fundo);
+  font-size: 14px;
+  line-height: 1.5;
+  color: #0b3a55;
+}
+
+.auth-promessa svg {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: var(--auth-marca);
+}
+
+.auth-promessa strong {
+  font-weight: 600;
+}
+
+.auth-caixa {
+  background: var(--auth-papel);
+  border: 1px solid var(--auth-linha);
+  border-radius: var(--auth-r-16);
+  padding: 24px;
+  box-shadow: 0 1px 2px rgba(10, 18, 35, 0.04), 0 8px 24px rgba(10, 18, 35, 0.05);
+}
+
+@media (min-width: 520px) {
+  .auth-caixa {
+    padding: 28px;
+  }
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0; /* fieldset ignora o grid do pai sem isto */
+}
+
+.auth-form:disabled {
+  opacity: 0.65;
+}
+
+.auth-legenda {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.auth-campo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* 13 px: o mínimo do sistema é 12 px, e rótulo é o texto que mais gente
+   pequena precisa ler. Nada de caixa alta espremida com `tracking-widest`. */
+.auth-rotulo {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--auth-tinta-2);
+}
+
+.auth-input {
+  width: 100%;
+  height: 46px;
+  padding: 0 14px;
+  font: inherit;
+  font-size: 15px;
+  color: var(--auth-tinta);
+  background: var(--auth-papel);
+  border: 1px solid var(--auth-linha);
+  border-radius: var(--auth-r-8);
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+  appearance: none;
+}
+
+/* 4,78:1 no branco. Placeholder É texto: o cinza claro de costume (#8a97ab e
+   parecidos) fica em ~2,9:1 e reprova em AA. Aqui o placeholder carrega o
+   EXEMPLO do que digitar ("Ex.: Condomínio Jardins") — se ele não for legível,
+   o exemplo não existe e o campo vira adivinhação. */
+.auth-input::placeholder {
+  color: #667487;
+  opacity: 1; /* Firefox aplica opacity .54 por padrão e derruba o contraste */
+}
+
+.auth-input:hover:not(:disabled) {
+  border-color: #b9c6d8;
+}
+
+.auth-input:focus-visible,
+.auth-input:focus {
+  outline: none;
+  border-color: var(--auth-marca);
+  box-shadow: 0 0 0 3px rgba(3, 105, 161, 0.18);
+}
+
+.auth-input[aria-invalid='true'] {
+  border-color: var(--auth-erro);
+}
+
+.auth-input[aria-invalid='true']:focus {
+  box-shadow: 0 0 0 3px rgba(179, 38, 30, 0.16);
+}
+
+/* Campo de senha com o botão de mostrar/ocultar dentro */
+.auth-campo-senha {
+  position: relative;
+  display: flex;
+}
+
+.auth-campo-senha .auth-input {
+  padding-right: 46px;
+}
+
+.auth-olho {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: var(--auth-r-8);
+  background: transparent;
+  color: var(--auth-tinta-3);
+  cursor: pointer;
+}
+
+.auth-olho:hover {
+  color: var(--auth-marca);
+  background: var(--auth-papel-3);
+}
+
+.auth-olho:focus-visible {
+  outline: 2px solid var(--auth-marca);
+  outline-offset: 2px;
+}
+
+.auth-dica {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--auth-tinta-3);
+}
+
+/* Erro de campo: ícone + texto. Cor NUNCA sozinha (WCAG 1.4.1). */
+.auth-erro-campo {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 0;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--auth-erro);
+}
+
+.auth-erro-campo svg {
+  flex: 0 0 auto;
+  margin-top: 2px;
+}
+
+.auth-erro-geral {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 14px;
+  border: 1px solid #f0c4c1;
+  border-radius: var(--auth-r-12);
+  background: #fdf2f1;
+  color: #7a1a15; /* 8,3:1 no fundo rosado */
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.auth-erro-geral-linha {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.auth-erro-geral-linha svg {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: var(--auth-erro);
+}
+
+.auth-erro-geral-extra {
+  font-weight: 400;
+  padding-left: 26px;
+}
+
+/* ------------------------------------------------------------------ botões */
+
+.auth-botao {
+  width: 100%;
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 18px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: var(--auth-r-8);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease,
+    box-shadow 160ms ease, transform 160ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Branco sobre #0369a1 = 5,93:1. O sistema antigo (ciano #38bdf8 sobre escuro)
+   dava 2,77:1 e reprovava em AA — o botão mais importante do funil era o menos
+   legível da tela. */
+.auth-botao-primario {
+  background: var(--auth-marca);
+  color: #ffffff;
+}
+
+.auth-botao-primario:hover:not(:disabled) {
+  background: var(--auth-marca-hover);
+}
+
+.auth-botao-secundario {
+  background: var(--auth-papel);
+  color: var(--auth-marca);
+  border-color: var(--auth-linha);
+}
+
+.auth-botao-secundario:hover:not(:disabled) {
+  background: var(--auth-papel-2);
+  border-color: #b9c6d8;
+}
+
+.auth-botao:focus-visible {
+  outline: 2px solid var(--auth-marca);
+  outline-offset: 2px;
+}
+
+.auth-botao:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.auth-botao .auth-girando {
+  animation: auth-giro 900ms linear infinite;
+}
+
+@keyframes auth-giro {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-botao .auth-girando {
+    animation-duration: 3s;
+  }
+}
+
+/* Motivo pelo qual o botão está travado — em TEXTO, não só no `disabled`.
+   Botão apagado sem explicação é o motivo nº 1 de abandono em formulário. */
+.auth-motivo {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--auth-atencao);
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.auth-motivo svg {
+  flex: 0 0 auto;
+  margin-top: 2px;
+}
+
+/* ------------------------------------------------------- linhas auxiliares */
+
+.auth-linha-opcoes {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.auth-checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--auth-tinta-2);
+  cursor: pointer;
+}
+
+/* Checkbox nativo, só redimensionado e recolorido: o `<div>` fingindo caixa que
+   existia antes não era focável por teclado nem anunciado por leitor de tela —
+   e num aceite de termos isso é problema jurídico, não só de acessibilidade. */
+.auth-checkbox input[type='checkbox'] {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  margin: 1px 0 0;
+  accent-color: var(--auth-marca);
+  cursor: pointer;
+}
+
+.auth-checkbox input[type='checkbox']:focus-visible {
+  outline: 2px solid var(--auth-marca);
+  outline-offset: 2px;
+}
+
+.auth-link {
+  color: var(--auth-marca);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  border-radius: 3px;
+}
+
+.auth-link:hover {
+  color: var(--auth-marca-hover);
+}
+
+.auth-link:focus-visible {
+  outline: 2px solid var(--auth-marca);
+  outline-offset: 2px;
+}
+
+.auth-separador {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--auth-tinta-3);
+  font-size: 12px;
+}
+
+.auth-separador::before,
+.auth-separador::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--auth-linha);
+}
+
+.auth-rodape-caixa {
+  margin: 20px 0 0;
+  padding-top: 18px;
+  border-top: 1px solid var(--auth-linha);
+  text-align: center;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--auth-tinta-3);
+}
+
+.auth-rodape {
+  text-align: center;
+  font-size: 12px;
+  color: var(--auth-tinta-3);
+}
+
+/* Bloco do atalho de desenvolvimento. Amarelo de propósito: se algum dia ele
+   escapar para produção, precisa gritar na captura de tela. */
+.auth-dev {
+  margin-top: 18px;
+  padding: 12px 14px;
+  border: 1px dashed #d8b26a;
+  border-radius: var(--auth-r-12);
+  background: #fdf6e7;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.auth-dev-aviso {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: #6b4506;
+}

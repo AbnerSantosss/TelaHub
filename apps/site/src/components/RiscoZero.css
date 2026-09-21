@@ -1,0 +1,66 @@
+/* RISCO ZERO — estilo próprio da seção.
+   Só tokens do sistema (index.css). Nenhuma cor nova é declarada aqui: se uma
+   cor faltar, ela vira token lá, não valor solto aqui. */
+
+.risco {
+  /* A linha de topo separa esta seção da tabela de preços — é o mesmo
+     separador decorativo do resto da página, não um limite de componente. */
+  border-top: 1px solid var(--borda);
+}
+
+/* .split já faz as duas colunas e o colapso em ≤980px; aqui só o alinhamento
+   vertical, que no mockup é centralizado entre o título e a lista. */
+.risco__grade {
+  align-items: center;
+}
+
+.risco__lista {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.risco__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 17px;
+  line-height: 1.5;
+  color: var(--tinta-2);
+}
+
+.risco__icone {
+  width: 22px;
+  height: 22px;
+  flex: none;
+  /* 25,5px é a altura da linha de texto (17px × 1,5); o deslocamento centra o
+     ícone na primeira linha em vez de colar no topo do bloco. */
+  margin-top: 2px;
+  color: var(--ok);
+}
+
+/* Botão que abre o formulário de contato. É <button>, não link: não navega,
+   dispara ação na própria página. Aparência, hover e sublinhado vêm de
+   .btn--texto + .btn--sublinhado (index.css); o foco é o global de 3px — o
+   de 2px que morava aqui era a única exceção da página.
+   O que fica aqui é só o encaixe DENTRO da frase: inline, e o padding vertical
+   com margem negativa compensando dá área de toque de ~45px sem empurrar a
+   linha do parágrafo. */
+.risco__pedir {
+  display: inline;
+  min-height: 0;
+  padding: 10px 3px;
+  margin: -10px -3px;
+  font-size: inherit;
+  line-height: inherit;
+  text-align: left;
+}
+
+@media (max-width: 980px) {
+  .risco__item {
+    font-size: 16px;
+  }
+}

@@ -1,0 +1,36 @@
+# Stack de PRODUÇÃO do site de vendas (LP pública, estática, servida por Nginx).
+#
+# A porta publicada é exigida pelo túnel, que roda no HOST e aponta para
+# `localhost:42938`. A imagem vem pronta do GHCR — ver o comentário longo em
+# `App-Projeto/docker-compose.yml`.
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - VITE_CHECKOUT_URL=${VITE_CHECKOUT_URL:-https://checkout.proxserverabner.site}
+        - VITE_APP_URL=${VITE_APP_URL:-https://telahub.proxserverabner.site}
+    # Sem `image:` de propósito. O Portainer roda `docker compose pull` antes de
+    # subir a stack; com um `image:` apontando para o GHCR (privado), o pull
+    # falha com "unauthorized" e o deploy nem chega a buildar. Sem ele, o compose
+    # nomeia a imagem como <stack>_<serviço> e constrói localmente.
+    container_name: site-telas-display
+    restart: unless-stopped
+    ports:
+      # sitetelahub.proxserverabner.site -> localhost:42938 (rota do túnel)
+      - "42938:80"
+    networks:
+      - telahub_net
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+networks:
+  # Criada uma única vez na VPS:  docker network create telahub_net
+  telahub_net:
+    external: true

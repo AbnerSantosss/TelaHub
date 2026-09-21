@@ -1,3 +1,14 @@
+# CI do monorepo.
+#
+# Os quatro apps (`apps/api`, `apps/painel`, `apps/checkout`, `apps/site`) viviam
+# em três repositórios separados, cada um com seu próprio CI. Agora é um arquivo
+# só, mas os jobs continuam INDEPENDENTES de propósito: quebrar o lint do site
+# não pode esconder o resultado dos testes da API.
+#
+# Não há filtro de `paths` aqui — o CI é barato e roda inteiro. O filtro por
+# pasta existe no `build-and-push.yml`, onde importa (lá cada build vira uma
+# imagem publicada e um redeploy no Portainer).
+
 name: CI
 
 on:
@@ -5,9 +16,38 @@ on:
     branches: [main]
   push:
     branches: [main]
+  # Botão manual na aba Actions, em QUALQUER branch.
+  #
+  # Em 05/09/2026 o trabalho estava em `chore/monorepo` com 58 commits que
+  # nunca foram para o GitHub — ou seja, este CI nunca rodou uma vez sequer,
+  # porque só dispara em `main`. Enquanto a branch não virar PR, o
+  # `workflow_dispatch` é o único jeito de saber se o código passa.
+  workflow_dispatch:
 
 jobs:
-  backend:
+  # Guarda contra claim proibido — promessa que o produto não cumpre.
+  #
+  # Job PRÓPRIO, e propositalmente o mais simples do arquivo: não sobe banco,
+  # não instala dependência (o script é Node puro, sem `npm ci`) e não depende
+  # de nenhum outro job. Quatro vezes a copy voltou a vender trial de 14 dias,
+  # funcionamento offline, SLA/SSO/API externa e depoimento inventado; toda vez
+  # a correção foi manual e toda vez a frase voltou, porque nada no pipeline
+  # barrava. Este job barra.
+  #
+  # Quebrou? Leia o cabeçalho de `scripts/verificar-claims-proibidos.mjs`: há
+  # marcador explícito (`claims-permitido`) para o texto que NEGA o claim, como
+  # as páginas legais que dizem, corretamente, que o produto não funciona sem
+  # internet. Afrouxar a regra é a última opção, não a primeira.
+  claims:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: node scripts/verificar-claims-proibidos.mjs
+
+  api:
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -24,19 +64,26 @@ jobs:
           --health-timeout 5s
           --health-retries 10
     env:
+      # `DATABASE_URL` é o que o Prisma CLI usa nos passos de `db push` e seed.
+      # `TEST_DATABASE_URL` é o que `apps/api/vitest.config.ts` exige para
+      # deixar a suíte rodar: ele RECUSA subir contra o banco de
+      # desenvolvimento (uma execução interrompida contra o banco de dev já
+      # deixou 13 planos `pay-loja-*` ativos no catálogo público). Aqui as duas
+      # apontam para o Postgres efêmero deste job, que morre com ele.
       DATABASE_URL: postgresql://ci:ci@localhost:5432/telahub_ci?schema=public
+      TEST_DATABASE_URL: postgresql://ci:ci@localhost:5432/telahub_ci?schema=public
       JWT_SECRET: ci-test-secret
       NODE_ENV: test
     defaults:
       run:
-        working-directory: backend
+        working-directory: apps/api
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
-          cache-dependency-path: backend/package-lock.json
+          cache-dependency-path: apps/api/package-lock.json
       - run: npm ci
       - run: npx prisma db push --skip-generate
       # Catálogo de planos. Vários testes (quota, subscription) consultam os
@@ -51,18 +98,53 @@ jobs:
       - run: npm run build
       - run: npm test
 
-  frontend:
+  painel:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: frontend
+        working-directory: apps/painel
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
-          cache-dependency-path: frontend/package-lock.json
+          cache-dependency-path: apps/painel/package-lock.json
       - run: npm ci
       - run: npm run lint
+      - run: npm run build
+
+  checkout:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/checkout
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: apps/checkout/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+
+  site:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/site
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: apps/site/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      # O build inclui o pré-render, que tenta buscar o catálogo de planos na
+      # API. Aqui não há API no ar: o script cai no snapshot versionado
+      # (`src/data/planos.json`) de propósito — ver `scripts/fetch-plans.mjs`.
       - run: npm run build

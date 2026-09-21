@@ -7,8 +7,8 @@ node_modules/
 !.env.example
 
 # Build artifacts
-backend/dist/
-frontend/dist/
+apps/*/dist/
+apps/*/dist-ssr/
 
 # SQLite residual
 *.db
@@ -33,7 +33,7 @@ Thumbs.db
 .playwright-mcp/
 
 # Temporary / Dev utilities
-backend/fix-*.js
+apps/api/fix-*.js
 docker-compose.dev.yml
 
 # package-lock.json NÃO é ignorado de propósito.

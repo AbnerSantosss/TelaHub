@@ -1,0 +1,57 @@
+/* Blocos.css — estilo próprio da seção "O que vai na tela".
+   Só existe aqui o que o sistema de index.css não entrega: o cartão de bloco
+   (o `.wid` do mockup) e o ajuste de espaçamento da grade. Nada de cor nova. */
+
+/* Ritmo vertical da seção (cabeça / grade / fecho), como no artboard.
+   Declarado aqui e não em index.css porque é medida desta seção. */
+.blocos-secao {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+/* O mockup usa gap 14px nesta grade (as demais do site usam 20px). Aplicamos
+   a classe junto de `.grid-3`, herdando dela o colapso para 1 coluna. */
+.blocos__grid {
+  gap: 14px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.bloco {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 16px 18px;
+  border: 1px solid var(--borda-2);
+  border-radius: var(--raio-12);
+  background: var(--papel);
+}
+
+.bloco svg {
+  flex: none;
+  color: var(--marca);
+}
+
+.bloco__nome {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--tinta);
+  margin-bottom: 2px;
+}
+
+.bloco__texto {
+  display: block;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--tinta-3);
+}
+
+/* Fecho da seção: o mesmo corpo do `.lead`, porém menor e mais firme,
+   como no mockup (16px/600). */
+.blocos__fecho {
+  font-size: 16px;
+  font-weight: 600;
+}

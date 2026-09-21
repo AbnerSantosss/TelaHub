@@ -1,4 +1,4 @@
-# Build das imagens e publicação no GHCR.
+# Build das imagens e publicação no GHCR — monorepo, quatro apps.
 #
 # Por que buildar aqui e não na VPS:
 #   - as variáveis `VITE_*` são resolvidas em tempo de BUILD e ficam embutidas no
@@ -9,9 +9,25 @@
 #     o que estava funcionando;
 #   - imagem com tag = rollback é repontar a tag, não "reverter e rebuildar".
 #
-# O último passo chama o webhook da stack no Portainer, que faz o pull da imagem
-# nova e recria o container. Cadastre a URL em Settings → Secrets → Actions com o
-# nome PORTAINER_WEBHOOK. Sem o secret, o passo é pulado e o deploy é manual.
+# ## Por que existe o job `changes`
+#
+# Os três projetos viraram um repositório só. Sem filtro, mexer numa vírgula da
+# copy do site rebuildaria a API e o painel e dispararia o webhook das TRÊS
+# stacks — ou seja, recriaria containers que ninguém pediu para mexer, em
+# produção, sem staging. O job `changes` compara o commit anterior com o atual e
+# só deixa passar o app cuja pasta mudou.
+#
+# O filtro NÃO está em `on.push.paths` porque lá ele vale para o workflow
+# inteiro, e o que se quer é granularidade por app.
+#
+# ## Webhooks do Portainer (secrets em Settings → Secrets → Actions)
+#
+#   PORTAINER_WEBHOOK           → stack do painel (api + painel juntos)
+#   PORTAINER_WEBHOOK_CHECKOUT  → stack do checkout
+#   PORTAINER_WEBHOOK_SITE      → stack do site de vendas
+#
+# Secret ausente = passo pulado, deploy manual. É de propósito: um webhook
+# errado é pior que nenhum, porque recria a stack errada.
 
 name: build-and-push
 
@@ -27,22 +43,81 @@ env:
   OWNER: abnersantosss
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.filter.outputs.matrix }}
+      any: ${{ steps.filter.outputs.any }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Precisa do histórico para conseguir diferenciar dois commits.
+          fetch-depth: 0
+
+      - id: filter
+        name: Descobrir quais apps mudaram
+        env:
+          EVENT: ${{ github.event_name }}
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+
+          # `workflow_dispatch` é o botão de "rebuilda tudo" — é o que se usa
+          # quando o problema está na imagem, não no código.
+          BUILD_ALL=0
+          if [ "$EVENT" != "push" ]; then
+            BUILD_ALL=1
+          elif [ -z "${BEFORE:-}" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+            # Primeiro push da branch: não há "antes" com que comparar.
+            BUILD_ALL=1
+          elif ! git cat-file -e "${BEFORE}^{commit}" 2>/dev/null; then
+            # Acontece depois de um force-push: o commit anterior sumiu.
+            BUILD_ALL=1
+          fi
+
+          if [ "$BUILD_ALL" = "1" ]; then
+            CHANGED="apps/api/ apps/painel/ apps/checkout/ apps/site/"
+            echo "Buildando tudo (evento=$EVENT)."
+          else
+            CHANGED=$(git diff --name-only "$BEFORE" "$AFTER")
+            echo "Arquivos alterados:"
+            echo "$CHANGED"
+          fi
+
+          ENTRIES=""
+          add() {
+            [ -n "$ENTRIES" ] && ENTRIES="$ENTRIES,"
+            ENTRIES="$ENTRIES$1"
+          }
+
+          echo "$CHANGED" | grep -q "^apps/api/"      && add '{"app":"api","image":"telahub-backend","context":"apps/api"}'      || true
+          echo "$CHANGED" | grep -q "^apps/painel/"   && add '{"app":"painel","image":"telahub-frontend","context":"apps/painel"}' || true
+          echo "$CHANGED" | grep -q "^apps/checkout/" && add '{"app":"checkout","image":"telahub-checkout","context":"apps/checkout"}' || true
+          echo "$CHANGED" | grep -q "^apps/site/"     && add '{"app":"site","image":"telahub-site","context":"apps/site"}'     || true
+
+          if [ -z "$ENTRIES" ]; then
+            echo "any=false" >> "$GITHUB_OUTPUT"
+            echo 'matrix={"include":[]}' >> "$GITHUB_OUTPUT"
+            echo "Nenhum app afetado — nada a publicar."
+          else
+            echo "any=true" >> "$GITHUB_OUTPUT"
+            echo "matrix={\"include\":[$ENTRIES]}" >> "$GITHUB_OUTPUT"
+            echo "Matriz: [$ENTRIES]"
+          fi
+
   build:
+    needs: changes
+    if: needs.changes.outputs.any == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
-
     strategy:
-      # `fail-fast: false` para que um erro no frontend não esconda o resultado
-      # do backend — os dois são publicados de forma independente.
+      # Um erro no site não pode esconder o resultado da API — eles são
+      # publicados de forma independente.
       fail-fast: false
-      matrix:
-        include:
-          - name: telahub-backend
-            context: ./backend
-          - name: telahub-frontend
-            context: ./frontend
+      matrix: ${{ fromJSON(needs.changes.outputs.matrix) }}
 
     steps:
       - uses: actions/checkout@v4
@@ -55,32 +130,111 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # Cada app consome um conjunto próprio de `VITE_*`; o Dockerfile de quem
+      # não usa simplesmente ignora os args.
+      #
+      # ⚠️ ESTES VALORES FICAM DENTRO DO BUNDLE. `VITE_*` é resolvido em tempo
+      # de BUILD: domínio errado aqui não se conserta no Portainer, só
+      # rebuildando. Por isso eles precisam ser os MESMOS dos composes:
+      #   site     → https://vendas.proxserverabner.site      (apps/site/docker-compose.prod.yml)
+      #   painel   → https://painel.proxserverabner.site      (docker-compose.prod.yml)
+      #   checkout → https://checkout.proxserverabner.site    (apps/checkout/docker-compose.prod.yml)
+      #
+      # Correção de 2026-09-05: o painel era buildado com
+      # `VITE_SITE_URL=https://sitetelahub.proxserverabner.site` e o site com
+      # `VITE_APP_URL=https://telahub.proxserverabner.site`, dois domínios que
+      # nenhum compose declara — ou seja, o link "ver site"/"entrar no painel"
+      # saía do build apontando para host que não resolve.
+      #
+      # PENDÊNCIA CONHECIDA: o site também lê `VITE_API_URL` (formulário de
+      # lead, `apps/site/src/lib/funnel.js`), mas `apps/site/Dockerfile` não
+      # declara esse ARG — passá-lo aqui seria um build-arg não consumido, que
+      # parece configuração e não é. Enquanto o ARG não existir, o bundle usa o
+      # default `https://telahub.proxserverabner.site/api`, e é por isso que o
+      # DEPLOY.md manda manter uma rota do túnel com esse nome apontando para a
+      # porta do painel (4025), que é quem faz proxy de /api.
+      - id: args
+        name: Montar build-args do app
+        run: |
+          set -euo pipefail
+          {
+            echo 'value<<EOF'
+            case "${{ matrix.app }}" in
+              painel)
+                echo "VITE_API_URL=/api"
+                echo "VITE_SITE_URL=https://vendas.proxserverabner.site"
+                echo "VITE_CHECKOUT_URL=https://checkout.proxserverabner.site"
+                ;;
+              site)
+                echo "VITE_CHECKOUT_URL=https://checkout.proxserverabner.site"
+                echo "VITE_APP_URL=https://painel.proxserverabner.site"
+                ;;
+              *)
+                echo ""
+                ;;
+            esac
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
+
       - name: Build e push
         uses: docker/build-push-action@v6
         with:
           context: ${{ matrix.context }}
           push: true
           tags: |
-            ${{ env.REGISTRY }}/${{ env.OWNER }}/${{ matrix.name }}:latest
-            ${{ env.REGISTRY }}/${{ env.OWNER }}/${{ matrix.name }}:${{ github.sha }}
-          # Só o frontend consome estes args; o Dockerfile do backend os ignora.
-          build-args: |
-            VITE_API_URL=/api
-            VITE_SITE_URL=https://sitetelahub.proxserverabner.site
-            VITE_CHECKOUT_URL=https://checkout.proxserverabner.site
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+            ${{ env.REGISTRY }}/${{ env.OWNER }}/${{ matrix.image }}:latest
+            ${{ env.REGISTRY }}/${{ env.OWNER }}/${{ matrix.image }}:${{ github.sha }}
+          build-args: ${{ steps.args.outputs.value }}
+          cache-from: type=gha,scope=${{ matrix.app }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.app }}
 
   deploy:
-    needs: build
+    needs: [changes, build]
+    if: needs.changes.outputs.any == 'true'
     runs-on: ubuntu-latest
     steps:
-      - name: Redeploy no Portainer
+      - name: Redeploy das stacks afetadas no Portainer
         env:
-          WEBHOOK: ${{ secrets.PORTAINER_WEBHOOK }}
+          MATRIX: ${{ needs.changes.outputs.matrix }}
+          WEBHOOK_APP: ${{ secrets.PORTAINER_WEBHOOK }}
+          WEBHOOK_CHECKOUT: ${{ secrets.PORTAINER_WEBHOOK_CHECKOUT }}
+          WEBHOOK_SITE: ${{ secrets.PORTAINER_WEBHOOK_SITE }}
         run: |
-          if [ -z "$WEBHOOK" ]; then
-            echo "PORTAINER_WEBHOOK não configurado — pulando redeploy automático."
-            exit 0
-          fi
-          curl -fsS -X POST "$WEBHOOK"
+          set -uo pipefail
+
+          # `api` e `painel` vivem na MESMA stack do Portainer: se os dois
+          # mudaram, o webhook é chamado uma vez só — chamar duas recriaria a
+          # stack no meio da própria recriação.
+          NEEDS_APP=0
+          NEEDS_CHECKOUT=0
+          NEEDS_SITE=0
+          case "$MATRIX" in
+            *'"app":"api"'*)      NEEDS_APP=1 ;;
+          esac
+          case "$MATRIX" in
+            *'"app":"painel"'*)   NEEDS_APP=1 ;;
+          esac
+          case "$MATRIX" in
+            *'"app":"checkout"'*) NEEDS_CHECKOUT=1 ;;
+          esac
+          case "$MATRIX" in
+            *'"app":"site"'*)     NEEDS_SITE=1 ;;
+          esac
+
+          disparar() {
+            local nome="$1" url="$2" precisa="$3"
+            if [ "$precisa" != "1" ]; then
+              echo "· $nome: não mudou, pulando."
+              return 0
+            fi
+            if [ -z "$url" ]; then
+              echo "· $nome: secret do webhook não configurado — deploy MANUAL necessário."
+              return 0
+            fi
+            echo "· $nome: disparando webhook…"
+            curl -fsS -X POST "$url" || echo "  ⚠ falhou — faça o pull manual no Portainer."
+          }
+
+          disparar "stack do painel (api+painel)" "$WEBHOOK_APP"      "$NEEDS_APP"
+          disparar "stack do checkout"            "$WEBHOOK_CHECKOUT" "$NEEDS_CHECKOUT"
+          disparar "stack do site"                "$WEBHOOK_SITE"     "$NEEDS_SITE"

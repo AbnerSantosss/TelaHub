@@ -1,15 +1,34 @@
 {
-  "name": "projeto-display",
+  "name": "telahub-monorepo",
   "private": true,
   "engines": {
     "node": "20.x"
   },
   "scripts": {
     "setup": "node setup-dev.js",
+    "check-env": "node check-env.js",
     "clean-telahub": "node delete-telahub.js",
-    "build": "cd backend && npm install && npx prisma generate && npm run build",
-    "start": "cd backend && npx prisma db push --accept-data-loss && npm start",
-    "seed": "cd backend && npx prisma db seed",
+
+    "install:all": "npm --prefix apps/api ci && npm --prefix apps/painel ci && npm --prefix apps/checkout ci && npm --prefix apps/site ci",
+
+    "dev:api": "npm --prefix apps/api run dev",
+    "dev:painel": "npm --prefix apps/painel run dev",
+    "dev:checkout": "npm --prefix apps/checkout run dev",
+    "dev:site": "npm --prefix apps/site run dev",
+
+    "build:api": "npm --prefix apps/api run build",
+    "build:painel": "npm --prefix apps/painel run build",
+    "build:checkout": "npm --prefix apps/checkout run build",
+    "build:site": "npm --prefix apps/site run build",
+    "build:all": "npm run build:api && npm run build:painel && npm run build:checkout && npm run build:site",
+
+    "test:api": "npm --prefix apps/api test",
+
+    "verificar:claims": "node scripts/verificar-claims-proibidos.mjs",
+
+    "build": "npm --prefix apps/api install && npm --prefix apps/api run prisma:generate && npm --prefix apps/api run build",
+    "start": "npm --prefix apps/api run db:deploy && npm --prefix apps/api start",
+    "seed": "npm --prefix apps/api run db:seed",
     "prepare": "husky"
   }
 }

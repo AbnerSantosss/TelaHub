@@ -1,0 +1,79 @@
+/* RODAPÉ — estilo próprio. Só tokens do sistema (index.css). */
+
+.rodape {
+  /* .secao dá o recuo lateral fluido, que precisa ser o mesmo do resto da
+     página; o vertical encolhe porque o rodapé é uma linha, não uma seção. */
+  padding-block: clamp(24px, 3vw, 40px);
+  border-top: 1px solid var(--borda);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  font-size: 13px;
+  color: var(--tinta-3);
+}
+
+/* Identificação do fornecedor: três linhas curtas empilhadas em vez de uma só
+   comprida. Em 390px, CNPJ + razão social + endereço + canal do titular numa
+   linha corrida viram um parágrafo cinza que ninguém lê — e a exigência do art.
+   6º do CDC é de informação ostensiva, não de informação presente. */
+.rodape__identidade {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 62ch;
+}
+
+.rodape__linha {
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Linhas com marcador entre colchetes ([RAZÃO SOCIAL], [ENDEREÇO], [E-MAIL DO
+   ENCARREGADO]). Ficam visíveis de propósito até o dono preencher: marcador que
+   se esconde é marcador que ninguém completa. */
+.rodape__marcador {
+  color: var(--tinta-3);
+}
+
+.rodape__links {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 20px;
+}
+
+/* `.rodape__pendente` (o rótulo "em preparação" de Privacidade e Termos) saiu
+   junto com o motivo dele: as páginas existem, os dois viraram <a href>. Se um
+   dia as rotas caírem, o rótulo honesto volta — não o href="#".
+
+   A mesma classe serve para <a> e para <button>: os dois são links aos olhos de
+   quem lê, e a diferença (navegar × rolar) é de comportamento, não de aparência.
+   O alvo de toque tem 44px de altura nos dois casos. */
+/* Base, hover e alvo de 44px vêm de .btn--texto (index.css); o foco é o
+   global de 3px. Aqui só o tom discreto de rodapé: cinza que vira --marca no
+   hover, peso normal e o corpo de 13px da faixa. Sem <span class="btn__rotulo">
+   o sublinhado animado não aparece — por isso o hover sublinha pelo jeito
+   clássico. */
+.rodape__link {
+  padding: 0;
+  font-size: inherit;
+  font-weight: 400;
+  color: var(--tinta-3);
+}
+
+.rodape__link:hover {
+  color: var(--marca);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+@media (max-width: 720px) {
+  .rodape {
+    justify-content: flex-start;
+  }
+}

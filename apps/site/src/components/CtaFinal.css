@@ -1,0 +1,32 @@
+/* CTA FINAL — estilo próprio da seção. Só tokens do sistema (index.css).
+   O fundo escuro vem de .secao--noite; nada de cor declarada aqui. */
+
+.ctafinal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 24px;
+}
+
+.ctafinal__titulo {
+  /* Trava a medida de leitura: em 1440px a frase sem limite viraria uma linha
+     de 1120px, larga demais para o olho voltar ao começo. */
+  max-width: 820px;
+  color: var(--noite-titulo);
+}
+
+/* O subtítulo enumera seis portes numa frase só; sem trava de medida ele vira
+   uma linha larguíssima no desktop e o olho não acha o começo da seguinte.
+   Mais estreito que o título de propósito: texto corrido cansa antes. */
+.ctafinal__sub {
+  max-width: 720px;
+  color: var(--noite-texto);
+}
+
+.ctafinal__provas {
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 0;
+  color: var(--noite-texto);
+}

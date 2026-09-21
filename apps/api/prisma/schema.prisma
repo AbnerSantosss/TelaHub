@@ -1,0 +1,884 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String    @id @default(uuid())
+  username  String    @unique
+  name      String?
+  email     String    @unique
+  password  String
+  role      String    @default("user")
+  createdAt DateTime  @default(now())
+  lastLogin DateTime?
+
+  // `true` quando a senha atual foi GERADA pelo sistema e enviada por e-mail
+  // (convite ou compra no checkout), em vez de escolhida pela pessoa.
+  //
+  // Senha provisória trafega em texto claro no corpo do e-mail e fica na caixa
+  // de entrada para sempre. Enquanto ela continuar valendo, qualquer um com
+  // acesso àquela caixa entra na conta. Marcar aqui é o que permite o painel
+  // exigir a troca no primeiro acesso e encerrar essa janela.
+  //
+  // Default `false` para não obrigar a base existente a trocar senha — quem já
+  // usa o produto escolheu a própria senha em algum momento.
+  mustChangePassword Boolean @default(false)
+
+  // ─── Aceite de Termos e Privacidade (LGPD art. 8º, CDC art. 46) ────────────
+  // Consentimento precisa ser DEMONSTRÁVEL: não basta a página ter um texto, é
+  // preciso provar que esta pessoa aceitou ESTA versão naquele instante. Sem o
+  // número da versão o registro é inútil no dia em que a política mudar, porque
+  // não se sabe a que texto o "aceito" se referia.
+  //
+  // Nulo na base existente de propósito: quem já usava o produto antes de
+  // 2026-09-05 não assinou nada, e inventar um aceite retroativo seria pior do
+  // que admitir que ele não existe. O painel pede o aceite no próximo acesso.
+  termsAcceptedAt DateTime?
+  termsVersion    String?
+  privacyVersion  String?
+
+  // ─── Comunicação de marketing (LGPD art. 7º) ───────────────────────────────
+  // Separado do aceite de Termos DE PROPÓSITO: aceitar o contrato para usar o
+  // produto não é consentir em receber novidades, e tratar os dois como um só
+  // transformaria uma condição do serviço em captura de base de marketing.
+  //
+  // Aviso de vencimento, inadimplência e cancelamento NÃO passam por aqui —
+  // são execução do contrato e vão para todo mundo. Só "novidades" exige opt-in.
+  //
+  // Nulo = nunca consentiu (o padrão, inclusive para toda a base existente:
+  // consentimento retroativo não existe).
+  marketingOptInAt DateTime?
+
+  // Token do link de descadastro. Precisa ser opaco e estável: vai dentro do
+  // e-mail e é clicado SEM sessão — quem descadastra costuma não conseguir (ou
+  // não querer) entrar na conta, e exigir login para sair de uma lista é a
+  // prática que a LGPD trata como obstáculo ao direito de oposição.
+  unsubscribeToken String? @unique
+
+  // ─── Sessão e desativação (2026-09-18) ─────────────────────────────────────
+  // O JWT dura dias e até aqui não havia como invalidá-lo: trocar o papel de
+  // alguém, remover da equipe ou redefinir a senha deixava o token antigo
+  // valendo até expirar. Token emitido ANTES deste instante é recusado com
+  // `session_revoked`. Nulo = nenhuma revogação (a base existente segue igual).
+  sessionsValidAfter DateTime?
+
+  // Desativar em vez de excluir: preserva autoria de telas, TVs e auditoria.
+  // Desativado não entra, não recebe e-mail de equipe e não conta no limite
+  // de pessoas do plano.
+  disabledAt DateTime?
+
+  // Escopo de tenant. Nulo apenas para o role `master` (proprietário da
+  // plataforma), que opera acima das organizações.
+  organizationId String?
+  organization   Organization? @relation("OrganizationMembers", fields: [organizationId], references: [id])
+
+  /// Organização da qual esta pessoa é Titular (no máximo uma).
+  ownedOrganization Organization? @relation("OrganizationOwner")
+
+  @@index([organizationId])
+}
+
+model Organization {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now())
+
+  // ─── Atribuição de campanha, congelada no momento do cadastro ──────────────
+  // O site já captura UTM e click ids na URL (`apps/site/src/lib/funnel.js`) e
+  // os repassa para o painel, mas até 2026-09-05 o signup os DESCARTAVA: toda
+  // conta grátis nascia como tráfego direto e não havia como calcular o custo
+  // por conta de nenhuma campanha — que é justamente a métrica que decide se a
+  // mídia paga continua ligada.
+  //
+  // Fica na organização (e não numa tabela de eventos) porque a pergunta que
+  // isto responde é "de onde veio ESTA conta", uma vez só, para sempre. É a
+  // primeira origem, nunca sobrescrita por visitas posteriores: reatribuir para
+  // o último clique faria o remarketing levar o crédito de toda conta que a
+  // prospecção trouxe.
+  utmSource   String?
+  utmMedium   String?
+  utmCampaign String?
+  utmContent  String?
+  utmTerm     String?
+  gclid       String?
+  fbclid      String?
+  referrer    String?
+  landingPath String?
+
+  // ─── Titular e escopo da equipe (2026-09-18) ───────────────────────────────
+  // Titular: quem responde pela conta (contrato, cobrança, transferência).
+  // Nulo nas contas antigas — até o backfill rodar, o código trata o admin
+  // mais antigo como Titular (`resolveOwnerUserId`).
+  ownerUserId String? @unique
+  owner       User?   @relation("OrganizationOwner", fields: [ownerUserId], references: [id], onDelete: SetNull)
+
+  // `all`: toda a equipe vê e edita tudo da conta (comportamento anterior).
+  // `own`: Editor e Leitor veem só o que criaram ou o que lhes foi atribuído;
+  // Titular e Administrador continuam vendo tudo. A migração gravou `all` em
+  // todas as contas existentes para não mudar nada para quem já usa; conta
+  // nova nasce `own`.
+  memberScope String @default("own")
+
+  displays         Display[]
+  users            User[]            @relation("OrganizationMembers")
+  devices          Device[]
+  broadcasts       Broadcast[]
+  auditLogs        AuditLog[]
+  subscription     Subscription?
+  checkoutSessions CheckoutSession[]
+  payments         Payment[]
+}
+
+model Display {
+  id   String @id @default(uuid())
+  name String
+
+  /// Slug legível escolhido pelo usuário (`loja-centro`). Continua funcionando
+  /// para não derrubar TV já pareada, mas é ADIVINHÁVEL: quem acerta o nome lê
+  /// a tela do cliente e consegue mapear quem usa a plataforma.
+  /// Preferir `publicToken` em URL nova. Ver wiki/tecnico/seguranca.
+  slug String @unique
+
+  /// Endereço público não adivinhável do player. Gerado no cadastro; as linhas
+  /// antigas foram preenchidas na migração `add_display_public_token`.
+  publicToken String? @unique
+  pages          String
+  coverImage     String?
+  updatedAt      DateTime      @updatedAt
+  devices        Device[]
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+
+  /// Quem criou (e é o responsável, no escopo `own`). Só o servidor preenche.
+  /// Sem FK de propósito: a autoria sobrevive à exclusão da pessoa.
+  createdById String?
+  /// Última pessoa que salvou.
+  updatedById String?
+
+  @@index([organizationId])
+  @@index([organizationId, createdById])
+}
+
+model Device {
+  id            String    @id @default(uuid())
+  pairingCode   String?   @unique
+  displayId     String?
+  display       Display?  @relation(fields: [displayId], references: [id], onDelete: SetNull)
+  status        String    @default("pending")
+  lastSeen      DateTime  @default(now())
+  lastAlertedAt DateTime?
+  name          String?
+
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+
+  // Quando o device passou a contar como "tela ativa" para fins de cobrança.
+  activatedAt DateTime?
+
+  /// Quem conectou a TV à conta (responsável no escopo `own`).
+  linkedById String?
+
+  /// sha256 do segredo entregue ao aparelho no registro. Nulo = aparelho
+  /// legado, registrado antes do segredo existir (aceito até a data de corte).
+  secretHash String?
+
+  // Histórico de online/offline, base do cálculo de disponibilidade.
+  statusChanges DeviceStatusChange[]
+
+  @@index([organizationId])
+  @@index([organizationId, linkedById])
+}
+
+model Broadcast {
+  id          String   @id @default(uuid())
+  name        String
+  page        String
+  startTime   String
+  endTime     String
+  isPermanent Boolean  @default(false)
+  displayIds  String
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  /// Legado (texto livre). Use `createdById`.
+  createdBy   String?
+  /// Quem criou. Só o servidor preenche.
+  createdById String?
+
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+
+  @@index([organizationId])
+}
+
+model Setting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+model PasswordReset {
+  id        String   @id @default(uuid())
+  email     String
+  token     String   @unique
+  /// sha256 do token. Linhas novas guardam só o hash (`token` recebe um valor
+  /// aleatório sem uso); as antigas continuam valendo até expirarem.
+  tokenHash String?  @unique
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+// ─── Cobrança / planos ───────────────────────────────────────────────────────
+
+model Plan {
+  id   String @id @default(uuid())
+  // gratis | loja | rede | enterprise.
+  // `trial` é código legado: o plano de entrada era um teste de 14 dias e virou
+  // freemium sem prazo em 2026-07-25. A linha `trial` permanece no banco com
+  // `active: false` (fora de `GET /api/plans`) só para preservar as FKs
+  // históricas; as assinaturas dela foram remanejadas para `gratis`.
+  code String @unique
+  name String
+
+  // Preço por tela ativa, em centavos de BRL. 0 = plano sem cobrança (trial).
+  pricePerScreenCents Int @default(0)
+
+  // Preço por tela/MÊS quando a assinatura é paga anualmente. Campo próprio, e
+  // não um desconto percentual calculado, porque o anual é uma OFERTA (número
+  // redondo escolhido pelo dono: R$ 39 no Loja, R$ 32 no Rede) e não uma regra
+  // de três — derivar por porcentagem faria a vitrine exibir centavos quebrados
+  // e mudaria sozinha a cada ajuste do mensal.
+  // `0` = plano SEM oferta anual (grátis e Enterprise); nesse caso quem paga
+  // "no anual" continua na base mensal. Ver `unitPriceCents()`.
+  priceAnnualPerScreenCents Int @default(0)
+
+  minScreens Int @default(1)
+
+  // Limites. `null` = ilimitado.
+  maxDevices       Int?
+  maxUsers         Int?
+  maxOrganizations Int?
+
+  // JSON array de feature flags liberadas (ex.: ["powerbi","api","white-label"]).
+  features String @default("[]")
+
+  active Boolean @default(true)
+
+  subscriptions Subscription[]
+}
+
+model Subscription {
+  id             String       @id @default(uuid())
+  organizationId String       @unique
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  planId         String
+  plan           Plan         @relation(fields: [planId], references: [id])
+
+  // trialing | active | past_due | canceled
+  status           String    @default("trialing")
+  trialEndsAt      DateTime?
+  currentPeriodEnd DateTime?
+
+  // monthly | yearly — COMO se paga, não O QUE se contrata. Fica aqui e não em
+  // `Plan` porque duas contas do mesmo plano podem estar em intervalos
+  // diferentes. Consequência deliberada: trocar de intervalo NÃO é upgrade de
+  // plano (ver `isPlanUpgrade`), então não passa pela guarda de pagamento.
+  billingInterval String @default("monthly")
+
+  // Integração com gateway (asaas | stripe | manual). Nulo enquanto em trial.
+  gateway               String?
+  gatewayCustomerId     String?
+  gatewaySubscriptionId String?
+
+  // ─── Cancelamento ──────────────────────────────────────────────────────────
+  // O cancelamento é AGENDADO, não imediato: quem pagou até o dia 30 tem direito
+  // de usar até o dia 30 (CDC art. 51, IV — cortar o acesso já pago é cláusula
+  // abusiva). Por isso `cancelAtPeriodEnd` existe separado de `status`: entre o
+  // pedido e o fim do ciclo a assinatura continua `active`, e só então vira
+  // `canceled`. Sem esse par, "cancelar" viraria "perder o que já pagou" e a
+  // promessa pública de cancelar no painel seria pior do que não existir.
+  //
+  // `canceledAt` é quando a pessoa PEDIU, não quando o acesso terminou — é essa
+  // data que responde "quanto tempo ela ficou" no cálculo de churn.
+  cancelAtPeriodEnd Boolean   @default(false)
+  canceledAt        DateTime?
+
+  // Por que a assinatura terminou.
+  //
+  // Duas naturezas convivem aqui de propósito. Quando o SISTEMA encerra, grava
+  // um código de um vocabulário fechado:
+  //   grace_expired     — passou da carência de inadimplência (o job encerrou)
+  //   period_end_unpaid — cancelamento agendado que venceu sem motivo registrado
+  //   admin:<motivo>    — o `master` cancelou pelo backoffice (motivo obrigatório)
+  //   refund            — estorno confirmado pelo gateway
+  // Quando a PESSOA cancela pelo painel, grava o texto livre que ela escreveu —
+  // que vale mais para entender churn do que um código genérico.
+  //
+  // A regra que sustenta as duas listas do backoffice: quem tem `grace_expired`
+  // NÃO renovou (cobrança falhou, é recuperável); qualquer outro motivo com
+  // `cancelAtPeriodEnd` PEDIU para sair (é produto). Sem essa distinção as duas
+  // viram a mesma lista, e são problemas opostos. Até 2026-09-09 o job
+  // encerrava sem gravar motivo nenhum, então nenhuma das duas existia.
+  cancelReason String?
+
+  // Carência antes de suspender por falta de pagamento. Preenchido quando o
+  // gateway avisa que a cobrança falhou; a conta segue funcionando até lá.
+  pastDueSince DateTime?
+
+  /// Telas cobertas pelo último pagamento confirmado. É o "Y" de "X telas
+  /// ativas de Y contratadas" — sem isso não há como ver a divergência entre
+  /// o que se usa e o que se paga (a recorrência não é revista sozinha).
+  contractedScreens Int?
+
+  /// O cancelamento da recorrência no gateway falhou e precisa de ação manual.
+  /// Enquanto `true`, o cliente pode continuar sendo cobrado.
+  gatewayCancelPending Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  /// Concessão manual de feature/limite feita pelo `master`. Ver `SubscriptionOverride`.
+  override SubscriptionOverride?
+
+  @@index([status])
+}
+
+/// Evento recebido de um gateway de pagamento.
+///
+/// Existe por UM motivo: idempotência. Todo gateway sério reenvia o mesmo evento
+/// quando não recebe 200 — o Asaas repete por dias. Sem esta tabela, um webhook
+/// de pagamento confirmado processado duas vezes provisiona duas assinaturas, ou
+/// credita dois meses, e a falha aparece semanas depois na conciliação, quando
+/// já não dá para saber qual cobrança era qual.
+///
+/// A unicidade é `(provider, eventId)` e não só `eventId` porque dois gateways
+/// diferentes podem usar o mesmo formato de id, e um dia haverá mais de um.
+///
+/// `payload` guarda o corpo cru: quando algo dá errado, o que se quer ver é o
+/// que o gateway realmente mandou, não a interpretação que o código fez dele.
+model WebhookEvent {
+  id String @id @default(uuid())
+
+  /// asaas | stripe | mercadopago | manual
+  provider String
+  /// Id do evento no gateway. É a chave de deduplicação.
+  eventId   String
+  eventType String
+
+  /// received | processed | ignored | failed
+  status String @default("received")
+  /// Corpo cru, como chegou. Texto e não Json para não depender do dialeto.
+  payload String
+  error   String?
+
+  receivedAt  DateTime  @default(now())
+  processedAt DateTime?
+
+  @@unique([provider, eventId])
+  @@index([status, receivedAt])
+}
+
+/// Cobrança emitida para uma organização — uma linha por fatura, não por ciclo.
+///
+/// Separado de `Subscription` porque assinatura é o CONTRATO (um por conta) e
+/// pagamento é o FATO (muitos por conta, cada um com seu status, seu método e
+/// sua nota fiscal). Guardar o último pagamento dentro da assinatura funcionaria
+/// até o primeiro estorno, quando não haveria onde registrar que o dinheiro
+/// voltou sem apagar o histórico de que ele entrou.
+///
+/// `amountCents` é o valor REALMENTE cobrado no ciclo — no anual é o total dos
+/// 12 meses, não o mensal equivalente. É a diferença entre o caixa e o MRR, e
+/// confundir os dois foi exatamente o defeito de US-A-05.
+model Payment {
+  id             String       @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+
+  /// asaas | stripe | mercadopago | manual | simulado
+  provider String
+  /// Id da cobrança no gateway. Único: é por ele que o webhook reencontra a linha.
+  providerPaymentId String? @unique
+
+  /// pending | confirmed | refunded | failed | canceled
+  status String @default("pending")
+  /// pix | credit_card | boleto | manual
+  method String?
+
+  /// Valor cobrado no ciclo inteiro, em centavos.
+  amountCents Int
+  /// monthly | yearly — o que `amountCents` cobre.
+  billingInterval String @default("monthly")
+  /// Telas faturadas neste ciclo, para a conciliação bater com a quantidade.
+  screens Int @default(1)
+
+  dueDate    DateTime?
+  paidAt     DateTime?
+  refundedAt DateTime?
+  /// Valor estornado. Igual a `amountCents` no estorno total.
+  refundedCents Int?
+
+  /// Link da fatura no gateway, mostrado na página Assinatura.
+  invoiceUrl String?
+
+  /// Nota fiscal de serviço. `nfseStatus`: pending | issued | failed | exempt.
+  nfseStatus String?
+  nfseUrl    String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([organizationId, createdAt])
+  @@index([status])
+}
+
+// ─── Auditoria ───────────────────────────────────────────────────────────────
+
+model AuditLog {
+  id             String        @id @default(uuid())
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  userId         String?
+  userEmail      String?
+  action         String // ex.: display.publish, device.link, user.invite
+  entityType     String
+  entityId       String?
+  metadata       String? // JSON livre
+  /// Ação feita pelo master em modo suporte, dentro da conta do cliente.
+  viaSupport     Boolean       @default(false)
+  /// Motivo informado (modo suporte ou ação administrativa).
+  reason         String?
+  createdAt      DateTime      @default(now())
+
+  @@index([organizationId, createdAt])
+}
+
+// ─── Checkout ────────────────────────────────────────────────────────────────
+//
+// Modelo do funil de contratação, no espírito de um checkout transparente
+// brasileiro: uma sessão é criada na PRIMEIRA visita (antes de qualquer dado
+// pessoal) e vai sendo enriquecida a cada passo. É isso que permite medir
+// "checkout iniciado" e "abandono" — sem a sessão persistida desde o início,
+// abandono é invisível por definição.
+//
+// LGPD: a sessão guarda dado pessoal de quem ainda NÃO é cliente. Por isso tem
+// `expiresAt` e o job de limpeza: sessão abandonada e não convertida não deve
+// virar base de dados eterna. Ver wiki/tecnico/seguranca-e-conformidade-tecnica.
+
+model CheckoutSession {
+  id String @id @default(uuid())
+
+  // Identificador público usado na URL do checkout. Não usar o `id` interno:
+  // este é o valor que circula em link de recuperação de abandono.
+  publicToken String @unique
+
+  // started | identified | payment_pending | paid | abandoned | expired
+  status String @default("started")
+
+  // O que está sendo contratado. `planCode` referencia `Plan.code` (não FK,
+  // para a sessão sobreviver a mudança de catálogo e preservar o histórico).
+  planCode    String?
+  screens     Int     @default(1)
+  // monthly | yearly — o intervalo escolhido no seletor do checkout. Precisa
+  // ficar na sessão (e não só na assinatura que ainda nem existe) porque é o
+  // que explica o `amountCents` congelado abaixo: sem ele, um relatório de
+  // abandono não distingue "achou caro" de "escolheu o anual".
+  billingInterval String @default("monthly")
+  // Valor congelado no momento do passo — o preço do catálogo pode mudar depois.
+  // Sempre o valor MENSAL EQUIVALENTE, inclusive no anual.
+  amountCents Int     @default(0)
+
+  // Dados do lead. Todos opcionais: a sessão nasce antes do formulário.
+  name        String?
+  email       String?
+  phone       String?
+  document    String? // CPF ou CNPJ
+  companyName String?
+
+  // Preenchido quando a sessão converte e a conta passa a existir.
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+
+  // ─── Cobrança ──────────────────────────────────────────────────────────────
+  // Todos anuláveis: a sessão existe muito antes de haver cobrança.
+  //
+  // `paymentProvider` guarda QUEM processou (`simulado` hoje; `asaas`/`stripe`
+  // quando houver gateway real). Registrar isso na própria sessão é o que
+  // permite, depois, distinguir no relatório uma contratação simulada de uma
+  // paga de verdade — sem essa coluna, as duas ficariam indistinguíveis no
+  // histórico e a primeira conciliação financeira seria um pesadelo.
+  paymentMethod    String? // pix | credit_card
+  paymentProvider  String?
+  providerChargeId String?
+
+  // Atribuição de campanha (o site já captura UTM/click ids no `tracking.js`).
+  utmSource   String?
+  utmMedium   String?
+  utmCampaign String?
+  utmContent  String?
+  utmTerm     String?
+  referrer    String?
+
+  // Click ids e cookies de anúncio, para o evento do servidor casar com o do
+  // navegador (deduplicação Meta e conversão offline Google).
+  fbp    String?
+  fbc    String?
+  gclid  String?
+  gbraid String?
+  wbraid String?
+
+  /// `event_id` do Purchase: o mesmo no pixel e na API de Conversões.
+  metaEventId String?
+
+  // Contexto técnico, útil para antifraude e para depurar abandono.
+  userAgent String?
+  ipHash    String? // hash, não o IP cru — minimização de dado (LGPD)
+
+  /// Consentimento para receber novidades, marcado no passo de identificação.
+  ///
+  /// Fica na SESSÃO, e não direto no usuário, porque aqui o consentimento é
+  /// dado antes de a conta existir: quem paga só vira `User` no `paid.handler`.
+  /// Sem esta coluna a caixa marcada na tela não teria onde esperar até haver a
+  /// quem atribuí-la — e caixa de consentimento que não chega a lugar nenhum é
+  /// pior que não ter caixa, porque a pessoa acredita ter consentido e o
+  /// registro não existe.
+  ///
+  /// `false` por padrão, sempre. Marketing nunca nasce marcado.
+  marketingOptIn Boolean @default(false)
+
+  // Marcos do funil. Separados do `updatedAt` porque cada um responde a uma
+  // pergunta diferente do relatório.
+  startedAt    DateTime  @default(now())
+  lastSeenAt   DateTime  @default(now())
+  identifiedAt DateTime?
+  paymentAt    DateTime?
+  paidAt       DateTime?
+  abandonedAt  DateTime?
+
+  // Recuperação de abandono: quando o contato foi feito e por qual canal.
+  recoveryNotifiedAt DateTime?
+  recoveryChannel    String?
+
+  expiresAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  events CheckoutEvent[]
+
+  @@index([status, startedAt])
+  @@index([email])
+  @@index([organizationId])
+}
+
+model CheckoutEvent {
+  id        String          @id @default(uuid())
+  sessionId String
+  session   CheckoutSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  // view | plan_selected | screens_changed | identify | payment_selected |
+  // submit | paid | abandoned | recovered
+  type      String
+  metadata  String? // JSON livre
+  createdAt DateTime @default(now())
+
+  // ─── Entrega do evento (padrão outbox) ─────────────────────────────────────
+  //
+  // O checkout GRAVA o evento; ele não chama o app. Um despachante lê os
+  // pendentes e entrega aos tratadores do domínio (provisionar conta, e-mail,
+  // auditoria). Assim o checkout não precisa saber o que acontece depois, e
+  // somar um consumidor novo não mexe em quem produz.
+  //
+  // Gravar o evento na MESMA transação da mudança de estado é o ponto do
+  // padrão: ou os dois acontecem, ou nenhum. Entrega por HTTP no meio da
+  // transação perderia evento sempre que a rede falhasse.
+  //
+  // pending | delivered | failed | skipped
+  dispatchStatus    String    @default("pending")
+  dispatchAttempts  Int       @default(0)
+  dispatchedAt      DateTime?
+  // Quando tentar de novo (backoff). Nulo = pode tentar já.
+  nextAttemptAt     DateTime?
+  lastDispatchError String?
+
+  @@index([sessionId, createdAt])
+  @@index([type, createdAt])
+  // Fila do despachante: pega os pendentes na ordem em que aconteceram.
+  @@index([dispatchStatus, nextAttemptAt, createdAt])
+}
+
+// ─── Histórico de disponibilidade das telas ──────────────────────────────────
+//
+// O painel hoje só sabe se a tela está online AGORA. Sem histórico de
+// transição, não há como calcular disponibilidade num período — e foi por não
+// medir isso que a promessa de "SLA 99,9%" precisou sair da página de vendas.
+//
+// Com as transições registradas dá para calcular, por tela e por loja
+// (Sommerville, cap. 10-11):
+//   MTTF = média do tempo em que ficou online (Mean Time To Failure)
+//   MTTR = média do tempo em que ficou offline (Mean Time To Repair)
+//   Disponibilidade = MTTF / (MTTF + MTTR)
+//
+// Referência: `7 - EngenhariaSoftware/wiki/confiabilidade/dependabilidade.md`.
+
+model DeviceStatusChange {
+  id       String @id @default(uuid())
+  deviceId String
+  device   Device @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  // Desnormalizado de propósito: o relatório é sempre por loja e por período,
+  // e o device pode trocar de organização ou ser apagado depois.
+  organizationId String?
+
+  // online | offline
+  status    String
+  changedAt DateTime @default(now())
+
+  // Duração do estado ANTERIOR, em milissegundos, fechada nesta transição.
+  // Guardar aqui evita parear linhas a cada consulta de relatório — o cálculo
+  // de MTTF/MTTR vira uma agregação simples.
+  previousStatusMs BigInt?
+
+  @@index([deviceId, changedAt])
+  @@index([organizationId, changedAt])
+  @@index([status, changedAt])
+}
+
+/// Lead comercial vindo do site (formulário "Falar com a gente" / Enterprise).
+///
+/// Existe porque o formulário do site era um `setTimeout` que mostrava
+/// "Recebemos seu contato!" e não guardava nada em lugar nenhum: todo lead de
+/// plano sob consulta era perdido em silêncio.
+///
+/// Guarda o mínimo (LGPD): nome, contato e origem. O IP entra como hash, nunca
+/// cru — mesmo padrão de `CheckoutSession.ipHash`.
+model Lead {
+  id      String  @id @default(uuid())
+  name    String
+  email   String
+  company String?
+  phone   String?
+
+  /// Plano que a pessoa estava vendo quando pediu contato (ex.: `enterprise`).
+  planCode String?
+
+  /// Origem da visita, para medir o que traz lead qualificado.
+  utmSource   String?
+  utmMedium   String?
+  utmCampaign String?
+  referrer    String?
+
+  ipHash String?
+
+  /// new | contacted | qualified | discarded — atendimento comercial.
+  status String @default("new")
+
+  /// `true` quando o e-mail de aviso para o comercial saiu.
+  notifiedAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([status, createdAt])
+  @@index([email])
+}
+
+// ─── Backoffice do administrador (2026-09-09) ────────────────────────────────
+//
+// Tudo nesta seção existe para o `master` OPERAR a plataforma: ver quem paga,
+// quem vence, quem não renovou; agir sobre a assinatura de um cliente; e falar
+// com a base por e-mail. Ver `Planejamento/Plano-Backoffice-Admin-2026-09.md`.
+
+/// Concessão manual de recurso ou limite a UMA organização.
+///
+/// POR QUE EXISTE: até aqui, liberar uma feature para um cliente só era possível
+/// editando a linha `Plan` — que vale para TODOS os assinantes daquele plano.
+/// Na prática isso significava que "libera o Power BI para fechar a venda" dava
+/// Power BI de graça para a base inteira, e ninguém percebia porque não há tela
+/// que mostre o catálogo efetivo por cliente.
+///
+/// `expiresAt` é o que separa uma cortesia de um vazamento permanente de
+/// receita: concessão para fechar negociação nasce com data para morrer, e quem
+/// esquece de desfazer não é punido pela própria memória.
+model SubscriptionOverride {
+  subscriptionId String       @id
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  /// JSON array de feature flags SOMADAS às do plano. Mesmo formato de `Plan.features`.
+  extraFeatures String @default("[]")
+
+  /// Limites que SUBSTITUEM os do plano quando não nulos. `null` = usa o plano.
+  maxDevices Int?
+  maxUsers   Int?
+
+  /// Motivo. Obrigatório: é o que responde "por que este cliente tem isso" daqui a seis meses.
+  note String
+
+  /// Nulo = sem prazo. Preenchido = a concessão para de valer sozinha.
+  expiresAt DateTime?
+
+  setByUserId String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([expiresAt])
+}
+
+/// Uma mensagem de e-mail, enfileirada antes de sair.
+///
+/// POR QUE EXISTE: até 2026-09-09 todo envio era síncrono e direto ao pedido —
+/// provedor fora do ar significava e-mail PERDIDO, não adiado, e não havia onde
+/// verificar quando um cliente dissesse "não recebi o convite". As três lacunas
+/// que a wiki listava (sem fila, sem repetição, sem registro) são a mesma
+/// tabela.
+///
+/// `kind` existe para a fila poder PRIORIZAR: uma campanha de 500 destinatários
+/// nunca pode atrasar uma redefinição de senha.
+model EmailMessage {
+  id String @id @default(uuid())
+
+  toEmail        String
+  toUserId       String?
+  organizationId String?
+
+  /// transactional | automation | campaign
+  kind String @default("transactional")
+
+  /// Chave do template de automação (ex.: `renewal_d7`), quando houver.
+  templateKey String?
+  campaignId  String?
+
+  subject  String
+  htmlBody String
+
+  /// queued | sent | failed | bounced | suppressed
+  status String @default("queued")
+
+  attempts          Int       @default(0)
+  nextAttemptAt     DateTime?
+  lastError         String?
+  providerMessageId String?
+  sentAt            DateTime?
+
+  /// Chave de idempotência: impede o mesmo aviso sair duas vezes quando o job
+  /// roda de novo após um reinício. Ex.: `renewal_d3:<orgId>:<periodEnd>`.
+  dedupeKey String? @unique
+
+  createdAt DateTime @default(now())
+
+  @@index([status, nextAttemptAt])
+  @@index([organizationId, createdAt])
+  @@index([campaignId])
+}
+
+/// Disparo avulso ou agendado para um recorte da base ("novidades").
+model EmailCampaign {
+  id String @id @default(uuid())
+
+  name        String
+  subject     String
+  htmlBody    String
+  previewText String?
+
+  /// JSON: {"plans":["loja"],"statuses":["active"],"optInOnly":true}
+  audience String @default("{}")
+
+  /// draft | scheduled | sending | sent | canceled
+  status String @default("draft")
+
+  scheduledAt DateTime?
+  sentAt      DateTime?
+
+  createdByUserId String
+
+  queuedCount     Int @default(0)
+  sentCount       Int @default(0)
+  failedCount     Int @default(0)
+  suppressedCount Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, scheduledAt])
+}
+
+/// Um fluxo automático por gatilho, editável pelo `master`.
+///
+/// A chave é o gatilho (`renewal_d7`), não um id gerado: o job procura por nome
+/// e o catálogo é fechado. `offsetDays` fica aqui, e não no código, porque
+/// "avisar com 7 ou com 10 dias" é decisão comercial que muda sem deploy.
+model EmailAutomation {
+  key String @id
+
+  enabled Boolean @default(false)
+
+  subject  String
+  htmlBody String
+
+  /// Dias relativos ao gatilho. Negativo = antes (D-7 = -7).
+  offsetDays Int @default(0)
+
+  updatedAt DateTime @updatedAt
+}
+
+/// Contagem própria de visitas ao site, agregada por dia.
+///
+/// NÃO é analytics e não substitui o GA4: existe para o funil fechar numa fonte
+/// só. O GA4 SUBCONTA justamente quem recusou cookie (Consent Mode), então
+/// numerador (visitas) e denominador (leads/checkouts, que estão neste banco)
+/// viriam de origens diferentes — e a taxa de conversão sairia inflada.
+///
+/// Sem cookie, sem id de pessoa: só contagem por dia/caminho/origem.
+model SiteVisit {
+  id String @id @default(uuid())
+
+  day  DateTime @db.Date
+  path String
+
+  // String VAZIA, não `null`, quando a origem é desconhecida.
+  //
+  // Não é preciosismo: no Postgres duas linhas com `NULL` na mesma coluna não
+  // colidem num índice único (`NULL` ≠ `NULL`), então o upsert do contador
+  // criaria uma linha nova a cada visita direta em vez de somar na existente —
+  // e o total de visitas ficaria certo enquanto a lista por origem enchia de
+  // duplicatas. `NULLS NOT DISTINCT` resolveria no banco, mas o Prisma não
+  // expressa a cláusula: o `schema.prisma` divergiria do schema real, e a
+  // divergência só apareceria na próxima migração.
+  utmSource    String @default("")
+  utmMedium    String @default("")
+  utmCampaign  String @default("")
+  referrerHost String @default("")
+
+  views   Int @default(0)
+  uniques Int @default(0)
+
+  updatedAt DateTime @updatedAt
+
+  @@unique([day, path, utmSource, utmMedium, utmCampaign, referrerHost], name: "site_visit_bucket")
+  @@index([day])
+}
+
+/// Gasto de mídia por semana e canal. Entrada MANUAL.
+///
+/// Existe porque os indicadores 1 e 3 da estratégia (custo por conversa e CAC)
+/// são impossíveis sem o gasto, e não há integração com Meta/Google Ads. Sem
+/// linha na semana, o painel mostra "sem gasto informado" — nunca zero, que
+/// leria como "campanha de graça".
+model AdSpend {
+  id String @id @default(uuid())
+
+  /// Segunda-feira da semana medida.
+  weekStart DateTime @db.Date
+  /// meta | google | outros
+  channel    String
+  amountCents Int
+  note       String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([weekStart, channel])
+}

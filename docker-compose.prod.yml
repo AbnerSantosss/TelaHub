@@ -10,8 +10,22 @@
 #    então publicar porta é obrigatório. Usar as mesmas 3025/3027 da stack
 #    antiga faria o container novo nem subir ("port is already allocated"),
 #    por isso a faixa 40xx.
-#      4025 → painel   (rota: painel.proxserverabner.site)
+#      4025 → painel   (rotas: painel.proxserverabner.site E o host público da
+#                       API, porque o Nginx desta imagem faz proxy de /api/ e
+#                       /uploads/ para o backend — ver `apps/painel/nginx.conf`)
 #    O backend NÃO publica porta: o Nginx do frontend já faz proxy de /api.
+#    Consequência prática, e é a que decide o roteamento no Cloudflare: TODA
+#    chamada pública à API (inclusive `/api/health` e o webhook do Asaas)
+#    atravessa a porta 4025. Não existe rota que chegue ao backend por fora
+#    dele — ver o procedimento numerado em DEPLOY.md.
+#
+#    Os outros dois apps são stacks próprias, cada uma com seu compose:
+#      4038 → site      (rota: vendas.proxserverabner.site)  apps/site/docker-compose.prod.yml
+#      4039 → checkout  (rota: checkout.proxserverabner.site) apps/checkout/docker-compose.prod.yml
+#    O domínio do site é `vendas.` em todos os arquivos deste repositório. Já
+#    houve divergência (`sitetelahub.`) entre o compose e o workflow de build, e
+#    divergência de domínio vira link morto no bundle — que é lido em tempo de
+#    BUILD e não se corrige mexendo no Portainer.
 # 2. Banco NOVO E VAZIO. O volume é próprio desta stack, então nada da base
 #    antiga vem junto — é uma instalação limpa. A base antiga continua intacta
 #    no volume dela, servindo a stack antiga.
@@ -24,6 +38,22 @@
 #   ADMIN_EMAIL, ADMIN_PASSWORD                 (mín. 12 caracteres)
 # Como o banco nasce vazio, não existe admin: sem ADMIN_* o seed aborta e o
 # container não sobe. É proposital — ver `backend/prisma/seed-prod.js`.
+#
+# ─── Variáveis para COBRAR e MEDIR (novas em 2026-09-05) ─────────────────────
+#   PAYMENT_PROVIDER=asaas   ASAAS_ENV   ASAAS_API_KEY   ASAAS_WEBHOOK_TOKEN
+#   ASAAS_NFSE_ENABLED
+#   GTM_CONTAINER_ID   META_PIXEL_ID   META_CAPI_ACCESS_TOKEN
+#   META_CAPI_TEST_EVENT_CODE (vazio em produção)
+#   COMPANY_CNPJ   PRIVACY_CONTACT_EMAIL   SITE_PUBLIC_URL
+#
+# ARMADILHA QUE JÁ CUSTOU UM DEPLOY: variável cadastrada na stack do Portainer
+# NÃO chega ao container se o compose não a repassar na lista `environment`. Foi
+# assim que ADMIN_* e SMTP_* ficaram sem efeito. Se você adicionar uma variável
+# nova ao código, adicione a linha aqui NO MESMO commit.
+#
+# Os segredos (ASAAS_API_KEY, ASAAS_WEBHOOK_TOKEN, META_CAPI_ACCESS_TOKEN) estão
+# escritos como `${VAR}` SEM valor padrão, de propósito: valor padrão em segredo
+# é segredo no Git. O repositório, aliás, ainda é público — ver DEPLOY.md.
 
 services:
   db:
@@ -47,7 +77,7 @@ services:
 
   backend:
     build:
-      context: ./backend
+      context: ./apps/api
       dockerfile: Dockerfile
     restart: unless-stopped
     environment:
@@ -57,7 +87,10 @@ services:
       - PORT=3001
       # Origens EXATAS: a comparação é por igualdade, então barra final a mais
       # ou domínio parcial derruba a comunicação do painel com a API.
-      - CORS_ORIGINS=${CORS_ORIGINS:-https://painel.proxserverabner.site,https://checkout.proxserverabner.site}
+      # O SITE entra na lista desde que a LP passou a chamar `POST /api/leads`:
+      # sem a origem exata aqui, o formulário "Falar com a gente" é bloqueado
+      # pelo navegador e todo lead de plano sob consulta se perde em silêncio.
+      - CORS_ORIGINS=${CORS_ORIGINS:-https://painel.proxserverabner.site,https://checkout.proxserverabner.site,https://vendas.proxserverabner.site}
       - APP_URL=${APP_URL:-https://painel.proxserverabner.site}
       # Saltos até o backend: Cloudflare Tunnel → Nginx → backend = 2.
       # Com 1, o rate limit de login agrupa todos os visitantes num contador só.
@@ -78,15 +111,76 @@ services:
       - SMTP_SECURE=${SMTP_SECURE:-}
       - SMTP_FROM_EMAIL=${SMTP_FROM_EMAIL:-}
       - SMTP_FROM_NAME=${SMTP_FROM_NAME:-TelaHub}
+      # Pagamento. Declarados aqui porque variável NÃO declarada no compose não
+      # chega ao container por mais que se cadastre no Portainer — mesma
+      # armadilha que já deixou ADMIN_*/SMTP_* sem efeito nesta stack.
+      #
+      # Sem `ALLOW_SIMULATED_PAYMENTS=true`, o provedor simulado é RECUSADO em
+      # produção: as rotas de cobrança respondem 503 e o checkout cai no contato
+      # comercial. O backend NÃO morre — ele também serve o Player, e derrubá-lo
+      # por erro de pagamento apagaria as TVs dos clientes.
+      - PAYMENT_PROVIDER=${PAYMENT_PROVIDER:-simulado}
+      - ALLOW_SIMULATED_PAYMENTS=${ALLOW_SIMULATED_PAYMENTS:-}
+      #
+      # ── Gateway Asaas ────────────────────────────────────────────────────
+      # `sandbox` é o padrão de propósito: esquecer a variável e cobrar de
+      # verdade sem querer é pior do que esquecer e não cobrar. Ao virar a
+      # chave para `production`, confira que a ASAAS_API_KEY é a de produção —
+      # chave de sandbox em ambiente production devolve 401 em toda cobrança.
+      - ASAAS_ENV=${ASAAS_ENV:-sandbox}
+      # SEGREDOS: sem valor padrão, nunca chumbados aqui. Cadastre no Portainer.
+      - ASAAS_API_KEY=${ASAAS_API_KEY}
+      # Prova que o webhook veio do gateway. Sem ele, qualquer um confirma o
+      # próprio pagamento com um `curl` na URL pública.
+      - ASAAS_WEBHOOK_TOKEN=${ASAAS_WEBHOOK_TOKEN}
+      # `false` = nota fiscal emitida à mão no primeiro mês.
+      - ASAAS_NFSE_ENABLED=${ASAAS_NFSE_ENABLED:-false}
+      #
+      # ── Medição (Google/Meta) ────────────────────────────────────────────
+      # O Pixel é público (vai no HTML). O TOKEN da Conversions API não: ele
+      # autoriza enviar evento em nome da conta de anúncios e NUNCA pode ir
+      # para o frontend nem para o Git — por isso fica aqui, sem padrão.
+      - GTM_CONTAINER_ID=${GTM_CONTAINER_ID:-}
+      - META_PIXEL_ID=${META_PIXEL_ID:-}
+      - META_CAPI_ACCESS_TOKEN=${META_CAPI_ACCESS_TOKEN}
+      # VAZIO em produção. Preenchido, todo evento entra como "teste" no
+      # Gerenciador de Eventos e não otimiza campanha nenhuma.
+      - META_CAPI_TEST_EVENT_CODE=${META_CAPI_TEST_EVENT_CODE:-}
+      #
+      # ── Identificação do fornecedor e canal do titular (CDC/LGPD) ────────
+      # Aparecem no rodapé, nos Termos, na Privacidade e na nota fiscal.
+      - COMPANY_CNPJ=${COMPANY_CNPJ:-}
+      - PRIVACY_CONTACT_EMAIL=${PRIVACY_CONTACT_EMAIL:-}
+      # Fonte única do canonical/OG/JSON-LD. NUNCA telahub.com.br: aquele
+      # domínio é de terceiro desde 2025.
+      - SITE_PUBLIC_URL=${SITE_PUBLIC_URL:-https://vendas.proxserverabner.site}
     depends_on:
       db:
         condition: service_healthy
+    # Prova de vida do backend. Sem healthcheck, um container que subiu mas
+    # morreu no boot (migração falhando, JWT_SECRET curto) fica "running" e o
+    # sintoma que chega ao dono é 502 no navegador — foi exatamente o que
+    # aconteceu com a API em 05/09.
+    #
+    # `start_period` alto de propósito: antes do `npm start` o boot roda
+    # migração + três seeds. Com o padrão (0s) o container seria marcado
+    # unhealthy no meio da migração e reiniciado em laço, refazendo a migração
+    # do zero a cada volta.
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -q -O /dev/null http://127.0.0.1:3001/api/health || exit 1']
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 120s
     volumes:
       - uploads_data:/app/uploads
     networks:
       - telahub_net
     # Sequência de boot. A ORDEM IMPORTA:
-    #   1. db push         — aplica o schema
+    #   1. migrate-deploy  — aplica as MIGRAÇÕES versionadas (com baseline
+    #                        automático em banco que veio da era do `db push`).
+    #                        Trocado de `db push` em 2026-08-29: `db push`
+    #                        resolve divergência apagando dado.
     #   2. backfill-tenant — vincula registros pré-existentes a uma organização.
     #                        Num banco novo não faz nada; é idempotente e fica
     #                        aqui para o dia em que esta stack não for mais nova.
@@ -95,7 +189,7 @@ services:
     # Encadeado com `&&`: se o seed falhar por falta de ADMIN_PASSWORD, o
     # container NÃO sobe. É melhor do que subir sem admin.
     command: >
-      sh -c "npx prisma db push --skip-generate &&
+      sh -c "node prisma/migrate-deploy.js &&
       npx tsx prisma/backfill-tenant-scope.ts &&
       npx tsx prisma/seed-plans.ts &&
       node prisma/seed-prod.js &&
@@ -106,7 +200,7 @@ services:
       # painel.proxserverabner.site -> localhost:4025 (rota no túnel do host)
       - "4025:3025"
     build:
-      context: ./frontend
+      context: ./apps/painel
       dockerfile: Dockerfile
       args:
         # Rota relativa: o Nginx desta imagem faz o proxy de /api para o backend.
@@ -116,6 +210,15 @@ services:
         - VITE_SITE_URL=${VITE_SITE_URL:-https://vendas.proxserverabner.site}
         - VITE_CHECKOUT_URL=${VITE_CHECKOUT_URL:-https://checkout.proxserverabner.site}
     restart: unless-stopped
+    # O Nginx desta imagem tem `proxy_pass http://backend:3001`. Nginx resolve o
+    # upstream ao CARREGAR a configuração: se o container `backend` ainda não
+    # existir, ele morre com "host not found in upstream" e não tenta de novo.
+    # `service_started` (e não `service_healthy`) porque o painel deve ficar de
+    # pé mostrando erro de API enquanto a migração roda — melhor do que não
+    # existir página nenhuma.
+    depends_on:
+      backend:
+        condition: service_started
     networks:
       - telahub_net
 

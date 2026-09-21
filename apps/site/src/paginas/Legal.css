@@ -1,0 +1,241 @@
+/* ── Páginas legais (Termos e Privacidade) ───────────────────────────────────
+   Uma folha para as duas de propósito: são o MESMO documento em forma, e
+   duplicar o CSS é como uma delas ganha um espaçamento diferente da outra seis
+   meses depois — numa página que ninguém revisita porque "é só o jurídico".
+
+   ── A composição é decisão de leitura, não de estética ─────────────────────
+   Documento legal só protege se for lido. Por isso: medida de ~72 caracteres
+   (linha longa faz o olho perder a volta), corpo em 1.0625rem com entrelinha
+   1.7 (acima do corpo do site, porque aqui o texto é denso e sem imagem),
+   títulos numerados e âncoras em cada seção — para poder mandar "veja o item 6"
+   por e-mail e o link cair no lugar certo.
+
+   ⚠️ ARMADILHA: `src/index.css` pertence a outro dono. Nada de valor cru aqui;
+   só as variáveis (`--tinta`, `--marca`, `--borda`, `--raio-12`, `--gutter`).
+   -------------------------------------------------------------------------- */
+
+.legal {
+  padding: 96px var(--gutter);
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.legal__medida {
+  width: 100%;
+  max-width: 72ch;
+}
+
+.legal__cabeca {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-bottom: 28px;
+  border-bottom: 1px solid var(--borda);
+}
+
+/* A data de vigência fica ACIMA do texto, não escondida no rodapé do
+   documento: é o primeiro dado que alguém confere ao comparar duas versões, e
+   é o que o Meta e o Google olham ao revisar um anúncio. */
+.legal__vigencia {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  align-self: flex-start;
+  padding: 6px 12px;
+  border: 1px solid var(--borda-2);
+  border-radius: 999px;
+  background: var(--papel-2);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--tinta-2);
+}
+
+.legal__resumo {
+  color: var(--tinta-2);
+  line-height: 1.65;
+}
+
+/* Sumário: um documento legal sem índice é um documento que se lê pela busca
+   do navegador — ou seja, não se lê. */
+.legal__sumario {
+  margin: 0;
+  padding: 20px 24px;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-12);
+  background: var(--papel-2);
+}
+
+.legal__sumario h2 {
+  margin: 0 0 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--tinta-3);
+}
+
+.legal__sumario ol {
+  margin: 0;
+  padding-left: 1.25em;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 6px 24px;
+  color: var(--tinta-2);
+}
+
+.legal__sumario a {
+  color: var(--tinta-2);
+  text-decoration: none;
+}
+
+.legal__sumario a:hover {
+  color: var(--marca);
+  text-decoration: underline;
+}
+
+.legal__secao {
+  padding-top: 28px;
+  scroll-margin-top: 96px; /* a navbar é fixa: sem isso a âncora cai atrás dela */
+}
+
+.legal__secao h2 {
+  margin: 0 0 12px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--tinta);
+}
+
+.legal__secao h3 {
+  margin: 22px 0 8px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--tinta);
+}
+
+.legal__secao p,
+.legal__secao li {
+  font-size: 1.0625rem;
+  line-height: 1.7;
+  color: var(--tinta-2);
+}
+
+.legal__secao p {
+  margin: 0 0 14px;
+}
+
+.legal__secao ul,
+.legal__secao ol {
+  margin: 0 0 14px;
+  padding-left: 1.35em;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.legal__secao a {
+  color: var(--marca);
+}
+
+.legal__secao strong {
+  color: var(--tinta);
+}
+
+/* Marcador de campo que o dono precisa preencher. Ele é VISÍVEL de propósito:
+   um `[RAZÃO SOCIAL]` discreto some na revisão e vai ao ar assim — e um termo
+   de uso sem a razão social do fornecedor não identifica quem cobra (CDC art.
+   6º, III), que é justamente o que Meta e Google reprovam. */
+.legal__pendente {
+  display: inline-block;
+  padding: 1px 6px;
+  border: 1px dashed var(--warn);
+  border-radius: var(--raio-8);
+  background: rgba(163, 90, 6, 0.07);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.9em;
+  font-weight: 600;
+  color: var(--warn);
+  white-space: nowrap;
+}
+
+/* Bloco "o que ainda NÃO fazemos". Borda de aviso, não de erro: é honestidade
+   declarada, e ela protege — não é defeito escondido no meio do texto. */
+.legal__limites {
+  margin-top: 8px;
+  padding: 22px 24px;
+  border: 1px solid var(--borda-2);
+  border-left: 4px solid var(--warn);
+  border-radius: var(--raio-12);
+  background: var(--papel-2);
+}
+
+.legal__limites h3 {
+  margin-top: 0;
+}
+
+.legal__limites ul {
+  margin-bottom: 0;
+}
+
+/* Tabela de base legal: a forma mais curta de responder "por que vocês podem
+   fazer isso com o meu dado". Rola sozinha no celular — tabela que estoura a
+   largura empurra a página inteira para o lado. */
+.legal__tabela {
+  margin: 0 0 18px;
+  overflow-x: auto;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-12);
+}
+
+.legal__tabela table {
+  width: 100%;
+  min-width: 560px;
+  border-collapse: collapse;
+  font-size: 0.9375rem;
+}
+
+.legal__tabela th,
+.legal__tabela td {
+  padding: 12px 16px;
+  text-align: left;
+  vertical-align: top;
+  line-height: 1.5;
+  border-bottom: 1px solid var(--borda);
+  color: var(--tinta-2);
+}
+
+.legal__tabela th {
+  background: var(--papel-2);
+  font-weight: 700;
+  color: var(--tinta);
+}
+
+.legal__tabela tr:last-child td {
+  border-bottom: none;
+}
+
+.legal__rodape {
+  margin-top: 36px;
+  padding-top: 24px;
+  border-top: 1px solid var(--borda);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  align-items: center;
+}
+
+.legal__rodape a {
+  color: var(--marca);
+  font-weight: 600;
+}
+
+@media (max-width: 640px) {
+  .legal {
+    padding-top: 80px;
+  }
+
+  .legal__sumario ol {
+    grid-template-columns: 1fr;
+  }
+}

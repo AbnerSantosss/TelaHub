@@ -1,0 +1,43 @@
+{
+  "_origem": "snapshot de apps/api/prisma/seed-plans.ts (2026-08-31, empacotamento v2: anual como oferta principal)",
+  "currency": "BRL",
+  "freeScreens": 1,
+  "planos": [
+    {
+      "code": "gratis",
+      "name": "Grátis",
+      "precoPorTela": 0,
+      "precoAnualPorTela": null,
+      "minScreens": 1,
+      "quoteOnly": false,
+      "free": true
+    },
+    {
+      "code": "loja",
+      "name": "Loja",
+      "precoPorTela": 49,
+      "precoAnualPorTela": 39,
+      "minScreens": 1,
+      "quoteOnly": false,
+      "free": false
+    },
+    {
+      "code": "rede",
+      "name": "Rede",
+      "precoPorTela": 39,
+      "precoAnualPorTela": 32,
+      "minScreens": 5,
+      "quoteOnly": false,
+      "free": false
+    },
+    {
+      "code": "enterprise",
+      "name": "Enterprise",
+      "precoPorTela": null,
+      "precoAnualPorTela": null,
+      "minScreens": 1,
+      "quoteOnly": true,
+      "free": false
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+# Stack NOVA do checkout.
+#
+# Porta própria (4039): o túnel desta VPS roda no HOST e roteia para
+# `localhost:PORTA`, então publicar é obrigatório.
+#
+# O Nginx desta imagem faz `proxy_pass http://backend:3001` em `/api/`, então
+# este container PRECISA estar na mesma rede do backend do painel — é de lá que
+# vêm plano, sessão de checkout e organização (ADR-001: backend único).
+#
+# ATENÇÃO: com as duas stacks do painel na mesma rede (a antiga e a nova), o
+# nome `backend` fica ambíguo. Enquanto a antiga existir, confirme para qual
+# delas este checkout está resolvendo antes de considerá-lo validado.
+
+services:
+  checkout:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # Defina CONTACT_EMAIL nas variáveis da stack no Portainer.
+        VITE_CONTACT_EMAIL: ${CONTACT_EMAIL:-}
+    container_name: telahub-checkout-prod
+    restart: unless-stopped
+    ports:
+      # checkout.proxserverabner.site -> localhost:4039
+      - "4039:80"
+    networks:
+      - telahub_net
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+networks:
+  telahub_net:
+    external: true

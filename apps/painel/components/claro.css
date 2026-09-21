@@ -1,0 +1,233 @@
+/* ============================================================================
+   TEMA CLARO — fonte única dos tokens das telas claras do painel.
+
+   Antes, Auth.css (`--auth-*`), Assinatura.css (`--asn-*`), ConecteSuaTV.css
+   (`--ctv-*`) e PaywallModal.css (`--pwl-*`) carregavam, cada um, uma cópia à
+   mão do mesmo sistema visual da landing (papel/tinta/linha/marca, Geist).
+   Quatro cópias = quatro lugares para o azul divergir. Agora os valores moram
+   AQUI, como `--claro-*`, e os nomes antigos viraram ALIASES — o CSS de cada
+   tela continua lendo `var(--asn-marca)` etc. sem precisar ser reescrito.
+
+   ESCOPO: tudo preso às classes-raiz das telas claras (e a `.tema-claro`, para
+   uma tela nova que queira o mesmo tema). Nada vai para `:root`: o resto do
+   painel é escuro e não pode herdar papel branco.
+
+   Cada tela importa este arquivo ANTES do seu próprio CSS.
+   ============================================================================ */
+
+.tema-claro,
+.auth-page,
+.asn,
+.ctv,
+.pwl {
+  /* Papel */
+  --claro-papel: #ffffff;
+  --claro-papel-2: #f4f7fb;
+  --claro-papel-3: #e9eff7;
+  /* Tinta */
+  --claro-tinta: #0a1223;
+  --claro-tinta-2: #33415c;
+  --claro-tinta-3: #55637d;
+  /* Linha */
+  --claro-linha: #d5deea;
+  /* Marca — branco sobre #0369a1 = 5,9:1 (AA) */
+  --claro-marca: #0369a1;
+  --claro-marca-forte: #025584;
+  --claro-marca-fundo: #e6f2fa;
+  --claro-marca-rgb: 3, 105, 161;
+  /* Sinais */
+  --claro-ok: #0f7a5a;
+  --claro-atencao: #a35a06;
+  --claro-erro: #b3261e;
+  /* Raios */
+  --claro-r-sm: 8px;
+  --claro-r-md: 12px;
+  --claro-r-lg: 16px;
+  --claro-r-xl: 24px;
+  /* Tipografia */
+  --claro-fonte: 'Geist', 'Geist Variable', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  /* Versão clara da grade com brilho do painel escuro (index.css
+     `.th-grid-bg`). Estática de propósito: telas de formulário e de cobrança
+     não precisam de movimento de fundo. Use como PRIMEIRAS camadas de um
+     `background`: `background: var(--claro-grade), <cor ou gradiente>;` */
+  --claro-grade:
+    radial-gradient(ellipse 75% 45% at 50% -10%, rgba(var(--claro-marca-rgb), 0.09), transparent 70%),
+    linear-gradient(rgba(10, 18, 35, 0.045) 1px, transparent 1px) 0 0 / 40px 40px,
+    linear-gradient(90deg, rgba(10, 18, 35, 0.045) 1px, transparent 1px) 0 0 / 40px 40px;
+}
+
+/* ─── Aliases dos nomes antigos (reduz risco: nenhum seletor precisou mudar) ── */
+
+.auth-page {
+  --auth-papel: var(--claro-papel);
+  --auth-papel-2: var(--claro-papel-2);
+  --auth-papel-3: var(--claro-papel-3);
+  --auth-tinta: var(--claro-tinta);
+  --auth-tinta-2: var(--claro-tinta-2);
+  --auth-tinta-3: var(--claro-tinta-3);
+  --auth-linha: var(--claro-linha);
+  --auth-marca: var(--claro-marca);
+  --auth-marca-hover: var(--claro-marca-forte);
+  --auth-marca-fundo: var(--claro-marca-fundo);
+  --auth-ok: var(--claro-ok);
+  --auth-atencao: var(--claro-atencao);
+  --auth-erro: var(--claro-erro);
+  --auth-r-8: var(--claro-r-sm);
+  --auth-r-12: var(--claro-r-md);
+  --auth-r-16: var(--claro-r-lg);
+  --auth-r-24: var(--claro-r-xl);
+}
+
+.asn {
+  --asn-papel: var(--claro-papel);
+  --asn-papel-2: var(--claro-papel-2);
+  --asn-papel-3: var(--claro-papel-3);
+  --asn-tinta: var(--claro-tinta);
+  --asn-tinta-2: var(--claro-tinta-2);
+  --asn-tinta-3: var(--claro-tinta-3);
+  --asn-linha: var(--claro-linha);
+  --asn-marca: var(--claro-marca);
+  --asn-marca-forte: var(--claro-marca-forte);
+  --asn-marca-fundo: var(--claro-marca-fundo);
+  --asn-ok: var(--claro-ok);
+  --asn-atencao: var(--claro-atencao);
+  --asn-erro: var(--claro-erro);
+}
+
+.ctv {
+  --ctv-papel: var(--claro-papel);
+  --ctv-papel-2: var(--claro-papel-2);
+  --ctv-papel-3: var(--claro-papel-3);
+  --ctv-tinta: var(--claro-tinta);
+  --ctv-tinta-2: var(--claro-tinta-2);
+  --ctv-tinta-3: var(--claro-tinta-3);
+  --ctv-linha: var(--claro-linha);
+  --ctv-marca: var(--claro-marca);
+  --ctv-marca-forte: var(--claro-marca-forte);
+  --ctv-marca-fundo: var(--claro-marca-fundo);
+  --ctv-ok: var(--claro-ok);
+  --ctv-atencao: var(--claro-atencao);
+  --ctv-erro: var(--claro-erro);
+  --ctv-r-sm: var(--claro-r-sm);
+  --ctv-r-md: var(--claro-r-md);
+  --ctv-r-lg: var(--claro-r-lg);
+  --ctv-r-xl: var(--claro-r-xl);
+}
+
+.pwl {
+  --pwl-papel: var(--claro-papel);
+  --pwl-papel-2: var(--claro-papel-2);
+  --pwl-papel-3: var(--claro-papel-3);
+  --pwl-tinta: var(--claro-tinta);
+  --pwl-tinta-2: var(--claro-tinta-2);
+  --pwl-tinta-3: var(--claro-tinta-3);
+  --pwl-linha: var(--claro-linha);
+  --pwl-marca: var(--claro-marca);
+  --pwl-marca-forte: var(--claro-marca-forte);
+  --pwl-marca-fundo: var(--claro-marca-fundo);
+  --pwl-ok: var(--claro-ok);
+  --pwl-atencao: var(--claro-atencao);
+  --pwl-erro: var(--claro-erro);
+}
+
+/* ─── Botões: mesmo tratamento do painel escuro (press + shimmer) ────────── */
+
+/* Toque ≥ 44px em todos os botões das telas claras; `transform` entra na
+   transição para o press. (A transição de cor de cada tela continua valendo:
+   aqui só acrescentamos propriedades.) */
+.auth-botao,
+.asn-btn,
+.ctv-btn,
+.pwl-btn {
+  min-height: 44px;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  transition-property: background-color, border-color, color, box-shadow, transform;
+  transition-duration: 160ms;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* press perceptível */
+.auth-botao:active:not(:disabled),
+.asn-btn:active:not(:disabled),
+.ctv-btn:active:not(:disabled),
+.pwl-btn:active:not(:disabled) {
+  transform: translateY(1px) scale(0.97);
+}
+
+/* O botão principal ganha profundidade leve na cor da marca */
+.auth-botao-primario,
+.asn-btn-primario,
+.ctv-btn-primario,
+.pwl-btn-primario {
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.18) inset,
+    0 6px 16px -8px rgba(var(--claro-marca-rgb), 0.65);
+}
+
+/* Faixa de luz que atravessa o botão no hover (shimmer). Só nos que têm
+   fundo; o botão de texto do ConecteSuaTV fica de fora. */
+.auth-botao::after,
+.asn-btn::after,
+.ctv-btn:not(.ctv-btn-texto)::after,
+.pwl-btn::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 55%;
+  z-index: -1;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.28), transparent);
+  transform: translateX(-130%) skewX(-12deg);
+  pointer-events: none;
+}
+/* nos botões brancos a luz precisa ser azulada para aparecer */
+.auth-botao-secundario::after,
+.asn-btn-secundario::after,
+.asn-btn-cancelar::after,
+.ctv-btn-secundario::after,
+.pwl-btn-secundario::after {
+  background: linear-gradient(100deg, transparent, rgba(var(--claro-marca-rgb), 0.10), transparent);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .auth-botao:hover:not(:disabled)::after,
+  .asn-btn:hover:not(:disabled)::after,
+  .ctv-btn:not(.ctv-btn-texto):hover:not(:disabled)::after,
+  .pwl-btn:hover:not(:disabled)::after {
+    transform: translateX(250%) skewX(-12deg);
+    transition: transform 700ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .auth-botao-primario:hover:not(:disabled),
+  .asn-btn-primario:hover:not(:disabled),
+  .ctv-btn-primario:hover:not(:disabled),
+  .pwl-btn-primario:hover:not(:disabled) {
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.18) inset,
+      0 10px 22px -8px rgba(var(--claro-marca-rgb), 0.75);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-botao,
+  .asn-btn,
+  .ctv-btn,
+  .pwl-btn {
+    transition-property: background-color, border-color, color;
+  }
+  .auth-botao:active:not(:disabled),
+  .asn-btn:active:not(:disabled),
+  .ctv-btn:active:not(:disabled),
+  .pwl-btn:active:not(:disabled) {
+    transform: none;
+  }
+  .auth-botao::after,
+  .asn-btn::after,
+  .ctv-btn::after,
+  .pwl-btn::after {
+    display: none;
+  }
+}

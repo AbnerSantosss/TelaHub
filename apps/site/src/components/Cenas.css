@@ -1,0 +1,124 @@
+/* Estilo da seção CENAS. Só as classes com prefixo `.cena` moram aqui — os
+   tokens, `.secao`, `.grid-3`, `.h2` e `.lead` vêm de src/index.css.
+
+   A borda dos cartões é translúcida (--noite-borda): sobre o fundo `--noite`
+   uma borda opaca vira um traço cinza duro. Era um rgba solto repetido aqui;
+   virou token em index.css junto com o redesign. */
+
+.cenas {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+/* Redundante se `.secao--noite` já clarear o texto — mas garante os valores do
+   mockup mesmo que a primitiva mude, e fica preso ao escopo da seção. */
+.cenas .h2 {
+  color: var(--papel);
+}
+
+.cenas .lead {
+  color: var(--noite-texto);
+}
+
+/* A lista é semântica (são seis casos irmãos); o grid vem de `.grid-3`. */
+.cenas__lista {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Spotlight: a mesma luz que segue o mouse nos `.card` claros, aqui em --luz
+   (o azul da marca some no escuro). --mx/--my vêm do listener delegado de
+   src/lib/spotlight.js; só existe com mouse e sem movimento reduzido. */
+.cena {
+  --mx: 50%;
+  --my: 0%;
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 24px;
+  border: 1px solid var(--noite-borda);
+  border-radius: var(--raio-16);
+  background: var(--noite-2);
+  transition: border-color 0.2s ease;
+}
+
+.cena::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background: radial-gradient(360px circle at var(--mx) var(--my), var(--brilho-luz), transparent 60%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cena:hover {
+    border-color: var(--noite-borda-2);
+  }
+
+  .cena:hover::before {
+    opacity: 1;
+  }
+}
+
+.cena__setor {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--luz);
+}
+
+/* A fala de hoje: a queixa, na voz do cliente. */
+.cena__hoje {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--noite-texto);
+  text-wrap: pretty;
+}
+
+/* O que muda. A linha de cima separa as duas falas sem precisar de rótulo. */
+.cena__vira {
+  margin: 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--noite-borda);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.55;
+  color: var(--noite-titulo);
+  text-wrap: pretty;
+}
+
+/* No celular o mockup aperta o cartão: menos respiro e raio menor. O texto
+   fica em 16px (era 14px): corpo de texto abaixo de 16px no celular está fora
+   da regra do site. O conteúdo continua inteiro. */
+@media (max-width: 640px) {
+  .cenas {
+    gap: 16px;
+  }
+
+  .cena {
+    gap: 8px;
+    padding: 16px;
+    border-radius: var(--raio-12);
+  }
+
+  .cena__setor {
+    font-size: 12px;
+  }
+
+  .cena__hoje,
+  .cena__vira {
+    font-size: 16px;
+    line-height: 1.5;
+  }
+}

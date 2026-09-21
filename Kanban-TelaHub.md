@@ -23,6 +23,82 @@ kanban-plugin: board
 	- 🎯 Obrigações legais para faturar SaaS por assinatura no Brasil: NFS-e/ISS (LC 116/2003), direito de arrependimento (CDC art. 49) e LGPD na posição de operador. Base: deep research de mercado/legal de 2026-07-25.
 - [ ] **EPIC N — Confiabilidade do Player** #epic/player
 	- 🎯 A pesquisa aponta "confiabilidade e operação offline" como um dos **3 pilares de decisão de compra** do pequeno varejista brasileiro (ao lado de facilidade de uso e baixo custo de hardware). Lacuna de produto, não de marketing.
+- [ ] **EPIC O — Funil de Compra Ponta a Ponta (Pagamento Simulado)** #epic/comercial
+	- 🎯 Fechar o caminho **LP → checkout → pagamento → acesso liberado por e-mail** com um **provedor de pagamento simulado**, para exercitar e demonstrar o funil inteiro antes de existir gateway real. Demanda do dono em 2026-07-31.
+	- 📌 Por que **não** coube na **EPIC H (Cobrança e Planos)**: H trata de **dinheiro real** — catálogo e preço (US-022), quota e inadimplência (US-023), gateway (US-029), fatura pro rata (US-041/042), tarifa única (US-043). Aqui não entra dinheiro nenhum: o objeto é a **costura (seam) de provedor de pagamento** e o fechamento do funil com uma implementação falsa e descartável. Também não coube na **EPIC I (Auto-atendimento e Onboarding)**, que cobre o auto-serviço do plano `gratis` (signup): aqui a conta **nasce de uma compra**, por outro caminho de código (`checkout-handlers/paid.handler.ts`), não pelo `POST /api/signup`.
+	- 📌 Estado do código levantado antes da quebra: o provisionamento pós-pagamento **já existe e é idempotente** (`backend/src/services/checkout-handlers/paid.handler.ts` cria Organization → User → Subscription e dispara e-mail). **Ninguém emite o evento `paid`.** `checkout.service.ts::submitSession` para em `payment_pending` com `TODO(gateway)` descrevendo o desenho pretendido (cobrança → confirmação → `status:'paid'` + `CheckoutEvent{type:'paid'}` na MESMA transação → outbox chama o tratador). Esta épica **implementa esse desenho com um provedor falso**, deixando a US-029 apenas trocar a implementação.
+	- ⚠️ **Risco central da épica**: "pagamento simulado que libera acesso real" é **exatamente** o que as travas atuais existem para impedir — `POST /api/billing/checkout` responde **501 de propósito**, com teste que fixa o comportamento "para impedir que alguém destrave o fluxo simulando pagamento aprovado", e `submitSession` documenta que conceder plano pago sem pagamento confirmado "entrega de graça o que deveria ser cobrado". Destravar isso **sem** a guarda de ambiente da US-052 e o marcador da US-058 transforma o endpoint em fábrica pública de contas pagas grátis (e de e-mails com credenciais saindo pelo SMTP da plataforma).
+	- 📌 Vale a **ADR-001** (registrada em `Checkout/README.md` e em [[deploy-e-infraestrutura]] §1.1): **os três repositórios continuam separados**, por ciclos de deploy e perfis de hospedagem diferentes. As US desta épica atravessam repositórios; o quadro é um só, a entrega não.
+	- 📌 Ordem de puxada pretendida: **US-052** (costura) → **US-053** (evento `paid`) → **US-058** (marcação de simulado) → **US-054** (e-mail) → **US-056** (passo de pagamento) → **US-055** (LP) → **US-057** (pré-preenchimento). Total estimado: **29 pontos**.
+- [ ] #epic/comercial **US-053** — Como dono de produto, quero que a confirmação de pagamento grave `paid` e emita o evento `paid` na mesma transação, para que o provisionamento da conta e o pagamento nunca se separem.
+	- 📌 **É esta US que destrava o funil.** O `paid.handler.ts` já está pronto e é idempotente; falta o emissor. O desenho está escrito no `TODO(gateway)` de `checkout.service.ts` e no cabeçalho do próprio tratador: rota de confirmação **sem `authMiddleware`, com validação de assinatura do provedor**, que numa única transação marca a sessão `paid` + `paidAt` e grava `CheckoutEvent { type: 'paid' }`; o **outbox/despachante** chama o tratador. A rota **nunca** chama o tratador direto.
+	- 📌 **Estimativa: 8 pontos** (Fibonacci) · **Prioridade: Must** · Depende da **US-052**.
+	- ⚠️ **Mudança de trava de segurança, não refactor**: o teste que fixa o **501** de `POST /api/billing/checkout` (`backend/src/routes/billing.routes.ts`) existe para impedir que alguém simule pagamento aprovado. Alterá-lo é decisão explícita e registrada — se for alterado em silêncio, repete a classe de falha da US-026 (claim removido que voltou duas vezes sem rastro).
+	- ⚠️ **Incerteza alta para 8 pontos** (transação + outbox + idempotência + reversão de uma trava com teste). Se no refinamento não couber com folga, **quebrar antes de entrar em desenvolvimento** (Cone da Incerteza) — candidato natural de corte: separar "rota de confirmação" de "despacho pelo outbox".
+	- **DADO** uma sessão de checkout em `payment_pending`, **QUANDO** o provedor confirma o pagamento, **ENTÃO** a sessão deve ficar `paid` com `paidAt` e um `CheckoutEvent { type: 'paid' }` deve ser gravado **na mesma transação**, nunca em duas escritas separadas.
+	- **DADO** o evento `paid` gravado, **QUANDO** o despachante o processa, **ENTÃO** `paid.handler.ts` deve criar Organization → User → Subscription e vincular `organizationId` à sessão.
+	- **DADO** a mesma confirmação reentregue N vezes (o provedor reentrega por projeto), **QUANDO** ela é processada, **ENTÃO** o resultado deve ser idêntico ao de uma entrega única — sem segunda organização, sem segunda assinatura, sem segundo e-mail.
+	- **DADO** uma confirmação com assinatura inválida ou ausente, **QUANDO** ela chega à rota, **ENTÃO** deve ser rejeitada sem tocar a sessão e sem gravar evento algum.
+	- **DADO** o comportamento **501** hoje fixado por teste, **QUANDO** ele for substituído, **ENTÃO** a substituição deve estar registrada no card e o teste deve passar a provar que **fora do modo simulado o endpoint continua recusando** confirmar pagamento.
+	- [ ] Criar a rota de confirmação sem `authMiddleware` e com validação de assinatura do provedor
+	- [ ] Gravar `status:'paid'` + `paidAt` + `CheckoutEvent{type:'paid'}` numa única transação
+	- [ ] Ligar o despacho do evento ao `paid.handler.ts` pelo outbox (sem chamada direta)
+	- [ ] Substituir o 501 de `POST /api/billing/checkout` mantendo a recusa fora do modo simulado
+	- [ ] Testes: provisionamento, reentrega idempotente, assinatura inválida e recusa fora do modo simulado
+- [ ] #epic/comercial **US-058** — Como responsável pelo produto, quero que toda conta nascida de pagamento simulado fique marcada e visível como tal, para não confundir demonstração com receita nem prometer contratação que não cobra.
+	- 📌 **Risco de receita fantasma**: a US-053 cria `Subscription { status: 'active' }` **sem dinheiro entrar**. Sem marcador, essas contas contaminam o smoke test de conversão (US-032), o Sean Ellis Test (US-031), a fatura por tela (US-041/US-042) e a emissão de NFS-e (US-036) — que passaria a emitir nota contra cliente que nunca pagou.
+	- 📌 **Risco de publicidade enganosa (CDC art. 37)**, mesma família da US-026: com pagamento simulado a página **prometeria contratação self-service que não cobra**. Se o modo simulado vazar para o site público sem aviso, o problema deixa de ser técnico.
+	- 📌 **Estimativa: 2 pontos** (Fibonacci) · **Prioridade: Must** · Anda **junto** da US-053, não depois.
+	- **DADO** um provisionamento originado do provedor simulado, **QUANDO** a conta é criada, **ENTÃO** a sessão/organização deve ficar marcada como simulada e o `AuditLog` deve distinguir `simulated` de pagamento real.
+	- **DADO** o checkout rodando com o provedor simulado, **QUANDO** o visitante abre qualquer passo, **ENTÃO** deve haver aviso visível de "ambiente de demonstração — nenhuma cobrança será feita", não escondido em rodapé.
+	- **DADO** um relatório ou métrica comercial, **QUANDO** contas simuladas existem na base, **ENTÃO** deve ser possível excluí-las da contagem por consulta, sem apagar o registro.
+	- [ ] Marcar origem simulada na sessão de checkout e na organização provisionada
+	- [ ] Distinguir `simulated` do pagamento real no `AuditLog`
+	- [ ] Exibir aviso de ambiente de demonstração em todos os passos do checkout simulado
+- [ ] #epic/comercial **US-054** — Como comprador que acabou de pagar, quero receber um e-mail próprio de liberação de acesso com minhas credenciais, para entrar na plataforma sem falar com ninguém.
+	- 📌 Hoje o `paid.handler.ts` reaproveita `sendInviteEmail()` — o **mesmo e-mail do convite de usuário do painel**. A demanda do dono é um **template de liberação de acesso** para quem comprou: o que foi contratado, quantas telas, como entrar, primeiro passo.
+	- 📌 O envio é **não bloqueante por decisão de projeto**: SMTP fora do ar não pode desfazer provisionamento já gravado nem devolver o evento para a fila. Manter assim.
+	- 📌 **Estimativa: 3 pontos** (Fibonacci) · **Prioridade: Must** · Depende da **US-053**; depende também do SMTP de plataforma da **US-020** (hoje em Em Desenvolvimento, sem review).
+	- ⚠️ A senha temporária é enviada **em texto claro por e-mail**. Isso é herdado do fluxo de convite, mas com o funil de compra aberto passa a valer para todo cliente pagante — avaliar troca obrigatória no primeiro login durante o code review.
+	- **DADO** um provisionamento concluído pelo evento `paid`, **QUANDO** o e-mail é disparado, **ENTÃO** o comprador deve receber um template de liberação de acesso com plano contratado, número de telas, link de acesso e credencial de primeiro login.
+	- **DADO** falha no envio do e-mail, **QUANDO** o provisionamento já foi gravado, **ENTÃO** a conta deve permanecer criada, o erro registrado e o evento **não** deve voltar para a fila.
+	- **DADO** a mesma confirmação reentregue, **QUANDO** o provisionamento já existia, **ENTÃO** o e-mail de liberação **não** deve ser enviado de novo.
+	- [ ] Criar o template de liberação de acesso separado do convite de usuário
+	- [ ] Preencher o template com plano, telas contratadas e primeiro passo
+	- [ ] Testes: envio no provisionamento novo, silêncio na reentrega e falha de SMTP sem reverter a conta
+- [ ] #epic/comercial **US-056** — Como comprador no checkout, quero escolher Pix ou cartão e concluir a compra, para chegar ao acesso liberado sem sair da tela.
+	- 📌 `PaymentStep.tsx` (`Checkout/src/checkout/`) **já tem os três cards desenhados e desativados**, com comentário no próprio arquivo dizendo "quando a cobrança entrar, é ligar cada card — não redesenhar o passo". Esta US **liga os cards**, não refaz o passo. Boleto fica fora do escopo simulado (a US-029 registra que boleto e Pix recorrente são essenciais no B2B brasileiro — decisão de gateway real).
+	- 📌 **Estimativa: 5 pontos** (Fibonacci) · **Prioridade: Must** · Depende da **US-053** (é ela quem confirma) e da **US-052**.
+	- ⚠️ *Repositório separado*: `Checkout/` **não está nesta árvore** (mesmo achado das US-047/US-048). Vale a **ADR-001** — a entrega tem ciclo de deploy próprio. Confirmar o repositório antes de executar.
+	- **DADO** o passo de pagamento com o provedor simulado ativo, **QUANDO** o comprador escolhe Pix, **ENTÃO** o card deve ficar habilitado, apresentar o meio escolhido e permitir concluir a compra.
+	- **DADO** o comprador escolhendo cartão, **QUANDO** ele preenche os dados e confirma, **ENTÃO** a sessão deve seguir para confirmação de pagamento pelo mesmo caminho do Pix.
+	- **DADO** a confirmação aceita, **QUANDO** o passo conclui, **ENTÃO** deve haver tela de sucesso dizendo que o acesso foi liberado e que as credenciais foram enviadas por e-mail.
+	- **DADO** uma confirmação recusada pelo provedor simulado, **QUANDO** o comprador tenta concluir, **ENTÃO** deve ver erro claro e poder tentar de novo, sem sessão duplicada.
+	- [ ] Habilitar os cards de Pix e cartão ligados ao provedor configurado (sem redesenhar o passo)
+	- [ ] Encadear a conclusão do passo com a confirmação da US-053
+	- [ ] Criar tela de sucesso com aviso de credenciais enviadas por e-mail
+	- [ ] Tratar recusa do provedor sem duplicar a sessão
+- [ ] #epic/comercial **US-055** — Como visitante da landing, quero clicar no plano que me interessa e cair no checkout já com esse plano selecionado, para não ter que escolher de novo e desistir no caminho.
+	- 📌 A LP (`Site/site-telas`) **já tem a grade de planos e o simulador de preço** e já leva ao checkout. O que falta é o **deep link com plano e quantidade de telas pré-selecionados**, para o passo de plano do checkout abrir coerente com o que foi clicado.
+	- 📌 **Estimativa: 3 pontos** (Fibonacci) · **Prioridade: Must** · Independente das demais desta épica (pode ser entregue antes do pagamento existir).
+	- ⚠️ **Conflito direto com a US-047**, que prevê o paliativo oposto — desviar os CTAs pagos para o canal comercial enquanto não há checkout. Se esta US entrar primeiro, a US-047 precisa ser reavaliada (vira "reverter o paliativo"); se a US-047 entrar primeiro, esta a desfaz. **Não executar as duas em paralelo.**
+	- ⚠️ *Repositório separado*: `Site/site-telas` **não está nesta árvore** (mesmo achado das US-047/US-048). Confirmar antes de executar.
+	- **DADO** a grade de planos da landing, **QUANDO** o visitante clica no CTA de um plano pago, **ENTÃO** ele deve chegar ao checkout com aquele plano já selecionado e a quantidade de telas do simulador preservada.
+	- **DADO** um link de checkout sem plano ou com plano inexistente, **QUANDO** a página abre, **ENTÃO** o checkout deve iniciar no passo de escolha de plano, sem erro e sem tela em branco.
+	- **DADO** o preço exibido na landing, **QUANDO** o checkout abre, **ENTÃO** o valor apresentado deve bater com o catálogo da US-022, e não com um número fixo na página.
+	- [ ] Levar plano e quantidade de telas da landing ao checkout por parâmetro de URL
+	- [ ] Pré-selecionar o plano no passo inicial do checkout com fallback seguro
+	- [ ] Garantir que o preço exibido venha do catálogo, não de constante duplicada
+- [ ] #epic/comercial **US-057** — Como quem testa ou demonstra o produto, quero um botão de pré-preenchimento com dados aleatórios válidos em cada passo do checkout, para percorrer o funil inteiro sem digitar nada.
+	- 📌 Pedido explícito do dono: botão de pré-preenchimento **no passo de identificação e também no de pagamento** (cartão/Pix). Vale para `IdentificationStep` e `PaymentStep`, orquestrados por `useCheckout.ts`.
+	- 📌 **Estimativa: 3 pontos** (Fibonacci) · **Prioridade: Should** — é conveniência de teste, não caminho do comprador. Depende da **US-052** (só aparece quando o provedor simulado está ativo).
+	- ⚠️ O botão **não pode existir em produção**: um gerador de dados no checkout público é convite a lixo na base de leads e a abuso do envio de e-mail. Amarrar à mesma variável de ambiente da US-052, não a um `if` solto.
+	- **DADO** o checkout com o provedor simulado ativo, **QUANDO** o comprador aciona "pré-preenchimento" no passo de identificação, **ENTÃO** nome, e-mail, empresa e telefone devem ser preenchidos com dados aleatórios que **passam na validação real** do formulário.
+	- **DADO** o passo de pagamento, **QUANDO** o botão é acionado, **ENTÃO** os dados de cartão (ou a escolha de Pix) devem ser preenchidos com valores fictícios aceitos pelo provedor simulado.
+	- **DADO** o provedor real configurado (ou produção), **QUANDO** qualquer passo do checkout é aberto, **ENTÃO** o botão de pré-preenchimento **não deve existir no DOM** — não basta estar escondido por CSS.
+	- [ ] Gerar dados aleatórios válidos para identificação e para pagamento
+	- [ ] Condicionar a renderização do botão à mesma flag de ambiente da US-052
+	- [ ] Teste provando ausência do botão no build com provedor real
 - [ ] #epic/comercial **US-029** — Como dono de produto, quero integração com gateway de pagamento (Asaas ou Iugu), para converter assinatura em receita de fato.
 	- 📌 Hoje `POST /api/billing/checkout` responde **501** honesto: existe plano e assinatura, não existe cobrança. **Sem esta US não há receita** — é o que separa "tem plano" de "tem cliente pagando".
 	- 📌 Decisão do dono: **adiado para um segundo ciclo** (mantido no Backlog de propósito, não é esquecimento).
@@ -203,8 +279,38 @@ kanban-plugin: board
 	- [ ] Documentar que auditoria de copy se valida no artefato, não no fonte
 
 
-## Em Análise (4 · 3 bloqueadas 🚧)
+## Em Análise (4 · 6 em uso — ACIMA DO LIMITE · 5 bloqueadas 🚧)
 
+- [ ] #epic/infra **INFRA-M02** — Como dono, quero as três stacks do Portainer apontando para o monorepo, para que o deploy volte a acompanhar o código.
+	- **DADO** o monorepo em `main`, **QUANDO** um push toca `apps/checkout`, **ENTÃO** a stack do checkout é recriada com a imagem nova.
+	- [ ] Cadastrar `PORTAINER_WEBHOOK_CHECKOUT` no repositório `TelaHub` (copiar do repo `TelaHub-Checkout`)
+	- [ ] Cadastrar `PORTAINER_WEBHOOK_SITE` no repositório `TelaHub` (copiar do repo `site-telas`)
+	- [ ] Repontar a stack do site para `apps/site/docker-compose.prod.yml` e **confirmar no ar**
+	- [ ] Repontar a stack do checkout para `apps/checkout/docker-compose.prod.yml` e **confirmar no ar**
+	- [ ] Repontar a stack do painel (os `context:` viraram `./apps/...`) e **confirmar no ar**
+	- [ ] Só depois das três validadas: arquivar os repositórios antigos (**não apagar** — são o rollback)
+	- 🚧 *Bloqueia-se sozinha em acesso manual: exige GitHub Settings e Portainer, fora do alcance de qualquer sessão de código. Uma stack por vez — não há staging, e repontar as três juntas derruba tudo se o caminho do compose estiver errado.*
+
+- [ ] #epic/infra **INFRA-M03** — Como dono, quero saber qual domínio do painel é o correto, para que o link do site não leve a lugar nenhum.
+	- **DADO** o funil do site, **QUANDO** o visitante clica para entrar no painel, **ENTÃO** ele chega ao painel real.
+	- [ ] Decidir entre `telahub.proxserverabner.site` (valor do workflow) e `painel.proxserverabner.site` (valor do `docker-compose.prod.yml`)
+	- [ ] Alinhar `VITE_APP_URL` nos dois lugares e rebuildar o site (é variável de BUILD)
+	- 🚧 *Divergência encontrada na migração e mantida como estava de propósito: trocar valor de produção no escuro é pior que registrar a dúvida. Um dos dois está errado hoje.*
+
+- [ ] #epic/comercial **US-052** — Como responsável técnico, quero um contrato de provedor de pagamento com uma implementação simulada selecionável por ambiente, para exercitar o funil de compra inteiro sem entregar acesso pago de graça em produção.
+	- 📌 **Puxada para "Em Análise" por ser a única vaga livre da coluna (4/4 depois desta) e por ser a costura que destrava toda a EPIC O.** As outras três US desta coluna estão 🚧 bloqueadas por ação manual fora do ambiente remoto, então a capacidade real de análise estava ociosa. **Nada entrou em "Em Desenvolvimento"**: a coluna tem 8 cards com código pronto e não revisado, e Code Review está em 4/4.
+	- 📌 Cumpre a **DoR**: critérios em Gherkin escritos, dependências conhecidas (nenhuma — é a base das demais) e tamanho estimável.
+	- 📌 **Estimativa: 5 pontos** (Fibonacci) · **Prioridade: Must** · Estimativa **individual do orquestrador**, por julgamento de especialista — **não é Planning Poker com time**. Vale a lacuna de DoR já registrada nas Políticas do Quadro.
+	- 📌 O desenho já está escrito no código: `checkout.service.ts::submitSession` tem `TODO(gateway)` marcando exatamente onde a criação da cobrança entra, e `paid.handler.ts` documenta o caminho de volta. Esta US cria a **interface**; a US-029 apenas troca a implementação por Asaas/Iugu, sem mexer no funil.
+	- ⚠️ **Esta é a US que carrega o risco de segurança da épica.** Sem a guarda de ambiente, "pagamento simulado" vira conta paga grátis para qualquer visitante — e um caminho aberto para disparar e-mails com credenciais pelo SMTP da plataforma. A guarda deve ser **de boot e fatal**, no mesmo padrão já adotado no `JWT_SECRET` (US-051) e nas variáveis de R2 (US-001): o processo aborta, não degrada em silêncio.
+	- **DADO** a aplicação subindo com `NODE_ENV=production` e o provedor simulado configurado, **QUANDO** o boot ocorre, **ENTÃO** o processo deve **abortar** com mensagem clara — jamais subir com pagamento simulado em produção.
+	- **DADO** um ambiente de desenvolvimento/homologação, **QUANDO** o provedor simulado está selecionado por variável de ambiente, **ENTÃO** a criação de cobrança deve devolver uma cobrança falsa consistente (id, meio de pagamento e valor) sem chamar rede externa.
+	- **DADO** o contrato de provedor definido, **QUANDO** a US-029 integrar um gateway real, **ENTÃO** deve bastar uma nova implementação do mesmo contrato, sem alterar `checkout.service.ts` nem `paid.handler.ts`.
+	- **DADO** nenhum provedor configurado, **QUANDO** o checkout é submetido, **ENTÃO** o comportamento atual deve ser preservado: termina em `payment_pending`, sem `Subscription` criada.
+	- [ ] Definir o contrato de provedor de pagamento (criar cobrança, consultar status, validar confirmação)
+	- [ ] Implementar o provedor simulado e a seleção por variável de ambiente
+	- [ ] Guarda de boot fatal impedindo provedor simulado com `NODE_ENV=production`
+	- [ ] Testes: boot abortado em produção, cobrança falsa em dev e comportamento inalterado sem provedor
 - [ ] #epic/armazenamento **US-002** — Como admin, quero migrar os arquivos já enviados via disco local para o R2, para não perder mídia existente ao ativar o modo R2.
 	- **DADO** arquivos existentes em `uploads/` local, **QUANDO** o script de migração roda, **ENTÃO** todos os arquivos devem aparecer no bucket R2 com os mesmos nomes/paths.
 	- **DADO** a migração concluída, **QUANDO** um `Display` referencia uma mídia antiga, **ENTÃO** a URL deve resolver corretamente pelo R2.
@@ -357,7 +463,20 @@ kanban-plugin: board
 
 
 
-## Concluído (13)
+## Concluído (14)
+
+- [x] #epic/infra **US-M01** — Como mantenedor, quero os três repositórios do TelaHub num monorepo, para que uma mudança que atravessa apps caiba num PR só e o preço anunciado não possa divergir do cobrado.
+	- **DADO** os apps em `apps/api`, `apps/painel`, `apps/checkout` e `apps/site`, **QUANDO** o CI roda, **ENTÃO** cada app é lintado e buildado no seu próprio job.
+	- **DADO** um commit que toca só `apps/site`, **QUANDO** o `build-and-push` roda, **ENTÃO** só a imagem do site é publicada e só o webhook da stack do site é disparado.
+	- **DADO** a API no ar, **QUANDO** o site é buildado, **ENTÃO** os preços do HTML pré-renderizado vêm de `GET /api/plans`.
+	- [x] Importar `TelaHub-Checkout` e `site-telas` via `git subtree`, preservando histórico (10 + 36 commits)
+	- [x] Mover `backend/` → `apps/api` e `frontend/` → `apps/painel`
+	- [x] Corrigir caminhos (composes, `ci.yml`, `setup-dev.js`, `check-env.js`, `.gitignore`, `.dockerignore`)
+	- [x] Unificar o CI num workflow com filtro por pasta e webhook por stack
+	- [x] Eliminar os preços escritos à mão do site (`fetch-plans.mjs` + `src/data/catalogo.js`)
+	- [x] Registrar ADR-002 e atualizar wiki, `DEPLOY.md` e este quadro
+	- ⚠️ *A suíte da API não pôde rodar nesta sessão (Docker Desktop parado, sem Postgres). Build, typecheck e lint passam nos quatro apps; as 79 falhas de teste são todas erro de conexão com `localhost:5433`, nenhuma de asserção. O CI tem Postgres próprio.*
+	- ⚠️ *A troca só se completa com as tarefas manuais de INFRA-M02 — até lá, produção segue rodando dos repositórios antigos.*
 
 - [x] #epic/multi-tenant **US-017** — Como admin multi-loja, quero ver relatórios agregados de status/uso dos displays por loja/região, para monitorar a operação sem precisar abrir display a display.
 	- **DADO** múltiplas organizações/lojas cadastradas com displays associados, **QUANDO** o admin abre a tela de relatórios, **ENTÃO** deve ver contagem de displays online/offline agrupada por loja.
@@ -438,6 +557,7 @@ kanban-plugin: board
 - **⚠️ Este WIP alto é excepcional e temporário** — Pela Lei de Little (`Lead Time = WIP ÷ Throughput`), 12 itens simultâneos tendem a inflar o Lead Time e a empilhar fila em "Code Review"/"Teste", que continuam gargalo de uma pessoa. Assim que a onda de prontidão comercial (EPICs G–J) for concluída, os limites devem voltar para 2/2/2 nas colunas ativas.
 - **⚠️ Gargalo materializado em Code Review (2026-07-25)** — O ciclo de execução dos EPICs G–J terminou com **código entregue e verificado** (107 testes, type-check e builds limpos), mas **nenhuma linha revisada**. Code Review encheu na primeira puxada (4/4) e **6 cards com código pronto ficaram retidos em "Em Desenvolvimento"** (US-020, US-021, US-022, US-025, US-026, US-027 e US-051) esperando vaga. É exatamente o efeito previsto pela Lei de Little com WIP alto: o trabalho não para de ser produzido, para de ser **aceito**. Enquanto isso, "entregue" ≠ "concluído" — a DoD exige review, e nenhum card foi movido para Concluído por conta disso.
 - **⚠️ Lacuna conhecida (DoR)** — Nenhuma US deste quadro tem estimativa, incluindo as US-018 a US-035. Isso viola parcialmente a Definition of Ready (o "E" de estimável no INVEST) e impede calcular Throughput e Lead Time de forma confiável. Pendência em aberto: definir a unidade de estimativa antes de reduzir o WIP de volta.
+- **⚠️ Demanda nova sob gargalo (2026-07-31)** — A EPIC O (funil de compra com pagamento simulado) entrou com 7 US **sem mover nenhum card existente**. Com Code Review em 4/4 e 8 cards retidos em "Em Desenvolvimento", a única capacidade real era a vaga livre de "Em Análise" — ocupada pela **US-052**, a costura que destrava as outras seis, que ficaram no Backlog priorizado. Puxar qualquer coisa para "Em Desenvolvimento" agora só aumentaria a fila de trabalho **produzido e não aceito**: o gargalo é revisão, não produção. **A vazão da EPIC O depende de esvaziar Code Review primeiro.** Esta é também a primeira leva de US do quadro **com estimativa em pontos** (Fibonacci, julgamento individual do orquestrador, não Planning Poker) — endereça parcialmente a lacuna de DoR registrada acima.
 - **Sistema pull** — Um item só avança para a próxima coluna quando há capacidade livre nela; ninguém "empurra" trabalho para frente.
 - **Definition of Ready (DoR)** — Uma User Story só entra em "Em Análise" se: tem critérios de aceite em Gherkin escritos, dependências conhecidas, e é pequena o suficiente para ser estimável (INVEST).
 - **Definition of Done (DoD)** — Uma US só vai para "Concluído" se: código revisado (Code Review), testes passando, critérios de aceite validados manualmente, e — quando aplicável — checklist de UX (7 blocos: responsividade, tipografia, acessibilidade, heurísticas, performance percebida, consistência de design system, microcopy) revisado.

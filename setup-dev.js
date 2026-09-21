@@ -4,16 +4,17 @@
  * Uso: node setup-dev.js
  * 
  * O que faz:
- * 1. Cria backend/.env se não existir (usando as credenciais do .env da raiz)
+ * 1. Cria apps/api/.env se não existir (usando as credenciais do .env da raiz)
  * 2. Cria docker-compose.override.yml para expor a porta do banco localmente
  * 3. Detecta conflito de porta do PostgreSQL e ajusta automaticamente
- * 4. Cria frontend/.env com VITE_API_URL apontando para o backend local
+ * 4. Cria apps/painel/.env com VITE_API_URL apontando para o backend local
  */
 
 const fs = require('fs');
 const path = require('path');
 const net = require('net');
 const { execSync } = require('child_process');
+const crypto = require('crypto');
 
 const ROOT = __dirname;
 
@@ -128,16 +129,27 @@ services:
     }
   }
 
-  // 3. Criar backend/.env
-  const backendEnvPath = path.join(ROOT, 'backend', '.env');
+  // 3. Criar apps/api/.env
+  const backendEnvPath = path.join(ROOT, 'apps', 'api', '.env');
   const rootEnv = parseEnvFile(path.join(ROOT, '.env'));
 
   const pgUser = rootEnv.POSTGRES_USER || 'display_user';
-  const pgPass = rootEnv.POSTGRES_PASSWORD || 'devpassword123';
+  // Nada de senha padrão escrita aqui: o repositório é público, e um valor
+  // de fábrica conhecido vira senha de produção no dia em que alguém esquece
+  // de trocar. A senha do Postgres tem que vir do `.env` da raiz porque é a
+  // mesma que o container do banco usa; JWT e admin são sorteados.
+  const pgPass = rootEnv.POSTGRES_PASSWORD;
+  if (!pgPass) {
+    console.error('Defina POSTGRES_PASSWORD no .env da raiz (copie de .env.example) e rode de novo.');
+    process.exit(1);
+  }
   const pgDb = rootEnv.POSTGRES_DB || 'display_db';
-  const jwtSecret = rootEnv.JWT_SECRET || 'telahub-jwt-dev-secret-key-1234567890';
-  const adminEmail = rootEnv.ADMIN_EMAIL || 'admin@telahub.com';
-  const adminPass = rootEnv.ADMIN_PASSWORD || 'adminpass123';
+  const jwtSecret = rootEnv.JWT_SECRET || crypto.randomBytes(32).toString('hex');
+  const adminEmail = rootEnv.ADMIN_EMAIL || 'admin@telahub.local';
+  const adminPass = rootEnv.ADMIN_PASSWORD || crypto.randomBytes(9).toString('base64url');
+  if (!rootEnv.ADMIN_PASSWORD) {
+    console.log(`Senha do admin sorteada (${adminEmail}): ${adminPass}`);
+  }
 
   const backendEnvContent = `# Gerado automaticamente por: node setup-dev.js
 # Banco de dados (PostgreSQL via Docker local na porta ${dbPort})
@@ -172,15 +184,15 @@ SMTP_FROM_NAME=${rootEnv.SMTP_FROM_NAME || 'TelaHub'}
 `;
 
   if (fs.existsSync(backendEnvPath)) {
-    log(colors.yellow, '⚠', 'backend/.env já existe — sobrescrevendo com novas configurações');
+    log(colors.yellow, '⚠', 'apps/api/.env já existe — sobrescrevendo com novas configurações');
   }
   fs.writeFileSync(backendEnvPath, backendEnvContent, 'utf-8');
-  log(colors.green, '✓', 'backend/.env criado');
+  log(colors.green, '✓', 'apps/api/.env criado');
 
-  // 4. Criar frontend/.env
-  const frontendEnvPath = path.join(ROOT, 'frontend', '.env');
+  // 4. Criar apps/painel/.env
+  const frontendEnvPath = path.join(ROOT, 'apps', 'painel', '.env');
   // O atalho "Acesso Master (Dev)" da tela de login lê estas duas variáveis.
-  // Elas ficam aqui, e não no código, porque `frontend/.env` não é versionado:
+  // Elas ficam aqui, e não no código, porque `apps/painel/.env` não é versionado:
   // credencial de usuário `master` escrita no componente vai inteira para o
   // bundle e fica legível para qualquer visitante do site publicado.
   const devMasterEmail = rootEnv.DEV_MASTER_EMAIL || adminEmail;
@@ -196,10 +208,10 @@ VITE_DEV_MASTER_PASSWORD=${devMasterPassword}
 `;
 
   if (fs.existsSync(frontendEnvPath)) {
-    log(colors.yellow, '⚠', 'frontend/.env já existe — sobrescrevendo com novas configurações');
+    log(colors.yellow, '⚠', 'apps/painel/.env já existe — sobrescrevendo com novas configurações');
   }
   fs.writeFileSync(frontendEnvPath, frontendEnvContent, 'utf-8');
-  log(colors.green, '✓', 'frontend/.env criado');
+  log(colors.green, '✓', 'apps/painel/.env criado');
 
   // 5. Resumo
   console.log(`\n${colors.bold}${colors.cyan}📋 Resumo${colors.reset}`);
@@ -209,8 +221,8 @@ VITE_DEV_MASTER_PASSWORD=${devMasterPassword}
 
   console.log(`\n${colors.bold}${colors.cyan}🚀 Para rodar o projeto:${colors.reset}`);
   console.log(`   1. docker compose up db -d`);
-  console.log(`   2. cd backend && npx prisma db push && npm run dev`);
-  console.log(`   3. cd frontend && npm run dev`);
+  console.log(`   2. cd apps/api && npx prisma db push && npm run dev`);
+  console.log(`   3. cd apps/painel && npm run dev`);
   console.log('');
 }
 

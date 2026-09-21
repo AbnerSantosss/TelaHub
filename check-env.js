@@ -74,25 +74,51 @@ async function runPortDiagnostics() {
   
   // 4. Check Environment Variables in Backend
   console.log(`\n${colors.bold}${colors.cyan}--- Backend Configuration ---${colors.reset}`);
-  const envPath = path.join(__dirname, 'backend', '.env');
+  const envPath = path.join(__dirname, 'apps', 'api', '.env');
   if (fs.existsSync(envPath)) {
-    console.log(`${colors.green}✓ .env File:${colors.reset} Found at backend/.env`);
+    console.log(`${colors.green}✓ .env File:${colors.reset} Found at apps/api/.env`);
     const envContent = fs.readFileSync(envPath, 'utf8');
     const dbUrlLine = envContent.split('\n').find(line => line.startsWith('DATABASE_URL='));
     if (dbUrlLine) {
       console.log(`  Database URL configured: ${dbUrlLine.trim()}`);
     } else {
-      console.log(`${colors.red}✗ DATABASE_URL:${colors.reset} Missing in backend/.env`);
+      console.log(`${colors.red}✗ DATABASE_URL:${colors.reset} Missing in apps/api/.env`);
     }
   } else {
-    console.log(`${colors.red}✗ .env File:${colors.reset} Missing at backend/.env (Copy from .env.example)`);
+    console.log(`${colors.red}✗ .env File:${colors.reset} Missing at apps/api/.env (Copy from .env.example)`);
+  }
+
+  // 5. Banco de TESTE separado do de desenvolvimento
+  //
+  // POR QUE ISTO ESTÁ AQUI: a suíte da API cria dados de verdade (planos
+  // `pay-loja-*` com active=true) e só limpa no afterAll. Rodando contra o
+  // banco de desenvolvimento, uma execução interrompida deixa lixo ATIVO no
+  // catálogo — já aconteceu, com 13 planos de teste visíveis em GET /api/plans.
+  // `apps/api/vitest.config.ts` recusa rodar contra o banco de dev; este bloco
+  // é só o aviso amigável, antes de a pessoa esbarrar no erro.
+  console.log(`\n${colors.bold}${colors.cyan}--- Banco de teste (isolamento da suíte) ---${colors.reset}`);
+  const testUrl = (process.env.TEST_DATABASE_URL || '').trim();
+  const nomeDoBanco = (url) => {
+    const m = /^[^:]+:\/\/[^/]+\/([^/?#]+)/.exec(url);
+    return m ? m[1] : null;
+  };
+  if (testUrl) {
+    const banco = nomeDoBanco(testUrl);
+    if (banco && /test/i.test(banco)) {
+      console.log(`${colors.green}✓ TEST_DATABASE_URL:${colors.reset} aponta para "${banco}" (separado do de desenvolvimento).`);
+    } else {
+      console.log(`${colors.red}✗ TEST_DATABASE_URL:${colors.reset} aponta para "${banco || '?'}" — não parece um banco descartável.`);
+    }
+  } else {
+    console.log(`${colors.yellow}⚠ TEST_DATABASE_URL:${colors.reset} não definida. O vitest deriva "<seu_banco>_test"; se esse banco não existir, os testes falham na conexão — e falhar é o certo, melhor do que escrever no banco de desenvolvimento.`);
+    console.log(`  Criar uma vez:  docker compose exec db createdb -U display_user display_db_test`);
   }
 
   // Final Actionable Summary
   console.log(`\n${colors.bold}${colors.cyan}--- Next Steps ---${colors.reset}`);
   if (!dockerRunning && !fs.existsSync(envPath)) {
     console.log(`1. Start Docker Desktop so PostgreSQL can be spun up.`);
-    console.log(`2. Create backend/.env based on backend/.env.example.`);
+    console.log(`2. Create apps/api/.env based on apps/api/.env.example.`);
   } else if (!dockerRunning) {
     console.log(`1. Start Docker Desktop so the database can be initialized.`);
   } else if (portConflicts > 0) {

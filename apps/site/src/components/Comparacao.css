@@ -1,0 +1,145 @@
+/* Comparacao.css — estilo próprio da tabela "O que mais você poderia fazer".
+   Complementa `.tabela` de index.css (que já cuida do overflow-x e do desenho
+   de th/td no desktop). Aqui: a coluna TelaHub em destaque e o modo celular. */
+
+.comparacao-secao {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+/* Nada de `overflow: hidden` aqui: o wrapper `.tabela` depende do
+   `overflow-x: auto` para deixar a tabela rolar entre 641px e o desktop.
+   Fechar o eixo mataria essa rolagem e cortaria a última coluna. */
+
+.comparacao__tabela {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+/* Legenda da tabela: existe para leitor de tela, não ocupa espaço na página. */
+.comparacao__legenda {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.comparacao__tabela th[scope='row'] {
+  font-size: 15px;
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 700;
+  color: var(--tinta);
+  white-space: nowrap;
+}
+
+/* A nossa coluna: mesma cor de marca do cabeçalho e peso maior nas células.
+   É ênfase, não cor nova. */
+.comparacao__nos {
+  color: var(--marca);
+}
+
+td.comparacao__nos {
+  color: var(--tinta);
+  font-weight: 700;
+}
+
+/* ------------------------------------------------------------------
+   MODO CELULAR (≤ 640px) — reapresentação em cartões.
+
+   Por que cartões e não só rolagem lateral: são seis colunas de texto
+   corrido. Mesmo dentro de um `.tabela` com overflow-x, o leitor teria de
+   arrastar quatro vezes para comparar uma única linha, perdendo de vista
+   justamente o rótulo da esquerda, que é o que dá sentido à célula. Em
+   cartão, cada critério vira um bloco fechado e a comparação acontece de
+   cima para baixo, no gesto que o polegar já faz.
+
+   Como isso não custa acessibilidade: `display: block` faz o navegador
+   descartar a semântica implícita de tabela, então os papéis (table,
+   rowgroup, row, columnheader, rowheader, cell) estão declarados
+   explicitamente no JSX e sobrevivem à mudança de layout. O cabeçalho de
+   coluna some da tela, mas volta em cada célula pelo `data-coluna` — assim
+   ninguém lê "Do celular, em 30 s" sem saber de quem é a resposta.
+   ------------------------------------------------------------------ */
+@media (max-width: 640px) {
+  .comparacao__quadro {
+    background: none;
+    border: 0;
+    box-shadow: none;
+  }
+
+  /* `min-width: 0` é o conserto do estouro medido na auditoria de celular, e é
+     tão importante quanto o `display: block`: o `min-width: 720px` de
+     `.tabela table` (index.css) existe para preservar as colunas na rolagem
+     lateral do desktop, e no modo cartão não há mais colunas a preservar — mas
+     a regra continuava valendo, dando 720px a cada cartão num aparelho de
+     390px. Trocar `width: auto` sem zerar o `min-width` não resolve nada:
+     largura mínima ganha de largura automática. */
+  .tabela .comparacao__tabela,
+  .tabela .comparacao__tabela tbody,
+  .tabela .comparacao__tabela tr,
+  .tabela .comparacao__tabela th,
+  .tabela .comparacao__tabela td {
+    display: block;
+    width: auto;
+    min-width: 0;
+  }
+
+  /* Os rótulos de coluna passam a viver dentro de cada célula. */
+  .tabela .comparacao__tabela thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  .tabela .comparacao__tabela tbody tr {
+    background: var(--papel);
+    border: 1px solid var(--borda-2);
+    border-radius: var(--raio-12);
+    padding: 4px 18px 8px;
+    margin-bottom: 14px;
+  }
+
+  .tabela .comparacao__tabela tbody tr:last-child {
+    margin-bottom: 0;
+  }
+
+  .tabela .comparacao__tabela th[scope='row'] {
+    font-size: 17px;
+    padding: 14px 0 12px;
+    border-bottom: 1px solid var(--borda);
+    white-space: normal;
+  }
+
+  .tabela .comparacao__tabela td {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--papel-3);
+  }
+
+  .tabela .comparacao__tabela tr td:last-child {
+    border-bottom: 0;
+  }
+
+  .tabela .comparacao__tabela td::before {
+    content: attr(data-coluna);
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--tinta-3);
+    margin-bottom: 4px;
+  }
+
+  .tabela .comparacao__tabela td.comparacao__nos::before {
+    color: var(--marca);
+  }
+}

@@ -1,0 +1,348 @@
+/* Barra fixa da landing. O `scroll-padding-top` de `index.css` compensa a
+   altura dela na chegada por âncora — se mudar a altura aqui, ajuste lá. */
+
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--papel);
+  border-bottom: 1px solid var(--borda);
+  transition: box-shadow 0.2s ease;
+}
+
+.navbar--descolada {
+  box-shadow: var(--sombra-navbar);
+}
+
+.navbar__inner {
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 0 var(--gutter);
+}
+
+.navbar__marca {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 800;
+  font-size: 1.125rem;
+  letter-spacing: -0.01em;
+  color: var(--tinta);
+}
+
+.navbar__marca:hover {
+  color: var(--tinta);
+  text-decoration: none;
+}
+
+.navbar__logo {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--raio-8);
+  background: var(--marca);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+
+.navbar__links {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.navbar__links button {
+  position: relative;
+  border: none;
+  background: none;
+  min-height: 44px;
+  padding: 8px 0;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--tinta-2);
+  cursor: pointer;
+  transition: color 0.16s ease;
+}
+
+/* Traço que cresce do centro no hover (transform, não width). */
+.navbar__links button::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 6px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--marca);
+  transform: scaleX(0);
+  transition: transform 0.25s var(--ease-saida);
+}
+
+.navbar__links button:hover {
+  color: var(--marca);
+}
+
+.navbar__links button:hover::after {
+  transform: scaleX(1);
+}
+
+.navbar__acoes {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+/* Base e hover de .btn--texto (index.css). */
+.navbar__entrar {
+  font-size: 0.9375rem;
+  white-space: nowrap;
+}
+
+/* ── Menu (abaixo de 1100px) ─────────────────────────────────────────────── */
+
+/* Botão do menu: 44×44, fora do desktop. */
+.navbar__menu,
+.navbar__fechar {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  flex: none;
+  padding: 0;
+  border: 1px solid var(--borda-2);
+  border-radius: var(--raio-8);
+  background: var(--papel);
+  color: var(--tinta);
+  cursor: pointer;
+  transition:
+    background-color 0.16s ease,
+    border-color 0.16s ease,
+    transform 0.12s ease;
+}
+
+.navbar__menu:hover,
+.navbar__fechar:hover {
+  background: var(--papel-2);
+  border-color: var(--borda-3);
+}
+
+.navbar__menu:active,
+.navbar__fechar:active {
+  transform: scale(0.95);
+}
+
+.navbar__veu,
+.navbar__gaveta {
+  display: none;
+}
+
+/* Véu e gaveta existem no DOM o tempo todo (SSR); fechados, ficam invisíveis
+   E fora do alcance (visibility + inert no JSX). O atraso na visibilidade
+   deixa a animação de saída terminar antes de sumir. */
+.navbar__veu {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  background: var(--veu);
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.25s ease,
+    visibility 0s linear 0.25s;
+}
+
+.navbar__veu--aberto {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.25s ease;
+}
+
+/* Gaveta pela direita. As margens internas somam os recortes da tela
+   (safe-area): no iPhone o botão de baixo não fica sob a barra de gestos e,
+   deitado, nada fica sob o entalhe. */
+.navbar__gaveta {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  width: min(380px, 88vw);
+  flex-direction: column;
+  gap: 8px;
+  padding:
+    max(12px, env(safe-area-inset-top))
+    max(20px, env(safe-area-inset-right))
+    max(20px, env(safe-area-inset-bottom))
+    20px;
+  background: var(--papel);
+  border-left: 1px solid var(--borda);
+  box-shadow: var(--sombra-modal);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  transform: translate3d(100%, 0, 0);
+  visibility: hidden;
+  transition:
+    transform 0.32s var(--ease-saida),
+    visibility 0s linear 0.32s;
+}
+
+.navbar__gaveta--aberta {
+  transform: none;
+  visibility: visible;
+  transition: transform 0.32s var(--ease-saida);
+}
+
+.navbar__gaveta-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 48px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--borda);
+}
+
+.navbar__gaveta-titulo {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--tinta-3);
+}
+
+.navbar__gaveta-links {
+  margin: 0;
+  padding: 8px 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.navbar__gaveta-links button {
+  width: 100%;
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 12px;
+  border: none;
+  border-radius: var(--raio-8);
+  background: none;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  color: var(--tinta);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.16s ease, color 0.16s ease;
+}
+
+.navbar__gaveta-links button svg {
+  color: var(--tinta-3);
+  flex: none;
+}
+
+.navbar__gaveta-links button:hover,
+.navbar__gaveta-links button:active {
+  background: var(--papel-2);
+  color: var(--marca);
+}
+
+.navbar__gaveta-acoes {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 16px;
+  border-top: 1px solid var(--borda);
+}
+
+.navbar__btn {
+  min-height: 44px;
+  padding: 0 20px;
+  font-size: 0.9375rem;
+}
+
+/* Abaixo de 1100px os quatro links não cabem sem espremer a marca contra o
+   botão. Eles saem; o rodapé repete os atalhos e a página continua rolável. */
+@media (max-width: 1100px) {
+  .navbar__links {
+    display: none;
+  }
+
+  .navbar__menu,
+  .navbar__fechar {
+    display: inline-flex;
+  }
+
+  .navbar__veu {
+    display: block;
+  }
+
+  .navbar__gaveta {
+    display: flex;
+  }
+}
+
+@media (max-width: 640px) {
+  .navbar__inner {
+    height: 60px;
+    gap: 10px;
+  }
+
+  /* "Entrar" VOLTA a aparecer no celular. Ele sumia abaixo de 640px, e é
+     justamente no celular que ele é mais usado: o síndico que já é cliente
+     abre a landing pelo link que tem salvo e precisa entrar no painel para
+     trocar o aviso da portaria. Sem este link, o único caminho é lembrar a URL
+     do painel de cabeça — e quem não lembra clica em "Começar grátis" e tenta
+     criar uma segunda conta. Cabe: a marca encolhe, os gaps também, e o alvo
+     de toque continua com 44px de altura. */
+  .navbar__entrar {
+    font-size: 0.9375rem;
+    padding: 0 2px;
+  }
+
+  .navbar__acoes {
+    gap: 8px;
+  }
+
+  .navbar__marca {
+    font-size: 1rem;
+    gap: 8px;
+  }
+
+  .navbar__logo {
+    width: 28px;
+    height: 28px;
+  }
+
+  /* 44px de altura: o alvo mínimo de toque (estava em 40px). */
+  .navbar__btn {
+    min-height: 44px;
+    padding: 0 14px;
+    font-size: 0.9375rem;
+  }
+}
+
+/* Aparelhos estreitos (≤ 440px): o nome da marca sai e fica só o símbolo, para
+   que "Entrar", o CTA e o botão do menu continuem inteiros. Era ≤ 380px; o
+   botão do menu (44px) empurrou o corte para cima — em 390px a barra passava
+   da largura. Some o texto, não a navegação — o símbolo continua sendo o link
+   para o topo e tem `aria-label` no JSX. */
+@media (max-width: 440px) {
+  .navbar__marca {
+    font-size: 0;
+    gap: 0;
+  }
+
+  .navbar__btn {
+    padding: 0 12px;
+  }
+}

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Mapa do site do TelaHub.
+
+  ⚠️ ARMADILHA 1: este arquivo é ESTÁTICO — ele não é gerado a partir de
+  `src/paginas/rotas.js`. Rota nova entra em três lugares: na tabela de rotas
+  (que alimenta o app e o pré-render), aqui, e no `llms.txt`. Se ela entrar só
+  na tabela, a página funciona e o Google nunca fica sabendo que ela existe.
+
+  ⚠️ ARMADILHA 2: o domínio ".com.br" com o nome da marca é de TERCEIRO desde
+  2025 e nenhuma URL daqui pode usá-lo. O único domínio publicável é
+  `vendas.proxserverabner.site`.
+
+  As três páginas de segmento têm prioridade alta porque são o destino dos
+  anúncios: se elas não forem indexadas, todo o tráfego delas precisa ser pago.
+  As legais têm prioridade baixa e mudam pouco, mas PRECISAM estar aqui — o
+  revisor do Meta e do Google Ads procura por elas.
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://vendas.proxserverabner.site/</loc>
+    <lastmod>2026-09-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://vendas.proxserverabner.site/condominio</loc>
+    <lastmod>2026-09-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://vendas.proxserverabner.site/clinica</loc>
+    <lastmod>2026-09-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://vendas.proxserverabner.site/loja</loc>
+    <lastmod>2026-09-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://vendas.proxserverabner.site/termos</loc>
+    <lastmod>2026-09-05</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://vendas.proxserverabner.site/privacidade</loc>
+    <lastmod>2026-09-05</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+</urlset>

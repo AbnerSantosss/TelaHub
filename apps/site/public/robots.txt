@@ -1,0 +1,36 @@
+# TelaHub — https://vendas.proxserverabner.site
+#
+# O site é público e QUER ser indexado: as cinco rotas (home, /condominio,
+# /clinica, /loja, /termos, /privacidade) saem pré-renderizadas do build, com
+# HTML de verdade dentro. Nada aqui bloqueia nada.
+#
+# Os agentes de IA aparecem nomeados de propósito. O `User-agent: *` já os
+# cobriria, mas listá-los é a forma de deixar registrado que a decisão de
+# permitir foi tomada — quem for restringir depois muda uma linha, em vez de
+# descobrir por acidente que o site sumiu do ChatGPT e do Claude.
+#
+# ⚠️ ARMADILHA: o domínio ".com.br" com o nome da marca é de TERCEIRO desde
+# 2025 e não é nosso. O Sitemap daqui apontava para lá — ou seja, o Google era
+# mandado para o mapa do site de outra empresa, e toda a autoridade que este
+# site ganhasse iria para ela. O único domínio publicável é
+# `vendas.proxserverabner.site`.
+
+User-agent: *
+Allow: /
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+Sitemap: https://vendas.proxserverabner.site/sitemap.xml

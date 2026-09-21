@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#0369a1" />
+
+    <title>TelaHub | Avisos, ofertas e agenda na TV que você já tem</title>
+    <!-- Até 155 caracteres: acima disso o Google corta no meio da frase e a
+         única linha que o resultado tem para convencer alguém termina em
+         reticências. O preço vem no começo de propósito — é a objeção nº 1. -->
+    <meta name="description" content="A primeira tela é grátis para sempre e não pede cartão. Avisos, ofertas e agenda na TV que você já tem, trocados pelo celular. Preço em real." />
+    <!-- Lei da Categoria (Ries & Trout): "digital signage" é o termo do mercado
+         corporativo, dominado por integradores. Síndico, gerente de escritório e
+         dono de loja buscam em português concreto — e buscam pela CENA deles, não
+         pela categoria. Por isso os termos de porte/ambiente vêm primeiro e os de
+         categoria corporativa depois, para não perder quem já os conhece.
+         Decisão de 2026-08-30: o produto é HORIZONTAL por porte. Termo de comida
+         não abre a lista (é dominado por QR/delivery) e não abre a página. -->
+    <meta name="keywords" content="painel de avisos para condomínio, mural digital para portaria, tv de recepção para empresa, tela para sala de espera de clínica, tv de ofertas para loja, grade de aulas na tv da academia, avisos na tv por celular, totem vertical para vitrine, digital signage, telahub" />
+    <link rel="canonical" href="https://vendas.proxserverabner.site/" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+
+    <!-- Open Graph / redes sociais (LinkedIn, WhatsApp — canais comuns em vendas B2B) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="pt_BR" />
+    <meta property="og:site_name" content="TelaHub" />
+    <meta property="og:title" content="Sua TV fica ligada o dia todo. Coloque seus avisos nela." />
+    <meta property="og:description" content="Avisos, ofertas, agenda e informação na TV que você já tem, trocados pelo celular. A primeira tela é grátis para sempre e não pede cartão." />
+    <meta property="og:image" content="https://vendas.proxserverabner.site/capturas/real-tv-codigo.jpg" />
+    <meta property="og:url" content="https://vendas.proxserverabner.site/" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Sua TV fica ligada o dia todo. Coloque seus avisos nela." />
+    <meta name="twitter:description" content="Avisos, ofertas e agenda na TV que você já tem, trocados pelo celular. A primeira tela é grátis para sempre e não pede cartão." />
+    <meta name="twitter:image" content="https://vendas.proxserverabner.site/capturas/real-tv-codigo.jpg" />
+
+    <!-- Dados estruturados (SEO/AEO/GEO): entidade da organização e do produto.
+         Os preços aqui precisam bater com `src/data/planos.json` — que é o
+         snapshot de `GET /api/plans`. Rich snippet com preço divergente do
+         cobrado é o mesmo problema de CDC (arts. 30 e 37) que a página já
+         corrigiu uma vez, só que exibido direto no Google. -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://vendas.proxserverabner.site/#organization",
+          "name": "TelaHub",
+          "url": "https://vendas.proxserverabner.site/",
+          "logo": "https://vendas.proxserverabner.site/favicon.svg"
+        },
+        {
+          "@type": "SoftwareApplication",
+          "@id": "https://vendas.proxserverabner.site/#software",
+          "name": "TelaHub",
+          "applicationCategory": "BusinessApplication",
+          "operatingSystem": "Web",
+          "description": "Sistema brasileiro para colocar avisos, ofertas, agenda e informação nas telas de um negócio (condomínio, escritório, clínica, loja, academia ou rede de unidades), usando a TV que já existe no lugar, com troca de conteúdo pelo celular e aviso por e-mail quando uma tela para de responder.",
+          "publisher": { "@id": "https://vendas.proxserverabner.site/#organization" },
+          "offers": [
+            {
+              "@type": "Offer",
+              "name": "Grátis",
+              "price": "0",
+              "priceCurrency": "BRL",
+              "description": "1 tela conectada, para sempre, sem cartão de crédito."
+            },
+            {
+              "@type": "Offer",
+              "name": "Loja",
+              "price": "39",
+              "priceCurrency": "BRL",
+              "description": "Por tela ativa/mês no plano anual (R$ 49 no mensal, sem fidelidade). Telas ilimitadas, cobrança só pelas telas ligadas.",
+              "priceSpecification": {
+                "@type": "UnitPriceSpecification",
+                "price": "39",
+                "priceCurrency": "BRL",
+                "unitText": "tela ativa por mês, no plano anual"
+              }
+            },
+            {
+              "@type": "Offer",
+              "name": "Rede",
+              "price": "32",
+              "priceCurrency": "BRL",
+              "description": "Por tela ativa/mês no plano anual (R$ 39 no mensal), com piso de 5 telas na fatura. Inclui painéis de gestão e auditoria de publicação.",
+              "priceSpecification": {
+                "@type": "UnitPriceSpecification",
+                "price": "32",
+                "priceCurrency": "BRL",
+                "unitText": "tela ativa por mês, no plano anual",
+                "minPrice": "160"
+              }
+            }
+          ]
+        },
+        {
+          "@type": "WebPage",
+          "@id": "https://vendas.proxserverabner.site/#webpage",
+          "url": "https://vendas.proxserverabner.site/",
+          "name": "TelaHub | Avisos, ofertas e agenda na TV que você já tem",
+          "isPartOf": { "@id": "https://vendas.proxserverabner.site/#organization" },
+          "inLanguage": "pt-BR"
+        }
+      ]
+    }
+    </script>
+
+    <!-- Uma família só (§3.5 do plano v2: o painel importava dez). Geist é a
+         fonte do sistema visual; Inter e a do sistema operacional são a reserva
+         declarada em `--fonte`, então a página não muda de layout se o Google
+         Fonts estiver fora do ar — só troca o desenho da letra. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+    <!-- Consent Mode v2 — padrão negado ANTES de qualquer tag carregar (LGPD/GDPR) -->
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){ window.dataLayer.push(arguments); }
+      gtag('consent', 'default', {
+        ad_storage: 'denied',
+        analytics_storage: 'denied',
+        ad_user_data: 'denied',
+        ad_personalization: 'denied',
+        wait_for_update: 500
+      });
+    </script>
+
+    <!-- Google Tag Manager — container GTM-W7K6QK7Z.
+         O MESMO container serve site, painel e checkout. A jornada atravessa os
+         três domínios; um container por app produziria três relatórios que não
+         se somam, e a única pergunta que importa ("quanto custou o pagante que
+         veio deste anúncio") não teria resposta em lugar nenhum. -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-W7K6QK7Z');</script>
+    <!-- End Google Tag Manager -->
+
+    <!-- Pixel do Meta — 1119943063690657.
+         Carregado FORA do GTM de propósito. Cada evento daqui também sai pelo
+         servidor (Conversions API) e os dois precisam do mesmo `eventID` para a
+         Meta descartar a cópia; com o Pixel dentro do GTM, esse id vira um campo
+         que alguém pode desconfigurar pela interface — e a duplicata não dá
+         erro, só divide por dois todo custo por resultado do painel.
+
+         `consent revoke` ANTES do init é o equivalente Meta do Consent Mode v2:
+         o Pixel carrega mas não grava cookie nem envia nada até a pessoa
+         aceitar na faixa (LGPD art. 7º). `ConsentBanner.jsx` chama
+         fbq('consent','grant') quando ela aceita. -->
+    <script>
+      !function(f,b,e,v,n,t,s)
+      {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+      n.queue=[];t=b.createElement(e);t.async=!0;
+      t.src=v;s=b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t,s)}(window,document,'script',
+      'https://connect.facebook.net/en_US/fbevents.js');
+      fbq('consent', 'revoke');
+      fbq('init', '1119943063690657');
+      fbq('track', 'PageView');
+    </script>
+    <!-- O <noscript> de imagem do Pixel fica no <body>, não aqui: dentro do
+         <head> ele é conteúdo não permitido e o parser de HTML do Vite falha o
+         build com `disallowed-content-in-noscript-in-head`. -->
+    <!-- End Meta Pixel -->
+
+    <!--
+      O GSAP + ScrollTrigger do cdnjs foram REMOVIDOS em 2026-07-31.
+
+      Não por peso (~70 KB de terceiro no caminho crítico, embora isso também
+      conte numa página feita para ranquear), mas porque a montagem tinha duas
+      formas de deixar a página em branco: CDN fora do ar, e chegada por âncora
+      (`/#precos`, o link que o painel e o checkout usam) — nesse caso o
+      ScrollTrigger de tudo que ficava acima do ponto de chegada nunca
+      disparava. A segunda foi reproduzida.
+
+      A animação virou CSS + IntersectionObserver, com o estado padrão VISÍVEL:
+      ver src/lib/reveal.js. Se voltar a precisar de GSAP para algo que CSS não
+      faça, importe como dependência do projeto — não de CDN — e nunca deixe o
+      estado inicial de um elemento de conteúdo depender dele.
+    -->
+  </head>
+  <body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-W7K6QK7Z"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+
+    <!-- Meta Pixel (noscript). Mora aqui, e não no <head>, porque imagem dentro
+         de <noscript> no <head> é conteúdo não permitido e quebra o build. -->
+    <noscript><img height="1" width="1" style="display:none" alt=""
+    src="https://www.facebook.com/tr?id=1119943063690657&amp;ev=PageView&amp;noscript=1" /></noscript>
+    <!-- End Meta Pixel (noscript) -->
+
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

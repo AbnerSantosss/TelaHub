@@ -1,0 +1,22 @@
+{
+  "id": "/",
+  "name": "TelaHub | Avisos, ofertas e agenda na TV que você já tem",
+  "short_name": "TelaHub",
+  "description": "Coloque avisos, ofertas e agenda na TV que já existe no seu lugar e troque o conteúdo pelo celular. A primeira tela é grátis para sempre e não pede cartão.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0369a1",
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "categories": ["business", "productivity"],
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
