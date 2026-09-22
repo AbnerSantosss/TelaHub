@@ -111,6 +111,15 @@ services:
       - SMTP_SECURE=${SMTP_SECURE:-}
       - SMTP_FROM_EMAIL=${SMTP_FROM_EMAIL:-}
       - SMTP_FROM_NAME=${SMTP_FROM_NAME:-TelaHub}
+      # Armazenamento de mídia (Cloudflare R2). Obrigatório em produção: o
+      # backend aborta o boot sem essas cinco variáveis (ver server.ts).
+      # Mesma armadilha do comentário acima — sem a linha aqui, cadastrar no
+      # Portainer não tem efeito nenhum.
+      - R2_ENDPOINT=${R2_ENDPOINT}
+      - R2_ACCESS_KEY=${R2_ACCESS_KEY}
+      - R2_SECRET_KEY=${R2_SECRET_KEY}
+      - R2_BUCKET=${R2_BUCKET}
+      - R2_PUBLIC_URL=${R2_PUBLIC_URL}
       # Pagamento. Declarados aqui porque variável NÃO declarada no compose não
       # chega ao container por mais que se cadastre no Portainer — mesma
       # armadilha que já deixou ADMIN_*/SMTP_* sem efeito nesta stack.

@@ -27,7 +27,11 @@ services:
     networks:
       - telahub_net
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/"]
+      # 127.0.0.1, não localhost: localhost resolve para ::1 dentro do
+      # container e o nginx desta imagem só escuta em IPv4, o que marcaria o
+      # container como "unhealthy" mesmo respondendo 200 de verdade (mesmo
+      # ajuste feito no site — ver apps/site/docker-compose.prod.yml).
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:80/"]
       interval: 30s
       timeout: 5s
       retries: 3
