@@ -27,7 +27,7 @@ import prisma from '../lib/prisma';
  */
 const router = Router();
 
-const APP_URL = process.env.APP_URL || 'https://display.proxserverabner.site';
+const APP_URL = process.env.APP_URL || 'https://devtelahubpainel.proxserverabner.site';
 
 /** Página de confirmação. Sem JS, sem imagem externa: precisa abrir em qualquer lugar. */
 function confirmationPage(): string {

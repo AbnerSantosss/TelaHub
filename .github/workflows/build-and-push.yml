@@ -136,23 +136,23 @@ jobs:
       # ⚠️ ESTES VALORES FICAM DENTRO DO BUNDLE. `VITE_*` é resolvido em tempo
       # de BUILD: domínio errado aqui não se conserta no Portainer, só
       # rebuildando. Por isso eles precisam ser os MESMOS dos composes:
-      #   site     → https://vendas.proxserverabner.site      (apps/site/docker-compose.prod.yml)
-      #   painel   → https://painel.proxserverabner.site      (docker-compose.prod.yml)
-      #   checkout → https://checkout.proxserverabner.site    (apps/checkout/docker-compose.prod.yml)
+      #   site     → https://devtelahublandingpage.proxserverabner.site  (apps/site/docker-compose.prod.yml)
+      #   painel   → https://devtelahubpainel.proxserverabner.site       (docker-compose.prod.yml)
+      #   checkout → https://devtelahubcheckout.proxserverabner.site     (apps/checkout/docker-compose.prod.yml)
       #
-      # Correção de 2026-09-05: o painel era buildado com
-      # `VITE_SITE_URL=https://sitetelahub.proxserverabner.site` e o site com
-      # `VITE_APP_URL=https://telahub.proxserverabner.site`, dois domínios que
-      # nenhum compose declara — ou seja, o link "ver site"/"entrar no painel"
-      # saía do build apontando para host que não resolve.
+      # Convenção de 25/09/2026: `telahub.proxserverabner.site` é o TelaHub
+      # principal (stack antiga). Esta versão usa só nomes `devtelahub*`.
       #
-      # PENDÊNCIA CONHECIDA: o site também lê `VITE_API_URL` (formulário de
-      # lead, `apps/site/src/lib/funnel.js`), mas `apps/site/Dockerfile` não
-      # declara esse ARG — passá-lo aqui seria um build-arg não consumido, que
-      # parece configuração e não é. Enquanto o ARG não existir, o bundle usa o
-      # default `https://telahub.proxserverabner.site/api`, e é por isso que o
-      # DEPLOY.md manda manter uma rota do túnel com esse nome apontando para a
-      # porta do painel (4025), que é quem faz proxy de /api.
+      # Correção de 2026-09-05: os links cruzados ("ver site" no painel e
+      # "entrar no painel" no site) já saíram do build apontando para hosts que
+      # nenhum compose declarava e que não resolviam. Por isso os valores abaixo
+      # repetem exatamente os três nomes `devtelahub*` listados acima.
+      #
+      # O site recebe `VITE_API_URL` (formulário de lead, em
+      # `apps/site/src/lib/funnel.js`) e `PLANS_API_URL` (busca de preços em
+      # `apps/site/scripts/fetch-plans.mjs`). Os dois apontam para a API da
+      # versão nova, servida pelo painel dev em /api. Não existe rota
+      # `telahub.` para a versão nova: esse nome é da stack antiga.
       - id: args
         name: Montar build-args do app
         run: |
@@ -162,12 +162,14 @@ jobs:
             case "${{ matrix.app }}" in
               painel)
                 echo "VITE_API_URL=/api"
-                echo "VITE_SITE_URL=https://vendas.proxserverabner.site"
-                echo "VITE_CHECKOUT_URL=https://checkout.proxserverabner.site"
+                echo "VITE_SITE_URL=https://devtelahublandingpage.proxserverabner.site"
+                echo "VITE_CHECKOUT_URL=https://devtelahubcheckout.proxserverabner.site"
                 ;;
               site)
-                echo "VITE_CHECKOUT_URL=https://checkout.proxserverabner.site"
-                echo "VITE_APP_URL=https://painel.proxserverabner.site"
+                echo "VITE_CHECKOUT_URL=https://devtelahubcheckout.proxserverabner.site"
+                echo "VITE_APP_URL=https://devtelahubpainel.proxserverabner.site"
+                echo "VITE_API_URL=https://devtelahubpainel.proxserverabner.site/api"
+                echo "PLANS_API_URL=https://devtelahubpainel.proxserverabner.site/api"
                 ;;
               *)
                 echo ""

@@ -11,14 +11,19 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        # Lidos em tempo de BUILD pelo Vite — defini-los como variável de
-        # ambiente da stack não teria efeito nenhum sobre o bundle.
-        - VITE_CHECKOUT_URL=${VITE_CHECKOUT_URL:-https://checkout.proxserverabner.site}
-        - VITE_APP_URL=${VITE_APP_URL:-https://painel.proxserverabner.site}
+        # Lidos em tempo de BUILD pelo Vite. Uma variável da stack com o mesmo
+        # nome passa por cima do default e entra no bundle, mas só com rebuild.
+        - VITE_CHECKOUT_URL=${VITE_CHECKOUT_URL:-https://devtelahubcheckout.proxserverabner.site}
+        - VITE_APP_URL=${VITE_APP_URL:-https://devtelahubpainel.proxserverabner.site}
+        - VITE_API_URL=${VITE_API_URL:-https://devtelahubpainel.proxserverabner.site/api}
+        # Preços do build (scripts/fetch-plans.mjs). Se a API não responder, o
+        # build segue com o snapshot de src/data/planos.json.
+        - PLANS_API_URL=${PLANS_API_URL:-https://devtelahubpainel.proxserverabner.site/api}
     container_name: telahub-site-prod
     restart: unless-stopped
     ports:
-      # vendas.proxserverabner.site -> localhost:4038
+      # devtelahublandingpage.proxserverabner.site -> localhost:4038
+      # Host com "dev" no nome sai do Google pelo nginx.conf (noindex por host).
       - "4038:80"
     networks:
       - telahub_net

@@ -29,7 +29,7 @@ import path from 'path';
  */
 
 // URL base do aplicativo — configurável via variável de ambiente
-const APP_URL = process.env.APP_URL || 'https://display.proxserverabner.site';
+const APP_URL = process.env.APP_URL || 'https://devtelahubpainel.proxserverabner.site';
 const LOGIN_URL = `${APP_URL}/#/login`;
 
 /**

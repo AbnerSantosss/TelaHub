@@ -22,7 +22,7 @@ services:
     container_name: telahub-checkout-prod
     restart: unless-stopped
     ports:
-      # checkout.proxserverabner.site -> localhost:4039
+      # devtelahubcheckout.proxserverabner.site -> localhost:4039
       - "4039:80"
     networks:
       - telahub_net

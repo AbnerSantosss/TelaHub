@@ -248,7 +248,7 @@ const REGRAS = [
     // Nunca pode aparecer em texto publicado, nem negado: o domínio é de outra
     // empresa desde 2025 e qualquer link/placeholder manda gente para lá.
     negavel: false,
-    porque: 'O domínio `telahub.com.br` é de TERCEIRO desde 2025. O domínio público é vendas.proxserverabner.site.',
+    porque: 'O domínio `telahub.com.br` é de TERCEIRO desde 2025. O domínio público da landing é devtelahublandingpage.proxserverabner.site.',
   },
   {
     id: 'gtm-placeholder',

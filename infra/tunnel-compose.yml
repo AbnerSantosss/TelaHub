@@ -28,9 +28,13 @@
 #    nunca no Git: quem tem o token abre uma entrada para dentro desta rede.
 #
 # ─── Public Hostnames a cadastrar no túnel NOVO ───────────────────────────────
-#   painel.proxserverabner.site    →  HTTP  →  frontend:3025
-#   vendas.proxserverabner.site    →  HTTP  →  site:80
-#   checkout.proxserverabner.site  →  HTTP  →  checkout:80
+#   devtelahubpainel.proxserverabner.site       →  HTTP  →  frontend:3025
+#   devtelahublandingpage.proxserverabner.site  →  HTTP  →  site:80
+#   devtelahubcheckout.proxserverabner.site     →  HTTP  →  checkout:80
+#
+# No túnel do HOST, que é o usado hoje, os mesmos nomes apontam para
+# localhost:4025, localhost:4038 e localhost:4039, nessa ordem.
+# `telahub.proxserverabner.site` é da stack antiga e não entra aqui.
 #
 # Os nomes acima são os dos serviços das outras stacks; todas precisam estar em
 # `telahub_net` para este container enxergá-las.

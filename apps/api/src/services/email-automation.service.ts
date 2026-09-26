@@ -91,7 +91,7 @@ export const AUTOMATION_VARIABLES = [
   '{{link}}',
 ] as const;
 
-const APP_URL = process.env.APP_URL || 'https://display.proxserverabner.site';
+const APP_URL = process.env.APP_URL || 'https://devtelahubpainel.proxserverabner.site';
 const PANEL_URL = `${APP_URL}/#/login`;
 
 function p(text: string): string {

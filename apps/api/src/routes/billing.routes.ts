@@ -36,7 +36,7 @@ router.use(authMiddleware);
  * produção rodam em hosts diferentes — com a URL fixa no código, o botão
  * "Assinar" do painel de dev mandaria o cliente para a produção.
  */
-const CHECKOUT_URL = (process.env.CHECKOUT_URL || 'https://checkout.proxserverabner.site/c').replace(
+const CHECKOUT_URL = (process.env.CHECKOUT_URL || 'https://devtelahubcheckout.proxserverabner.site/c').replace(
   /\/+$/,
   ''
 );

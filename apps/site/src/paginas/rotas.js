@@ -36,7 +36,7 @@
  * `index.html` e no `sitemap.xml`, mandando o Google para o site de outra
  * empresa. Nunca escreva esse endereço em lugar nenhum deste repositório.
  */
-export const SITE_URL = 'https://vendas.proxserverabner.site';
+export const SITE_URL = 'https://devtelahublandingpage.proxserverabner.site';
 
 /** Data de vigência dos documentos legais. Mesma string em Termos e Privacidade. */
 export const VERSAO_LEGAL = '2026-09-05';

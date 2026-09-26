@@ -6,10 +6,11 @@
  * precisa dos endereços dos outros dois para mandar o usuário contratar — e
  * como cada um vive num domínio próprio, os links são absolutos.
  *
- * Os defaults apontam para PRODUÇÃO de propósito: o build roda no Docker sem
- * receber build args por padrão, e um default de localhost quebraria o botão de
- * contratação numa imagem publicada — falha que só apareceria no clique de quem
- * ia pagar. Em desenvolvimento, sobrescreva no `.env` local.
+ * Os defaults apontam para os endereços PUBLICADOS (hoje, os da versão dev) de
+ * propósito: o build roda no Docker sem receber build args por padrão, e um
+ * default de localhost quebraria o botão de contratação numa imagem publicada.
+ * A falha só apareceria no clique de quem ia pagar. Em desenvolvimento,
+ * sobrescreva no `.env` local.
  *
  * ⚠️ `VITE_*` é resolvido em tempo de BUILD. Trocar o domínio exige rebuild da
  * imagem; alterar a variável no Portainer não tem efeito.
@@ -20,22 +21,22 @@ const stripTrailingSlash = (value: string): string => value.replace(/\/+$/, '');
 /**
  * Site de vendas público (SSR/SEO).
  *
- * ⚠️ Existe UM subdomínio para o site: `vendas.proxserverabner.site`. É o que o
- * compose de produção publica, o que está no `canonical` de `apps/site/index.html`
- * e o que os anúncios usam. O default aqui era `sitetelahub.` — um endereço que
- * NÃO responde. Cada link do painel montado a partir daqui (planos, Termos,
- * Política de Privacidade) levava o cliente a uma URL morta, e a falha só
- * aparecia no clique de quem já estava dentro do produto querendo pagar ou
- * conferir o contrato. Divergir daqui é sempre isso: uma página em branco na
- * mão de quem confiou.
+ * ⚠️ Existe UM subdomínio para o site: `devtelahublandingpage.proxserverabner.site`.
+ * É o endereço da versão dev, que substituiu o antigo subdomínio `vendas.` (fora
+ * do ar). Precisa bater com o que o compose do site publica e com o `canonical`
+ * de `apps/site/index.html`. Um default que não responde leva cada link do painel
+ * montado daqui (planos, Termos, Política de Privacidade) a uma URL morta. A
+ * falha só aparece no clique de quem já está dentro do produto querendo pagar ou
+ * conferir o contrato. Quando a versão virar produção com outro nome, troque
+ * este default junto com o do checkout.
  */
 export const SITE_URL = stripTrailingSlash(
-  import.meta.env.VITE_SITE_URL || 'https://vendas.proxserverabner.site'
+  import.meta.env.VITE_SITE_URL || 'https://devtelahublandingpage.proxserverabner.site'
 );
 
-/** App de checkout — é ele que conduz a contratação de plano pago. */
+/** App de checkout. É ele que conduz a contratação de plano pago. */
 export const CHECKOUT_URL = stripTrailingSlash(
-  import.meta.env.VITE_CHECKOUT_URL || 'https://checkout.proxserverabner.site'
+  import.meta.env.VITE_CHECKOUT_URL || 'https://devtelahubcheckout.proxserverabner.site'
 );
 
 /** Seção de planos do site de vendas. */

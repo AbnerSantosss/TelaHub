@@ -10,9 +10,10 @@
 #    então publicar porta é obrigatório. Usar as mesmas 3025/3027 da stack
 #    antiga faria o container novo nem subir ("port is already allocated"),
 #    por isso a faixa 40xx.
-#      4025 → painel   (rotas: painel.proxserverabner.site E o host público da
-#                       API, porque o Nginx desta imagem faz proxy de /api/ e
-#                       /uploads/ para o backend — ver `apps/painel/nginx.conf`)
+#      4025 → painel   (rota: devtelahubpainel.proxserverabner.site, que também
+#                       é o host público da API: o Nginx desta imagem faz proxy
+#                       de /api/ e /uploads/ para o backend. Ver
+#                       `apps/painel/nginx.conf`)
 #    O backend NÃO publica porta: o Nginx do frontend já faz proxy de /api.
 #    Consequência prática, e é a que decide o roteamento no Cloudflare: TODA
 #    chamada pública à API (inclusive `/api/health` e o webhook do Asaas)
@@ -20,12 +21,16 @@
 #    dele — ver o procedimento numerado em DEPLOY.md.
 #
 #    Os outros dois apps são stacks próprias, cada uma com seu compose:
-#      4038 → site      (rota: vendas.proxserverabner.site)  apps/site/docker-compose.prod.yml
-#      4039 → checkout  (rota: checkout.proxserverabner.site) apps/checkout/docker-compose.prod.yml
-#    O domínio do site é `vendas.` em todos os arquivos deste repositório. Já
-#    houve divergência (`sitetelahub.`) entre o compose e o workflow de build, e
-#    divergência de domínio vira link morto no bundle — que é lido em tempo de
-#    BUILD e não se corrige mexendo no Portainer.
+#      4038 → site      (rota: devtelahublandingpage.proxserverabner.site)  apps/site/docker-compose.prod.yml
+#      4039 → checkout  (rota: devtelahubcheckout.proxserverabner.site)     apps/checkout/docker-compose.prod.yml
+#    Convenção de 25/09/2026: `telahub.proxserverabner.site` é o TelaHub
+#    principal (stack antiga `telahub-novo`). Esta versão usa só nomes com
+#    prefixo `devtelahub`. Os nomes `painel.`, `vendas.` e `checkout.` saíram
+#    do ar. O domínio precisa ser o mesmo em todos os arquivos: divergência
+#    vira link morto no bundle, que é lido em tempo de BUILD e não se corrige
+#    mexendo no Portainer.
+#    As stacks não foram renomeadas. Renomear recria os volumes com outro
+#    prefixo e o banco nasceria vazio.
 # 2. Banco NOVO E VAZIO. O volume é próprio desta stack, então nada da base
 #    antiga vem junto — é uma instalação limpa. A base antiga continua intacta
 #    no volume dela, servindo a stack antiga.
@@ -90,8 +95,11 @@ services:
       # O SITE entra na lista desde que a LP passou a chamar `POST /api/leads`:
       # sem a origem exata aqui, o formulário "Falar com a gente" é bloqueado
       # pelo navegador e todo lead de plano sob consulta se perde em silêncio.
-      - CORS_ORIGINS=${CORS_ORIGINS:-https://painel.proxserverabner.site,https://checkout.proxserverabner.site,https://vendas.proxserverabner.site}
-      - APP_URL=${APP_URL:-https://painel.proxserverabner.site}
+      - CORS_ORIGINS=${CORS_ORIGINS:-https://devtelahubpainel.proxserverabner.site,https://devtelahubcheckout.proxserverabner.site,https://devtelahublandingpage.proxserverabner.site}
+      - APP_URL=${APP_URL:-https://devtelahubpainel.proxserverabner.site}
+      # Destino do botão de assinar, lido em `billing.routes.ts`. Sem esta
+      # linha a variável cadastrada no Portainer nunca chega ao container.
+      - CHECKOUT_URL=${CHECKOUT_URL:-https://devtelahubcheckout.proxserverabner.site/c}
       # Saltos até o backend: Cloudflare Tunnel → Nginx → backend = 2.
       # Com 1, o rate limit de login agrupa todos os visitantes num contador só.
       - TRUST_PROXY=${TRUST_PROXY:-2}
@@ -162,7 +170,7 @@ services:
       - PRIVACY_CONTACT_EMAIL=${PRIVACY_CONTACT_EMAIL:-}
       # Fonte única do canonical/OG/JSON-LD. NUNCA telahub.com.br: aquele
       # domínio é de terceiro desde 2025.
-      - SITE_PUBLIC_URL=${SITE_PUBLIC_URL:-https://vendas.proxserverabner.site}
+      - SITE_PUBLIC_URL=${SITE_PUBLIC_URL:-https://devtelahublandingpage.proxserverabner.site}
     depends_on:
       db:
         condition: service_healthy
@@ -206,7 +214,7 @@ services:
 
   frontend:
     ports:
-      # painel.proxserverabner.site -> localhost:4025 (rota no túnel do host)
+      # devtelahubpainel.proxserverabner.site -> localhost:4025 (rota no túnel do host)
       - "4025:3025"
     build:
       context: ./apps/painel
@@ -215,9 +223,10 @@ services:
         # Rota relativa: o Nginx desta imagem faz o proxy de /api para o backend.
         - VITE_API_URL=/api
         # Os outros dois apps vivem em domínios próprios. São lidos em tempo de
-        # BUILD — configurá-los só como variável da stack não teria efeito.
-        - VITE_SITE_URL=${VITE_SITE_URL:-https://vendas.proxserverabner.site}
-        - VITE_CHECKOUT_URL=${VITE_CHECKOUT_URL:-https://checkout.proxserverabner.site}
+        # BUILD: uma variável da stack com o mesmo nome passa por cima do default
+        # abaixo e entra no bundle, mas só depois de um redeploy com rebuild.
+        - VITE_SITE_URL=${VITE_SITE_URL:-https://devtelahublandingpage.proxserverabner.site}
+        - VITE_CHECKOUT_URL=${VITE_CHECKOUT_URL:-https://devtelahubcheckout.proxserverabner.site}
     restart: unless-stopped
     # O Nginx desta imagem tem `proxy_pass http://backend:3001`. Nginx resolve o
     # upstream ao CARREGAR a configuração: se o container `backend` ainda não

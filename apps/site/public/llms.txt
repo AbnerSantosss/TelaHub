@@ -67,35 +67,35 @@ ferramentas de IA a repetir a informação errada.
 
 ## Páginas
 
-O único domínio publicável do TelaHub é `vendas.proxserverabner.site`. O
+O único domínio publicável do TelaHub é `devtelahublandingpage.proxserverabner.site`. O
 domínio ".com.br" com o nome da marca pertence a TERCEIRO desde 2025 e não tem
 relação com este projeto: nenhuma URL nossa usa esse endereço, e o conteúdo
 publicado lá não é nosso nem foi escrito por nós.
 
-- [Home](https://vendas.proxserverabner.site/): a cena por segmento, como
+- [Home](https://devtelahublandingpage.proxserverabner.site/): a cena por segmento, como
   funciona em 3 passos, os dois formatos de tela, o que cabe na tela, comparação
   com cartaz, pen-drive, agência e sistemas cobrados em dólar, planos e preços, e
   perguntas frequentes.
-- [Condomínio](https://vendas.proxserverabner.site/condominio): o aviso de
+- [Condomínio](https://devtelahublandingpage.proxserverabner.site/condominio): o aviso de
   assembleia, manutenção do elevador e coleta seletiva na TV da portaria ou do
   hall, trocado pelo celular do síndico. Responde a "preciso aprovar em
   assembleia?", "o porteiro consegue trocar?" e "e o síndico seguinte?".
-- [Clínica](https://vendas.proxserverabner.site/clinica): serviços, convênios,
+- [Clínica](https://devtelahublandingpage.proxserverabner.site/clinica): serviços, convênios,
   horários e orientações pré-consulta na TV da sala de espera, em loop, mantidos
   pela recepção. Conteúdo institucional apenas: o produto não exibe dado de
   paciente, fila nominal nem resultado de exame.
-- [Loja](https://vendas.proxserverabner.site/loja): a oferta com foto e preço na
+- [Loja](https://devtelahublandingpage.proxserverabner.site/loja): a oferta com foto e preço na
   TV do balcão e no totem da vitrine, trocada do celular, com aviso agendado por
   data e hora no plano Loja para cima. Serve loja de rua, mercadinho, farmácia,
   pet, ótica e lanchonete.
-- [Termos de uso](https://vendas.proxserverabner.site/termos): versão 2026-09-05.
+- [Termos de uso](https://devtelahublandingpage.proxserverabner.site/termos): versão 2026-09-05.
   Identificação do fornecedor (CNPJ 74.191.667/0001-55), o que o serviço faz,
   conta grátis de 1 tela sem prazo e sem cartão, cobrança por tela ativa,
   cancelamento, os 7 dias de arrependimento do art. 49 do CDC, responsabilidade
   sobre o conteúdo publicado, dependência de internet no local, suspensão por
   atraso só após 10 dias corridos e com aviso, e a lista do que o produto ainda
   não faz.
-- [Política de Privacidade](https://vendas.proxserverabner.site/privacidade):
+- [Política de Privacidade](https://devtelahublandingpage.proxserverabner.site/privacidade):
   versão 2026-09-05. Dados coletados, finalidade e base legal de cada uso,
   compartilhamento nominal com Google (Analytics, Ads, Tag Manager) e Meta
   (Pixel e API de Conversões), transferência internacional, prazos de guarda,

@@ -19,10 +19,18 @@ COPY . .
 # não basta mudar a variável no Portainer.
 #
 # Sem estes args valem os defaults de produção de `src/lib/funnel.js`.
+#
+# VITE_API_URL é a API do formulário de lead, embutida no bundle.
+# PLANS_API_URL é lida por `scripts/fetch-plans.mjs`, que roda no começo do
+# `npm run build` e grava os preços no HTML pré-renderizado.
 ARG VITE_CHECKOUT_URL
 ARG VITE_APP_URL
+ARG VITE_API_URL
+ARG PLANS_API_URL
 ENV VITE_CHECKOUT_URL=$VITE_CHECKOUT_URL
 ENV VITE_APP_URL=$VITE_APP_URL
+ENV VITE_API_URL=$VITE_API_URL
+ENV PLANS_API_URL=$PLANS_API_URL
 
 # Build the production bundle
 RUN npm run build

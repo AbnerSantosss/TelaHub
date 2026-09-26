@@ -2,17 +2,42 @@
 
 ---
 
+# Convenção de nomes (desde 25/09/2026)
+
+Decisão do dono em 25/09/2026. Vale para todos os arquivos deste repositório.
+
+| Hostname | O que é | Túnel |
+|---|---|---|
+| `telahub.proxserverabner.site` | TelaHub principal: a produção antiga, stack `telahub-novo`, com os dados reais dos clientes | stack antiga |
+| `devtelahubpainel.proxserverabner.site` | versão nova: painel, API em `/api`, login e cadastro | `localhost:4025` |
+| `devtelahublandingpage.proxserverabner.site` | versão nova: site de vendas | `localhost:4038` |
+| `devtelahubcheckout.proxserverabner.site` | versão nova: checkout (hoje simulado) | `localhost:4039` |
+
+Regra curta: `telahub.` é a principal. Tudo com prefixo `devtelahub` é a versão
+nova. Os nomes `painel.`, `vendas.` e `checkout.` foram da versão nova até
+25/09 e saíram do ar. Não reaproveite esses nomes.
+
+As stacks no Portainer **não foram renomeadas**. Continuam `telahub-prod`,
+`telahub-site-prod` e `telahub-checkout-prod`. O Portainer usa o nome da stack
+como prefixo dos volumes: renomear cria volumes novos e o banco nasce vazio.
+
+Nunca aponte `telahub.` para a porta `4025`. Isso levaria os clientes da
+produção antiga para a versão nova.
+
+---
+
 # Estado do deploy em 05/09/2026 — leia antes de tudo
 
-Levantamento feito nesta data, com o que dá para verificar de fora:
+Levantamento feito nesta data, com o que dá para verificar de fora. Os nomes
+da tabela são os que valiam em 05/09. Os atuais estão na convenção acima.
 
 | O que | Situação |
 |---|---|
 | API pública | responde **502** |
-| `painel.proxserverabner.site` | **não resolve** em DNS |
-| `checkout.proxserverabner.site` | **não resolve** em DNS |
-| `vendas.proxserverabner.site` | **não resolve** em DNS |
-| `sitetelahub.proxserverabner.site` | **não resolve** em DNS (e não é mais usado — ver abaixo) |
+| `painel.proxserverabner.site` (hoje `devtelahubpainel.`) | **não resolve** em DNS |
+| `checkout.proxserverabner.site` (hoje `devtelahubcheckout.`) | **não resolve** em DNS |
+| `vendas.proxserverabner.site` (hoje `devtelahublandingpage.`) | **não resolve** em DNS |
+| `sitetelahub.proxserverabner.site` | **não resolve** em DNS. Não é mais usado |
 | Branch de trabalho | `chore/monorepo`, com **58 commits que nunca foram para o GitHub** |
 | CI / build-and-push | **nunca rodaram**: disparam em `main`, e nada chegou em `main` |
 | Imagens no GHCR | não há imagem nova publicada desta rodada |
@@ -36,20 +61,20 @@ Domínios e portas usados daqui para frente (uma linha só, para não haver dúv
 
 | App | Porta na VPS | Domínio |
 |---|---|---|
-| painel + API | `4025` | `painel.proxserverabner.site` |
-| site de vendas | `4038` | `vendas.proxserverabner.site` |
-| checkout | `4039` | `checkout.proxserverabner.site` |
+| painel + API | `4025` | `devtelahubpainel.proxserverabner.site` |
+| site de vendas | `4038` | `devtelahublandingpage.proxserverabner.site` |
+| checkout | `4039` | `devtelahubcheckout.proxserverabner.site` |
 
 A **API não tem domínio próprio**: o Nginx do painel faz proxy de `/api/` e
 `/uploads/` para `backend:3001`. Logo, o domínio da API **é**
-`painel.proxserverabner.site`. Isso vale para o `/api/health`, para o webhook do
-Asaas e para qualquer chamada pública.
+`devtelahubpainel.proxserverabner.site`. Isso vale para o `/api/health`, para o
+webhook do Asaas e para qualquer chamada pública.
 
-> O domínio do site é **`vendas.`**. `sitetelahub.` aparecia no
-> `build-and-push.yml` e foi corrigido em 05/09 — era um domínio que nenhum
-> compose declarava, ou seja, o link "ver site" saía do build morto. `VITE_*` é
-> lido em tempo de **build**: domínio errado no bundle não se conserta mexendo
-> no Portainer, só rebuildando.
+> O domínio do site é **`devtelahublandingpage.`**. Até 25/09 era `vendas.`.
+> Antes disso, `sitetelahub.` aparecia no `build-and-push.yml` sem nenhum
+> compose declarar, e o link "ver site" saía do build morto. `VITE_*` é lido em
+> tempo de **build**: domínio errado no bundle não se conserta mexendo no
+> Portainer, só rebuildando.
 
 ## Fase 0 — antes de tocar em qualquer coisa
 
@@ -141,8 +166,9 @@ que já existia.
    | `POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB` | sim | banco novo e vazio, próprio desta stack |
    | `JWT_SECRET` | sim | `openssl rand -base64 48`, mín. 32 caracteres |
    | `ADMIN_EMAIL` / `ADMIN_PASSWORD` | sim | banco nasce vazio: sem admin o seed aborta e o container **não sobe** — é proposital |
-   | `CORS_ORIGINS` | sim | origens **exatas**, separadas por vírgula: `https://painel.proxserverabner.site,https://checkout.proxserverabner.site,https://vendas.proxserverabner.site`. Barra final a mais derruba a comunicação |
-   | `APP_URL` | sim | `https://painel.proxserverabner.site` |
+   | `CORS_ORIGINS` | sim | origens **exatas**, separadas por vírgula: `https://devtelahubpainel.proxserverabner.site,https://devtelahubcheckout.proxserverabner.site,https://devtelahublandingpage.proxserverabner.site`. Barra final a mais derruba a comunicação |
+   | `APP_URL` | sim | `https://devtelahubpainel.proxserverabner.site` |
+   | `CHECKOUT_URL` | não | padrão `https://devtelahubcheckout.proxserverabner.site/c`. Destino do botão de assinar, lido em `billing.routes.ts` |
    | `TRUST_PROXY` | sim | `2` (Tunnel → Nginx → backend). Com `1`, o rate limit agrupa todos os visitantes num contador só |
    | `SMTP_USER` / `SMTP_PASS` | para haver e-mail | sem elas o sistema sobe e apenas não envia |
    | `SMTP_PROVIDER` / `SMTP_FROM_EMAIL` / `SMTP_FROM_NAME` | não | ver seção de e-mail |
@@ -158,7 +184,7 @@ que já existia.
    | `META_CAPI_TEST_EVENT_CODE` | **vazio em produção** | preenchido, todo evento entra como teste e não otimiza campanha |
    | `COMPANY_CNPJ` | sim | identificação do fornecedor (CDC art. 6º, III); sem ela a página não deveria cobrar nem anunciar |
    | `PRIVACY_CONTACT_EMAIL` | sim | canal do titular (LGPD art. 18) |
-   | `SITE_PUBLIC_URL` | sim | `https://vendas.proxserverabner.site`. **Nunca** `telahub.com.br`: é domínio de terceiro desde 2025 |
+   | `SITE_PUBLIC_URL` | sim | `https://devtelahublandingpage.proxserverabner.site`. **Nunca** `telahub.com.br`: é domínio de terceiro desde 2025 |
 
    Os três segredos estão escritos no compose como `${VAR}` **sem valor
    padrão**, de propósito. Se algum ficar em branco, o container sobe com a
@@ -213,28 +239,33 @@ enxerga nome de container — é por isso que os composes publicam portas).
 
     | Hostname | Serviço |
     |---|---|
-    | `painel.proxserverabner.site` | `http://localhost:4025` |
-    | `vendas.proxserverabner.site` | `http://localhost:4038` |
-    | `checkout.proxserverabner.site` | `http://localhost:4039` |
+    | `devtelahubpainel.proxserverabner.site` | `http://localhost:4025` |
+    | `devtelahublandingpage.proxserverabner.site` | `http://localhost:4038` |
+    | `devtelahubcheckout.proxserverabner.site` | `http://localhost:4039` |
 
-15. **Rota extra, temporária, para o formulário de lead do site.** O bundle do
-    site chama a API em `https://telahub.proxserverabner.site/api` — é o default
-    de `apps/site/src/lib/funnel.js`, e ele não é configurável hoje porque
-    `apps/site/Dockerfile` não declara `ARG VITE_API_URL`. Enquanto isso não for
-    corrigido, crie também:
+    Apague as rotas antigas `painel.`, `vendas.` e `checkout.` se ainda
+    existirem. Esses nomes saíram do ar em 25/09.
 
-    | Hostname | Serviço |
+15. **Não crie rota `telahub.` para a versão nova.** Versões anteriores deste
+    arquivo pediam uma rota extra `telahub.proxserverabner.site → localhost:4025`
+    para o formulário de lead do site. Essa rota nunca foi criada e não deve
+    ser. `telahub.` é o TelaHub principal e continua apontando para a stack
+    antiga.
+
+    O site agora recebe dois build args, os dois com padrão
+    `https://devtelahubpainel.proxserverabner.site/api`:
+
+    | Build arg | Quem usa |
     |---|---|
-    | `telahub.proxserverabner.site` | `http://localhost:4025` |
+    | `VITE_API_URL` | formulário de lead (`apps/site/src/lib/funnel.js`), embutido no bundle |
+    | `PLANS_API_URL` | busca de preços no build (`apps/site/scripts/fetch-plans.mjs`) |
 
-    Se esse hostname hoje aponta para a stack **antiga**, repontá-lo é o que
-    move o tráfego para a stack nova — decida isso conscientemente, não de
-    passagem. A correção definitiva (declarar o ARG e buildar o site com
-    `VITE_API_URL=https://painel.proxserverabner.site/api`) está nas pendências.
+    Com isso o formulário e a busca de preços falam direto com a API nova, pelo
+    painel dev. Nenhuma rota extra é necessária.
 
 16. Confirme que cada hostname resolve em DNS antes de testar no navegador
-    (`nslookup painel.proxserverabner.site`). Hostname criado no túnel só existe
-    depois que o registro propaga.
+    (`nslookup devtelahubpainel.proxserverabner.site`). Hostname criado no
+    túnel só existe depois que o registro propaga.
 
 > **Só siga se:** os três domínios abrem alguma coisa que não seja 502/1033.
 
@@ -243,7 +274,7 @@ enxerga nome de container — é por isso que os composes publicam portas).
 17. No painel do Asaas → Integrações → **Webhooks**, cadastre:
 
     ```
-    https://painel.proxserverabner.site/api/webhooks/asaas
+    https://devtelahubpainel.proxserverabner.site/api/webhooks/asaas
     ```
 
     (Se você criou um hostname dedicado para a API, use
@@ -267,7 +298,7 @@ Três verificações. As três, não uma.
 19. **A API responde:**
 
     ```bash
-    curl -i https://painel.proxserverabner.site/api/health
+    curl -i https://devtelahubpainel.proxserverabner.site/api/health
     ```
 
     Esperado: `200` e `{"status":"ok","timestamp":"…"}`. Um **502 aqui significa
@@ -275,13 +306,13 @@ Três verificações. As três, não uma.
     do backend, não para o Cloudflare.
 
     ```bash
-    curl -s https://painel.proxserverabner.site/api/plans | head -c 400
+    curl -s https://devtelahubpainel.proxserverabner.site/api/plans | head -c 400
     ```
 
     Deve listar o catálogo. Se vier vazio, o `seed-plans` não rodou.
 
 20. **Um cadastro real, pelo domínio público.** Abra
-    `https://painel.proxserverabner.site` numa janela anônima, crie uma conta
+    `https://devtelahubpainel.proxserverabner.site` numa janela anônima, crie uma conta
     pelo signup, confirme que entra no painel e que o e-mail de boas-vindas
     chega. Isso exercita, de uma vez: DNS, túnel, Nginx, CORS, banco, JWT, SMTP
     e o rate limit com `TRUST_PROXY` certo. No log, confira que o IP registrado
@@ -300,9 +331,10 @@ Três verificações. As três, não uma.
 
 ## Se der errado — rollback
 
-- **Stack nova quebrada, antiga ainda de pé:** não mexa na nova; reponte os
-  hostnames do túnel de volta para as portas antigas (3025/42938). O túnel é o
-  ponto de reversão mais rápido — não exige rebuild nem redeploy.
+- **Stack nova quebrada, antiga ainda de pé:** a antiga não é afetada. Cada
+  uma tem os próprios hostnames (`telahub.` para a antiga, `devtelahub*` para
+  a nova). Não reponte nomes de uma para a outra. Conserte a nova pelo log do
+  container ou volte a imagem (item abaixo).
 - **Imagem ruim:** o `build-and-push` publica a tag `:latest` **e** a
   `:<sha>`. Troque a tag no compose para o sha anterior e faça redeploy. Voltar
   é repontar a tag, não "reverter e rebuildar".
@@ -409,8 +441,9 @@ rodando do monorepo e validadas.
 - Se a API estiver fora do ar durante o build, o script **avisa e usa o snapshot
   versionado** em vez de falhar. Um reajuste publicado com a API fora sai com o
   preço antigo — confira o log do build ao publicar mudança de preço.
-- O alvo padrão é `https://telahub.proxserverabner.site/api`. Para apontar para
-  outro ambiente: `PLANS_API_URL=... npm run build`.
+- O alvo padrão é `https://devtelahubpainel.proxserverabner.site/api`. No
+  Docker ele chega pelo build arg `PLANS_API_URL`. Para apontar para outro
+  ambiente fora do Docker: `PLANS_API_URL=... npm run build`.
 
 ## Promoção para produção (estado atual, sem staging)
 
@@ -521,13 +554,14 @@ confirme o dump antes de promover.
 
 - **Rotação de segredos no Portainer** (US-P0-05): as senhas novas foram geradas em 2026-07-26 mas **não há confirmação de que foram aplicadas** nas variáveis de ambiente das stacks — pendente desde 29/07/2026. Exige acesso ao Portainer. Enquanto não for feito, o histórico público do repositório contém as credenciais antigas ainda válidas. Está como passo 3 da Fase 0 do procedimento acima.
 - **Repositório GitHub privado** (US-P0-05): o histórico contém a wiki inteira e credenciais. Tornar privado é um clique nas configurações do repositório; limpar o histórico exige `git filter-repo` + force-push coordenado.
-- **`ARG VITE_API_URL` no `apps/site/Dockerfile`**: o site lê `VITE_API_URL` (formulário de lead) mas o Dockerfile não declara o ARG, então o valor não pode ser configurado no build — o bundle fica com o default `https://telahub.proxserverabner.site/api`. Enquanto isso, o procedimento pede uma rota extra no túnel com esse hostname (Fase 4, passo 15). Corrigido o ARG, buildar com `VITE_API_URL=https://painel.proxserverabner.site/api` e apagar a rota extra.
+- **`ARG VITE_API_URL` no `apps/site/Dockerfile`**: resolvido em 25/09/2026. O Dockerfile declara `VITE_API_URL` e `PLANS_API_URL`, e o site é buildado com `https://devtelahubpainel.proxserverabner.site/api` nos dois. A rota extra `telahub. → 4025`, pedida em versões anteriores deste arquivo, nunca foi criada e não deve ser: `telahub.` é da stack antiga.
 - **Stack legada ainda roda `prisma db push`**: ela puxa `docker-compose.yml`, que mantém `db push` porque é também o compose de desenvolvimento. Trocar o comando ali mudaria o comportamento da stack legada no próximo pull. O caminho é **aposentar a stack legada** depois que as três novas estiverem validadas — não repuxá-la. A stack de produção nova (`docker-compose.prod.yml`) já usa `migrate deploy`.
 - **pgAdmin**: saiu do caminho padrão. Continua em `docker-compose.yml` mas atrás do profile `db-admin`, então `docker compose up` não o inicia mais — nem no seu micro, nem numa stack que aponte para esse arquivo. Para usar localmente: `docker compose --profile db-admin up -d pgadmin`. No servidor, use `docker exec -it <db> psql`.
 - **Variáveis novas desta rodada** (definir na stack antes do deploy):
   - `COMMERCIAL_EMAIL` — para onde vai o aviso de lead novo do site. Sem ela, o aviso cai no próprio remetente do SMTP.
   - `CORS_ORIGINS` — precisa incluir a origem do **site** agora que a LP chama `POST /api/leads`. Sem isso, o formulário de contato é bloqueado pelo navegador.
-  - `VITE_API_URL` (build arg do site) — base da API para o formulário de lead.
+  - `VITE_API_URL` e `PLANS_API_URL` (build args do site): base da API para o formulário de lead e para a busca de preços. Padrão `https://devtelahubpainel.proxserverabner.site/api`.
+  - `CHECKOUT_URL` (stack do painel): destino do botão de assinar. Padrão `https://devtelahubcheckout.proxserverabner.site/c`.
   - Opcionais de ajuste fino: `HTTP_PROXY_ALLOWED_HOSTS`, `DEVICE_REGISTER_RATE_LIMIT`, `DEVICE_TELEMETRY_RATE_LIMIT`, `PROXY_RATE_LIMIT`, `LEAD_RATE_LIMIT`.
 - **Placeholders do site** (US-P0-07, parcial): WhatsApp `wa.me/5500000000000`, `CNPJ 00.000.000/0001-00`, `GTM-XXXXXXX` e o domínio `telahub.com.br` (que é de **terceiro** desde 2025) dependem de dados que só o dono tem. Desde 05/09 o `GTM-XXXXXXX` e o `telahub.com.br` **derrubam o CI** (job `claims`), então não voltam sem alguém ver. O formulário de lead, que era um `setTimeout` sem gravar nada, **já foi ligado ao backend**.
 - **Ambiente de staging separado de produção**: exige provisionar um novo stack/container na VPS (ou um segundo Portainer environment) e um subdomínio próprio no Cloudflare Tunnel. Requer acesso direto à VPS/Portainer/Cloudflare — não foi executado nesta sessão, apenas planejado aqui.
