@@ -59,3 +59,7 @@ docker-compose.dev.yml
 # o histórico do Git — o conteúdo antigo segue acessível em commits anteriores.
 wiki/
 raw/
+
+# Registro bruto de sessão (pedidos na íntegra, comandos, respostas). O
+# repositório é público e isto é diário de trabalho, não código.
+registro/

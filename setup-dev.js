@@ -14,6 +14,7 @@ const fs = require('fs');
 const path = require('path');
 const net = require('net');
 const { execSync } = require('child_process');
+const crypto = require('crypto');
 
 const ROOT = __dirname;
 
@@ -133,11 +134,22 @@ services:
   const rootEnv = parseEnvFile(path.join(ROOT, '.env'));
 
   const pgUser = rootEnv.POSTGRES_USER || 'display_user';
-  const pgPass = rootEnv.POSTGRES_PASSWORD || 'devpassword123';
+  // Nada de senha padrão escrita aqui: o repositório é público, e um valor
+  // de fábrica conhecido vira senha de produção no dia em que alguém esquece
+  // de trocar. A senha do Postgres tem que vir do `.env` da raiz porque é a
+  // mesma que o container do banco usa; JWT e admin são sorteados.
+  const pgPass = rootEnv.POSTGRES_PASSWORD;
+  if (!pgPass) {
+    console.error('Defina POSTGRES_PASSWORD no .env da raiz (copie de .env.example) e rode de novo.');
+    process.exit(1);
+  }
   const pgDb = rootEnv.POSTGRES_DB || 'display_db';
-  const jwtSecret = rootEnv.JWT_SECRET || 'telahub-jwt-dev-secret-key-1234567890';
-  const adminEmail = rootEnv.ADMIN_EMAIL || 'admin@telahub.com';
-  const adminPass = rootEnv.ADMIN_PASSWORD || 'adminpass123';
+  const jwtSecret = rootEnv.JWT_SECRET || crypto.randomBytes(32).toString('hex');
+  const adminEmail = rootEnv.ADMIN_EMAIL || 'admin@telahub.local';
+  const adminPass = rootEnv.ADMIN_PASSWORD || crypto.randomBytes(9).toString('base64url');
+  if (!rootEnv.ADMIN_PASSWORD) {
+    console.log(`Senha do admin sorteada (${adminEmail}): ${adminPass}`);
+  }
 
   const backendEnvContent = `# Gerado automaticamente por: node setup-dev.js
 # Banco de dados (PostgreSQL via Docker local na porta ${dbPort})

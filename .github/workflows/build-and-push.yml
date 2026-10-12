@@ -132,6 +132,27 @@ jobs:
 
       # Cada app consome um conjunto próprio de `VITE_*`; o Dockerfile de quem
       # não usa simplesmente ignora os args.
+      #
+      # ⚠️ ESTES VALORES FICAM DENTRO DO BUNDLE. `VITE_*` é resolvido em tempo
+      # de BUILD: domínio errado aqui não se conserta no Portainer, só
+      # rebuildando. Por isso eles precisam ser os MESMOS dos composes:
+      #   site     → https://devtelahublandingpage.proxserverabner.site  (apps/site/docker-compose.prod.yml)
+      #   painel   → https://devtelahubpainel.proxserverabner.site       (docker-compose.prod.yml)
+      #   checkout → https://devtelahubcheckout.proxserverabner.site     (apps/checkout/docker-compose.prod.yml)
+      #
+      # Convenção de 25/09/2026: `telahub.proxserverabner.site` é o TelaHub
+      # principal (stack antiga). Esta versão usa só nomes `devtelahub*`.
+      #
+      # Correção de 2026-09-05: os links cruzados ("ver site" no painel e
+      # "entrar no painel" no site) já saíram do build apontando para hosts que
+      # nenhum compose declarava e que não resolviam. Por isso os valores abaixo
+      # repetem exatamente os três nomes `devtelahub*` listados acima.
+      #
+      # O site recebe `VITE_API_URL` (formulário de lead, em
+      # `apps/site/src/lib/funnel.js`) e `PLANS_API_URL` (busca de preços em
+      # `apps/site/scripts/fetch-plans.mjs`). Os dois apontam para a API da
+      # versão nova, servida pelo painel dev em /api. Não existe rota
+      # `telahub.` para a versão nova: esse nome é da stack antiga.
       - id: args
         name: Montar build-args do app
         run: |
@@ -141,12 +162,14 @@ jobs:
             case "${{ matrix.app }}" in
               painel)
                 echo "VITE_API_URL=/api"
-                echo "VITE_SITE_URL=https://sitetelahub.proxserverabner.site"
-                echo "VITE_CHECKOUT_URL=https://checkout.proxserverabner.site"
+                echo "VITE_SITE_URL=https://devtelahublandingpage.proxserverabner.site"
+                echo "VITE_CHECKOUT_URL=https://devtelahubcheckout.proxserverabner.site"
                 ;;
               site)
-                echo "VITE_CHECKOUT_URL=https://checkout.proxserverabner.site"
-                echo "VITE_APP_URL=https://telahub.proxserverabner.site"
+                echo "VITE_CHECKOUT_URL=https://devtelahubcheckout.proxserverabner.site"
+                echo "VITE_APP_URL=https://devtelahubpainel.proxserverabner.site"
+                echo "VITE_API_URL=https://devtelahubpainel.proxserverabner.site/api"
+                echo "PLANS_API_URL=https://devtelahubpainel.proxserverabner.site/api"
                 ;;
               *)
                 echo ""

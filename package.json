@@ -24,6 +24,8 @@
 
     "test:api": "npm --prefix apps/api test",
 
+    "verificar:claims": "node scripts/verificar-claims-proibidos.mjs",
+
     "build": "npm --prefix apps/api install && npm --prefix apps/api run prisma:generate && npm --prefix apps/api run build",
     "start": "npm --prefix apps/api run db:deploy && npm --prefix apps/api start",
     "seed": "npm --prefix apps/api run db:seed",
