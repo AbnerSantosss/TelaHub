@@ -1,33 +1,94 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import {
-  Building2,
-  User as UserIcon,
-  Mail,
-  Lock,
-  Loader2,
-  AlertTriangle,
-  ShieldCheck,
-  UserPlus,
-} from 'lucide-react';
-import { signup } from '../services/storage';
-import { isApiError, getApiErrorMessage } from '../libs/api';
+import { AlertCircle, Check, Eye, EyeOff, Info, Loader2, UserPlus } from 'lucide-react';
+import { api, setAuthToken, isApiError, getApiErrorMessage } from '../libs/api';
+import { EVENT, META_EVENT, newEventId, readFbCookies, track } from '../libs/tracking';
+import { SITE_URL } from '../libs/external-urls';
+import type { SignupResponse } from '../types';
 import { LogoHub } from './Login';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
+// tokens e efeitos do tema claro, antes do CSS da tela
+import './claro.css';
+import './Auth.css';
 
 type FieldName = 'companyName' | 'name' | 'email' | 'password' | 'confirmPassword';
-
 type FieldErrors = Partial<Record<FieldName, string>>;
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const MIN_PASSWORD_LENGTH = 8;
 
-const inputClass =
-  'pl-10 text-foreground border-border bg-gray-950/40 focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/40 h-11 rounded-xl transition-all duration-300 ease-out aria-invalid:border-rose-500/60 aria-invalid:ring-rose-500/20';
+/**
+ * Versão dos documentos aceitos no cadastro.
+ *
+ * Vai junto no corpo do POST e fica gravada na conta. Sem isso, uma revisão
+ * futura dos Termos apaga a prova de o que exatamente a pessoa aceitou — e o
+ * registro do aceite é a peça que o CDC e a LGPD (art. 8º, §1º) pedem quando
+ * alguém contesta a cobrança. Ao publicar uma revisão, mude a data AQUI.
+ */
+const TERMS_VERSION = '2026-09-05';
+const PRIVACY_VERSION = '2026-09-05';
 
-const labelClass =
-  'text-[10px] font-black text-muted-foreground uppercase tracking-wider pl-0.5 block';
+// Um subdomínio só para o site (ver `libs/external-urls.ts`); as páginas moram lá.
+const TERMS_URL = `${SITE_URL}/termos`;
+const PRIVACY_URL = `${SITE_URL}/privacidade`;
+
+/**
+ * Exemplos de nome de organização, rotacionando.
+ *
+ * A ordem é deliberada e os segmentos entram em pé de igualdade: o TelaHub é
+ * horizontal. Fixar um exemplo de lanchonete faz o síndico e o gerente de
+ * clínica pensarem "não é para mim" no primeiro campo do formulário — que é o
+ * campo mais caro da jornada inteira, porque veio de clique pago.
+ */
+const EXEMPLOS_ORGANIZACAO = [
+  'Ex.: Condomínio Jardins',
+  'Ex.: Clínica Vida',
+  'Ex.: Padaria do Sol',
+  'Ex.: Academia Corpo e Movimento',
+];
+
+export interface SignupAttribution {
+  utmSource?: string;
+  utmMedium?: string;
+  utmCampaign?: string;
+  utmContent?: string;
+  utmTerm?: string;
+  gclid?: string;
+  fbclid?: string;
+  referrer?: string;
+  landingPath?: string;
+}
+
+/**
+ * Lê a atribuição da URL de entrada.
+ *
+ * ARMADILHA: o painel usa `HashRouter`. O site monta o link como
+ * `https://painel.../?utm_source=...#/signup` — a query vem ANTES do `#` de
+ * propósito (ver `apps/site/src/lib/funnel.js`). Depois do `#` ela viraria
+ * parte da rota e `window.location.search` voltaria vazio: o cadastro chegaria
+ * sem origem nenhuma e a campanha inteira ficaria sem custo por conta criada.
+ * Por isso lemos de `location.search`, nunca do hash.
+ */
+function readAttribution(): SignupAttribution {
+  if (typeof window === 'undefined') return {};
+  try {
+    const p = new URLSearchParams(window.location.search);
+    const pick = (key: string) => p.get(key) || undefined;
+    return {
+      utmSource: pick('utm_source'),
+      utmMedium: pick('utm_medium'),
+      utmCampaign: pick('utm_campaign'),
+      utmContent: pick('utm_content'),
+      utmTerm: pick('utm_term'),
+      gclid: pick('gclid'),
+      fbclid: pick('fbclid'),
+      referrer: typeof document !== 'undefined' ? document.referrer || undefined : undefined,
+      landingPath: `${window.location.pathname}${window.location.hash}`,
+    };
+  } catch {
+    // Atribuição é diagnóstico: nunca pode impedir alguém de criar a conta.
+    return {};
+  }
+}
 
 const Signup: React.FC = () => {
   const navigate = useNavigate();
@@ -37,11 +98,40 @@ const Signup: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false); // NUNCA nasce marcado
+  /**
+   * Opt-in de novidades — OPCIONAL, e também nunca nasce marcado.
+   *
+   * É um consentimento SEPARADO do aceite dos Termos, e a separação é o item
+   * inteiro: juntar os dois numa frase só (ou pré-marcar) transforma condição
+   * do serviço em captura de base de marketing, que é exatamente o que invalida
+   * o consentimento na LGPD (art. 8º, §§3º e 4º) — e o consentimento inválido
+   * não é neutro: derruba a base legal de TODA a lista, não só desta conta.
+   *
+   * Também não pode travar o cadastro. Quem não quer novidades cria a conta
+   * igual.
+   */
+  const [marketingOptIn, setMarketingOptIn] = useState(false);
 
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [formError, setFormError] = useState('');
   const [emailAlreadyUsed, setEmailAlreadyUsed] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  // A atribuição é capturada UMA vez, na montagem: se a pessoa navegar dentro
+  // do painel antes de enviar, a URL muda e a origem se perde.
+  const [attribution] = useState<SignupAttribution>(() => readAttribution());
+
+  // Exemplo do campo de organização, rotacionando devagar.
+  const [exemploIndex, setExemploIndex] = useState(0);
+  useEffect(() => {
+    if (companyName) return; // já digitou: para de trocar debaixo do dedo dela
+    const id = window.setInterval(() => {
+      setExemploIndex((i) => (i + 1) % EXEMPLOS_ORGANIZACAO.length);
+    }, 3500);
+    return () => window.clearInterval(id);
+  }, [companyName]);
 
   const clearFieldError = (field: FieldName) => {
     setFieldErrors((prev) => {
@@ -56,7 +146,7 @@ const Signup: React.FC = () => {
     const errors: FieldErrors = {};
 
     if (!companyName.trim()) {
-      errors.companyName = 'Informe o nome da sua empresa.';
+      errors.companyName = 'Diga o nome do seu lugar. É ele que aparece no painel.';
     }
     if (!name.trim()) {
       errors.name = 'Informe o seu nome.';
@@ -64,17 +154,17 @@ const Signup: React.FC = () => {
     if (!email.trim()) {
       errors.email = 'Informe o seu e-mail.';
     } else if (!EMAIL_REGEX.test(email.trim())) {
-      errors.email = 'Informe um e-mail válido (ex.: nome@empresa.com.br).';
+      errors.email = 'Esse e-mail parece incompleto. Confira o que vem depois do @.';
     }
     if (!password) {
-      errors.password = 'Crie uma senha de acesso.';
+      errors.password = 'Crie uma senha.';
     } else if (password.length < MIN_PASSWORD_LENGTH) {
-      errors.password = `A senha deve ter pelo menos ${MIN_PASSWORD_LENGTH} caracteres.`;
+      errors.password = `A senha precisa de pelo menos ${MIN_PASSWORD_LENGTH} caracteres.`;
     }
     if (!confirmPassword) {
       errors.confirmPassword = 'Repita a senha para confirmar.';
     } else if (confirmPassword !== password) {
-      errors.confirmPassword = 'As senhas não coincidem.';
+      errors.confirmPassword = 'As duas senhas estão diferentes.';
     }
 
     return errors;
@@ -83,6 +173,7 @@ const Signup: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (loading) return; // trava dupla contra duplo cadastro
+    if (!acceptedTerms) return; // o botão já está travado; isto é o cinto de segurança
 
     setFormError('');
     setEmailAlreadyUsed(false);
@@ -90,32 +181,90 @@ const Signup: React.FC = () => {
     const errors = validate();
     setFieldErrors(errors);
     if (Object.keys(errors).length > 0) {
-      // Move o foco para o primeiro campo com erro (acessibilidade).
       const first = Object.keys(errors)[0] as FieldName;
       document.getElementById(`signup-${first}`)?.focus();
       return;
     }
 
     setLoading(true);
+
+    // O id nasce ANTES do pedido porque a MESMA string precisa ir para os dois
+    // lados: o corpo do POST (o servidor repete o evento pela Conversions API) e
+    // o Pixel do navegador, mais abaixo. Id diferente entre navegador e servidor
+    // faz a Meta contar a conversão DUAS vezes — sem nenhum erro aparecer, e com
+    // todo custo por resultado do painel caindo pela metade.
+    const metaEventId = newEventId();
+    const { fbp, fbc } = readFbCookies();
+
     try {
-      await signup({
+      // Chamamos `POST /api/signup` direto (e não `services/storage.signup()`)
+      // porque aquele helper só encaminha os quatro campos do formulário, e o
+      // aceite dos Termos, a atribuição e o id de deduplicação precisam chegar
+      // no servidor no MESMO pedido que cria a conta. Gravar o aceite depois,
+      // numa segunda chamada, deixaria uma janela em que existe conta sem prova
+      // de consentimento — exatamente o que a LGPD pede para não existir.
+      const result = await api.post<SignupResponse>('/signup', {
         companyName: companyName.trim(),
         name: name.trim(),
         email: email.trim(),
         password,
+
+        // Consentimento (LGPD art. 8º / CDC): o que foi aceito e qual versão.
+        acceptedTerms: true,
+        termsVersion: TERMS_VERSION,
+        privacyVersion: PRIVACY_VERSION,
+
+        // Novidades por e-mail: consentimento à parte, e vai o valor REAL da
+        // caixa — nunca `true` fixo como o `acceptedTerms` acima (aquele pode
+        // ser fixo porque o envio nem acontece sem ele). É este campo que
+        // decide se a conta entra na régua de campanha; mandar `true` por
+        // descuido cria base de marketing sem consentimento, e o estrago só
+        // aparece no primeiro disparo, quando já foi.
+        marketingOptIn,
+
+        // De onde veio esta conta.
+        attribution,
+
+        // Deduplicação Pixel × Conversions API.
+        metaEventId,
+        fbp,
+        fbc,
       });
-      // Token já persistido por `signup()` — segue direto para o Dashboard.
+
+      // O token é persistido aqui, igual ao que `storage.signup()` fazia.
+      setAuthToken(result.token);
+
+      // Só agora: o evento marca CONTA CRIADA. Disparar antes da resposta
+      // contaria como conversão todo formulário que o servidor recusou.
+      track({
+        event: EVENT.SIGN_UP,
+        params: {
+          method: 'email',
+          plan: 'gratis',
+          org_id: result.user?.organizationId ?? undefined,
+        },
+        metaEvent: META_EVENT.COMPLETE_REGISTRATION,
+        eventId: metaEventId,
+      });
+
       navigate('/', { replace: true });
     } catch (err) {
       if (isApiError(err) && err.status === 409) {
         setEmailAlreadyUsed(true);
+        setFormError(getApiErrorMessage(err, 'Este e-mail já tem conta no TelaHub.'));
+      } else if (isApiError(err)) {
         setFormError(
-          getApiErrorMessage(err, 'Este e-mail já está cadastrado.'),
+          getApiErrorMessage(err, 'Não conseguimos criar sua conta agora. Tente de novo.'),
         );
       } else {
-        setFormError(
-          getApiErrorMessage(err, 'Não foi possível criar sua conta agora. Tente novamente.'),
-        );
+        // Não é `ApiError`: o servidor nem respondeu (rede caiu, DNS, CORS).
+        // `getApiErrorMessage` devolveria a `message` de QUALQUER Error, e a do
+        // fetch é "Failed to fetch" — texto técnico em inglês, no exato momento
+        // em que a pessoa está criando a conta. Quem só vê isso conclui que o
+        // produto está quebrado e vai embora; o certo é dizer o que houve e
+        // que os dados dela continuam preenchidos na tela.
+        console.error(err);
+        setFormError('Sem conexão com o servidor agora. Verifique sua internet e tente de novo.');
       }
     } finally {
       setLoading(false);
@@ -126,12 +275,8 @@ const Signup: React.FC = () => {
     const message = fieldErrors[field];
     if (!message) return null;
     return (
-      <p
-        id={`signup-${field}-error`}
-        role="alert"
-        className="flex items-start gap-1.5 text-[11px] font-semibold text-rose-400 pl-0.5"
-      >
-        <AlertTriangle size={12} className="mt-[1px] flex-shrink-0" aria-hidden="true" />
+      <p id={`signup-${field}-error`} role="alert" className="auth-erro-campo">
+        <AlertCircle size={14} aria-hidden="true" />
         <span>{message}</span>
       </p>
     );
@@ -145,252 +290,331 @@ const Signup: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-transparent text-foreground py-10">
-      {/* Background Mesh Grid */}
-      <div className="absolute inset-0 bg-[radial-gradient(rgba(14,165,233,0.03)_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none z-0"></div>
-
-      <div className="w-full max-w-md p-6 sm:p-8 relative z-10 flex flex-col gap-6">
-        {/* Logo e Branding */}
-        <div className="flex flex-col items-center animate-in fade-in slide-in-from-top-4 duration-500">
-          <div className="w-20 h-20 bg-card flex items-center justify-center border border-border mb-4 shadow-md relative p-2.5 rounded-xl">
-            <LogoHub size={44} />
+    <div className="auth-page">
+      <div className="auth-shell">
+        <aside className="auth-vitrine">
+          <div className="auth-marca">
+            <LogoHub size={34} />
+            <span className="auth-marca-nome">
+              Tela<em>Hub</em>
+            </span>
           </div>
-          <h1 className="text-3xl font-black text-foreground tracking-tight mb-1 text-center uppercase font-sans">
-            Tela<span className="text-accent font-black">Hub</span>
-          </h1>
-          <p className="text-muted-foreground text-xs font-semibold tracking-wider text-center max-w-[300px] uppercase">
-            Criar sua conta
-          </p>
-        </div>
 
-        {/* Destaque da oferta freemium — 1 tela grátis, sem prazo.
-            NÃO trocar por "X dias grátis": a entrada do produto não é trial. */}
-        <div className="flex flex-col gap-2 rounded-xl border border-emerald-500/20 bg-emerald-500/[0.07] px-4 py-3">
-          <p className="flex items-center gap-2.5 text-[12px] font-bold text-emerald-300 leading-snug">
-            <ShieldCheck size={16} className="text-emerald-400 flex-shrink-0" aria-hidden="true" />
-            1 tela grátis para sempre, sem cartão de crédito
-          </p>
-          <p className="text-[11px] text-emerald-200/70 leading-snug pl-[26px]">
-            Ao ligar a 2ª tela, a cobrança começa dela em diante e proporcional ao período — nunca retroativa.
-          </p>
-        </div>
+          <div>
+            <h2 className="auth-vitrine-titulo">Use a TV que você já tem para mostrar avisos e ofertas.</h2>
+            <p className="auth-vitrine-texto">
+              Crie a conta, conecte a TV que já existe no lugar e publique o primeiro aviso pelo
+              celular. Dá para fazer tudo em poucos minutos.
+            </p>
+          </div>
 
-        <div className="bg-[#0a0f24]/60 backdrop-blur-md border border-border shadow-soft p-6 sm:p-8 transition-all duration-300 hover:border-sky-500/30 rounded-xl">
-          <form onSubmit={handleSubmit} noValidate>
-            {/* fieldset desabilitado bloqueia todos os campos durante o envio */}
-            <fieldset disabled={loading} className="space-y-5 disabled:opacity-70">
-              <legend className="sr-only">Dados de cadastro</legend>
+          <ul className="auth-lugares">
+            <li>Portaria de condomínio</li>
+            <li>Recepção de empresa</li>
+            <li>Sala de espera de clínica</li>
+            <li>Vitrine de loja</li>
+            <li>Grade da academia</li>
+            <li>Balcão da padaria</li>
+          </ul>
 
-              {/* Nome da empresa */}
-              <div className="space-y-1.5">
-                <label htmlFor="signup-companyName" className={labelClass}>
-                  Nome da empresa
-                </label>
-                <div className="relative group">
-                  <Input
-                    id="signup-companyName"
-                    name="organization"
-                    type="text"
-                    value={companyName}
-                    onChange={(e) => {
-                      setCompanyName(e.target.value);
-                      clearFieldError('companyName');
-                    }}
-                    className={inputClass}
-                    placeholder="Ex: Padaria Central Ltda"
-                    autoComplete="organization"
-                    aria-invalid={!!fieldErrors.companyName}
-                    aria-describedby={describedBy('companyName')}
-                  />
-                  <Building2
-                    size={16}
-                    className="absolute left-3.5 top-3.5 text-muted-foreground group-focus-within:text-accent transition-colors"
-                    aria-hidden="true"
-                  />
-                </div>
-                {renderFieldError('companyName')}
+          <ul className="auth-provas">
+            <li>
+              <Check size={18} aria-hidden="true" />
+              <span>A primeira tela é grátis para sempre e não pede cartão.</span>
+            </li>
+            <li>
+              <Check size={18} aria-hidden="true" />
+              <span>Para conectar a TV, basta digitar um código. Não precisa de pen-drive nem de técnico.</span>
+            </li>
+            <li>
+              <Check size={18} aria-hidden="true" />
+              <span>
+                A cobrança só começa quando você liga a 2ª tela, proporcional ao período. Nada é cobrado de forma retroativa.
+              </span>
+            </li>
+          </ul>
+        </aside>
+
+        <main className="auth-coluna">
+          <div className="auth-cartao">
+            <div className="auth-topo-mobile">
+              <LogoHub size={44} />
+              <div>
+                <h1 className="auth-titulo">Criar sua conta</h1>
+                <p className="auth-subtitulo">Leva um minuto e não pede cartão.</p>
               </div>
+            </div>
 
-              {/* Seu nome */}
-              <div className="space-y-1.5">
-                <label htmlFor="signup-name" className={labelClass}>
-                  Seu nome
-                </label>
-                <div className="relative group">
-                  <Input
-                    id="signup-name"
-                    name="name"
-                    type="text"
-                    value={name}
-                    onChange={(e) => {
-                      setName(e.target.value);
-                      clearFieldError('name');
-                    }}
-                    className={inputClass}
-                    placeholder="Ex: Maria Souza"
-                    autoComplete="name"
-                    aria-invalid={!!fieldErrors.name}
-                    aria-describedby={describedBy('name')}
-                  />
-                  <UserIcon
-                    size={16}
-                    className="absolute left-3.5 top-3.5 text-muted-foreground group-focus-within:text-accent transition-colors"
-                    aria-hidden="true"
-                  />
-                </div>
-                {renderFieldError('name')}
-              </div>
+            {/* A promessa da landing, repetida. Não é teste com prazo. */}
+            <p className="auth-promessa">
+              <Check size={18} aria-hidden="true" />
+              <span>
+                <strong>A primeira tela é grátis para sempre e não pede cartão.</strong> Ao ligar a 2ª
+                tela, a cobrança começa dela em diante e proporcional ao período.
+              </span>
+            </p>
 
-              {/* E-mail */}
-              <div className="space-y-1.5">
-                <label htmlFor="signup-email" className={labelClass}>
-                  E-mail
-                </label>
-                <div className="relative group">
-                  <Input
-                    id="signup-email"
-                    name="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => {
-                      setEmail(e.target.value);
-                      clearFieldError('email');
-                      setEmailAlreadyUsed(false);
-                    }}
-                    className={inputClass}
-                    placeholder="Ex: seu.email@empresa.com.br"
-                    autoComplete="email"
-                    aria-invalid={!!fieldErrors.email}
-                    aria-describedby={describedBy('email')}
-                  />
-                  <Mail
-                    size={16}
-                    className="absolute left-3.5 top-3.5 text-muted-foreground group-focus-within:text-accent transition-colors"
-                    aria-hidden="true"
-                  />
-                </div>
-                {renderFieldError('email')}
-              </div>
+            <div className="auth-caixa">
+              <form onSubmit={handleSubmit} noValidate>
+                <fieldset className="auth-form" disabled={loading}>
+                  <legend className="auth-legenda">Dados da conta</legend>
 
-              {/* Senha */}
-              <div className="space-y-1.5">
-                <label htmlFor="signup-password" className={labelClass}>
-                  Senha
-                </label>
-                <div className="relative group">
-                  <Input
-                    id="signup-password"
-                    name="new-password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => {
-                      setPassword(e.target.value);
-                      clearFieldError('password');
-                    }}
-                    className={inputClass}
-                    placeholder="Mínimo de 8 caracteres"
-                    autoComplete="new-password"
-                    aria-invalid={!!fieldErrors.password}
-                    aria-describedby={describedBy('password', 'signup-password-hint')}
-                  />
-                  <Lock
-                    size={16}
-                    className="absolute left-3.5 top-3.5 text-muted-foreground group-focus-within:text-accent transition-colors"
-                    aria-hidden="true"
-                  />
-                </div>
-                <p id="signup-password-hint" className="text-[11px] text-slate-500 pl-0.5">
-                  Use no mínimo {MIN_PASSWORD_LENGTH} caracteres.
-                </p>
-                {renderFieldError('password')}
-              </div>
+                  {/* Nome do lugar */}
+                  <div className="auth-campo">
+                    <label className="auth-rotulo" htmlFor="signup-companyName">
+                      Nome do seu lugar
+                    </label>
+                    <input
+                      id="signup-companyName"
+                      name="organization"
+                      type="text"
+                      className="auth-input"
+                      value={companyName}
+                      onChange={(e) => {
+                        setCompanyName(e.target.value);
+                        clearFieldError('companyName');
+                      }}
+                      placeholder={EXEMPLOS_ORGANIZACAO[exemploIndex]}
+                      autoComplete="organization"
+                      aria-invalid={!!fieldErrors.companyName}
+                      aria-describedby={describedBy('companyName', 'signup-company-hint')}
+                    />
+                    <p id="signup-company-hint" className="auth-dica">
+                      O nome do condomínio, escritório, clínica, loja ou academia. É ele que
+                      aparece no seu painel.
+                    </p>
+                    {renderFieldError('companyName')}
+                  </div>
 
-              {/* Confirmação de senha */}
-              <div className="space-y-1.5">
-                <label htmlFor="signup-confirmPassword" className={labelClass}>
-                  Confirmar senha
-                </label>
-                <div className="relative group">
-                  <Input
-                    id="signup-confirmPassword"
-                    name="confirm-password"
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => {
-                      setConfirmPassword(e.target.value);
-                      clearFieldError('confirmPassword');
-                    }}
-                    className={inputClass}
-                    placeholder="Repita a senha"
-                    autoComplete="new-password"
-                    aria-invalid={!!fieldErrors.confirmPassword}
-                    aria-describedby={describedBy('confirmPassword')}
-                  />
-                  <Lock
-                    size={16}
-                    className="absolute left-3.5 top-3.5 text-muted-foreground group-focus-within:text-accent transition-colors"
-                    aria-hidden="true"
-                  />
-                </div>
-                {renderFieldError('confirmPassword')}
-              </div>
+                  {/* Nome da pessoa */}
+                  <div className="auth-campo">
+                    <label className="auth-rotulo" htmlFor="signup-name">
+                      Seu nome
+                    </label>
+                    <input
+                      id="signup-name"
+                      name="name"
+                      type="text"
+                      className="auth-input"
+                      value={name}
+                      onChange={(e) => {
+                        setName(e.target.value);
+                        clearFieldError('name');
+                      }}
+                      placeholder="Ex.: Maria Souza"
+                      autoComplete="name"
+                      aria-invalid={!!fieldErrors.name}
+                      aria-describedby={describedBy('name')}
+                    />
+                    {renderFieldError('name')}
+                  </div>
 
-              {/* Erro geral (inclui 409 — e-mail já cadastrado) */}
-              {formError && (
-                <div
-                  role="alert"
-                  className="bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs p-3 rounded-xl font-bold flex flex-col gap-1.5"
-                >
-                  <span className="flex items-center gap-2">
-                    <AlertTriangle size={14} aria-hidden="true" /> {formError}
-                  </span>
-                  {emailAlreadyUsed && (
-                    <span className="text-[11px] font-normal text-rose-300/90">
-                      Já tem uma conta com esse e-mail?{' '}
-                      <Link
-                        to="/login"
-                        className="font-bold text-sky-400 hover:text-sky-300 underline underline-offset-2"
+                  {/* E-mail */}
+                  <div className="auth-campo">
+                    <label className="auth-rotulo" htmlFor="signup-email">
+                      Seu e-mail
+                    </label>
+                    <input
+                      id="signup-email"
+                      name="email"
+                      type="email"
+                      className="auth-input"
+                      value={email}
+                      onChange={(e) => {
+                        setEmail(e.target.value);
+                        clearFieldError('email');
+                        setEmailAlreadyUsed(false);
+                      }}
+                      placeholder="voce@seunegocio.com.br"
+                      autoComplete="email"
+                      inputMode="email"
+                      aria-invalid={!!fieldErrors.email}
+                      aria-describedby={describedBy('email', 'signup-email-hint')}
+                    />
+                    <p id="signup-email-hint" className="auth-dica">
+                      É por aqui que avisamos se uma tela parar de responder.
+                    </p>
+                    {renderFieldError('email')}
+                  </div>
+
+                  {/* Senha */}
+                  <div className="auth-campo">
+                    <label className="auth-rotulo" htmlFor="signup-password">
+                      Senha
+                    </label>
+                    <div className="auth-campo-senha">
+                      <input
+                        id="signup-password"
+                        name="new-password"
+                        type={showPassword ? 'text' : 'password'}
+                        className="auth-input"
+                        value={password}
+                        onChange={(e) => {
+                          setPassword(e.target.value);
+                          clearFieldError('password');
+                        }}
+                        placeholder={`Pelo menos ${MIN_PASSWORD_LENGTH} caracteres`}
+                        autoComplete="new-password"
+                        aria-invalid={!!fieldErrors.password}
+                        aria-describedby={describedBy('password', 'signup-password-hint')}
+                      />
+                      <button
+                        type="button"
+                        className="auth-olho"
+                        onClick={() => setShowPassword((v) => !v)}
+                        aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                        aria-pressed={showPassword}
                       >
-                        Entrar agora
-                      </Link>
-                      .
-                    </span>
+                        {showPassword ? (
+                          <EyeOff size={18} aria-hidden="true" />
+                        ) : (
+                          <Eye size={18} aria-hidden="true" />
+                        )}
+                      </button>
+                    </div>
+                    <p id="signup-password-hint" className="auth-dica">
+                      Use no mínimo {MIN_PASSWORD_LENGTH} caracteres.
+                    </p>
+                    {renderFieldError('password')}
+                  </div>
+
+                  {/* Confirmação */}
+                  <div className="auth-campo">
+                    <label className="auth-rotulo" htmlFor="signup-confirmPassword">
+                      Repita a senha
+                    </label>
+                    <input
+                      id="signup-confirmPassword"
+                      name="confirm-password"
+                      type={showPassword ? 'text' : 'password'}
+                      className="auth-input"
+                      value={confirmPassword}
+                      onChange={(e) => {
+                        setConfirmPassword(e.target.value);
+                        clearFieldError('confirmPassword');
+                      }}
+                      placeholder="A mesma senha de novo"
+                      autoComplete="new-password"
+                      aria-invalid={!!fieldErrors.confirmPassword}
+                      aria-describedby={describedBy('confirmPassword')}
+                    />
+                    {renderFieldError('confirmPassword')}
+                  </div>
+
+                  {/* Aceite obrigatório: checkbox nativo, nunca pré-marcado.
+                      Consentimento tem de ser um ato — caixa já marcada é
+                      justamente o que a LGPD e o CDC não aceitam como prova. */}
+                  <div className="auth-campo">
+                    <label className="auth-checkbox" htmlFor="signup-termos">
+                      <input
+                        id="signup-termos"
+                        type="checkbox"
+                        checked={acceptedTerms}
+                        onChange={(e) => setAcceptedTerms(e.target.checked)}
+                        aria-describedby="signup-termos-motivo"
+                      />
+                      <span>
+                        Li e aceito os{' '}
+                        <a
+                          className="auth-link"
+                          href={TERMS_URL}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          Termos de uso
+                        </a>{' '}
+                        e a{' '}
+                        <a
+                          className="auth-link"
+                          href={PRIVACY_URL}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          Política de Privacidade
+                        </a>
+                        .
+                      </span>
+                    </label>
+
+                    {/* Motivo em TEXTO. Botão apagado sem explicação faz a
+                        pessoa achar que o site quebrou e ir embora. */}
+                    {!acceptedTerms && (
+                      <p id="signup-termos-motivo" className="auth-motivo">
+                        <Info size={14} aria-hidden="true" />
+                        <span>
+                          Para criar a conta, marque que você leu e aceita os Termos e a Política de
+                          Privacidade.
+                        </span>
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Opt-in de novidades: OUTRA caixa, OUTRO campo, opcional.
+                      Fica depois do aceite e nunca dentro dele — uma caixa só
+                      dizendo "aceito os Termos e quero receber novidades" faz
+                      quem quer a conta consentir com marketing sem escolha, e
+                      é esse pacote que a LGPD não aceita como consentimento.
+                      Sem `auth-motivo` embaixo: não marcar não impede nada, e
+                      um aviso aqui sugeriria que impede. */}
+                  <div className="auth-campo">
+                    <label className="auth-checkbox" htmlFor="signup-novidades">
+                      <input
+                        id="signup-novidades"
+                        type="checkbox"
+                        checked={marketingOptIn}
+                        onChange={(e) => setMarketingOptIn(e.target.checked)}
+                      />
+                      <span>
+                        Quero receber novidades e dicas de uso por e-mail. Você pode sair quando
+                        quiser, pelo link no rodapé de cada mensagem.
+                      </span>
+                    </label>
+                  </div>
+
+                  {formError && (
+                    <div role="alert" className="auth-erro-geral">
+                      <span className="auth-erro-geral-linha">
+                        <AlertCircle size={16} aria-hidden="true" />
+                        {formError}
+                      </span>
+                      {emailAlreadyUsed && (
+                        <span className="auth-erro-geral-extra">
+                          Já é você?{' '}
+                          <Link className="auth-link" to="/login">
+                            Entrar agora
+                          </Link>
+                          .
+                        </span>
+                      )}
+                    </div>
                   )}
-                </div>
-              )}
 
-              <Button
-                type="submit"
-                disabled={loading}
-                variant="brand"
-                className="w-full py-6 rounded-xl hover:shadow-[0_0_20px_rgba(56,189,248,0.3)] transition-all duration-300 ease-out flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed text-xs tracking-wider active:scale-[0.98] border border-white/10 uppercase font-black"
-              >
-                {loading ? (
-                  <Loader2 size={18} className="animate-spin" aria-hidden="true" />
-                ) : (
-                  <UserPlus size={18} aria-hidden="true" />
-                )}
-                {loading ? 'CRIANDO CONTA...' : 'CRIAR CONTA GRÁTIS'}
-              </Button>
-            </fieldset>
-          </form>
+                  <button
+                    type="submit"
+                    className="auth-botao auth-botao-primario"
+                    disabled={loading || !acceptedTerms}
+                  >
+                    {loading ? (
+                      <Loader2 size={18} className="auth-girando" aria-hidden="true" />
+                    ) : (
+                      <UserPlus size={18} aria-hidden="true" />
+                    )}
+                    {loading ? 'Criando sua conta…' : 'Criar conta grátis'}
+                  </button>
+                </fieldset>
+              </form>
 
-          <p className="text-center text-xs text-muted-foreground mt-5">
-            Já tenho conta —{' '}
-            <Link
-              to="/login"
-              className="font-bold text-sky-400 hover:text-sky-300 underline underline-offset-2 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/50"
-            >
-              fazer login
-            </Link>
-          </p>
-        </div>
+              <p className="auth-rodape-caixa">
+                Já tem conta?{' '}
+                <Link className="auth-link" to="/login">
+                  Entrar
+                </Link>
+              </p>
+            </div>
 
-        <div className="text-center">
-          <p className="text-muted-foreground text-[9px] font-mono uppercase tracking-widest">
-            &copy; {new Date().getFullYear()} TelaHub System v2.0
-          </p>
-        </div>
+            <p className="auth-rodape">© {new Date().getFullYear()} TelaHub</p>
+          </div>
+        </main>
       </div>
     </div>
   );

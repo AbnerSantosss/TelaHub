@@ -102,7 +102,7 @@ export const CreateDisplayModal: React.FC<CreateDisplayModalProps> = ({
                 </div>
                 <div className="text-center">
                   <p className="text-xs font-black uppercase tracking-wider">Horizontal</p>
-                  <p className="text-[10px] text-text-muted/60 font-mono mt-0.5">16:9 — TV / Monitor</p>
+                  <p className="text-[10px] text-text-muted/60 font-mono mt-0.5">16:9 (TV ou monitor)</p>
                 </div>
               </button>
 
@@ -116,7 +116,7 @@ export const CreateDisplayModal: React.FC<CreateDisplayModalProps> = ({
                 </div>
                 <div className="text-center">
                   <p className="text-xs font-black uppercase tracking-wider">Vertical</p>
-                  <p className="text-[10px] text-text-muted/60 font-mono mt-0.5">9:16 — Totem / Kiosk</p>
+                  <p className="text-[10px] text-text-muted/60 font-mono mt-0.5">9:16 (totem)</p>
                 </div>
               </button>
             </div>

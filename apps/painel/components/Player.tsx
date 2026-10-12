@@ -595,7 +595,7 @@ const Player: React.FC = () => {
       <div className="h-screen w-screen bg-black flex items-center justify-center text-white font-bold uppercase tracking-widest text-sm text-center px-6">
         <div className="flex flex-col items-center gap-6">
           <div className="w-16 h-16 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-          <p className="animate-pulse">Sincronizando Player via Nuvem...</p>
+          <p className="animate-pulse">Carregando conteúdo...</p>
         </div>
       </div>
     );

@@ -22,6 +22,8 @@ import {
 import { Display, Device } from '../../types';
 import { motion } from 'motion/react';
 import { cardItem } from '../../libs/motion';
+import { Button } from '../ui/button';
+import { moverSpotlight } from '../../lib/spotlight';
 
 interface DisplayCardProps {
   display: Display;
@@ -64,7 +66,8 @@ export const DisplayCard: React.FC<DisplayCardProps> = ({
       transition={{ type: 'spring', stiffness: 300, damping: 18 }}
       style={{ height: '100%' }}
     >
-      <div className="display-card">
+      {/* fx-spotlight: luz + borda que acendem seguindo o mouse (index.css) */}
+      <div className="display-card fx-spotlight" onPointerMove={moverSpotlight}>
         {/* PREVIEW — altura fixa 190px */}
         <div className="display-preview">
           {/* Status Badge */}
@@ -150,25 +153,33 @@ export const DisplayCard: React.FC<DisplayCardProps> = ({
 
           <span className="display-code">ID: {display.slug}</span>
 
-          <button className="btn-open" onClick={() => onNavigateToEdit(display.id)}>
+          {/* h-11 no celular = alvo de toque ≥ 44px; volta a 36px no desktop */}
+          <Button
+            variant="glow"
+            className="display-open mt-auto h-11 w-full gap-2 rounded-[var(--radius)] text-[13px] md:h-9"
+            onClick={() => onNavigateToEdit(display.id)}
+          >
             <Pencil size={15} /> Abrir Designer
-          </button>
+          </Button>
 
           <div className="display-actions">
-            <button 
-              className={`btn-sub ${copiedId === display.id ? 'copied' : ''}`}
+            <Button
+              variant="shimmer"
+              data-copied={copiedId === display.id ? 'true' : undefined}
+              className="h-11 gap-1.5 rounded-[var(--radius-sm)] text-xs md:h-9"
               onClick={() => onCopyPlayerLink(display.publicToken || display.slug, display.id)}
             >
               {copiedId === display.id ? <Check size={13} /> : <Copy size={13} />}
               {copiedId === display.id ? 'Copiado!' : 'Copiar URL'}
-            </button>
+            </Button>
 
-            <button 
-              className="btn-sub"
+            <Button
+              variant="shimmer"
+              className="h-11 gap-1.5 rounded-[var(--radius-sm)] text-xs md:h-9"
               onClick={() => onOpenPlayer(display.publicToken || display.slug)}
             >
               <ExternalLink size={13} /> Visualizar
-            </button>
+            </Button>
           </div>
         </div>
       </div>

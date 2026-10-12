@@ -1,6 +1,7 @@
 import React from 'react';
 import { Monitor, Wifi, WifiOff, Tv } from 'lucide-react';
 import { Display, Device } from '../../types';
+import { moverSpotlight } from '../../lib/spotlight';
 
 interface StatsRowProps {
   displays: Display[];
@@ -51,11 +52,15 @@ export const StatsRow: React.FC<StatsRowProps> = ({ displays, devices }) => {
       {stats.map((stat, i) => (
         <div
           key={i}
-          className="flex items-center gap-1 px-2 py-0.5 rounded-md"
+          // fx-spotlight: mesmo brilho que segue o mouse dos cards de tela,
+          // com raio menor porque o cartão de número é pequeno.
+          className="fx-spotlight flex items-center gap-1 px-2 py-0.5 rounded-md"
+          onPointerMove={moverSpotlight}
           style={{
             background: 'rgba(255,255,255,0.04)',
             border: '1px solid rgba(255,255,255,0.06)',
-          }}
+            ['--spot-size' as string]: '90px',
+          } as React.CSSProperties}
         >
           {stat.icon}
           <span className="text-[10px] font-medium text-slate-500 leading-none">{stat.label}</span>

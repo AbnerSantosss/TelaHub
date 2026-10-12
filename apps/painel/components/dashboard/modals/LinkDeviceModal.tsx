@@ -1,10 +1,25 @@
+/**
+ * ⚠️ SUBSTITUÍDO em 2026-09-05 — nada mais monta este modal.
+ *
+ * O vínculo de TV agora é a tela `components/ConecteSuaTV.tsx` (rota
+ * `#/conecte-sua-tv` e primeiro passo de conta nova). O motivo é de ativação,
+ * não de estética: aqui o endereço do player aparecia num `<Input readOnly>` de
+ * 12 px dentro de um modal, junto com três campos obrigatórios — quem tinha que
+ * DIGITAR aquilo no controle remoto da TV não conseguia nem ler. E TV conectada
+ * é a métrica que decide se a mídia paga fecha a conta.
+ *
+ * O arquivo continua aqui, sem nenhum importador, porque outros agentes estão
+ * mexendo no painel em paralelo e apagá-lo agora quebraria o build de quem
+ * tivesse acabado de importá-lo. Sem importador ele não entra no pacote final.
+ * Pode ser removido com segurança quando o painel estiver estável.
+ */
 import React from 'react';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogClose 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogClose
 } from '../../ui/dialog';
 import { Button } from '../../ui/button';
 import { Input } from '../../ui/input';

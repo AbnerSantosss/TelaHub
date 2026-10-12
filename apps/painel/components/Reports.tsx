@@ -76,7 +76,7 @@ const Reports: React.FC = () => {
             </button>
             <div>
               <h1 className="text-2xl font-black tracking-tight text-white">Dashboard Gerencial</h1>
-              <p className="text-sm text-slate-500 font-medium">Visão consolidada da operação de Digital Signage</p>
+              <p className="text-sm text-slate-500 font-medium">Resumo de todas as suas telas</p>
             </div>
           </div>
           
@@ -109,7 +109,7 @@ const Reports: React.FC = () => {
             </h2>
             <p className="text-sm text-slate-400 max-w-xl mx-auto leading-relaxed">{planBlock.message}</p>
             <p className="text-xs text-slate-500 mt-4">
-              O alerta por e-mail quando uma tela cai continua ativo no seu plano — o que muda aqui é o histórico consolidado.
+              O alerta por e-mail quando uma tela cai continua ativo no seu plano. O que fica de fora é o histórico consolidado.
             </p>
           </div>
         )}

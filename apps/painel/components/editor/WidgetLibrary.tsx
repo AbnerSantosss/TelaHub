@@ -125,11 +125,11 @@ export const WidgetLibrary: React.FC<WidgetLibraryProps> = ({
          <div className="mb-2.5">
            <h4 className="text-[9px] font-black text-emerald-400 uppercase tracking-widest mb-1 flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-emerald-400 inline-block"></span>Básicos</h4>
            <div className="grid grid-cols-3 gap-1.5">
-             <WidgetTool icon={<ImageIcon size={20} className="text-sky-400" />} label="Imagem" description="Exibe imagens de alta qualidade (PNG, JPG, SVG) com ajuste automático ao contêiner." onClick={() => addWidget(WidgetType.IMAGE)} tooltipAlign="left" />
-             <WidgetTool icon={<Film size={20} className="text-rose-400" />} label="Vídeo" description="Reproduz vídeos locais em looping ou links diretos do YouTube." onClick={() => addWidget(WidgetType.VIDEO)} tooltipAlign="center" />
-             <WidgetTool icon={<Type size={20} className="text-slate-200" />} label="Texto" description="Adiciona caixas de texto com fontes, cores e tamanhos personalizáveis." onClick={() => addWidget(WidgetType.TEXT)} tooltipAlign="right" />
-             <WidgetTool icon={<Sparkles size={20} className="text-fuchsia-400" />} label="GIF" description="Exibe animações divertidas em formato GIF para atrair a atenção do público." onClick={() => addWidget(WidgetType.GIF)} tooltipAlign="left" />
-             <WidgetTool icon={<Globe size={20} className="text-cyan-400" />} label="Web" description="Incorpora qualquer site ou página web externa de forma interativa." onClick={() => addWidget(WidgetType.IFRAME)} tooltipAlign="center" />
+             <WidgetTool icon={<ImageIcon size={20} className="text-sky-400" />} label="Imagem" description="Mostra imagens PNG, JPG ou SVG ajustadas ao espaço do bloco." onClick={() => addWidget(WidgetType.IMAGE)} tooltipAlign="left" />
+             <WidgetTool icon={<Film size={20} className="text-rose-400" />} label="Vídeo" description="Toca vídeos enviados, em repetição, ou links do YouTube." onClick={() => addWidget(WidgetType.VIDEO)} tooltipAlign="center" />
+             <WidgetTool icon={<Type size={20} className="text-slate-200" />} label="Texto" description="Caixa de texto com fonte, cor e tamanho que você escolhe." onClick={() => addWidget(WidgetType.TEXT)} tooltipAlign="right" />
+             <WidgetTool icon={<Sparkles size={20} className="text-fuchsia-400" />} label="GIF" description="Mostra animações em GIF." onClick={() => addWidget(WidgetType.GIF)} tooltipAlign="left" />
+             <WidgetTool icon={<Globe size={20} className="text-cyan-400" />} label="Web" description="Mostra uma página de outro site dentro da tela." onClick={() => addWidget(WidgetType.IFRAME)} tooltipAlign="center" />
            </div>
          </div>
 
@@ -137,11 +137,11 @@ export const WidgetLibrary: React.FC<WidgetLibraryProps> = ({
          <div className="mb-2.5">
            <h4 className="text-[9px] font-black text-cyan-400 uppercase tracking-widest mb-1 flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-cyan-400 inline-block"></span>Utilitários</h4>
            <div className="grid grid-cols-3 gap-1.5">
-             <WidgetTool icon={<Clock size={20} className="text-sky-300" />} label="Relógio" description="Mostra um relógio digital sincronizado em tempo real com a cidade escolhida." onClick={() => addWidget(WidgetType.CLOCK)} tooltipAlign="left" />
-             <WidgetTool icon={<CloudSun size={20} className="text-amber-400" />} label="Clima" description="Exibe a previsão do tempo e temperatura em tempo real para qualquer cidade." onClick={() => addWidget(WidgetType.WEATHER)} tooltipAlign="center" />
-             <WidgetTool icon={<LayoutDashboard size={20} className="text-teal-400" />} label="Completo" description="Painel integrado de relógio, clima e fundos de alta definição." onClick={() => addWidget(WidgetType.FULL_INFO)} tooltipAlign="right" />
-             <WidgetTool icon={<Rss size={20} className="text-orange-400" />} label="RSS" description="Exibe feeds de notícias em tempo real de portais de notícias como G1 e CNN." onClick={() => addWidget(WidgetType.RSS)} tooltipAlign="left" />
-             <WidgetTool icon={<CalendarDays size={20} className="text-rose-300" />} label="Agenda" description="Integração direta com Google Agenda para exibir eventos e programações." onClick={() => addWidget(WidgetType.CALENDAR)} tooltipAlign="center" />
+             <WidgetTool icon={<Clock size={20} className="text-sky-300" />} label="Relógio" description="Relógio digital com o horário da cidade escolhida." onClick={() => addWidget(WidgetType.CLOCK)} tooltipAlign="left" />
+             <WidgetTool icon={<CloudSun size={20} className="text-amber-400" />} label="Clima" description="Previsão do tempo e temperatura atual da cidade escolhida." onClick={() => addWidget(WidgetType.WEATHER)} tooltipAlign="center" />
+             <WidgetTool icon={<LayoutDashboard size={20} className="text-teal-400" />} label="Completo" description="Relógio e clima juntos, com imagem de fundo." onClick={() => addWidget(WidgetType.FULL_INFO)} tooltipAlign="right" />
+             <WidgetTool icon={<Rss size={20} className="text-orange-400" />} label="RSS" description="Notícias de portais como G1 e CNN, por RSS." onClick={() => addWidget(WidgetType.RSS)} tooltipAlign="left" />
+             <WidgetTool icon={<CalendarDays size={20} className="text-rose-300" />} label="Agenda" description="Mostra os eventos de uma agenda do Google." onClick={() => addWidget(WidgetType.CALENDAR)} tooltipAlign="center" />
            </div>
          </div>
 
@@ -149,11 +149,11 @@ export const WidgetLibrary: React.FC<WidgetLibraryProps> = ({
          <div className="mb-2.5">
            <h4 className="text-[9px] font-black text-amber-400 uppercase tracking-widest mb-1 flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-amber-400 inline-block"></span>Interativos</h4>
            <div className="grid grid-cols-3 gap-1.5">
-             <WidgetTool icon={<StickyNote size={20} className="text-yellow-400" />} label="Notas" description="Mural de notas adesivas com temas neon, glassmorphism e cores vibrantes." onClick={() => addWidget(WidgetType.NOTES)} tooltipAlign="left" />
-             <WidgetTool icon={<ListTodo size={20} className="text-emerald-400" />} label="Tarefas" description="Lista de tarefas interativa com checkboxes e progresso de conclusão." onClick={() => addWidget(WidgetType.TODO)} tooltipAlign="center" />
-             <WidgetTool icon={<Timer size={20} className="text-rose-400" />} label="Contador" description="Cronômetro regressivo para grandes eventos, metas ou datas especiais." onClick={() => addWidget(WidgetType.COUNTDOWN)} tooltipAlign="right" />
-             <WidgetTool icon={<ClipboardList size={20} className="text-cyan-400" />} label="Deveres" description="Quadro semanal de deveres domésticos ou corporativos com responsáveis." onClick={() => addWidget(WidgetType.CHORES)} tooltipAlign="left" />
-             <WidgetTool icon={<Utensils size={20} className="text-amber-400" />} label="Meal Plan" description="Planejador ou cardápio de refeições semanais com slide para os dias." onClick={() => addWidget(WidgetType.MEAL_PLAN)} tooltipAlign="center" />
+             <WidgetTool icon={<StickyNote size={20} className="text-yellow-400" />} label="Notas" description="Recados em formato de nota adesiva, com vários temas de cor." onClick={() => addWidget(WidgetType.NOTES)} tooltipAlign="left" />
+             <WidgetTool icon={<ListTodo size={20} className="text-emerald-400" />} label="Tarefas" description="Lista de tarefas com itens marcados e o total concluído." onClick={() => addWidget(WidgetType.TODO)} tooltipAlign="center" />
+             <WidgetTool icon={<Timer size={20} className="text-rose-400" />} label="Contador" description="Contagem regressiva para um evento, meta ou data." onClick={() => addWidget(WidgetType.COUNTDOWN)} tooltipAlign="right" />
+             <WidgetTool icon={<ClipboardList size={20} className="text-cyan-400" />} label="Deveres" description="Quadro semanal de tarefas com o responsável por cada uma." onClick={() => addWidget(WidgetType.CHORES)} tooltipAlign="left" />
+             <WidgetTool icon={<Utensils size={20} className="text-amber-400" />} label="Meal Plan" description="Cardápio da semana, passando dia a dia." onClick={() => addWidget(WidgetType.MEAL_PLAN)} tooltipAlign="center" />
            </div>
          </div>
 
@@ -161,14 +161,14 @@ export const WidgetLibrary: React.FC<WidgetLibraryProps> = ({
          <div className="mb-2.5">
            <h4 className="text-[9px] font-black text-rose-400 uppercase tracking-widest mb-1 flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-rose-400 inline-block"></span>Integrações</h4>
            <div className="grid grid-cols-3 gap-1.5">
-             <WidgetTool icon={<TrendingUp size={20} className="text-green-400" />} label="Bolsa" description="Painel de cotações financeiras de ações e criptomoedas em tempo real." onClick={() => addWidget(WidgetType.MARKET_WATCH)} tooltipAlign="left" locked={locked(WidgetType.MARKET_WATCH)} lockedHint={lockedHint(WidgetType.MARKET_WATCH)} />
-             <WidgetTool icon={<Aperture size={20} className="text-blue-400" />} label="Snapshot" description="Renderiza capturas estáticas e periódicas de páginas de forma segura." onClick={() => addWidget(WidgetType.BROWSER_SNAPSHOT)} tooltipAlign="center" locked={locked(WidgetType.BROWSER_SNAPSHOT)} lockedHint={lockedHint(WidgetType.BROWSER_SNAPSHOT)} />
+             <WidgetTool icon={<TrendingUp size={20} className="text-green-400" />} label="Bolsa" description="Cotações de ações e criptomoedas." onClick={() => addWidget(WidgetType.MARKET_WATCH)} tooltipAlign="left" locked={locked(WidgetType.MARKET_WATCH)} lockedHint={lockedHint(WidgetType.MARKET_WATCH)} />
+             <WidgetTool icon={<Aperture size={20} className="text-blue-400" />} label="Snapshot" description="Mostra uma foto da página, atualizada de tempos em tempos." onClick={() => addWidget(WidgetType.BROWSER_SNAPSHOT)} tooltipAlign="center" locked={locked(WidgetType.BROWSER_SNAPSHOT)} lockedHint={lockedHint(WidgetType.BROWSER_SNAPSHOT)} />
              <WidgetTool icon={<FileText size={20} className="text-cyan-500" />} label="G Docs" description="Incorpora documentos, planilhas ou slides do Google Workspace." onClick={() => addWidget(WidgetType.GOOGLE_DOCS)} tooltipAlign="right" locked={locked(WidgetType.GOOGLE_DOCS)} lockedHint={lockedHint(WidgetType.GOOGLE_DOCS)} />
              <WidgetTool icon={<BookOpen size={20} className="text-blue-500" />} label="Office Docs" description="Exibe planilhas Excel, documentos Word ou slides PowerPoint do Office 365." onClick={() => addWidget(WidgetType.OFFICE_DOCS)} tooltipAlign="left" locked={locked(WidgetType.OFFICE_DOCS)} lockedHint={lockedHint(WidgetType.OFFICE_DOCS)} />
-             <WidgetTool icon={<BarChart3 size={20} className="text-amber-500" />} label="Power BI" description="Exibe painéis interativos e relatórios dinâmicos do Microsoft Power BI." onClick={() => addWidget(WidgetType.POWER_BI)} tooltipAlign="center" locked={locked(WidgetType.POWER_BI)} lockedHint={lockedHint(WidgetType.POWER_BI)} />
-             <WidgetTool icon={<Database size={20} className="text-rose-500" />} label="Airtable" description="Exibe visualizações, tabelas ou bases de dados completas do Airtable." onClick={() => addWidget(WidgetType.AIRTABLE)} tooltipAlign="right" locked={locked(WidgetType.AIRTABLE)} lockedHint={lockedHint(WidgetType.AIRTABLE)} />
-             <WidgetTool icon={<FileText size={20} className="text-red-500" />} label="PDF" description="Exibe documentos PDFs e apostilas corporativas página a página." onClick={() => addWidget(WidgetType.PDF_DOCUMENT)} tooltipAlign="left" locked={locked(WidgetType.PDF_DOCUMENT)} lockedHint={lockedHint(WidgetType.PDF_DOCUMENT)} />
-             <WidgetTool icon={<Code2 size={20} className="text-indigo-400" />} label="HTML" description="Insira código HTML, CSS ou JS personalizado livremente." onClick={() => addWidget(WidgetType.EMBED_HTML)} tooltipAlign="center" locked={locked(WidgetType.EMBED_HTML)} lockedHint={lockedHint(WidgetType.EMBED_HTML)} />
+             <WidgetTool icon={<BarChart3 size={20} className="text-amber-500" />} label="Power BI" description="Mostra painéis e relatórios do Microsoft Power BI." onClick={() => addWidget(WidgetType.POWER_BI)} tooltipAlign="center" locked={locked(WidgetType.POWER_BI)} lockedHint={lockedHint(WidgetType.POWER_BI)} />
+             <WidgetTool icon={<Database size={20} className="text-rose-500" />} label="Airtable" description="Mostra visualizações, tabelas ou bases do Airtable." onClick={() => addWidget(WidgetType.AIRTABLE)} tooltipAlign="right" locked={locked(WidgetType.AIRTABLE)} lockedHint={lockedHint(WidgetType.AIRTABLE)} />
+             <WidgetTool icon={<FileText size={20} className="text-red-500" />} label="PDF" description="Mostra um PDF, uma página por vez." onClick={() => addWidget(WidgetType.PDF_DOCUMENT)} tooltipAlign="left" locked={locked(WidgetType.PDF_DOCUMENT)} lockedHint={lockedHint(WidgetType.PDF_DOCUMENT)} />
+             <WidgetTool icon={<Code2 size={20} className="text-indigo-400" />} label="HTML" description="Coloque seu próprio código HTML, CSS ou JS." onClick={() => addWidget(WidgetType.EMBED_HTML)} tooltipAlign="center" locked={locked(WidgetType.EMBED_HTML)} lockedHint={lockedHint(WidgetType.EMBED_HTML)} />
            </div>
          </div>
          
@@ -436,7 +436,7 @@ export const WidgetLibrary: React.FC<WidgetLibraryProps> = ({
            <div>
              <p className="text-[10px] font-bold text-cyan-400 mb-0.5">Cena Programada</p>
              <p className="text-[9px] text-cyan-200/60 leading-relaxed">
-               Esta cena foi injetada pela Central. Alterações feitas aqui afetarão apenas esta tela.
+               Esta cena veio da Central de Programação. O que você mudar aqui vale só para esta tela.
              </p>
            </div>
          </div>

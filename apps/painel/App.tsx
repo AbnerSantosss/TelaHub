@@ -3,6 +3,8 @@ import React, { useEffect, useState, Suspense } from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { getCurrentUser } from './services/storage';
 import { Loader2 } from 'lucide-react';
+import { MotionConfig } from 'motion/react';
+import { GridGlowBackground } from './components/GridGlowBackground';
 import { Toaster } from './components/ui/sonner';
 import { pricingUrl } from './libs/external-urls';
 import type { User } from './types';
@@ -18,6 +20,17 @@ const ForgotPassword = React.lazy(() => import('./components/ForgotPassword'));
 const ResetPassword = React.lazy(() => import('./components/ResetPassword'));
 const Reports = React.lazy(() => import('./components/Reports'));
 const ForcePasswordChange = React.lazy(() => import('./components/ForcePasswordChange'));
+/**
+ * Telas novas de ativação e de cobrança.
+ *
+ * `ConecteSuaTV` também é montada DENTRO do `Dashboard` como primeiro passo de
+ * conta nova; a rota existe para quem quer voltar a ela depois (link do menu,
+ * e-mail de boas-vindas, suporte mandando o endereço por WhatsApp). São dois
+ * pontos de entrada para o MESMO componente de propósito: duplicar a tela em
+ * dois lugares é como o texto do passo de ativação começa a divergir.
+ */
+const ConecteSuaTV = React.lazy(() => import('./components/ConecteSuaTV'));
+const Assinatura = React.lazy(() => import('./components/Assinatura'));
 
 /**
  * `/vendas` era uma SEGUNDA landing page, mantida aqui dentro em paralelo ao
@@ -126,8 +139,13 @@ const ProtectedRoute = ({ children }: { children?: React.ReactNode }) => {
 
 const App: React.FC = () => {
   return (
+    // reducedMotion="user": toda animação de `motion/react` passa a respeitar
+    // o prefers-reduced-motion do sistema (transform/layout viram instantâneos).
+    <MotionConfig reducedMotion="user">
     <HashRouter>
       <div className="min-h-screen bg-transparent text-slate-100 selection:bg-sky-500/30 selection:text-sky-200">
+        {/* Grade com brilho atrás de tudo (fica fora do Player e das telas claras) */}
+        <GridGlowBackground />
         <Toaster closeButton theme="dark" position="top-right" />
         <Suspense fallback={
           <div className="h-screen w-screen bg-slate-950 flex flex-col items-center justify-center gap-4">
@@ -164,6 +182,21 @@ const App: React.FC = () => {
               </ProtectedRoute>
             } />
 
+            {/* Ativação: a TV conectada é a métrica que decide a conta. */}
+            <Route path="/conecte-sua-tv" element={
+              <ProtectedRoute>
+                <ConecteSuaTV variante="pagina" />
+              </ProtectedRoute>
+            } />
+
+            {/* Cobrança e cancelamento pelo próprio painel (CDC + promessa da
+                landing: cancelar não pode depender de falar com alguém). */}
+            <Route path="/assinatura" element={
+              <ProtectedRoute>
+                <Assinatura />
+              </ProtectedRoute>
+            } />
+
             {/* Rota Pública (Player não precisa de login para funcionar na TV) */}
             <Route path="/player" element={<Player />} />
             <Route path="/player/:slug" element={<Player />} />
@@ -174,6 +207,7 @@ const App: React.FC = () => {
         </Suspense>
       </div>
     </HashRouter>
+    </MotionConfig>
   );
 };
 

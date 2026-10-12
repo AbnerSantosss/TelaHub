@@ -6,7 +6,11 @@ import tailwindcss from '@tailwindcss/vite';
 export default defineConfig(() => {
     return {
       server: {
-        port: 3000,
+        // 3010, não 3000: a 3000 é disputada por outros projetos desta máquina
+        // (Next.js etc.) e, no Windows, dois processos bindam a mesma porta sem
+        // erro — quem responde é o que subiu primeiro, e a LP abria o app errado.
+        port: 3010,
+        strictPort: true,
         host: '0.0.0.0',
         proxy: {
           '/uploads': {

@@ -293,201 +293,6 @@
   92%, 96% { background-color: #334155; }
   94% { background-color: #475569; }
 }
-/* Widget Background Animations */
-@keyframes gradient-flow {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-.bg-anim-gradient-flow {
-  background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
-  background-size: 400% 400%;
-  animation: gradient-flow 15s ease infinite;
-}
-
-@keyframes clouds-move {
-  0% { background-position: 0 0; }
-  100% { background-position: 100% 0; }
-}
-
-.bg-anim-clouds {
-  background: #87CEEB;
-  background-image: 
-    radial-gradient(circle at 50% 50%, rgba(255,255,255,0.8) 0%, transparent 60%),
-    radial-gradient(circle at 20% 80%, rgba(255,255,255,0.8) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(255,255,255,0.8) 0%, transparent 50%);
-  background-size: 200% 200%;
-  animation: clouds-move 20s linear infinite;
-}
-
-@keyframes rain-fall {
-  0% { background-position: 0 0; }
-  100% { background-position: 0 100%; }
-}
-
-.bg-anim-rain {
-  background-color: #0f172a;
-  background-image: linear-gradient(to bottom, rgba(255,255,255,0.1) 1px, transparent 1px);
-  background-size: 20px 20px;
-  animation: rain-fall 1s linear infinite;
-}
-
-@keyframes snow-fall {
-  0% { background-position: 0 0, 0 0, 0 0; }
-  100% { background-position: 400px 1100px, 400px 400px, 300px 300px; }
-}
-
-.bg-anim-snow {
-  background-color: #0f172a;
-  background-image: 
-    radial-gradient(white 2px, transparent 3px),
-    radial-gradient(white 1px, transparent 2px),
-    radial-gradient(rgba(255,255,255,0.5) 2px, transparent 3px);
-  background-size: 400px 400px, 300px 300px, 200px 200px;
-  animation: snow-fall 10s linear infinite;
-}
-
-@keyframes fire-rise {
-  0% { background-position: 0% 100%; }
-  100% { background-position: 0% 0%; }
-}
-
-.bg-anim-fire {
-  background: linear-gradient(to top, #7f1d1d, #b91c1c, #ef4444, transparent);
-  background-size: 100% 200%;
-  animation: fire-rise 3s linear infinite;
-}
-
-@keyframes tech-grid-move {
-  0% { background-position: 0 0; }
-  100% { background-position: 40px 40px; }
-}
-
-.bg-anim-tech-grid {
-  background-color: #000;
-  background-image: 
-    linear-gradient(rgba(124, 58, 237, 0.15) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(124, 58, 237, 0.15) 1px, transparent 1px);
-  background-size: 40px 40px;
-  animation: tech-grid-move 4s linear infinite;
-}
-
-@keyframes pulse-red {
-  0%, 100% { background-color: rgba(220, 38, 38, 0.2); }
-  50% { background-color: rgba(220, 38, 38, 0.6); }
-}
-
-.bg-anim-pulse-red {
-  animation: pulse-red 2s ease-in-out infinite;
-}
-
-@keyframes pulse-blue {
-  0%, 100% { background-color: rgba(37, 99, 235, 0.2); }
-  50% { background-color: rgba(37, 99, 235, 0.6); }
-}
-
-.bg-anim-pulse-blue {
-  animation: pulse-blue 2s ease-in-out infinite;
-}
-
-@keyframes pulse-green {
-  0%, 100% { background-color: rgba(22, 163, 74, 0.2); }
-  50% { background-color: rgba(22, 163, 74, 0.6); }
-}
-
-.bg-anim-pulse-green {
-  animation: pulse-green 2s ease-in-out infinite;
-}
-
-@keyframes aurora-shift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-.bg-anim-aurora {
-  background: linear-gradient(120deg, #000000, #1a2a6c, #b21f1f, #fdbb2d);
-  background-size: 400% 400%;
-  animation: aurora-shift 10s ease infinite;
-}
-
-/* --- Day/Night Weather Variations --- */
-
-/* Clear Day */
-.bg-anim-clear-day {
-  background: linear-gradient(to bottom, var(--th-accent-soft), #bae6fd);
-  background-size: 100% 100%;
-  animation: gradient-flow 20s ease infinite;
-}
-
-/* Clear Night */
-@keyframes twinkle {
-  0%, 100% { opacity: 0.8; }
-  50% { opacity: 0.4; }
-}
-.bg-anim-clear-night {
-  background-color: #020617;
-  background-image: 
-    radial-gradient(white 1px, transparent 2px),
-    radial-gradient(white 1px, transparent 2px);
-  background-size: 50px 50px, 100px 100px;
-  background-position: 0 0, 25px 25px;
-  animation: twinkle 3s ease-in-out infinite;
-}
-
-/* Clouds Night */
-.bg-anim-clouds-night {
-  background: #1e293b;
-  background-image: 
-    radial-gradient(circle at 50% 50%, rgba(255,255,255,0.1) 0%, transparent 60%),
-    radial-gradient(circle at 20% 80%, rgba(255,255,255,0.1) 0%, transparent 50%);
-  background-size: 200% 200%;
-  animation: clouds-move 30s linear infinite;
-}
-
-/* Rain Day */
-.bg-anim-rain-day {
-  background-color: #64748b;
-  background-image: linear-gradient(to bottom, rgba(255,255,255,0.3) 1px, transparent 1px);
-  background-size: 20px 20px;
-  animation: rain-fall 0.8s linear infinite;
-}
-
-/* Rain Night */
-.bg-anim-rain-night {
-  background-color: #020617;
-  background-image: linear-gradient(to bottom, rgba(255,255,255,0.1) 1px, transparent 1px);
-  background-size: 20px 20px;
-  animation: rain-fall 0.8s linear infinite;
-}
-
-/* Snow Day */
-.bg-anim-snow-day {
-  background-color: #cbd5e1;
-  background-image: 
-    radial-gradient(white 2px, transparent 3px),
-    radial-gradient(white 1px, transparent 2px);
-  background-size: 400px 400px, 300px 300px;
-  animation: snow-fall 10s linear infinite;
-}
-
-/* Snow Night */
-.bg-anim-snow-night {
-  background-color: #0f172a;
-  background-image: 
-    radial-gradient(white 2px, transparent 3px),
-    radial-gradient(white 1px, transparent 2px);
-  background-size: 400px 400px, 300px 300px;
-  animation: snow-fall 10s linear infinite;
-}
-
-/* Storm */
-@keyframes lightning {
-  0%, 90%, 100% { background-color: #0f172a; }
-  92%, 96% { background-color: #334155; }
-  94% { background-color: #475569; }
-}
 .bg-anim-storm {
   background-color: #0f172a;
   background-image: linear-gradient(to bottom, rgba(255,255,255,0.2) 2px, transparent 1px);
@@ -741,15 +546,13 @@
     @apply border-border outline-ring/50;
     box-sizing: border-box;
   }
-  @keyframes corporate-flow {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-  }
+  /* Fundo base estático. O movimento (grade com brilho) mora no componente
+     `GridGlowBackground`, montado no App — ele fica de fora do Player (TV) e
+     pausa quando a aba está oculta. O antigo gradiente animado `corporate-flow`
+     repintava a página inteira a cada frame, inclusive com a aba em segundo
+     plano. */
   body {
-    background: linear-gradient(135deg, #060810 0%, #0d1424 35%, #080c16 70%, #060810 100%);
-    background-size: 400% 400%;
-    animation: corporate-flow 24s ease-in-out infinite;
+    background: #070a12;
     color: var(--color-text, var(--txt, #e8edf5));
     -webkit-font-smoothing: antialiased;
     font-family: 'Exo 2', sans-serif;
@@ -842,11 +645,9 @@
   grid-template-columns: auto auto;
   gap: 6px;
 }
-.displays-list .btn-open {
+.displays-list .display-open {
   margin-top: 0;
   width: auto;
-  padding: 6px 14px;
-  font-size: 12px;
 }
 .displays-list .display-code {
   width: 100%;
@@ -1055,123 +856,11 @@
   flex-shrink: 0;
 }
 
-/* Botão "Abrir Designer" — Sólido e marcante, contraste premium */
-.btn-open {
-  width: 100%;
-  padding: 8px;
-  border-radius: var(--radius, 0.875rem);
-  background: linear-gradient(135deg, var(--th-accent), var(--th-accent-strong));
-  border: 1px solid rgba(var(--th-accent-rgb),0.25);
-  color: #ffffff;
-  font-weight: 700;
-  font-size: 13px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  transition: all 0.25s var(--ease-spring, cubic-bezier(0.16, 1, 0.3, 1));
-  margin-top: auto;
-  box-shadow: 0 4px 10px rgba(var(--th-accent-rgb),0.15);
-}
-.btn-open:hover {
-  background: linear-gradient(135deg, var(--th-accent-soft), var(--th-accent));
-  border-color: rgba(var(--th-accent-soft-rgb),0.45);
-  box-shadow: 0 6px 18px rgba(var(--th-accent-rgb),0.3);
-  transform: translateY(-1.5px);
-}
-.btn-open:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 8px rgba(var(--th-accent-rgb),0.15);
-}
-
-/* Botões secundários — com preenchimento sutil e bordas interativas */
+/* Ações do card — os botões em si são <Button variant="glow|shimmer"> */
 .display-actions {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
-}
-.btn-sub {
-  padding: 9px;
-  border-radius: var(--radius-sm, 0.625rem);
-  background: rgba(255, 255, 255, 0.045);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: #cbd5e1;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.btn-sub:hover {
-  background: rgba(255, 255, 255, 0.09);
-  color: #ffffff;
-  border-color: rgba(var(--th-accent-soft-rgb),0.4);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  transform: translateY(-1px);
-}
-.btn-sub:active {
-  transform: translateY(0);
-}
-.btn-sub.copied {
-  background: rgba(52, 211, 153, 0.12) !important;
-  color: #34d399 !important;
-  border-color: rgba(52, 211, 153, 0.45) !important;
-}
-
-/* TopBar / Nav Buttons - Premium Contrast */
-.btn-tb-outline {
-  background-color: rgba(255, 255, 255, 0.045) !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  color: #cbd5e1 !important;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
-}
-.btn-tb-outline:hover {
-  background-color: var(--th-accent) !important; /* Solid blue on hover! */
-  border-color: var(--th-accent-soft) !important;
-  color: #ffffff !important;
-  box-shadow: 0 4px 14px rgba(var(--th-accent-rgb),0.35) !important;
-  transform: translateY(-1px);
-}
-.btn-tb-outline:active {
-  transform: translateY(0);
-}
-
-.btn-tb-primary {
-  background: linear-gradient(135deg, var(--th-accent), #2563eb) !important;
-  color: #ffffff !important;
-  border: 1px solid rgba(var(--th-accent-rgb),0.3) !important;
-  box-shadow: 0 2px 12px rgba(var(--th-accent-rgb),0.25) !important;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
-}
-.btn-tb-primary:hover:not(:disabled) {
-  background: linear-gradient(135deg, var(--th-accent-strong), #1d4ed8) !important;
-  border-color: rgba(var(--th-accent-strong-rgb),0.6) !important;
-  box-shadow: 0 4px 16px rgba(var(--th-accent-strong-rgb),0.3) !important;
-  transform: translateY(-1px);
-}
-.btn-tb-primary:active:not(:disabled) {
-  transform: translateY(0);
-}
-
-.btn-tb-danger {
-  background-color: rgba(255, 255, 255, 0.045) !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  color: #cbd5e1 !important;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
-}
-.btn-tb-danger:hover {
-  background-color: #e11d48 !important; /* Solid rose/red on hover! */
-  border-color: #f43f5e !important;
-  color: #ffffff !important;
-  box-shadow: 0 4px 12px rgba(225, 29, 72, 0.3) !important;
-  transform: translateY(-1px);
-}
-.btn-tb-danger:active {
-  transform: translateY(0);
 }
 
 /* Dashboard Nav Items (Módulos) styling classes */
@@ -1424,13 +1113,6 @@
   height: 48px;
 }
 
-/* Altura mínima em touch targets para botões secundários */
-@media (any-pointer: coarse) {
-  .btn-sub {
-    min-height: 48px;
-  }
-}
-
 /* Acessibilidade de foco global */
 :focus {
   outline: none;
@@ -1440,3 +1122,179 @@
   outline-offset: 2px;
 }
 
+
+/* ========================================
+   EFEITOS DO PAINEL (redesign 09/2026)
+   Adaptados do 21st.dev: Glow Button (reflexo + press), Glow Card Grid
+   (borda que acende seguindo o ponteiro) e GridGlowBackground (grade com
+   brilho). Tudo segue --th-accent, então funciona com os 6 presets de
+   `libs/theme.ts`. Hover/cursor só existem com ponteiro fino; com
+   prefers-reduced-motion nada se move (só muda cor).
+   ======================================== */
+
+/* --- Fundo: grade com brilho (ver components/GridGlowBackground.tsx) --- */
+.th-grid-bg {
+  position: fixed;
+  inset: 0;
+  /* -1 no contexto raiz: fica acima do fundo do body e abaixo de todo o
+     conteúdo, sem precisar mexer no z-index de ninguém. */
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse 70% 45% at 50% -8%, rgba(var(--th-accent-rgb), 0.10), transparent 70%),
+    #070a12;
+}
+.th-grid-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 48px 48px;
+  /* a grade some nas bordas: sóbria, não "papel quadriculado" */
+  -webkit-mask-image: radial-gradient(ellipse 85% 70% at 50% 30%, #000 30%, transparent 100%);
+  mask-image: radial-gradient(ellipse 85% 70% at 50% 30%, #000 30%, transparent 100%);
+}
+.th-grid-bg canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.55;
+}
+
+/* --- Botão glow: cor de destaque + reflexo que segue o cursor --- */
+/* Texto escuro (#0a0d16) e não branco: branco sobre sky/esmeralda/âmbar fica
+   entre 2,1:1 e 2,8:1. Escuro sobre qualquer preset base dá ≥ 4,6:1. */
+.btn-fx-glow {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: var(--th-accent);
+  color: #0a0d16;
+  font-weight: 700;
+  border: 1px solid rgba(var(--th-accent-soft-rgb), 0.55);
+  box-shadow:
+    0 0 0 1px rgba(var(--th-accent-rgb), 0.15),
+    0 6px 18px -6px rgba(var(--th-accent-rgb), 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  transition: transform 160ms var(--ease-spring), box-shadow 220ms ease, background-color 220ms ease;
+}
+.btn-fx-glow::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: radial-gradient(120px circle at var(--mx, 50%) var(--my, 50%), rgba(255, 255, 255, 0.38), transparent 70%);
+  opacity: 0;
+  transition: opacity 220ms ease;
+  pointer-events: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  .btn-fx-glow:hover:not(:disabled) {
+    background: var(--th-accent-soft);
+    box-shadow:
+      0 0 0 1px rgba(var(--th-accent-soft-rgb), 0.35),
+      0 10px 28px -6px rgba(var(--th-accent-rgb), 0.7),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+  .btn-fx-glow:hover:not(:disabled)::before { opacity: 1; }
+}
+.btn-fx-glow:active:not(:disabled) {
+  transform: translateY(1px) scale(0.97);
+  box-shadow: 0 2px 8px -2px rgba(var(--th-accent-rgb), 0.5), inset 0 2px 4px rgba(0, 0, 0, 0.18);
+}
+
+/* --- Botão shimmer: superfície discreta + faixa de luz no hover --- */
+.btn-fx-shimmer {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  color: #cbd5e1;
+  font-weight: 600;
+  transition: transform 160ms var(--ease-spring), border-color 200ms ease, background-color 200ms ease, color 200ms ease;
+}
+.btn-fx-shimmer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 60%;
+  z-index: -1;
+  background: linear-gradient(100deg, transparent, rgba(var(--th-accent-soft-rgb), 0.22), rgba(255, 255, 255, 0.10), transparent);
+  transform: translateX(-120%) skewX(-12deg);
+  pointer-events: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  .btn-fx-shimmer:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(var(--th-accent-soft-rgb), 0.45);
+    color: #ffffff;
+  }
+  .btn-fx-shimmer:hover:not(:disabled)::after {
+    transform: translateX(230%) skewX(-12deg);
+    transition: transform 700ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+.btn-fx-shimmer:active:not(:disabled) {
+  transform: translateY(1px) scale(0.97);
+  background: rgba(255, 255, 255, 0.06);
+}
+/* estado "Copiado!" do card de tela */
+.btn-fx-shimmer[data-copied='true'] {
+  background: rgba(52, 211, 153, 0.12);
+  color: #34d399;
+  border-color: rgba(52, 211, 153, 0.45);
+}
+
+/* --- Card: spotlight que segue o mouse + borda com brilho --- */
+/* As coordenadas (--spot-x/--spot-y, em px) vêm de `lib/spotlight.ts`. */
+.fx-spotlight {
+  position: relative;
+  isolation: isolate;
+}
+.fx-spotlight::before,
+.fx-spotlight::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 300ms ease;
+}
+/* luz sobre a superfície */
+.fx-spotlight::before {
+  z-index: 1;
+  background: radial-gradient(var(--spot-size, 320px) circle at var(--spot-x, 50%) var(--spot-y, 50%), rgba(var(--th-accent-soft-rgb), 0.09), transparent 65%);
+}
+/* anel da borda que acende perto do ponteiro (máscara que vaza só 1px) */
+.fx-spotlight::after {
+  z-index: 30;
+  padding: 1px;
+  background: radial-gradient(calc(var(--spot-size, 320px) * 0.75) circle at var(--spot-x, 50%) var(--spot-y, 50%), rgba(var(--th-accent-soft-rgb), 0.85), transparent 70%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+@media (hover: hover) and (pointer: fine) {
+  .fx-spotlight:hover::before,
+  .fx-spotlight:hover::after { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-fx-glow,
+  .btn-fx-shimmer { transition: none; }
+  .btn-fx-glow:active:not(:disabled),
+  .btn-fx-shimmer:active:not(:disabled) { transform: none; }
+  .btn-fx-shimmer::after { display: none; }
+  /* o brilho continua (é cor, não movimento), mas sem esmaecer */
+  .fx-spotlight::before,
+  .fx-spotlight::after { transition: none; }
+}

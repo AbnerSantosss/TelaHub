@@ -344,7 +344,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                         }}
                         value=""
                       >
-                        <option value="" disabled>⚡ Escolher Fonte Recomendada...</option>
+                        <option value="" disabled>Escolher uma fonte sugerida...</option>
                         {FEED_CATEGORIES.map((category, idx) => (
                           <optgroup key={idx} label={category.name}>
                             {category.feeds.map(feed => (
@@ -611,7 +611,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                   }}
                   value=""
                 >
-                  <option value="" disabled>📍 Selecionar cidade popular...</option>
+                  <option value="" disabled>Selecionar uma cidade...</option>
                   <optgroup label="Paraíba">
                     <option value="Campina Grande, PB">Campina Grande, PB</option>
                     <option value="João Pessoa, PB">João Pessoa, PB</option>
@@ -713,7 +713,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                   }}
                   value=""
                 >
-                  <option value="" disabled>📍 Selecionar cidade popular...</option>
+                  <option value="" disabled>Selecionar uma cidade...</option>
                   <optgroup label="Paraíba">
                     <option value="Campina Grande, PB">Campina Grande, PB</option>
                     <option value="João Pessoa, PB">João Pessoa, PB</option>
@@ -848,7 +848,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                   }}
                   value=""
                 >
-                  <option value="" disabled>📍 Selecionar cidade popular...</option>
+                  <option value="" disabled>Selecionar uma cidade...</option>
                   <optgroup label="Nordeste">
                     <option value="João Pessoa, PB">João Pessoa, PB</option>
                     <option value="Recife, PE">Recife, PE</option>
@@ -932,7 +932,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                   placeholder="Cole aqui o ID, URL ou iframe do Google Calendar"
                 />
                 <p className="text-[9px] text-emerald-500/80 leading-relaxed bg-emerald-500/5 p-2 rounded border border-emerald-500/10">
-                  💡 <strong>Dica:</strong> Você pode colar diretamente a URL do calendário, o código de incorporação (iframe), ou apenas o ID da agenda.
+                  <strong>Dica:</strong> cole a URL do calendário, o código de incorporação (iframe) ou só o ID da agenda.
                 </p>
 
                 <details className="group bg-slate-900/60 rounded-xl border border-slate-700/50 overflow-hidden transition-all">
@@ -1923,7 +1923,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                   />
                   <div className="flex flex-col">
                     <span className="font-bold text-slate-200">Preencher Container</span>
-                    <span className="text-[9px] text-slate-500 leading-tight">Widget de complemento em tela cheia — ocupa 100% da tela</span>
+                    <span className="text-[9px] text-slate-500 leading-tight">Ocupa a tela inteira da TV</span>
                   </div>
                 </label>
 

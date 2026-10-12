@@ -85,7 +85,7 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
               <div>
                 <h4 className="text-xs font-black text-warning uppercase tracking-wider">Aviso de SMTP</h4>
                 <p className="text-xs text-text-muted mt-1 leading-relaxed">
-                  As configurações de e-mail (SMTP) não estão preenchidas. O sistema não poderá disparar convites ou redefinições de senha automaticamente. Configure o SMTP na guia administrativa para habilitar envios automatizados.
+                  O e-mail (SMTP) ainda não foi configurado, então convites e redefinições de senha não serão enviados. Configure o SMTP na guia administrativa.
                 </p>
               </div>
             </div>

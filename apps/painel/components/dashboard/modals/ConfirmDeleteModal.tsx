@@ -48,7 +48,7 @@ export const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
             <span className="font-black text-text border-b border-danger/30 pb-0.5">{itemName}</span>?
           </p>
           <p className="text-xs text-text-muted">
-            Esta ação é irreversível e removerá todos os dados vinculados de forma definitiva.
+            Não dá para desfazer. Os dados ligados a ela também serão apagados.
           </p>
 
           <div className="flex gap-3 justify-end pt-3">

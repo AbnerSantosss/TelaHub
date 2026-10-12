@@ -413,7 +413,7 @@ const Scheduler: React.FC = () => {
       h: defaultHeight,
       type,
       data: {
-        content: type === WidgetType.TEXT ? 'NOVO TEXTO' : (type === WidgetType.NOTES ? '📝 Bloco de Notas\n\n• Use esta nota para deixar recados ou avisos importantes no display!\n• Suporta quebra de linhas e emojis.' : ''),
+        content: type === WidgetType.TEXT ? 'NOVO TEXTO' : (type === WidgetType.NOTES ? 'Bloco de notas\n\n• Use esta nota para deixar recados ou avisos na tela.\n• Aceita quebra de linha e emojis.' : ''),
         url: type === WidgetType.IMAGE ? 'https://picsum.photos/400/300' : (type === WidgetType.IFRAME ? 'https://www.wikipedia.org' : (type === WidgetType.GIF ? 'https://media.giphy.com/media/3o7TKSjRrfIPjei72E/giphy.gif' : '')),
         videoUrl: type === WidgetType.VIDEO ? 'https://www.youtube.com/watch?v=YhYaHfpz6lo' : '',
         rssUrl: type === WidgetType.RSS ? 'https://g1.globo.com/rss/g1/tecnologia/' : '',
@@ -441,13 +441,13 @@ const Scheduler: React.FC = () => {
           ]
         } : undefined,
         countdownConfig: type === WidgetType.COUNTDOWN ? {
-          title: '⏰ Lançamento do Novo Site',
+          title: 'Lançamento do novo site',
           targetDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 16),
-          expiredMessage: '🚀 O lançamento chegou!',
+          expiredMessage: 'O lançamento chegou!',
           theme: 'bold-gradient'
         } : undefined,
         choresConfig: type === WidgetType.CHORES ? {
-          title: '🧹 Quadro de Deveres',
+          title: 'Quadro de Deveres',
           items: [
             { id: '1', chore: 'Regar as plantas', assignee: 'Carlos', day: 'Segunda', done: false },
             { id: '2', chore: 'Organizar estoque', assignee: 'Mariana', day: 'Terça', done: true },
@@ -455,7 +455,7 @@ const Scheduler: React.FC = () => {
           ]
         } : undefined,
         mealPlanConfig: type === WidgetType.MEAL_PLAN ? {
-          title: '🍽️ Cardápio da Semana',
+          title: 'Cardápio da Semana',
           days: {
             'Segunda': { breakfast: 'Tapioca + Café', lunch: 'Arroz, Feijão, Frango', dinner: 'Sopa de Legumes', snacks: 'Fruta' },
             'Terça': { breakfast: 'Pão Integral + Suco', lunch: 'Purê de Batata, Carne', dinner: 'Salada Completa', snacks: 'Iogurte' },
@@ -489,7 +489,7 @@ const Scheduler: React.FC = () => {
           interactive: false
         } : undefined,
         embedHtmlConfig: type === WidgetType.EMBED_HTML ? {
-          html: '<div style="padding: 20px; text-align: center; background: linear-gradient(135deg, #1e1b4b, #311042); color: #fff; border-radius: 12px; font-family: sans-serif; height: 100%; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; align-items: center;">\n  <h2 style="margin-top:0; color: #22d3ee; margin-bottom: 8px;">HTML Customizado 🚀</h2>\n  <p style="margin-bottom: 12px;">Edite este bloco digitando qualquer código HTML ou JS no painel lateral!</p>\n  <span style="font-size: 32px;">💻</span>\n</div>'
+          html: '<div style="padding: 20px; text-align: center; background: linear-gradient(135deg, #1e1b4b, #311042); color: #fff; border-radius: 12px; font-family: sans-serif; height: 100%; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; align-items: center;">\n  <h2 style="margin-top:0; color: #22d3ee; margin-bottom: 8px;">HTML personalizado</h2>\n  <p style="margin-bottom: 12px;">Edite este bloco com seu código HTML ou JS no painel lateral.</p>\n</div>'
         } : undefined,
         airtableConfig: type === WidgetType.AIRTABLE ? {
           shareUrl: ''
@@ -588,7 +588,7 @@ const Scheduler: React.FC = () => {
                 <CalendarIcon className="text-indigo-500 shrink-0 w-6 h-6 md:w-8 md:h-8" />
                 <span>Central de <span className="text-[var(--th-accent)]">Programação</span></span>
               </h1>
-              <p className="text-slate-500 text-xs md:text-sm font-medium">Agendamento mestre e distribuição de conteúdo</p>
+              <p className="text-slate-500 text-xs md:text-sm font-medium">Escolha o que cada tela mostra e em que horário</p>
             </div>
           </div>
           
@@ -711,11 +711,11 @@ const Scheduler: React.FC = () => {
                   <div className="mb-2.5">
                     <h4 className="text-[9px] font-black text-emerald-400 uppercase tracking-widest mb-1 flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-emerald-400 inline-block"></span>Básicos</h4>
                     <div className="grid grid-cols-3 gap-1.5">
-                      <WidgetTool icon="/icons3d/image.png" label="Imagem" description="Exibe imagens de alta qualidade (PNG, JPG, SVG) com ajuste automático ao contêiner." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.IMAGE)} tooltipAlign="left" />
-                      <WidgetTool icon="/icons3d/video.png" label="Vídeo" description="Reproduz vídeos locais em looping ou links diretos do YouTube." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.VIDEO)} tooltipAlign="center" />
-                      <WidgetTool icon="/icons3d/text.png" label="Texto" description="Adiciona caixas de texto com fontes, cores e tamanhos personalizáveis." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.TEXT)} tooltipAlign="right" />
-                      <WidgetTool icon="/icons3d/gif.png" label="GIF" description="Exibe animações divertidas em formato GIF para atrair a atenção do público." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.GIF)} tooltipAlign="left" />
-                      <WidgetTool icon="/icons3d/web.png" label="Web" description="Incorpora qualquer site ou página web externa de forma interativa." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.IFRAME)} tooltipAlign="center" />
+                      <WidgetTool icon="/icons3d/image.png" label="Imagem" description="Mostra imagens PNG, JPG ou SVG ajustadas ao espaço do bloco." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.IMAGE)} tooltipAlign="left" />
+                      <WidgetTool icon="/icons3d/video.png" label="Vídeo" description="Toca vídeos enviados, em repetição, ou links do YouTube." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.VIDEO)} tooltipAlign="center" />
+                      <WidgetTool icon="/icons3d/text.png" label="Texto" description="Caixa de texto com fonte, cor e tamanho que você escolhe." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.TEXT)} tooltipAlign="right" />
+                      <WidgetTool icon="/icons3d/gif.png" label="GIF" description="Mostra animações em GIF." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.GIF)} tooltipAlign="left" />
+                      <WidgetTool icon="/icons3d/web.png" label="Web" description="Mostra uma página de outro site dentro da tela." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.IFRAME)} tooltipAlign="center" />
                     </div>
                   </div>
 
@@ -723,11 +723,11 @@ const Scheduler: React.FC = () => {
                   <div className="mb-2.5">
                     <h4 className="text-[9px] font-black text-cyan-400 uppercase tracking-widest mb-1 flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-cyan-400 inline-block"></span>Utilitários</h4>
                     <div className="grid grid-cols-3 gap-1.5">
-                      <WidgetTool icon="/icons3d/clock.png" label="Relógio" description="Mostra um relógio digital sincronizado em tempo real com a cidade escolhida." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.CLOCK)} tooltipAlign="left" />
-                      <WidgetTool icon="/icons3d/weather.png" label="Clima" description="Exibe a previsão do tempo e temperatura em tempo real para qualquer cidade." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.WEATHER)} tooltipAlign="center" />
-                      <WidgetTool icon="/icons3d/full-info.png" label="Completo" description="Painel integrado de relógio, clima e fundos de alta definição." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.FULL_INFO)} tooltipAlign="right" />
-                      <WidgetTool icon="/icons3d/rss.png" label="RSS" description="Exibe feeds de notícias em tempo real de portais de notícias como G1 e CNN." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.RSS)} tooltipAlign="left" />
-                      <WidgetTool icon="/icons3d/calendar.png" label="Agenda" description="Integração direta com Google Agenda para exibir eventos e programações." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.CALENDAR)} tooltipAlign="center" />
+                      <WidgetTool icon="/icons3d/clock.png" label="Relógio" description="Relógio digital com o horário da cidade escolhida." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.CLOCK)} tooltipAlign="left" />
+                      <WidgetTool icon="/icons3d/weather.png" label="Clima" description="Previsão do tempo e temperatura atual da cidade escolhida." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.WEATHER)} tooltipAlign="center" />
+                      <WidgetTool icon="/icons3d/full-info.png" label="Completo" description="Relógio e clima juntos, com imagem de fundo." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.FULL_INFO)} tooltipAlign="right" />
+                      <WidgetTool icon="/icons3d/rss.png" label="RSS" description="Notícias de portais como G1 e CNN, por RSS." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.RSS)} tooltipAlign="left" />
+                      <WidgetTool icon="/icons3d/calendar.png" label="Agenda" description="Mostra os eventos de uma agenda do Google." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.CALENDAR)} tooltipAlign="center" />
                     </div>
                   </div>
 
@@ -735,11 +735,11 @@ const Scheduler: React.FC = () => {
                   <div className="mb-2.5">
                     <h4 className="text-[9px] font-black text-amber-400 uppercase tracking-widest mb-1 flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-amber-400 inline-block"></span>Interativos</h4>
                     <div className="grid grid-cols-3 gap-1.5">
-                      <WidgetTool icon="/icons3d/notes.png" label="Notas" description="Mural de notas adesivas com temas neon, glassmorphism e cores vibrantes." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.NOTES)} tooltipAlign="left" />
-                      <WidgetTool icon="/icons3d/todo.png" label="Tarefas" description="Lista de tarefas interativa com checkboxes e progresso de conclusão." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.TODO)} tooltipAlign="center" />
-                      <WidgetTool icon="/icons3d/countdown.png" label="Contador" description="Cronômetro regressivo para grandes eventos, metas ou datas especiais." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.COUNTDOWN)} tooltipAlign="right" />
-                      <WidgetTool icon="/icons3d/chores.png" label="Deveres" description="Quadro semanal de deveres domésticos ou corporativos com responsáveis." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.CHORES)} tooltipAlign="left" />
-                      <WidgetTool icon="/icons3d/meal-plan.png" label="Meal Plan" description="Planejador ou cardápio de refeições semanais com slide para os dias." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.MEAL_PLAN)} tooltipAlign="center" />
+                      <WidgetTool icon="/icons3d/notes.png" label="Notas" description="Recados em formato de nota adesiva, com vários temas de cor." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.NOTES)} tooltipAlign="left" />
+                      <WidgetTool icon="/icons3d/todo.png" label="Tarefas" description="Lista de tarefas com itens marcados e o total concluído." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.TODO)} tooltipAlign="center" />
+                      <WidgetTool icon="/icons3d/countdown.png" label="Contador" description="Contagem regressiva para um evento, meta ou data." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.COUNTDOWN)} tooltipAlign="right" />
+                      <WidgetTool icon="/icons3d/chores.png" label="Deveres" description="Quadro semanal de tarefas com o responsável por cada uma." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.CHORES)} tooltipAlign="left" />
+                      <WidgetTool icon="/icons3d/meal-plan.png" label="Meal Plan" description="Cardápio da semana, passando dia a dia." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.MEAL_PLAN)} tooltipAlign="center" />
                     </div>
                   </div>
 
@@ -747,14 +747,14 @@ const Scheduler: React.FC = () => {
                   <div className="mb-2.5">
                     <h4 className="text-[9px] font-black text-rose-400 uppercase tracking-widest mb-1 flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-rose-400 inline-block"></span>Integrações</h4>
                     <div className="grid grid-cols-3 gap-1.5">
-                      <WidgetTool icon="/icons3d/market.png" label="Bolsa" description="Painel de cotações financeiras de ações e criptomoedas em tempo real." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.MARKET_WATCH)} tooltipAlign="left" />
-                      <WidgetTool icon="/icons3d/snapshot.png" label="Snapshot" description="Renderiza capturas estáticas e periódicas de páginas de forma segura." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.BROWSER_SNAPSHOT)} tooltipAlign="center" />
+                      <WidgetTool icon="/icons3d/market.png" label="Bolsa" description="Cotações de ações e criptomoedas." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.MARKET_WATCH)} tooltipAlign="left" />
+                      <WidgetTool icon="/icons3d/snapshot.png" label="Snapshot" description="Mostra uma foto da página, atualizada de tempos em tempos." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.BROWSER_SNAPSHOT)} tooltipAlign="center" />
                       <WidgetTool icon="/icons3d/google-docs.png" label="G Docs" description="Incorpora documentos, planilhas ou slides do Google Workspace." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.GOOGLE_DOCS)} tooltipAlign="right" />
                       <WidgetTool icon="/icons3d/office-docs.png" label="Office Docs" description="Exibe planilhas Excel, documentos Word ou slides PowerPoint do Office 365." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.OFFICE_DOCS)} tooltipAlign="left" />
-                      <WidgetTool icon="/icons3d/power-bi.png" label="Power BI" description="Exibe painéis interativos e relatórios dinâmicos do Microsoft Power BI." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.POWER_BI)} tooltipAlign="center" />
-                      <WidgetTool icon="/icons3d/airtable.png" label="Airtable" description="Exibe visualizações, tabelas ou bases de dados completas do Airtable." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.AIRTABLE)} tooltipAlign="right" />
-                      <WidgetTool icon="/icons3d/pdf.png" label="PDF" description="Exibe documentos PDFs e apostilas corporativas página a página." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.PDF_DOCUMENT)} tooltipAlign="left" />
-                      <WidgetTool icon="/icons3d/html.png" label="HTML" description="Insira código HTML, CSS ou JS personalizado livremente." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.EMBED_HTML)} tooltipAlign="center" />
+                      <WidgetTool icon="/icons3d/power-bi.png" label="Power BI" description="Mostra painéis e relatórios do Microsoft Power BI." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.POWER_BI)} tooltipAlign="center" />
+                      <WidgetTool icon="/icons3d/airtable.png" label="Airtable" description="Mostra visualizações, tabelas ou bases do Airtable." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.AIRTABLE)} tooltipAlign="right" />
+                      <WidgetTool icon="/icons3d/pdf.png" label="PDF" description="Mostra um PDF, uma página por vez." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.PDF_DOCUMENT)} tooltipAlign="left" />
+                      <WidgetTool icon="/icons3d/html.png" label="HTML" description="Coloque seu próprio código HTML, CSS ou JS." onHover={setHoveredDescription} onClick={() => addWidget(WidgetType.EMBED_HTML)} tooltipAlign="center" />
                     </div>
                   </div>
                   
@@ -771,7 +771,7 @@ const Scheduler: React.FC = () => {
                   <div className="mt-3 p-2.5 bg-slate-950/60 rounded-xl border border-slate-800/80 min-h-[48px] flex items-center gap-2">
                     <Info size={12} className="text-[var(--th-accent)] shrink-0" />
                     <p className="text-[9px] text-slate-400 font-medium leading-relaxed">
-                      {hoveredDescription || "Passe o mouse sobre um widget para ver a descrição detalhada."}
+                      {hoveredDescription || "Passe o mouse sobre um widget para ver o que ele faz."}
                     </p>
                   </div>
                 </div>
@@ -1142,7 +1142,7 @@ const Scheduler: React.FC = () => {
                     : 'text-slate-600 border-slate-800'
                 }`}>
                   <Maximize2 size={12} className={currentBroadcast?.orientation === 'vertical' ? 'text-purple-500' : 'text-[#F97316]'} />
-                  {currentBroadcast?.orientation === 'vertical' ? 'Canvas Programação 9:16 — Vertical' : 'Canvas Programação 16:9 — Horizontal'}
+                  {currentBroadcast?.orientation === 'vertical' ? 'Programação 9:16 (vertical)' : 'Programação 16:9 (horizontal)'}
                 </div>
                 {pendingAllScreens || (currentBroadcast?.display_ids?.length === displays.length && displays.length > 0) ? (
                   <div className="absolute top-4 right-4 flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest bg-amber-500/20 text-amber-400 px-3 py-1.5 rounded-full border border-amber-500/30 backdrop-blur-sm z-20">
@@ -1184,7 +1184,7 @@ const Scheduler: React.FC = () => {
               <div className="py-20 text-center border-2 border-dashed border-slate-800 rounded-3xl bg-slate-900/20">
                 <CalendarDays size={64} className="mx-auto text-slate-800 mb-6" />
                 <h3 className="text-xl font-bold text-slate-300 mb-2">Nenhuma programação encontrada</h3>
-                <p className="text-slate-500 mb-8 max-w-sm mx-auto">Comece criando sua primeira programação mestre para distribuir conteúdo em suas telas.</p>
+                <p className="text-slate-500 mb-8 max-w-sm mx-auto">Crie a primeira programação para definir o que passa em cada tela e em que horário.</p>
                 <button 
                   onClick={handleCreateNew}
                   className="px-8 py-3 bg-indigo-600 hover:bg-sky-500 text-white rounded-xl font-bold transition-all shadow-lg"
@@ -1322,7 +1322,7 @@ const Scheduler: React.FC = () => {
               </div>
               <div className="text-center">
                 <p className="text-sm font-bold text-slate-300 group-hover:text-[var(--th-accent)] transition-colors">Horizontal</p>
-                <p className="text-[10px] text-slate-600 font-mono mt-0.5">16:9 — TV / Monitor</p>
+                <p className="text-[10px] text-slate-600 font-mono mt-0.5">16:9 (TV ou monitor)</p>
               </div>
             </button>
 
@@ -1335,7 +1335,7 @@ const Scheduler: React.FC = () => {
               </div>
               <div className="text-center">
                 <p className="text-sm font-bold text-slate-300 group-hover:text-purple-400 transition-colors">Vertical</p>
-                <p className="text-[10px] text-slate-600 font-mono mt-0.5">9:16 — Totem / Kiosk</p>
+                <p className="text-[10px] text-slate-600 font-mono mt-0.5">9:16 (totem)</p>
               </div>
             </button>
           </div>
@@ -1344,7 +1344,7 @@ const Scheduler: React.FC = () => {
             <div className="mt-2 bg-amber-500/10 border border-amber-500/20 rounded-xl p-3 flex items-start gap-2">
               <AlertCircle size={14} className="text-amber-400 mt-0.5 shrink-0" />
               <p className="text-[11px] text-amber-400/80 leading-relaxed">
-                O conteúdo será exibido em <strong>todas as {displays.length} telas</strong> conectadas. Ideal para avisos urgentes.
+                O conteúdo será exibido em <strong>todas as {displays.length} telas</strong> conectadas. Use para avisos urgentes.
               </p>
             </div>
           )}
@@ -1399,7 +1399,7 @@ const Scheduler: React.FC = () => {
               <span>Status e Monitoramento de Telas ({displays.length})</span>
             </DialogTitle>
             <DialogDescription className="text-xs text-slate-500 mt-1">
-              Visualize o status de conexão em tempo real e as programações ativas de cada monitor corporativo.
+              Veja quais telas estão conectadas agora e as programações ativas em cada uma.
             </DialogDescription>
           </DialogHeader>
           
@@ -1442,7 +1442,7 @@ const Scheduler: React.FC = () => {
                       </span>
                     </div>
                     <div>
-                      <span className="text-slate-600 block uppercase text-[8px] font-black tracking-wider">Programações Injetadas</span>
+                      <span className="text-slate-600 block uppercase text-[8px] font-black tracking-wider">Programações ativas</span>
                       <span className="font-bold text-slate-300 mt-0.5 block">{display.pages.filter(p => p.broadcast_id).length} cenas</span>
                     </div>
                   </div>
@@ -1600,7 +1600,7 @@ const Scheduler: React.FC = () => {
           
           {currentBroadcast?.page && currentBroadcast.page.layout.length > 0 && (
             <p className="text-[10px] text-slate-500 mt-4 text-center border-t border-slate-800 pt-3">
-              💡 Arraste as camadas usando o indicador de arrastar para alterar a ordem de sobreposição (z-index).
+              Arraste as camadas usando o indicador de arrastar para alterar a ordem de sobreposição (z-index).
             </p>
           )}
         </DialogContent>
@@ -1619,16 +1619,16 @@ const Scheduler: React.FC = () => {
             {[
               { id: '', label: 'Nenhum', desc: 'Remover animação' },
               { id: 'auto-weather', label: 'Automático (Clima)', desc: 'Muda com o tempo' },
-              { id: 'gradient-flow', label: 'Fluxo Gradiente', desc: 'Suave e colorido' },
-              { id: 'clouds', label: 'Céu e Nuvens', desc: 'Calmo e relaxante' },
-              { id: 'rain', label: 'Chuva Digital', desc: 'Dark mode com chuva' },
-              { id: 'snow', label: 'Neve Caindo', desc: 'Inverno suave' },
-              { id: 'fire', label: 'Chamas', desc: 'Intenso e quente' },
-              { id: 'tech-grid', label: 'Grid Tech', desc: 'Futurista e técnico' },
+              { id: 'gradient-flow', label: 'Fluxo Gradiente', desc: 'Cores mudando devagar' },
+              { id: 'clouds', label: 'Céu e Nuvens', desc: 'Nuvens passando' },
+              { id: 'rain', label: 'Chuva Digital', desc: 'Fundo escuro com chuva' },
+              { id: 'snow', label: 'Neve Caindo', desc: 'Neve caindo devagar' },
+              { id: 'fire', label: 'Chamas', desc: 'Fogo em movimento' },
+              { id: 'tech-grid', label: 'Grid Tech', desc: 'Grade com linhas de luz' },
               { id: 'pulse-red', label: 'Alerta Vermelho', desc: 'Para avisos urgentes' },
-              { id: 'pulse-blue', label: 'Pulso Azul', desc: 'Tecnológico suave' },
-              { id: 'pulse-green', label: 'Pulso Verde', desc: 'Status positivo' },
-              { id: 'aurora', label: 'Aurora Boreal', desc: 'Místico e elegante' },
+              { id: 'pulse-blue', label: 'Pulso Azul', desc: 'Brilho azul pulsando' },
+              { id: 'pulse-green', label: 'Pulso Verde', desc: 'Brilho verde pulsando' },
+              { id: 'aurora', label: 'Aurora Boreal', desc: 'Faixas de luz no céu' },
             ].map((option) => (
               <button
                 key={option.id}

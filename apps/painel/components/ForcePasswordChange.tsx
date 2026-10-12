@@ -117,7 +117,7 @@ const ForcePasswordChange: React.FC<ForcePasswordChangeProps> = ({ user, onSucce
           <p className="text-xs leading-relaxed text-slate-400 border-l-2 border-[var(--th-accent)]/40 pl-3">
             A senha que você recebeu por e-mail é <strong className="text-slate-200">provisória</strong>: ela
             trafegou em texto claro, então qualquer pessoa com acesso à sua caixa de entrada poderia
-            usá-la para entrar na sua conta. Escolha uma senha sua agora — leva dez segundos e a
+            usá-la para entrar na sua conta. Escolha uma senha sua agora. Leva dez segundos, e a
             provisória deixa de valer.
           </p>
         </CardHeader>

@@ -29,7 +29,7 @@ export const AccentPicker: React.FC = () => {
         <Button
           variant="outline"
           size="icon"
-          className="flex items-center justify-center w-[32px] h-[32px] rounded-xl border-white/10 hover:bg-white/5 text-slate-400 hover:text-slate-200"
+          className="flex items-center justify-center size-11 lg:size-8 rounded-xl border-white/10 hover:bg-white/5 text-slate-400 hover:text-slate-200"
           title="Cor do painel"
         >
           <Palette size={13} />

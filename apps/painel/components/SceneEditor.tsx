@@ -159,7 +159,7 @@ const SceneEditor: React.FC<SceneEditorProps> = ({
       h: defaultHeight,
       type,
       data: {
-        content: type === WidgetType.TEXT ? 'NOVO TEXTO' : (type === WidgetType.NOTES ? '📝 Bloco de Notas\n\n• Use esta nota para deixar recados ou avisos importantes no display!\n• Suporta quebra de linhas e emojis.' : ''),
+        content: type === WidgetType.TEXT ? 'NOVO TEXTO' : (type === WidgetType.NOTES ? 'Bloco de notas\n\n• Use esta nota para deixar recados ou avisos na tela.\n• Aceita quebra de linha e emojis.' : ''),
         url: type === WidgetType.IMAGE ? 'https://picsum.photos/400/300' : (type === WidgetType.IFRAME ? 'https://www.wikipedia.org' : (type === WidgetType.GIF ? 'https://media.giphy.com/media/3o7TKSjRrfIPjei72E/giphy.gif' : '')),
         videoUrl: type === WidgetType.VIDEO ? 'https://www.youtube.com/watch?v=YhYaHfpz6lo' : '',
         rssUrl: type === WidgetType.RSS ? 'https://g1.globo.com/rss/g1/tecnologia/' : '',
@@ -189,13 +189,13 @@ const SceneEditor: React.FC<SceneEditorProps> = ({
           ]
         } : undefined,
         countdownConfig: type === WidgetType.COUNTDOWN ? {
-          title: '⏰ Lançamento do Novo Site',
+          title: 'Lançamento do novo site',
           targetDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 16),
-          expiredMessage: '🚀 O lançamento chegou!',
+          expiredMessage: 'O lançamento chegou!',
           theme: 'bold-gradient'
         } : undefined,
         choresConfig: type === WidgetType.CHORES ? {
-          title: '🧹 Quadro de Deveres',
+          title: 'Quadro de Deveres',
           items: [
             { id: '1', chore: 'Regar as plantas', assignee: 'Carlos', day: 'Segunda', done: false },
             { id: '2', chore: 'Organizar sala de reuniões', assignee: 'Mariana', day: 'Terça', done: true },
@@ -235,7 +235,7 @@ const SceneEditor: React.FC<SceneEditorProps> = ({
           interactive: true
         } : undefined,
         embedHtmlConfig: type === WidgetType.EMBED_HTML ? {
-          html: '<div style="padding: 20px; text-align: center; background: linear-gradient(135deg, #1e1b4b, #311042); color: #fff; border-radius: 12px; font-family: sans-serif; height: 100%; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; align-items: center;">\n  <h2 style="margin-top:0; color: #22d3ee; margin-bottom: 8px;">HTML Customizado 🚀</h2>\n  <p style="margin-bottom: 12px;">Edite este bloco digitando qualquer código HTML ou JS no painel lateral!</p>\n  <span style="font-size: 32px;">💻</span>\n</div>'
+          html: '<div style="padding: 20px; text-align: center; background: linear-gradient(135deg, #1e1b4b, #311042); color: #fff; border-radius: 12px; font-family: sans-serif; height: 100%; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; align-items: center;">\n  <h2 style="margin-top:0; color: #22d3ee; margin-bottom: 8px;">HTML personalizado</h2>\n  <p style="margin-bottom: 12px;">Edite este bloco com seu código HTML ou JS no painel lateral.</p>\n</div>'
         } : undefined,
         airtableConfig: type === WidgetType.AIRTABLE ? {
           shareUrl: 'https://airtable.com/embed/shr...'
@@ -321,41 +321,41 @@ const SceneEditor: React.FC<SceneEditorProps> = ({
         <div className="bg-slate-900/80 backdrop-blur-md border-b border-slate-800 p-3 flex items-center justify-between z-30">
           <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 md:pb-0">
             {/* Básicos */}
-            <WidgetTool icon="/icons3d/image.png" label="Imagem" description="Exibe imagens de alta qualidade (PNG, JPG, SVG) com ajuste automático ao contêiner." onClick={() => addWidget(WidgetType.IMAGE)} />
-            <WidgetTool icon="/icons3d/video.png" label="Vídeo" description="Reproduz vídeos locais em looping ou links diretos do YouTube." onClick={() => addWidget(WidgetType.VIDEO)} />
-            <WidgetTool icon="/icons3d/text.png" label="Texto" description="Adiciona caixas de texto com fontes, cores e tamanhos personalizáveis." onClick={() => addWidget(WidgetType.TEXT)} />
-            <WidgetTool icon="/icons3d/gif.png" label="GIF" description="Exibe animações divertidas em formato GIF para atrair a atenção do público." onClick={() => addWidget(WidgetType.GIF)} />
-            <WidgetTool icon="/icons3d/web.png" label="Web" description="Incorpora qualquer site ou página web externa de forma interativa." onClick={() => addWidget(WidgetType.IFRAME)} />
+            <WidgetTool icon="/icons3d/image.png" label="Imagem" description="Mostra imagens PNG, JPG ou SVG ajustadas ao espaço do bloco." onClick={() => addWidget(WidgetType.IMAGE)} />
+            <WidgetTool icon="/icons3d/video.png" label="Vídeo" description="Toca vídeos enviados, em repetição, ou links do YouTube." onClick={() => addWidget(WidgetType.VIDEO)} />
+            <WidgetTool icon="/icons3d/text.png" label="Texto" description="Caixa de texto com fonte, cor e tamanho que você escolhe." onClick={() => addWidget(WidgetType.TEXT)} />
+            <WidgetTool icon="/icons3d/gif.png" label="GIF" description="Mostra animações em GIF." onClick={() => addWidget(WidgetType.GIF)} />
+            <WidgetTool icon="/icons3d/web.png" label="Web" description="Mostra uma página de outro site dentro da tela." onClick={() => addWidget(WidgetType.IFRAME)} />
 
             <div className="w-px h-6 bg-slate-800 mx-1 flex-shrink-0"></div>
 
             {/* Utilitários */}
-            <WidgetTool icon="/icons3d/clock.png" label="Relógio" description="Mostra um relógio digital sincronizado em tempo real com a cidade escolhida." onClick={() => addWidget(WidgetType.CLOCK)} />
-            <WidgetTool icon="/icons3d/weather.png" label="Clima" description="Exibe a previsão do tempo e temperatura em tempo real para qualquer cidade." onClick={() => addWidget(WidgetType.WEATHER)} />
-            <WidgetTool icon="/icons3d/full-info.png" label="Completo" description="Painel integrado de relógio, clima e fundos de alta definição." onClick={() => addWidget(WidgetType.FULL_INFO)} />
-            <WidgetTool icon="/icons3d/rss.png" label="RSS" description="Exibe feeds de notícias em tempo real de portais de notícias como G1 e CNN." onClick={() => addWidget(WidgetType.RSS)} />
-            <WidgetTool icon="/icons3d/calendar.png" label="Agenda" description="Integração direta com Google Agenda para exibir eventos e programações." onClick={() => addWidget(WidgetType.CALENDAR)} />
+            <WidgetTool icon="/icons3d/clock.png" label="Relógio" description="Relógio digital com o horário da cidade escolhida." onClick={() => addWidget(WidgetType.CLOCK)} />
+            <WidgetTool icon="/icons3d/weather.png" label="Clima" description="Previsão do tempo e temperatura atual da cidade escolhida." onClick={() => addWidget(WidgetType.WEATHER)} />
+            <WidgetTool icon="/icons3d/full-info.png" label="Completo" description="Relógio e clima juntos, com imagem de fundo." onClick={() => addWidget(WidgetType.FULL_INFO)} />
+            <WidgetTool icon="/icons3d/rss.png" label="RSS" description="Notícias de portais como G1 e CNN, por RSS." onClick={() => addWidget(WidgetType.RSS)} />
+            <WidgetTool icon="/icons3d/calendar.png" label="Agenda" description="Mostra os eventos de uma agenda do Google." onClick={() => addWidget(WidgetType.CALENDAR)} />
 
             <div className="w-px h-6 bg-slate-800 mx-1 flex-shrink-0"></div>
 
             {/* Interativos */}
-            <WidgetTool icon="/icons3d/notes.png" label="Notas" description="Mural de notas adesivas com temas neon, glassmorphism e cores vibrantes." onClick={() => addWidget(WidgetType.NOTES)} />
-            <WidgetTool icon="/icons3d/todo.png" label="Tarefas" description="Lista de tarefas interativa com checkboxes e progresso de conclusão." onClick={() => addWidget(WidgetType.TODO)} />
-            <WidgetTool icon="/icons3d/countdown.png" label="Contador" description="Cronômetro regressivo para grandes eventos, metas ou datas especiais." onClick={() => addWidget(WidgetType.COUNTDOWN)} />
-            <WidgetTool icon="/icons3d/chores.png" label="Deveres" description="Quadro semanal de deveres domésticos ou corporativos com responsáveis." onClick={() => addWidget(WidgetType.CHORES)} />
-            <WidgetTool icon="/icons3d/meal-plan.png" label="Meal Plan" description="Planejador ou cardápio de refeições semanais com slide para os dias." onClick={() => addWidget(WidgetType.MEAL_PLAN)} />
+            <WidgetTool icon="/icons3d/notes.png" label="Notas" description="Recados em formato de nota adesiva, com vários temas de cor." onClick={() => addWidget(WidgetType.NOTES)} />
+            <WidgetTool icon="/icons3d/todo.png" label="Tarefas" description="Lista de tarefas com itens marcados e o total concluído." onClick={() => addWidget(WidgetType.TODO)} />
+            <WidgetTool icon="/icons3d/countdown.png" label="Contador" description="Contagem regressiva para um evento, meta ou data." onClick={() => addWidget(WidgetType.COUNTDOWN)} />
+            <WidgetTool icon="/icons3d/chores.png" label="Deveres" description="Quadro semanal de tarefas com o responsável por cada uma." onClick={() => addWidget(WidgetType.CHORES)} />
+            <WidgetTool icon="/icons3d/meal-plan.png" label="Meal Plan" description="Cardápio da semana, passando dia a dia." onClick={() => addWidget(WidgetType.MEAL_PLAN)} />
 
             <div className="w-px h-6 bg-slate-800 mx-1 flex-shrink-0"></div>
 
             {/* Integrações */}
-            <WidgetTool icon="/icons3d/market.png" label="Bolsa" description="Painel de cotações financeiras de ações e criptomoedas em tempo real." onClick={() => addWidget(WidgetType.MARKET_WATCH)} />
-            <WidgetTool icon="/icons3d/snapshot.png" label="Snapshot" description="Renderiza capturas estáticas e periódicas de páginas de forma segura." onClick={() => addWidget(WidgetType.BROWSER_SNAPSHOT)} />
+            <WidgetTool icon="/icons3d/market.png" label="Bolsa" description="Cotações de ações e criptomoedas." onClick={() => addWidget(WidgetType.MARKET_WATCH)} />
+            <WidgetTool icon="/icons3d/snapshot.png" label="Snapshot" description="Mostra uma foto da página, atualizada de tempos em tempos." onClick={() => addWidget(WidgetType.BROWSER_SNAPSHOT)} />
             <WidgetTool icon="/icons3d/google-docs.png" label="G Docs" description="Incorpora documentos, planilhas ou slides do Google Workspace." onClick={() => addWidget(WidgetType.GOOGLE_DOCS)} />
             <WidgetTool icon="/icons3d/office-docs.png" label="Office Docs" description="Exibe planilhas Excel, documentos Word ou slides PowerPoint do Office 365." onClick={() => addWidget(WidgetType.OFFICE_DOCS)} />
-            <WidgetTool icon="/icons3d/power-bi.png" label="Power BI" description="Exibe painéis interativos e relatórios dinâmicos do Microsoft Power BI." onClick={() => addWidget(WidgetType.POWER_BI)} />
-            <WidgetTool icon="/icons3d/airtable.png" label="Airtable" description="Exibe visualizações, tabelas ou bases de dados completas do Airtable." onClick={() => addWidget(WidgetType.AIRTABLE)} />
-            <WidgetTool icon="/icons3d/pdf.png" label="PDF" description="Exibe documentos PDFs e apostilas corporativas página a página." onClick={() => addWidget(WidgetType.PDF_DOCUMENT)} />
-            <WidgetTool icon="/icons3d/html.png" label="HTML" description="Insira código HTML, CSS ou JS personalizado livremente." onClick={() => addWidget(WidgetType.EMBED_HTML)} />
+            <WidgetTool icon="/icons3d/power-bi.png" label="Power BI" description="Mostra painéis e relatórios do Microsoft Power BI." onClick={() => addWidget(WidgetType.POWER_BI)} />
+            <WidgetTool icon="/icons3d/airtable.png" label="Airtable" description="Mostra visualizações, tabelas ou bases do Airtable." onClick={() => addWidget(WidgetType.AIRTABLE)} />
+            <WidgetTool icon="/icons3d/pdf.png" label="PDF" description="Mostra um PDF, uma página por vez." onClick={() => addWidget(WidgetType.PDF_DOCUMENT)} />
+            <WidgetTool icon="/icons3d/html.png" label="HTML" description="Coloque seu próprio código HTML, CSS ou JS." onClick={() => addWidget(WidgetType.EMBED_HTML)} />
           </div>
 
           <div className="flex items-center gap-2">
@@ -460,7 +460,7 @@ const SceneEditor: React.FC<SceneEditorProps> = ({
 
                     {w.data.fullScreenMode && (
                       <div className="absolute top-5 right-2 z-30 bg-cyan-950/80 border border-[var(--th-accent)]/50 backdrop-blur-sm text-[var(--th-accent)] text-[8px] font-black uppercase px-2 py-0.5 rounded-full shadow-[0_0_10px_rgba(6,182,212,0.3)] pointer-events-none animate-pulse flex items-center gap-1">
-                        <span>📺 Tela Cheia</span>
+                        <span>Tela cheia</span>
                       </div>
                     )}
 
@@ -1120,7 +1120,7 @@ const renderWidgetControls = (
             placeholder="Cole aqui o ID, URL ou iframe do Google Calendar"
           />
           <p className="text-[9px] text-emerald-500/80 leading-relaxed bg-emerald-500/5 p-2 rounded border border-emerald-500/10">
-            💡 <strong>Dica:</strong> Você pode colar diretamente a URL do calendário, o código de incorporação (iframe), ou apenas o ID da agenda.
+            <strong>Dica:</strong> cole a URL do calendário, o código de incorporação (iframe) ou só o ID da agenda.
           </p>
 
           {/* Accordion: Como conectar o Google Calendar */}
@@ -1789,7 +1789,7 @@ const renderWidgetControls = (
             />
             <div className="flex flex-col">
               <span className="font-bold text-slate-200">Preencher Container</span>
-              <span className="text-[9px] text-slate-500 leading-tight">Widget de complemento em tela cheia — ocupa 100% da tela, de canto a canto</span>
+              <span className="text-[9px] text-slate-500 leading-tight">Ocupa a tela inteira da TV, de canto a canto</span>
             </div>
           </label>
 

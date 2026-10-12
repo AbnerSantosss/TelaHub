@@ -139,7 +139,7 @@ export const DisplayGrid: React.FC<DisplayGridProps> = ({
                     onClick={() => { setSort(s); setShowSortMenu(false); }}
                     className={`w-full text-left px-4 py-2.5 text-[12px] font-semibold uppercase tracking-wider transition-all hover:bg-white/5 ${sort === s ? 'text-[var(--th-accent)]' : 'text-slate-400'}`}
                   >
-                    {{ name: 'Nome (A–Z)', date: 'Data de edição', orientation: 'Orientação' }[s]}
+                    {{ name: 'Nome (A a Z)', date: 'Data de edição', orientation: 'Orientação' }[s]}
                     {sort === s && <span className="ml-2 text-[10px]">✓</span>}
                   </button>
                 ))}

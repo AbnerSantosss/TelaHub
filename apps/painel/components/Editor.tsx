@@ -234,7 +234,7 @@ const Editor: React.FC = () => {
       h: defaultHeight,
       type,
       data: {
-        content: type === WidgetType.TEXT ? 'NOVO TEXTO' : (type === WidgetType.NOTES ? '📝 Bloco de Notas\n\n• Use esta nota para deixar recados ou avisos importantes no display!\n• Suporta quebra de linhas e emojis.' : ''),
+        content: type === WidgetType.TEXT ? 'NOVO TEXTO' : (type === WidgetType.NOTES ? 'Bloco de notas\n\n• Use esta nota para deixar recados ou avisos na tela.\n• Aceita quebra de linha e emojis.' : ''),
         url: type === WidgetType.IMAGE ? 'https://picsum.photos/400/300' : (type === WidgetType.IFRAME ? 'https://www.wikipedia.org' : (type === WidgetType.GIF ? 'https://media.giphy.com/media/3o7TKSjRrfIPjei72E/giphy.gif' : '')),
         videoUrl: type === WidgetType.VIDEO ? 'https://www.youtube.com/watch?v=YhYaHfpz6lo' : '',
         rssUrl: type === WidgetType.RSS ? 'https://g1.globo.com/rss/g1/tecnologia/' : '',
@@ -264,13 +264,13 @@ const Editor: React.FC = () => {
           ]
         } : undefined,
         countdownConfig: type === WidgetType.COUNTDOWN ? {
-          title: '⏰ Lançamento do Novo Site',
+          title: 'Lançamento do novo site',
           targetDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 16),
-          expiredMessage: '🚀 O lançamento chegou!',
+          expiredMessage: 'O lançamento chegou!',
           theme: 'bold-gradient'
         } : undefined,
         choresConfig: type === WidgetType.CHORES ? {
-          title: '🧹 Quadro de Deveres',
+          title: 'Quadro de Deveres',
           items: [
             { id: '1', chore: 'Regar as plantas', assignee: 'Carlos', day: 'Segunda', done: false },
             { id: '2', chore: 'Organizar estoque', assignee: 'Mariana', day: 'Terça', done: true },
@@ -278,7 +278,7 @@ const Editor: React.FC = () => {
           ]
         } : undefined,
         mealPlanConfig: type === WidgetType.MEAL_PLAN ? {
-          title: '🍽️ Cardápio da Semana',
+          title: 'Cardápio da Semana',
           days: {
             'Segunda': { breakfast: 'Tapioca + Café', lunch: 'Arroz, Feijão, Frango', dinner: 'Sopa de Legumes', snacks: 'Fruta' },
             'Terça': { breakfast: 'Pão Integral + Suco', lunch: 'Purê de Batata, Carne', dinner: 'Salada Completa', snacks: 'Iogurte' },
@@ -312,7 +312,7 @@ const Editor: React.FC = () => {
           interactive: false
         } : undefined,
         embedHtmlConfig: type === WidgetType.EMBED_HTML ? {
-          html: '<div style="padding: 20px; text-align: center; background: linear-gradient(135deg, #1e1b4b, #311042); color: #fff; border-radius: 12px; font-family: sans-serif; height: 100%; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; align-items: center;">\n  <h2 style="margin-top:0; color: #22d3ee; margin-bottom: 8px;">HTML Customizado 🚀</h2>\n  <p style="margin-bottom: 12px;">Edite este bloco digitando qualquer código HTML ou JS no painel lateral!</p>\n  <span style="font-size: 32px;">💻</span>\n</div>'
+          html: '<div style="padding: 20px; text-align: center; background: linear-gradient(135deg, #1e1b4b, #311042); color: #fff; border-radius: 12px; font-family: sans-serif; height: 100%; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; align-items: center;">\n  <h2 style="margin-top:0; color: #22d3ee; margin-bottom: 8px;">HTML personalizado</h2>\n  <p style="margin-bottom: 12px;">Edite este bloco com seu código HTML ou JS no painel lateral.</p>\n</div>'
         } : undefined,
         airtableConfig: type === WidgetType.AIRTABLE ? {
           shareUrl: ''
@@ -438,16 +438,16 @@ const Editor: React.FC = () => {
               {[
                 { id: '', label: 'Nenhum', desc: 'Remover animação' },
                 { id: 'auto-weather', label: 'Automático (Clima)', desc: 'Muda com o tempo' },
-                { id: 'gradient-flow', label: 'Fluxo Gradiente', desc: 'Suave e colorido' },
-                { id: 'clouds', label: 'Céu e Nuvens', desc: 'Calmo e relaxante' },
-                { id: 'rain', label: 'Chuva Digital', desc: 'Dark mode com chuva' },
-                { id: 'snow', label: 'Neve Caindo', desc: 'Inverno suave' },
-                { id: 'fire', label: 'Chamas', desc: 'Intenso e quente' },
-                { id: 'tech-grid', label: 'Grid Tech', desc: 'Futurista e técnico' },
+                { id: 'gradient-flow', label: 'Fluxo Gradiente', desc: 'Cores mudando devagar' },
+                { id: 'clouds', label: 'Céu e Nuvens', desc: 'Nuvens passando' },
+                { id: 'rain', label: 'Chuva Digital', desc: 'Fundo escuro com chuva' },
+                { id: 'snow', label: 'Neve Caindo', desc: 'Neve caindo devagar' },
+                { id: 'fire', label: 'Chamas', desc: 'Fogo em movimento' },
+                { id: 'tech-grid', label: 'Grid Tech', desc: 'Grade com linhas de luz' },
                 { id: 'pulse-red', label: 'Alerta Vermelho', desc: 'Para avisos urgentes' },
-                { id: 'pulse-blue', label: 'Pulso Azul', desc: 'Tecnológico suave' },
-                { id: 'pulse-green', label: 'Pulso Verde', desc: 'Status positivo' },
-                { id: 'aurora', label: 'Aurora Boreal', desc: 'Místico e elegante' },
+                { id: 'pulse-blue', label: 'Pulso Azul', desc: 'Brilho azul pulsando' },
+                { id: 'pulse-green', label: 'Pulso Verde', desc: 'Brilho verde pulsando' },
+                { id: 'aurora', label: 'Aurora Boreal', desc: 'Faixas de luz no céu' },
               ].map((option) => (
                 <button
                   key={option.id}

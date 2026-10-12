@@ -12,9 +12,12 @@ export const DeviceChips: React.FC<DeviceChipsProps> = ({ devices, displays }) =
 
   if (linked.length === 0) return null;
 
+  // Rótulos aqui eram de 9 px e 10 px. O sistema visual do produto define 12 px
+  // como mínimo, e não é preciosismo: esta faixa é onde o dono do negócio
+  // confere se a TV da recepção está no ar.
   return (
     <div className="flex items-center gap-1.5 flex-wrap">
-      <span className="text-[9px] uppercase tracking-widest font-bold text-slate-600 mr-0.5">TVs:</span>
+      <span className="text-[12px] uppercase tracking-widest font-bold text-slate-500 mr-0.5">TVs:</span>
       {linked.map(device => {
         const isOnline = device.online;
         const linkedDisplay = displays.find(d => d.id === device.display_id);
@@ -36,8 +39,8 @@ export const DeviceChips: React.FC<DeviceChipsProps> = ({ devices, displays }) =
                 boxShadow: isOnline ? '0 0 6px rgba(34,197,94,0.5)' : 'none',
               }}
             />
-            <Tv size={10} className="text-slate-500 flex-shrink-0" />
-            <span className="text-[10px] font-medium text-slate-400 leading-none max-w-[80px] truncate">
+            <Tv size={12} className="text-slate-400 flex-shrink-0" />
+            <span className="text-[12px] font-medium text-slate-300 leading-none max-w-[110px] truncate">
               {device.name || 'TV'}
             </span>
           </div>

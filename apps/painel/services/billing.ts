@@ -1,4 +1,4 @@
-import { api } from '../libs/api';
+import { api, getApiErrorMessage, isApiError } from '../libs/api';
 
 // ==============================================================================
 // Contrato real de `GET /api/plans` e `GET /api/billing/subscription`.
@@ -231,4 +231,363 @@ export const isWidgetLocked = (
 ): boolean => {
   const key = widgetFeatureKey(widgetType);
   return key !== null && !hasFeature(features, key);
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PÁGINA "ASSINATURA" + PAYWALL — leitura, cancelamento, reativação, checkout
+//
+// ⚠️ ARMADILHA DO CONTRATO: em 2026-09-05 `GET /api/billing/subscription`
+// responde no formato ANTIGO (`{ subscription: {...}, usage: {...} }`, ver
+// `apps/api/src/routes/billing.routes.ts`) e o formato NOVO — plano e cobrança
+// achatados na raiz, com `payments[]` — está sendo escrito em paralelo.
+//
+// Por isso tudo aqui passa por `normalizeBillingAccount`, que aceita as DUAS
+// formas. Sem isso a página "Assinatura" ficaria em branco em produção no dia
+// em que uma das pontas subisse antes da outra — e página de cancelamento em
+// branco é problema de CDC (direito de rescindir), não de layout.
+//
+// A segunda regra é igualmente dura: NADA aqui inventa número. Campo ausente
+// vira `null`, e a tela mostra "—" em vez de um valor plausível. Assinatura é
+// documento de cobrança: valor chutado na tela é promessa que a fatura não
+// cumpre.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export type BillingInterval = 'monthly' | 'yearly';
+
+/** Uma cobrança do histórico. Tudo opcional: o gateway ainda não está no ar. */
+export interface BillingPayment {
+  id: string;
+  /** `paid` | `pending` | `failed` | `refunded` | … — texto livre do gateway. */
+  status: string;
+  /** Meio de pagamento, quando o gateway informa. Nunca prometemos um aqui. */
+  method: string | null;
+  amountCents: number | null;
+  billingInterval: BillingInterval | null;
+  paidAt: string | null;
+  dueDate: string | null;
+  /** Link da fatura no gateway. `null` = não mostrar botão nenhum. */
+  invoiceUrl: string | null;
+  /** Link da nota fiscal de serviço. `null` = não prometer nota. */
+  nfseUrl: string | null;
+}
+
+export interface BillingAccount {
+  planCode: string | null;
+  planName: string;
+  /** `trialing` | `active` | `past_due` | `canceled` | … */
+  status: string;
+  billingInterval: BillingInterval | null;
+  /** Telas que entram na fatura (respeita o piso do plano). */
+  screensBilled: number | null;
+  currentPeriodEnd: string | null;
+  /** Cancelada, mas o acesso segue até `currentPeriodEnd`. */
+  cancelAtPeriodEnd: boolean;
+  canceledAt: string | null;
+  /** Valor do CICLO (no anual, os 12 meses), em centavos. */
+  cycleAmountCents: number | null;
+  nextChargeAt: string | null;
+  payments: BillingPayment[];
+  /** `true` quando não existe cobrança nenhuma — o plano de entrada. */
+  free: boolean;
+}
+
+const asRecord = (value: unknown): Record<string, unknown> | null =>
+  value && typeof value === 'object' && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : null;
+
+const asText = (value: unknown): string | null =>
+  typeof value === 'string' && value.trim() ? value : null;
+
+const asCount = (value: unknown): number | null =>
+  typeof value === 'number' && Number.isFinite(value) ? value : null;
+
+const asInterval = (value: unknown): BillingInterval | null =>
+  value === 'yearly' || value === 'monthly' ? value : null;
+
+/** Primeiro valor não nulo entre os caminhos tentados. */
+const firstOf = <T,>(...values: (T | null | undefined)[]): T | null => {
+  for (const value of values) {
+    if (value !== null && value !== undefined) return value;
+  }
+  return null;
+};
+
+const normalizePayment = (raw: unknown, index: number): BillingPayment | null => {
+  const record = asRecord(raw);
+  if (!record) return null;
+  return {
+    id: asText(record.id) ?? `pagamento-${index}`,
+    status: asText(record.status) ?? 'desconhecido',
+    method: asText(record.method),
+    amountCents: asCount(record.amountCents),
+    billingInterval: asInterval(record.billingInterval),
+    paidAt: asText(record.paidAt),
+    dueDate: asText(record.dueDate),
+    invoiceUrl: asText(record.invoiceUrl),
+    nfseUrl: asText(record.nfseUrl),
+  };
+};
+
+/**
+ * Aceita o payload novo (achatado) e o antigo (`{subscription, usage}`).
+ *
+ * Devolve `null` só quando não há sequer um `status` — aí não é "formato
+ * diferente", é resposta que não fala de assinatura nenhuma.
+ */
+export const normalizeBillingAccount = (raw: unknown): BillingAccount | null => {
+  const root = asRecord(raw);
+  if (!root) return null;
+
+  // No formato antigo os campos moram um nível abaixo, em `subscription`.
+  const flat = asRecord(root.subscription) ?? root;
+  const status = asText(flat.status);
+  if (!status) return null;
+
+  const plan = asRecord(flat.plan);
+  const estimated = asRecord(flat.estimatedMonthly);
+
+  const planCode = plan ? asText(plan.code) : null;
+  const planName = (plan ? asText(plan.name) : null) ?? asText(flat.planName) ?? 'Plano atual';
+
+  const pricePerScreenCents = plan ? asCount(plan.pricePerScreenCents) : null;
+  const quoteOnly = plan?.quoteOnly === true;
+  const free =
+    plan?.free === true ||
+    estimated?.free === true ||
+    (!quoteOnly && pricePerScreenCents === 0) ||
+    (!quoteOnly && planCode === 'gratis');
+
+  const rawPayments = Array.isArray(root.payments)
+    ? root.payments
+    : Array.isArray(flat.payments)
+      ? flat.payments
+      : [];
+
+  return {
+    planCode,
+    planName,
+    status,
+    billingInterval: asInterval(flat.billingInterval),
+    screensBilled: firstOf(
+      asCount(flat.screensBilled),
+      estimated ? asCount(estimated.billedScreens) : null
+    ),
+    currentPeriodEnd: asText(flat.currentPeriodEnd),
+    cancelAtPeriodEnd: flat.cancelAtPeriodEnd === true,
+    canceledAt: asText(flat.canceledAt),
+    cycleAmountCents: firstOf(
+      asCount(flat.cycleAmountCents),
+      estimated ? asCount(estimated.cents) : null
+    ),
+    // Sem fallback para `currentPeriodEnd`: fim de período e próxima cobrança
+    // coincidem no caso comum, mas NÃO coincidem em conta cancelada. A tela
+    // rotula os dois separadamente em vez de adivinhar.
+    nextChargeAt: asText(flat.nextChargeAt),
+    payments: rawPayments
+      .map((item, index) => normalizePayment(item, index))
+      .filter((item): item is BillingPayment => item !== null),
+    free,
+  };
+};
+
+/**
+ * Resultado plano em vez de união discriminada: o `tsconfig` do painel roda com
+ * `strictNullChecks` desligado, e nesse modo o TypeScript não estreita união
+ * por discriminante booleano — `resultado.reason` dentro do `else` vira erro de
+ * compilação. Um objeto só, com `reason: 'ok'`, evita a armadilha.
+ */
+export interface BillingAccountResult {
+  account: BillingAccount | null;
+  reason: 'ok' | 'no_subscription' | 'unavailable';
+  /** Texto para a tela quando `reason !== 'ok'`. */
+  message: string | null;
+}
+
+/**
+ * `GET /api/billing/subscription`, já normalizado.
+ *
+ * Diferente de `getBillingSnapshot`, este NÃO engole o erro em `null`: a página
+ * de assinatura precisa distinguir "conta sem assinatura" (404) de "não
+ * consegui falar com o servidor". Nos dois casos a tela diz a verdade, mas o
+ * texto e o botão são outros.
+ */
+export const getBillingAccount = async (): Promise<BillingAccountResult> => {
+  try {
+    const raw = await api.get<unknown>('/billing/subscription');
+    const account = normalizeBillingAccount(raw);
+    if (!account) {
+      return {
+        account: null,
+        reason: 'unavailable',
+        message: 'O servidor respondeu, mas sem os dados da assinatura.',
+      };
+    }
+    return { account, reason: 'ok', message: null };
+  } catch (error) {
+    if (isApiError(error) && error.status === 404) {
+      return {
+        account: null,
+        reason: 'no_subscription',
+        message: getApiErrorMessage(error, 'Nenhuma assinatura encontrada para esta conta.'),
+      };
+    }
+    return {
+      account: null,
+      reason: 'unavailable',
+      message: getApiErrorMessage(error, 'Não foi possível carregar sua assinatura agora.'),
+    };
+  }
+};
+
+export interface CancelOutcome {
+  cancelAtPeriodEnd: boolean;
+  currentPeriodEnd: string | null;
+  status: string | null;
+}
+
+const normalizeCancelOutcome = (raw: unknown): CancelOutcome => {
+  const root = asRecord(raw) ?? {};
+  const flat = asRecord(root.subscription) ?? root;
+  return {
+    cancelAtPeriodEnd: flat.cancelAtPeriodEnd === true,
+    currentPeriodEnd: asText(flat.currentPeriodEnd),
+    status: asText(flat.status),
+  };
+};
+
+/**
+ * `POST /api/billing/cancel`. O erro SOBE — quem cancelou precisa saber que o
+ * cancelamento não foi registrado, e um `catch` silencioso aqui faria a tela
+ * mostrar "cancelado" sem nada ter sido cancelado.
+ */
+export const cancelSubscription = async (reason?: string): Promise<CancelOutcome> => {
+  const trimmed = reason?.trim();
+  const raw = await api.post<unknown>('/billing/cancel', trimmed ? { reason: trimmed } : {});
+  return normalizeCancelOutcome(raw);
+};
+
+/** `POST /api/billing/reactivate` — só faz sentido antes de o ciclo acabar. */
+export const reactivateSubscription = async (): Promise<CancelOutcome> => {
+  const raw = await api.post<unknown>('/billing/reactivate', {});
+  return normalizeCancelOutcome(raw);
+};
+
+/**
+ * `POST /api/billing/checkout` → URL hospedada do gateway.
+ *
+ * ⚠️ Hoje a rota responde 501 (`gateway_not_integrated`): o gateway não está
+ * no ar. O erro é propagado de propósito para que a tela ofereça o caminho
+ * alternativo (o app de checkout) em vez de fingir que a compra começou.
+ */
+export const startCheckout = async (
+  input: { planCode?: string; screens?: number } = {}
+): Promise<string> => {
+  const body: Record<string, unknown> = {};
+  if (input.planCode) body.planCode = input.planCode;
+  if (input.screens && input.screens > 0) body.screens = input.screens;
+
+  const raw = await api.post<unknown>('/billing/checkout', body);
+  const url = asText(asRecord(raw)?.checkoutUrl);
+  if (!url) throw new Error('O servidor não devolveu o endereço do checkout.');
+  return url;
+};
+
+// ─── Plano sugerido no paywall ───────────────────────────────────────────────
+
+export interface SuggestedUpgrade {
+  code: string;
+  name: string;
+  pricePerScreenCents: number;
+  minScreens: number;
+  /** Telas efetivamente cobradas com a tela nova ligada. */
+  billedScreens: number;
+  /** Total mensal com essas telas, em centavos. */
+  totalCents: number;
+}
+
+/**
+ * Lê o plano sugerido de dentro do erro 403 do backend.
+ *
+ * O `enforceQuota` já devolve `billing.suggestedPlan` com preço, piso e total
+ * JÁ CALCULADOS pela mesma função que gera a fatura (`estimateMonthlyCents`).
+ * Usar esses números — em vez de recalcular no cliente — é o que garante que o
+ * valor do paywall e o valor da cobrança sejam o mesmo número.
+ */
+export const suggestedUpgradeFromError = (payload: unknown): SuggestedUpgrade | null => {
+  const billing = asRecord(asRecord(payload)?.billing);
+  const suggested = asRecord(billing?.suggestedPlan);
+  if (!suggested) return null;
+
+  const code = asText(suggested.code);
+  const name = asText(suggested.name);
+  const price = asCount(suggested.pricePerScreenCents);
+  const total = asCount(suggested.estimatedMonthlyCents);
+  if (!code || !name || price === null || total === null) return null;
+
+  return {
+    code,
+    name,
+    pricePerScreenCents: price,
+    minScreens: asCount(suggested.minScreens) ?? 1,
+    billedScreens: asCount(suggested.billedScreens) ?? 0,
+    totalCents: total,
+  };
+};
+
+/**
+ * Reserva quando o erro não trouxe sugestão: o plano pago mais barato que
+ * comporta `screensWanted` telas. Planos sob consulta ficam de fora — não dá
+ * para mostrar total de um preço que é negociado.
+ */
+export const suggestedUpgradeFromCatalog = (
+  catalog: PlansCatalog | null,
+  screensWanted: number
+): SuggestedUpgrade | null => {
+  if (!catalog) return null;
+
+  const candidates = catalog.plans
+    .filter((plan) => !plan.free && !plan.quoteOnly && plan.pricePerScreenCents > 0)
+    .filter((plan) => plan.limits.maxDevices === null || plan.limits.maxDevices >= screensWanted)
+    .sort((a, b) => monthlyCents(a, screensWanted) - monthlyCents(b, screensWanted));
+
+  const plan = candidates[0];
+  if (!plan) return null;
+
+  return {
+    code: plan.code,
+    name: plan.name,
+    pricePerScreenCents: plan.pricePerScreenCents,
+    minScreens: plan.minScreens,
+    billedScreens: billedScreens(plan, screensWanted),
+    totalCents: monthlyCents(plan, screensWanted),
+  };
+};
+
+// ─── Formatação ──────────────────────────────────────────────────────────────
+
+/** `2026-09-05T…` → `05/09/2026`. `null` quando não há data — nunca "hoje". */
+export const formatDateBR = (iso: string | null | undefined): string | null => {
+  if (!iso) return null;
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return null;
+  return date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+};
+
+/** Data por extenso, para a frase do cancelamento ("até 5 de outubro de 2026"). */
+export const formatDateLongBR = (iso: string | null | undefined): string | null => {
+  if (!iso) return null;
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return null;
+  return date.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' });
+};
+
+/** Valor em centavos → `R$ 0,00`. `null` vira `—`, nunca `R$ 0,00`. */
+export const formatCentsOrDash = (cents: number | null | undefined): string =>
+  typeof cents === 'number' && Number.isFinite(cents) ? formatBRL(cents) : '-';
+
+export const intervalLabel = (interval: BillingInterval | null): string => {
+  if (interval === 'yearly') return 'Anual';
+  if (interval === 'monthly') return 'Mensal';
+  return '-';
 };

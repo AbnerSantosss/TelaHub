@@ -86,7 +86,7 @@ export const invalidSubscriptionMessage = (
 ): string => {
   switch (reason) {
     case 'past_due':
-      return 'Pagamento pendente — regularize para continuar publicando nas suas telas.';
+      return 'Pagamento pendente. Regularize para continuar publicando nas suas telas.';
     case 'canceled':
       return 'Sua assinatura foi cancelada. Escolha um plano para reativar o acesso.';
     case 'trial_expired':
@@ -105,8 +105,73 @@ export const subscriptionBadgeLabel = (view: SubscriptionView): string => {
   if (view.isTrial) {
     const days = view.trialDaysRemaining;
     if (days === null) return 'Período promocional';
-    if (days === 1) return 'Período promocional — 1 dia restante';
-    return `Período promocional — ${days} dias restantes`;
+    if (days === 1) return 'Período promocional: falta 1 dia';
+    return `Período promocional: faltam ${days} dias`;
   }
   return view.planName;
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// RÓTULOS DA PÁGINA "ASSINATURA"
+//
+// Ficam aqui, e não dentro do componente, porque o MESMO status precisa ser
+// dito com as MESMAS palavras na página de assinatura, na faixa do topo e em
+// qualquer aviso futuro. Status traduzido de um jeito num lugar e de outro no
+// outro é a receita para o cliente achar que tem duas assinaturas.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export type BillingTone = 'ok' | 'atencao' | 'erro' | 'neutro';
+
+/** Nome humano do status. Status desconhecido volta como ele mesmo, não some. */
+export const billingStatusLabel = (status: string): string => {
+  switch (status) {
+    case 'active':
+      return 'Ativa';
+    case 'trialing':
+      return 'Período promocional';
+    case 'past_due':
+      return 'Pagamento pendente';
+    case 'canceled':
+      return 'Cancelada';
+    case 'expired':
+      return 'Encerrada';
+    default:
+      return status;
+  }
+};
+
+export const billingStatusTone = (status: string): BillingTone => {
+  switch (status) {
+    case 'active':
+      return 'ok';
+    case 'trialing':
+      return 'neutro';
+    case 'past_due':
+      return 'atencao';
+    case 'canceled':
+    case 'expired':
+      return 'erro';
+    default:
+      return 'neutro';
+  }
+};
+
+/**
+ * Explicação de UMA linha do que o status significa para o acesso.
+ *
+ * ⚠️ `past_due` NÃO cita prazo de carência em dias: o número real depende do
+ * gateway, que ainda não está integrado. Prometer "5 dias" aqui seria inventar
+ * uma condição contratual.
+ */
+export const billingStatusExplanation = (status: string): string | null => {
+  switch (status) {
+    case 'past_due':
+      return 'A última cobrança não foi aprovada. Suas telas continuam no ar enquanto tentamos de novo. Atualize a forma de pagamento para não perder o acesso.';
+    case 'canceled':
+      return 'Esta assinatura foi cancelada. Depois do fim do período já pago, as telas param de exibir conteúdo.';
+    case 'expired':
+      return 'O período contratado terminou e não foi renovado.';
+    default:
+      return null;
+  }
 };

@@ -306,7 +306,7 @@ export const Canvas: React.FC<CanvasProps> = ({
           : 'text-slate-600 border-slate-800'
       }`}>
         <Maximize2 size={12} className={display.orientation === 'vertical' ? 'text-purple-500' : 'text-[#F97316]'} />
-        {display.orientation === 'vertical' ? 'Canvas 9:16 — Vertical' : 'Canvas 16:9 — Horizontal'}
+        {display.orientation === 'vertical' ? 'Tela 9:16 (vertical)' : 'Tela 16:9 (horizontal)'}
       </div>
       
       {/*
@@ -421,7 +421,7 @@ export const Canvas: React.FC<CanvasProps> = ({
                 >
                   {w.data.fullScreenMode && (
                     <div className="absolute top-2 right-2 z-30 bg-indigo-950/80 border border-[var(--th-accent)]/50 backdrop-blur-sm text-[var(--th-accent)] text-[9px] font-black uppercase px-2 py-0.5 rounded-full shadow-[0_0_10px_rgba(124,58,237,0.3)] pointer-events-none animate-pulse flex items-center gap-1">
-                      <span>📺 Tela Cheia (100% da TV)</span>
+                      <span>Tela cheia (100% da TV)</span>
                     </div>
                   )}
 

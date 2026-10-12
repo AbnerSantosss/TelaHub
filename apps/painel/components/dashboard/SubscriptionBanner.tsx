@@ -31,8 +31,8 @@ interface SubscriptionBannerProps {
 const badgeLabel = (planName: string, isTrial: boolean, days: number | null): string => {
   if (!isTrial) return planName;
   if (days === null) return 'Teste promocional';
-  if (days === 1) return 'Teste promocional — 1 dia restante';
-  return `Teste promocional — ${days} dias restantes`;
+  if (days === 1) return 'Teste promocional: falta 1 dia';
+  return `Teste promocional: faltam ${days} dias`;
 };
 
 export const SubscriptionBanner: React.FC<SubscriptionBannerProps> = ({
@@ -161,15 +161,15 @@ export const SubscriptionBanner: React.FC<SubscriptionBannerProps> = ({
       {/* Convite para escalar — só quando a tela grátis já está em uso. */}
       {freeLimitReached && (
         <p className="text-[11px] text-slate-400 leading-snug">
-          Precisa de outra tela? A cobrança começa na tela nova e é proporcional aos dias que faltam no período —
-          nunca retroativa.
+          Precisa de outra tela? A cobrança começa na tela nova e é proporcional aos dias que faltam no período.
+          Nada é cobrado de forma retroativa.
         </p>
       )}
 
       {/* Trial promocional encerrado: informativo, não bloqueio. */}
       {view.invalidReason === 'trial_expired' && (
         <p className="text-[11px] text-slate-400 leading-snug">
-          Seu teste promocional terminou. Sua conta segue no plano grátis — escolha um plano quando quiser ativar mais telas.
+          Seu teste promocional terminou. Sua conta continua no plano grátis. Escolha um plano quando quiser ativar mais telas.
         </p>
       )}
     </div>

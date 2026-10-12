@@ -234,7 +234,7 @@ export const EmailSettingsModal: React.FC<EmailSettingsModalProps> = ({
               type="password"
               value={smtpPass}
               onChange={(e) => setSmtpPass(e.target.value)}
-              placeholder={smtpHasSavedPass ? '(senha salva — deixe vazio para manter)' : '••••••••••••'}
+              placeholder={smtpHasSavedPass ? '(senha salva, deixe vazio para manter)' : '••••••••••••'}
               className={`${inputClass} font-mono tracking-wider`}
             />
             {preset?.passHint && (

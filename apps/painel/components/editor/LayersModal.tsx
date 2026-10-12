@@ -345,7 +345,7 @@ export const LayersModal: React.FC<LayersModalProps> = ({
         
         {totalLayers > 0 && (
           <p className="text-[10px] text-slate-500 mt-4 text-center border-t border-slate-800 pt-3">
-            💡 Arraste as camadas para alterar a ordem. Camadas no topo sobrepõem as de baixo.
+            Arraste as camadas para alterar a ordem. Camadas no topo sobrepõem as de baixo.
           </p>
         )}
       </div>

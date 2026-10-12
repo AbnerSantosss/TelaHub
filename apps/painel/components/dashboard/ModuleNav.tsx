@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, FileImage, Users as UsersIcon, Settings, BarChart3 } from 'lucide-react';
+import { Calendar, FileImage, Users as UsersIcon, Settings, BarChart3, Tv, CreditCard } from 'lucide-react';
 import { User } from '../../types';
 import { Button } from '../ui/button';
 
@@ -83,6 +83,29 @@ export const ModuleNav: React.FC<ModuleNavProps> = ({
       >
         <BarChart3 size={14} className={isRouteActive('#/reports') ? 'text-[var(--th-accent)]' : ''} />
         <span className="hidden min-[681px]:inline">Relatórios</span>
+      </Button>
+
+      {/* Ativação: o caminho de volta para "Conecte sua TV". Antes o vínculo só
+          existia dentro de um modal do topo — quem fechasse o modal não achava
+          mais. Conectar mais uma TV é operação recorrente, não de instalação. */}
+      <Button
+        variant="ghost"
+        onClick={() => navigate('/conecte-sua-tv')}
+        className={getNavItemClass(isRouteActive('#/conecte-sua-tv'))}
+      >
+        <Tv size={14} className={isRouteActive('#/conecte-sua-tv') ? 'text-[var(--th-accent)]' : ''} />
+        <span className="hidden min-[681px]:inline">Conectar TV</span>
+      </Button>
+
+      {/* Assinatura fica no menu, e não escondida em "minha conta": cancelamento
+          difícil de achar é problema de CDC, não de navegação. */}
+      <Button
+        variant="ghost"
+        onClick={() => navigate('/assinatura')}
+        className={getNavItemClass(isRouteActive('#/assinatura'))}
+      >
+        <CreditCard size={14} className={isRouteActive('#/assinatura') ? 'text-[var(--th-accent)]' : ''} />
+        <span className="hidden min-[681px]:inline">Assinatura</span>
       </Button>
 
       {(currentUser?.role === 'admin' || currentUser?.role === 'master') && (

@@ -87,7 +87,7 @@ export const TopBar: React.FC<TopBarProps> = ({
             variant="outline"
             size="icon"
             onClick={onRefresh}
-            className="flex items-center justify-center w-[32px] h-[32px] rounded-xl border-white/10 hover:bg-white/5 text-slate-400 hover:text-slate-200"
+            className="flex items-center justify-center size-11 lg:size-8 rounded-xl border-white/10 hover:bg-white/5 text-slate-400 hover:text-slate-200"
           >
             <RefreshCw size={13} className={loading ? 'animate-spin text-[var(--th-accent)]' : ''} />
           </Button>
@@ -127,20 +127,23 @@ export const TopBar: React.FC<TopBarProps> = ({
 
       {/* 3. Actions */}
       <div className="flex items-center gap-2 flex-shrink-0 w-full lg:w-auto justify-end border-t border-white/5 lg:border-t-0 pt-3 lg:pt-0">
+        {/* "Vincular" era jargão nosso: quem administra um condomínio ou uma
+            clínica chama isso de conectar a TV. O botão agora leva à tela
+            inteira de ativação, não a um modal. */}
         <Button
-          variant="outline"
+          variant="shimmer"
           onClick={onLinkTv}
-          className="flex-1 lg:flex-none flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl font-bold text-xs uppercase tracking-wider btn-tb-outline border-white/10"
+          className="flex-1 lg:flex-none h-11 lg:h-9 gap-1.5 px-3 rounded-xl font-bold text-xs uppercase tracking-wider"
         >
-          <Tv size={13} className="text-slate-400" />
-          <span className="text-slate-300">Vincular</span>
+          <Tv size={13} />
+          <span>Conectar TV</span>
         </Button>
 
         <Button
-          variant="brand"
+          variant="glow"
           onClick={onCreateDisplay}
           disabled={loading}
-          className="flex-1 lg:flex-none flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl font-bold text-slate-900 bg-[var(--th-accent)] hover:bg-[var(--th-accent-strong)] disabled:opacity-50 text-xs"
+          className="flex-1 lg:flex-none h-11 lg:h-9 gap-1.5 px-4 rounded-xl text-xs"
         >
           <Plus size={14} strokeWidth={3} />
           <span>Nova Tela</span>
@@ -156,7 +159,7 @@ export const TopBar: React.FC<TopBarProps> = ({
           variant="outline"
           size="icon"
           onClick={onRefresh}
-          className="hidden lg:flex items-center justify-center w-[32px] h-[32px] rounded-xl border-white/10 hover:bg-white/5 text-slate-400 hover:text-slate-200"
+          className="hidden lg:flex items-center justify-center size-11 lg:size-8 rounded-xl border-white/10 hover:bg-white/5 text-slate-400 hover:text-slate-200"
           title="Atualizar lista"
         >
           <RefreshCw size={13} className={loading ? 'animate-spin text-[var(--th-accent)]' : ''} />
@@ -166,7 +169,7 @@ export const TopBar: React.FC<TopBarProps> = ({
           variant="outline"
           size="icon"
           onClick={onLogout}
-          className="flex items-center justify-center w-[32px] h-[32px] rounded-xl border-white/10 hover:bg-rose-500/10 text-slate-400 hover:text-rose-500 flex-shrink-0"
+          className="flex items-center justify-center size-11 lg:size-8 rounded-xl border-white/10 hover:bg-rose-500/10 text-slate-400 hover:text-rose-500 flex-shrink-0"
           title="Sair"
         >
           <LogOut size={13} />

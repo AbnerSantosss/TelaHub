@@ -1,0 +1,232 @@
+/* ============================================================================
+   PAYWALL DA 2ª TELA — estilo local.
+   Mora ao lado do componente e não no `index.css` pelo mesmo motivo das outras
+   telas novas: CSS global é ponto de conflito entre agentes trabalhando em
+   paralelo no mesmo painel.
+
+   Tokens do sistema visual vêm de `claro.css` (aliases `--pwl-*`, escopados
+   em `.pwl` para não vazar claro por cima do painel escuro).
+   ============================================================================ */
+
+.pwl {
+  /* Tokens (papel/tinta/linha/marca/sinais) vêm de `claro.css` — os
+     `--pwl-*` são aliases definidos lá. */
+
+  font-family: 'Geist', 'Geist Variable', system-ui, -apple-system, sans-serif;
+  /* grade clara sutil (claro.css) sobre o papel */
+  background: var(--claro-grade), var(--pwl-papel);
+  color: var(--pwl-tinta);
+  border-radius: 24px;
+  /* ⚠️ NADA de `overflow: hidden` aqui: este CSS não está em `@layer` e por
+     isso vence o `overflow-y-auto` do `DialogContent`. Com `hidden`, um modal
+     mais alto que 90vh (celular deitado, fonte grande do sistema) cortaria o
+     botão de pagar sem deixar rolar até ele. */
+  overflow-y: auto;
+  text-align: left;
+}
+
+.pwl *,
+.pwl *::before,
+.pwl *::after {
+  box-sizing: border-box;
+}
+
+.pwl-topo {
+  padding: 26px 26px 0;
+}
+
+.pwl-selo {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--pwl-marca-fundo);
+  color: var(--pwl-marca-forte);
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  margin-bottom: 12px;
+}
+
+.pwl-titulo {
+  font-size: 24px;
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0 0 8px;
+  color: var(--pwl-tinta);
+}
+
+.pwl-texto {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--pwl-tinta-2);
+  margin: 0;
+}
+
+.pwl-corpo {
+  padding: 20px 26px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ─── Cartão do plano sugerido ────────────────────────────────────────────── */
+
+.pwl-plano {
+  background: var(--pwl-papel-2);
+  border: 1px solid var(--pwl-linha);
+  border-radius: 16px;
+  padding: 18px;
+}
+
+.pwl-plano-nome {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--pwl-tinta-3);
+  margin: 0 0 6px;
+}
+
+.pwl-plano-total {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pwl-valor {
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--pwl-tinta);
+  line-height: 1.1;
+}
+
+.pwl-valor-apoio {
+  font-size: 14px;
+  color: var(--pwl-tinta-2);
+}
+
+.pwl-plano-detalhe {
+  font-size: 13px;
+  color: var(--pwl-tinta-3);
+  margin: 10px 0 0;
+  line-height: 1.5;
+}
+
+.pwl-sem-preco {
+  font-size: 13px;
+  color: var(--pwl-tinta-2);
+  margin: 0;
+  line-height: 1.55;
+}
+
+/* ─── Regra anti-retroativa ───────────────────────────────────────────────── */
+
+.pwl-regra {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  background: var(--pwl-papel-3);
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+
+.pwl-regra-icone {
+  color: var(--pwl-ok);
+  flex: 0 0 auto;
+  margin-top: 2px;
+}
+
+.pwl-regra-texto {
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--pwl-tinta-2);
+  margin: 0;
+}
+
+.pwl-regra-texto strong {
+  color: var(--pwl-tinta);
+  font-weight: 700;
+}
+
+/* ─── Erro do servidor ────────────────────────────────────────────────────── */
+
+.pwl-erro {
+  background: #fdecea;
+  color: var(--pwl-erro);
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* ─── Rodapé ──────────────────────────────────────────────────────────────── */
+
+.pwl-rodape {
+  padding: 20px 26px 24px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.pwl-btn {
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 12px;
+  padding: 11px 20px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease,
+    box-shadow 160ms ease, transform 160ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.pwl-btn:focus-visible {
+  outline: 3px solid var(--pwl-marca);
+  outline-offset: 2px;
+}
+
+.pwl-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Branco sobre #0369a1 = 5,8:1 — acima do mínimo AA de 4,5:1. */
+.pwl-btn-primario {
+  background: var(--pwl-marca);
+  color: var(--pwl-papel);
+  flex: 1 1 auto;
+  justify-content: center;
+}
+
+.pwl-btn-primario:hover:not(:disabled) {
+  background: var(--pwl-marca-forte);
+}
+
+.pwl-btn-secundario {
+  background: var(--pwl-papel);
+  color: var(--pwl-tinta-2);
+  border-color: var(--pwl-linha);
+}
+
+.pwl-btn-secundario:hover:not(:disabled) {
+  background: var(--pwl-papel-3);
+  color: var(--pwl-tinta);
+}
+
+.pwl-nota {
+  font-size: 12px;
+  color: var(--pwl-tinta-3);
+  line-height: 1.5;
+  padding: 0 26px 22px;
+  margin: 0;
+}

@@ -13,7 +13,6 @@ import {
   resendInvite,
   adminSendPasswordReset,
   getDevices,
-  linkDevice,
   unlinkDevice,
   updateDeviceDisplay,
   getSmtpSettings,
@@ -30,9 +29,11 @@ import {
   getSubscription
 } from '../services/storage';
 import { Display, User, Device, Organization, SubscriptionState } from '../types';
-import { isApiError, getApiErrorMessage, setActiveOrganizationId } from '../libs/api';
+import { isApiError, getApiErrorMessage, setActiveOrganizationId, getActiveOrganizationId } from '../libs/api';
 import { checkoutUrl } from '../libs/external-urls';
 import { MediaLibrary } from './MediaLibrary';
+import ConecteSuaTV from './ConecteSuaTV';
+import { PaywallModal } from './PaywallModal';
 import { toast } from 'sonner';
 import { motion } from 'motion/react';
 import { Button } from './ui/button';
@@ -47,7 +48,6 @@ import { SubscriptionBanner } from './dashboard/SubscriptionBanner';
 
 // Decomposed Modals
 import { CreateDisplayModal } from './dashboard/modals/CreateDisplayModal';
-import { LinkDeviceModal } from './dashboard/modals/LinkDeviceModal';
 import { UserManagementModal } from './dashboard/modals/UserManagementModal';
 import { EmailSettingsModal } from './dashboard/modals/EmailSettingsModal';
 import { AccountSettingsModal } from './dashboard/modals/AccountSettingsModal';
@@ -56,6 +56,17 @@ import { RenameDisplayModal } from './dashboard/modals/RenameDisplayModal';
 import { ConfirmDeleteModal } from './dashboard/modals/ConfirmDeleteModal';
 
 const SELECTED_ORG_STORAGE_KEY = 'selectedOrgId';
+
+/**
+ * Marca que a pessoa já dispensou o primeiro passo ("Conecte sua TV").
+ *
+ * Sem isto, TODA conta sem TV conectada — inclusive quem abriu o painel só para
+ * montar conteúdo antes de comprar o aparelho — cairia no passo de ativação a
+ * cada login, sem saída. Fica no `localStorage` e não no servidor porque é
+ * preferência de exibição, não estado de negócio: perder isso ao trocar de
+ * navegador não causa dano nenhum.
+ */
+const FIRST_STEP_DISMISSED_KEY = 'telahub:primeiro-passo-tv-dispensado';
 
 const Dashboard: React.FC = () => {
   const [displays, setDisplays] = useState<Display[]>([]);
@@ -77,18 +88,27 @@ const Dashboard: React.FC = () => {
   // Modais
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
-  const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [isMediaLibraryOpen, setIsMediaLibraryOpen] = useState(false);
+
+  /**
+   * Paywall da 2ª tela. Substitui o `toast.error` de 8 segundos que sumia
+   * levando junto a única pessoa da base que já tinha decidido pagar.
+   * Guarda a mensagem E o payload do erro: é do payload que sai o plano
+   * sugerido com o preço que o servidor calculou.
+   */
+  const [paywall, setPaywall] = useState<{ mensagem: string; payload: unknown } | null>(null);
+
+  /**
+   * `null` = ainda não decidimos (dados carregando). Depois de decidido, só a
+   * pessoa muda: a tela NÃO some sozinha quando a TV conecta, senão a
+   * confirmação apareceria e desapareceria antes de ser lida.
+   */
+  const [primeiroPassoTv, setPrimeiroPassoTv] = useState<boolean | null>(null);
 
   // Form States
   const [newDisplayName, setNewDisplayName] = useState('');
   const [newDisplayOrientation, setNewDisplayOrientation] = useState<'horizontal' | 'vertical'>('horizontal');
-
-  // Link Device Form States
-  const [linkCode, setLinkCode] = useState('');
-  const [linkName, setLinkName] = useState('');
-  const [selectedDisplayId, setSelectedDisplayId] = useState('');
 
   // User Invite Form States
   const [inviteEmail, setInviteEmail] = useState('');
@@ -316,6 +336,40 @@ const Dashboard: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
+  /**
+   * Decide UMA vez, no primeiro carregamento, se a conta entra no passo
+   * "Conecte sua TV".
+   *
+   * ⚠️ ARMADILHA: calcular isto direto do `devices` a cada render faria a tela
+   * de ativação desaparecer no instante em que a TV conectasse — a confirmação
+   * ("TV conectada") apareceria e sumiria em menos de um segundo, que é
+   * exatamente o feedback que a pessoa precisa ver. Por isso a decisão vira
+   * estado e só a pessoa a desfaz.
+   */
+  useEffect(() => {
+    if (loading || primeiroPassoTv !== null) return;
+
+    let dispensado = false;
+    try {
+      dispensado = localStorage.getItem(FIRST_STEP_DISMISSED_KEY) === '1';
+    } catch {
+      // Navegador com armazenamento bloqueado: trata como não dispensado.
+    }
+
+    const semTvConectada = devices.filter((d) => d.status === 'linked').length === 0;
+    setPrimeiroPassoTv(semTvConectada && !dispensado);
+  }, [loading, devices, primeiroPassoTv]);
+
+  const sairDoPrimeiroPasso = () => {
+    try {
+      localStorage.setItem(FIRST_STEP_DISMISSED_KEY, '1');
+    } catch {
+      // Sem armazenamento, o passo reaparece no próximo login — irritante,
+      // mas não quebra nada.
+    }
+    setPrimeiroPassoTv(false);
+  };
+
   const handleSelectOrg = (organizationId: string | null) => {
     // Aceita apenas ids presentes na lista devolvida pela API.
     const isKnown = !organizationId || organizations.some((org) => org.id === organizationId);
@@ -352,9 +406,20 @@ const Dashboard: React.FC = () => {
   };
 
   /**
-   * Traduz erros de ação (criar tela / vincular TV / convidar usuário) em toast.
-   * 402 = assinatura inválida, 403 = quota do plano estourada. Nos dois casos
-   * a mensagem da API tem prioridade sobre qualquer texto nosso.
+   * Traduz erros de ação (criar tela / conectar TV / convidar usuário).
+   *
+   * A mensagem da API SEMPRE tem prioridade sobre texto nosso — é ela que sabe
+   * o limite real da conta. O que mudou em 2026-09-05 foi o DESTINO:
+   *
+   *   403 (quota estourada) → abre o `PaywallModal`. Antes virava um toast
+   *     vermelho de 8 segundos: quem tentou ligar a 2ª tela — ou seja, quem
+   *     estava disposto a pagar — via o aviso sumir e ficava sem caminho
+   *     nenhum. Era o momento de maior intenção de compra do produto inteiro
+   *     terminando em nada.
+   *
+   *   402 (assinatura inválida: `past_due`/`canceled`) → NÃO é paywall de
+   *     upgrade, é conta com pendência. O lugar certo é a página de
+   *     assinatura, onde dá para ver a cobrança e regularizar.
    */
   const notifyActionError = (error: unknown, fallback: string) => {
     const message = getApiErrorMessage(error, fallback);
@@ -362,16 +427,13 @@ const Dashboard: React.FC = () => {
     if (isApiError(error) && error.status === 402) {
       toast.error(message, {
         duration: 10000,
-        action: { label: 'Escolher plano', onClick: handleChoosePlan },
+        action: { label: 'Ver assinatura', onClick: () => navigate('/assinatura') },
       });
       return;
     }
 
     if (isApiError(error) && error.status === 403) {
-      toast.error(message, {
-        duration: 8000,
-        action: { label: 'Ver planos', onClick: handleChoosePlan },
-      });
+      setPaywall({ mensagem: message, payload: error.payload });
       return;
     }
 
@@ -385,26 +447,12 @@ const Dashboard: React.FC = () => {
   };
 
   // --- Device Handlers ---
-  const handleLinkDevice = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!linkCode || !selectedDisplayId || !linkName) return;
-
-    setLoading(true);
-    try {
-      await linkDevice(linkCode, selectedDisplayId, linkName);
-      toast.success('Dispositivo vinculado com sucesso!');
-      setIsLinkModalOpen(false);
-      setLinkCode('');
-      setLinkName('');
-      setSelectedDisplayId('');
-      await refreshData();
-    } catch (error) {
-      console.error("Erro ao vincular dispositivo:", error);
-      notifyActionError(error, 'Código inválido ou dispositivo não encontrado.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  //
+  // O vínculo de TV saiu daqui: mora em `ConecteSuaTV`, que é tela inteira e
+  // não modal. O passo de ativação precisa do endereço do player em letras
+  // grandes e de um guia por aparelho — nada disso cabia num modal de 420 px, e
+  // era por isso que a conta nascia sem TV nenhuma conectada.
+  const abrirConecteSuaTV = () => navigate('/conecte-sua-tv');
 
   const confirmDeleteDevice = (deviceId: string) => {
     setDeviceToDelete(deviceId);
@@ -700,7 +748,7 @@ const Dashboard: React.FC = () => {
       return;
     }
     if (preset?.fixedUser && !smtpFromEmail) {
-      toast.error(`${preset.label} autentica com usuário fixo — informe o e-mail remetente.`);
+      toast.error(`${preset.label} autentica com usuário fixo. Informe o e-mail remetente.`);
       return;
     }
     setSmtpLoading(true);
@@ -785,6 +833,21 @@ const Dashboard: React.FC = () => {
     }
   };
 
+  // PRIMEIRO PASSO DA CONTA NOVA.
+  // Vem antes do painel de propósito: a conta que nasce e não conecta nenhuma
+  // TV não vira cliente, e o painel cheio de opções esconde a única coisa que
+  // precisa acontecer agora. Todos os hooks já rodaram acima, então este
+  // retorno antecipado não muda a ordem de nenhum deles.
+  if (primeiroPassoTv === true) {
+    return (
+      <ConecteSuaTV
+        variante="primeiro-passo"
+        onSair={sairDoPrimeiroPasso}
+        onConectado={refreshData}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen relative z-10" style={{ color: 'var(--color-text)' }}>
       <div className="th-container py-6 md:py-8 relative min-h-screen">
@@ -801,7 +864,7 @@ const Dashboard: React.FC = () => {
             loading={loading}
             displays={displays}
             devices={devices}
-            onLinkTv={() => setIsLinkModalOpen(true)}
+            onLinkTv={abrirConecteSuaTV}
             onCreateDisplay={openCreateModal}
             onRefresh={refreshData}
             onLogout={handleLogout}
@@ -831,10 +894,12 @@ const Dashboard: React.FC = () => {
               <DeviceChips devices={devices} displays={displays} />
             ) : !loading && (
               <button
-                onClick={() => setIsLinkModalOpen(true)}
-                className="text-[11px] font-medium text-slate-500 hover:text-[var(--th-accent)] transition-colors"
+                onClick={abrirConecteSuaTV}
+                className="text-[13px] font-semibold text-[var(--th-accent)] hover:underline transition-colors"
               >
-                Nenhuma TV pareada ainda — clique aqui para parear a primeira
+                {/* Era "parear dispositivo" em 11 px. Ninguém que compra uma TV
+                    para a recepção fala "parear" — e 11 px some na tela. */}
+                Nenhuma TV conectada ainda. Conectar a primeira
               </button>
             )}
           </div>
@@ -883,18 +948,15 @@ const Dashboard: React.FC = () => {
         onSubmit={handleCreateConfirm}
       />
 
-      <LinkDeviceModal
-        open={isLinkModalOpen}
-        onClose={() => setIsLinkModalOpen(false)}
-        displays={displays}
-        linkCode={linkCode}
-        setLinkCode={setLinkCode}
-        linkName={linkName}
-        setLinkName={setLinkName}
-        selectedDisplayId={selectedDisplayId}
-        setSelectedDisplayId={setSelectedDisplayId}
-        onSubmit={handleLinkDevice}
-        loading={loading}
+      {/* Paywall da 2ª tela — abre no lugar do antigo toast vermelho. */}
+      <PaywallModal
+        open={paywall !== null}
+        onClose={() => setPaywall(null)}
+        telasAtivas={devices.filter((d) => d.status === 'linked').length}
+        planoAtual={subscription?.subscription.plan?.name ?? subscription?.subscription.planName ?? null}
+        mensagemApi={paywall?.mensagem ?? null}
+        payloadApi={paywall?.payload}
+        organizationId={selectedOrgId ?? getActiveOrganizationId()}
       />
 
       <UserManagementModal
