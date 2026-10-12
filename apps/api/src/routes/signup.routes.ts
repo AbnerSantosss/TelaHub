@@ -11,6 +11,10 @@ const router = Router();
  * POST /api/signup — auto-atendimento público.
  * Cria organização + usuário admin + assinatura no plano `gratis` (freemium:
  * 1 tela para sempre, `status: 'active'`, sem prazo) e devolve token.
+ *
+ * O corpo também carrega a origem da campanha (`attribution`), o aceite dos
+ * termos (`acceptedTerms`, obrigatório) e os identificadores do Pixel
+ * (`metaEventId`, `fbp`, `fbc`) — ver `signup.schema.ts`.
  */
 router.post(
   '/',
@@ -18,7 +22,14 @@ router.post(
   validateBody(signupSchema),
   async (req: Request, res: Response): Promise<void> => {
     try {
-      const result = await signupService.signup(req.body);
+      // IP e user-agent saem da REQUISIÇÃO, nunca do corpo: são o que a Meta
+      // usa para casar o cadastro com o clique no anúncio, e valor enviado pelo
+      // navegador é valor que dá para forjar.
+      const result = await signupService.signup(req.body, {
+        ip: req.ip,
+        userAgent: req.get('user-agent'),
+        sourceUrl: req.get('referer'),
+      });
       res.status(201).json(result);
     } catch (error: any) {
       if (error instanceof SignupError) {

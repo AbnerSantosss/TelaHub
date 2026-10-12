@@ -283,8 +283,10 @@ describe('POST /sessions/:token/simulate-payment', () => {
       `/api/checkout/sessions/${session.publicToken}/simulate-payment`
     );
 
-    // 503: `asaas` está no catálogo mas não implementado, então nem o
-    // provedor resolve. O que importa é que NÃO confirma pagamento.
+    // 503 quando o Asaas está selecionado mas sem `ASAAS_API_KEY` (o provedor
+    // nem resolve); 404 quando resolve, porque a porta dos fundos só existe no
+    // provedor simulado. O que importa nos dois casos é que NÃO confirma
+    // pagamento — a trava é por construção, não por disciplina de deploy.
     expect([404, 503]).toContain(res.status);
 
     const after = await reload(session.id);

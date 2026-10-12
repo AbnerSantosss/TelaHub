@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 
 import { planService } from '../services/plan.service';
 import { hasFeature } from '../services/plan.service';
+import { subscriptionOverrideService } from '../services/subscription-override.service';
 import { subscriptionService } from '../services/subscription.service';
 import { resolveTenantId } from './quota.middleware';
 
@@ -152,6 +153,27 @@ export const requireFeature = (featureKey: string) => {
       }
 
       if (hasFeature(subscription, featureKey)) {
+        next();
+        return;
+      }
+
+      // ── Concessão manual, consultada SÓ no caminho da negação ──────────────
+      //
+      // A ordem aqui é o desenho, não uma otimização. O plano é verificado
+      // primeiro e libera sozinho; a concessão só é lida quando o gate já ia
+      // recusar. Duas garantias saem disso de graça:
+      //
+      //   1. Quem tem direito PELO PLANO nunca depende desta consulta — um erro
+      //      de banco ao ler o override não pode transformar um cliente do Rede
+      //      em bloqueado. Nenhuma disciplina de código sustenta isso; a ordem
+      //      das linhas sustenta.
+      //   2. Sem concessão nenhuma no banco, o comportamento é idêntico ao de
+      //      antes de 2026-09-09, e a consulta extra só acontece no caminho que
+      //      já ia responder 403 — que é raro e não é quente.
+      //
+      // `grantsFeature` não lança: ver a invariante 3 de
+      // `subscription-override.service.ts`.
+      if (await subscriptionOverrideService.grantsFeature(organizationId, featureKey)) {
         next();
         return;
       }

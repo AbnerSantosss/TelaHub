@@ -8,10 +8,20 @@ declare global {
       user?: {
         id: string;
         email: string;
+        /** Papel como gravado. Use `normalizeRole` (lib/permissions) para decidir. */
         role: string;
         /** Escopo de tenant do usuário. Nulo apenas para o role `master`. */
         organizationId: string | null;
+        /** Titular da organização (ver `Organization.ownerUserId`). */
+        isOwner?: boolean;
+        /** `memberScope` da organização do usuário: `all` | `own`. */
+        memberScope?: 'all' | 'own';
       };
+      /**
+       * Preenchido quando o master age dentro da conta de um cliente (modo
+       * suporte: `X-Organization-Id` + `X-Support-Reason`). Nulo fora disso.
+       */
+      support?: { organizationId: string; reason: string } | null;
     }
   }
 }

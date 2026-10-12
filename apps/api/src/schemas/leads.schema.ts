@@ -26,6 +26,28 @@ export const createLeadSchema = z.object({
   utmMedium: z.string().trim().max(120).optional(),
   utmCampaign: z.string().trim().max(120).optional(),
   referrer: z.string().trim().max(1000).optional(),
+
+  /**
+   * Identificador do clique no anúncio do Meta. NÃO é persistido (o modelo
+   * `Lead` não tem coluna para ele): serve só para reconstruir o `_fbc` no
+   * evento `Lead` da Conversions API quando o cookie do Pixel foi bloqueado —
+   * que é justamente quando o servidor precisa salvar a medição.
+   */
+  fbclid: z.string().trim().max(255).optional(),
+
+  /**
+   * Deduplicação do Pixel: o MESMO uuid que o site usou no
+   * `fbq('track', 'Lead', {}, { eventID })`.
+   *
+   * ARMADILHA: id diferente (ou ausente) faz a Meta contar o lead DUAS vezes,
+   * sem erro nenhum — o custo por lead do relatório cai pela metade e a
+   * decisão de mídia é tomada em cima de um número que não existe.
+   */
+  metaEventId: z.string().trim().max(64).optional(),
+  /** Cookie `_fbp` do navegador. */
+  fbp: z.string().trim().max(255).optional(),
+  /** Cookie `_fbc` do navegador (quando ausente, reconstruído do `fbclid`). */
+  fbc: z.string().trim().max(255).optional(),
 });
 
 export type CreateLeadInput = z.infer<typeof createLeadSchema>;

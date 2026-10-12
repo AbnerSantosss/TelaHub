@@ -93,7 +93,16 @@ router.post('/link', authMiddleware, requireTenant, requireActiveSubscription, e
   try {
     const { code, displayId, name } = req.body;
 
-    const result = await deviceService.link(code, displayId, name, req.tenantId);
+    // O contexto vai só para a medição do `TelaPareada` (ativação real do
+    // produto), disparado dentro do serviço apenas no PRIMEIRO pareamento
+    // deste aparelho. Tudo sai de cabeçalho, não do corpo: `linkDeviceSchema`
+    // descarta chave desconhecida, então enviar `metaEventId` daqui exigiria
+    // ampliar aquele schema primeiro.
+    const result = await deviceService.link(code, displayId, name, req.tenantId, {
+      ip: req.ip,
+      userAgent: req.get('user-agent'),
+      sourceUrl: req.get('referer'),
+    });
 
     if (result === 'display-not-found') {
       // Display de outro tenant (ou inexistente) — 404 sem distinguir os casos.

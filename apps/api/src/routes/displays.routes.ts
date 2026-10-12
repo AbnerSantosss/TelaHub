@@ -200,7 +200,7 @@ router.post('/', authMiddleware, requireTenant, requireActiveSubscription, valid
           res.status(402).json({
             error:
               `Seus ${FREE_VIDEO_TRIAL_DAYS} dias de vídeo no plano Grátis terminaram. ` +
-              'Assine o plano Loja para continuar publicando vídeos — o resto do conteúdo segue funcionando normalmente.',
+              'Assine o plano Loja para continuar publicando vídeos. O resto do conteúdo segue funcionando normalmente.',
             code: 'video_requires_paid_plan',
             widgetTypes: videoWidgets,
           });

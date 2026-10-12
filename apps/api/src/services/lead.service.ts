@@ -3,11 +3,20 @@ import type { Lead } from '@prisma/client';
 import prisma from '../lib/prisma';
 import { hashIp } from './checkout.service';
 import { sendLeadNotificationEmail } from './email.service';
+import { buildFbc, newEventId, sendMetaEventAsync } from './meta-capi.service';
 import type { CreateLeadInput } from '../schemas/leads.schema';
 
 export interface LeadContext {
   ip?: string | null;
   referrer?: string | null;
+  /**
+   * User-agent e URL de origem vêm da REQUISIÇÃO, nunca do corpo. São o que a
+   * Meta usa para casar o lead com o clique no anúncio quando o cookie do
+   * Pixel não existe — e valor enviado pelo navegador é valor que dá para
+   * forjar.
+   */
+  userAgent?: string | null;
+  sourceUrl?: string | null;
 }
 
 function truncate(value: string | null | undefined, max: number): string | null {
@@ -40,6 +49,40 @@ export const leadService = {
         ipHash: hashIp(context.ip),
       },
     });
+
+    // `Lead` na Conversions API: o formulário "Falar com a gente" é a única
+    // conversão do site que não passa pelo checkout, e sem este evento toda
+    // campanha de plano sob consulta otimizaria às cegas.
+    //
+    // Dispara DEPOIS do insert e nunca antes: o que vale é o lead gravado. E
+    // com a versão `Async`, que engole a exceção — Meta fora do ar não pode
+    // transformar "quero comprar" em "o formulário não funciona".
+    try {
+      sendMetaEventAsync({
+        eventName: 'Lead',
+        eventId: input.metaEventId || newEventId(),
+        actionSource: 'website',
+        sourceUrl: context.sourceUrl ?? input.referrer ?? context.referrer ?? null,
+        userData: {
+          email: lead.email,
+          phone: lead.phone,
+          ip: context.ip ?? null,
+          userAgent: context.userAgent ?? null,
+          fbp: input.fbp ?? null,
+          // Sem o cookie `_fbc` (bloqueador, Safari), reconstruímos a partir do
+          // `fbclid` da URL do anúncio — senão o clique pago se perde.
+          fbc: input.fbc || buildFbc(input.fbclid) || null,
+        },
+        custom: { plan_code: lead.planCode ?? undefined },
+      });
+    } catch (err) {
+      // O lead JÁ está gravado. Medição quebrada não pode virar "o formulário
+      // não funciona" para quem estava tentando comprar.
+      console.warn(
+        '[leads] falha ao medir Lead (lead gravado):',
+        err instanceof Error ? err.message : err
+      );
+    }
 
     try {
       await sendLeadNotificationEmail(lead);

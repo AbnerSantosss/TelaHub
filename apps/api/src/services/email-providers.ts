@@ -61,7 +61,7 @@ export const EMAIL_PROVIDERS: EmailProvider[] = [
     port: 587,
     secure: false,
     userHint: 'O endereço Gmail completo (ex.: notificacoes@gmail.com)',
-    passHint: 'Senha de app de 16 dígitos — a senha da conta não funciona',
+    passHint: 'Senha de app de 16 dígitos (a senha da conta não funciona)',
     credentialsUrl: 'https://myaccount.google.com/apppasswords',
     warning:
       'Exige Verificação em 2 Etapas ativa. Limite aproximado de 500 destinatários/dia numa conta gratuita.',
@@ -101,7 +101,7 @@ export const EMAIL_PROVIDERS: EmailProvider[] = [
     userHint: 'A caixa corporativa (ex.: sistema@suaempresa.com.br)',
     passHint: 'Senha da caixa (quando a organização ainda permitir SMTP AUTH)',
     warning:
-      'A Microsoft desativou autenticação básica no Exchange Online em outubro de 2022. Só funciona se o administrador tiver reativado SMTP AUTH para essa caixa — do contrário exige OAuth2, que o TelaHub ainda não implementa.',
+      'A Microsoft desativou autenticação básica no Exchange Online em outubro de 2022. Só funciona se o administrador tiver reativado SMTP AUTH para essa caixa. Do contrário exige OAuth2, que o TelaHub ainda não implementa.',
   },
   {
     id: 'zoho',
@@ -124,7 +124,7 @@ export const EMAIL_PROVIDERS: EmailProvider[] = [
     userHint: 'O e-mail do domínio hospedado no Zoho',
     passHint: 'Senha da conta, ou senha de aplicativo se houver 2FA',
     warning:
-      'Contas de domínio usam `smtppro`, não `smtp` — trocar o host é o erro mais comum aqui.',
+      'Contas de domínio usam `smtppro`, não `smtp`. Errar o host é o erro mais comum aqui.',
   },
   {
     id: 'yahoo',
@@ -134,7 +134,7 @@ export const EMAIL_PROVIDERS: EmailProvider[] = [
     port: 465,
     secure: true,
     userHint: 'O endereço Yahoo completo',
-    passHint: 'Senha de app (obrigatória — a senha da conta é recusada)',
+    passHint: 'Senha de app (obrigatória, a senha da conta é recusada)',
     credentialsUrl: 'https://login.yahoo.com/account/security',
   },
   {
@@ -157,7 +157,7 @@ export const EMAIL_PROVIDERS: EmailProvider[] = [
     port: 587,
     secure: false,
     fixedUser: 'apikey',
-    userHint: 'Literalmente `apikey` — o provedor exige essa palavra',
+    userHint: 'Literalmente `apikey`, o provedor exige essa palavra',
     passHint: 'A API Key gerada no painel (começa com SG.)',
     credentialsUrl: 'https://app.sendgrid.com/settings/api_keys',
   },
@@ -172,7 +172,7 @@ export const EMAIL_PROVIDERS: EmailProvider[] = [
     passHint: 'Senha SMTP do domínio',
     credentialsUrl: 'https://app.mailgun.com/settings/api_security',
     warning:
-      'Domínio na região europeia usa `smtp.eu.mailgun.org` — nesse caso escolha "Servidor SMTP manual".',
+      'Domínio na região europeia usa `smtp.eu.mailgun.org`. Nesse caso, escolha "Servidor SMTP manual".',
   },
   {
     id: 'amazon-ses',
@@ -218,7 +218,7 @@ export const EMAIL_PROVIDERS: EmailProvider[] = [
     port: 587,
     secure: false,
     fixedUser: 'resend',
-    userHint: 'Literalmente `resend` — o provedor exige essa palavra',
+    userHint: 'Literalmente `resend`, o provedor exige essa palavra',
     passHint: 'A API Key da conta (começa com re_)',
     credentialsUrl: 'https://resend.com/api-keys',
     warning: 'Exige domínio verificado antes do primeiro envio.',

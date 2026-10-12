@@ -1,3 +1,5 @@
+import type { FeatureOverride } from './plan.service';
+import { parseFeatures } from './plan.service';
 import { isFreePlan, SubscriptionWithPlan } from './subscription.service';
 
 /**
@@ -101,12 +103,27 @@ export const BI_WIDGET_TYPES = new Set([
 /** Feature do catálogo que libera os widgets de `BI_WIDGET_TYPES`. */
 export const BI_FEATURE_KEY = 'powerbi';
 
+/**
+ * Feature que uma CONCESSÃO manual pode usar para liberar vídeo no plano
+ * Grátis, depois de vencida a degustação de 7 dias.
+ *
+ * Não está no catálogo (`prisma/seed-plans.ts`) e não deve estar: nenhum plano
+ * vende "vídeo" como item — nos planos pagos ele já vem por não ser Grátis. A
+ * chave existe só para o caso que o backoffice atende de verdade ("a degustação
+ * dele acabou no meio do piloto, libera por mais 15 dias"), e por isso nasce com
+ * `expiresAt` na concessão. Um plano que trouxesse esta feature seria um plano
+ * pago dizendo que inclui vídeo — redundante e enganoso.
+ */
+export const VIDEO_FEATURE_KEY = 'video';
+
 export interface VideoEntitlement {
   allowed: boolean;
   /** `true` quando o acesso vem da degustação, não do plano pago. */
   viaTrial: boolean;
   /** Dias inteiros restantes de degustação (0 quando expirou ou não se aplica). */
   trialDaysRemaining: number;
+  /** `true` quando quem liberou foi uma concessão manual do backoffice. */
+  viaOverride: boolean;
 }
 
 /**
@@ -115,9 +132,23 @@ export interface VideoEntitlement {
  * A regra é definida pelo NEGATIVO — só o plano gratuito é restrito — para que
  * qualquer plano pago novo que entre no catálogo já nasça com vídeo liberado,
  * sem precisar mexer aqui.
+ *
+ * ── Concessão manual (2026-09-09) ───────────────────────────────────────────
+ * O `override` é OPCIONAL no tipo de entrada, e isso muda o comportamento de
+ * exatamente ninguém hoje: o chamador de produção (`displays.routes`) monta a
+ * assinatura sem ele e continua decidindo só pelo plano e pela degustação. A
+ * concessão vale quando — e só quando — quem chama fizer
+ * `include: { override: true }`. Deixar o parâmetro obrigatório exigiria mexer
+ * na rota de publicação de display, que é o caminho mais quente do produto e
+ * está fora do escopo desta frente; deixá-lo fora de vez faria o backoffice
+ * prometer uma liberação de vídeo que o gate ignoraria em silêncio — que é
+ * pior.
  */
 export function resolveVideoEntitlement(
-  subscription: Pick<SubscriptionWithPlan, 'createdAt' | 'plan'> | null | undefined,
+  subscription:
+    | (Pick<SubscriptionWithPlan, 'createdAt' | 'plan'> & { override?: FeatureOverride | null })
+    | null
+    | undefined,
   now: Date = new Date()
 ): VideoEntitlement {
   // Sem assinatura não há como afirmar que é plano gratuito. Falhamos ABERTO
@@ -126,11 +157,11 @@ export function resolveVideoEntitlement(
   // que a pessoa já usava. Quem barra o acesso sem assinatura é o
   // `requireActiveSubscription`, não este serviço.
   if (!subscription?.plan) {
-    return { allowed: true, viaTrial: false, trialDaysRemaining: 0 };
+    return { allowed: true, viaTrial: false, trialDaysRemaining: 0, viaOverride: false };
   }
 
   if (!isFreePlan(subscription.plan)) {
-    return { allowed: true, viaTrial: false, trialDaysRemaining: 0 };
+    return { allowed: true, viaTrial: false, trialDaysRemaining: 0, viaOverride: false };
   }
 
   const trialEndsAt = new Date(subscription.createdAt.getTime() + FREE_VIDEO_TRIAL_DAYS * DAY_MS);
@@ -141,10 +172,35 @@ export function resolveVideoEntitlement(
       allowed: true,
       viaTrial: true,
       trialDaysRemaining: Math.ceil(msRemaining / DAY_MS),
+      viaOverride: false,
     };
   }
 
-  return { allowed: false, viaTrial: false, trialDaysRemaining: 0 };
+  // A degustação acabou. Última chance: uma concessão manual ainda válida.
+  // Checada por ÚLTIMO de propósito — enquanto a degustação corre, é ela que
+  // deve aparecer na resposta (`viaTrial: true`), senão o painel deixaria de
+  // mostrar os dias restantes justamente para quem tem uma cortesia
+  // sobreposta, e o cliente descobriria o fim do prazo do jeito ruim.
+  if (grantsVideoByOverride(subscription.override, now)) {
+    return { allowed: true, viaTrial: false, trialDaysRemaining: 0, viaOverride: true };
+  }
+
+  return { allowed: false, viaTrial: false, trialDaysRemaining: 0, viaOverride: false };
+}
+
+/**
+ * `true` quando a concessão manual, AINDA VÁLIDA, libera vídeo.
+ *
+ * A validade é conferida na leitura, nunca por job — concessão vencida deixa de
+ * valer sozinha. Ver a invariante 1 de `subscription-override.service.ts`.
+ */
+function grantsVideoByOverride(
+  override: FeatureOverride | null | undefined,
+  now: Date
+): boolean {
+  if (!override) return false;
+  if (override.expiresAt && override.expiresAt.getTime() <= now.getTime()) return false;
+  return parseFeatures(override.extraFeatures ?? null).includes(VIDEO_FEATURE_KEY);
 }
 
 /**

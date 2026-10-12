@@ -318,17 +318,117 @@ describe('POST /api/billing/plan', () => {
 });
 
 describe('POST /api/billing/checkout', () => {
-  it('devolve 501 — gateway ainda não integrado (sem simular pagamento)', async () => {
+  it('devolve a URL do checkout com plano, telas e intervalo preenchidos', async () => {
     const plan = await makePlan('checkout', 5);
     const { authHeader } = await makeTenant(plan.id);
 
     const res = await request(app)
       .post('/api/billing/checkout')
       .set('Authorization', authHeader)
-      .send({ planCode: plan.code, screens: 3 });
+      .send({ planCode: plan.code, screens: 3, interval: 'yearly' });
 
-    expect(res.status).toBe(501);
-    expect(res.body.code).toBe('gateway_not_integrated');
-    expect(res.body).not.toHaveProperty('checkoutUrl');
+    expect(res.status).toBe(200);
+    const url = new URL(res.body.checkoutUrl);
+    expect(url.searchParams.get('plan')).toBe(plan.code);
+    expect(url.searchParams.get('screens')).toBe('3');
+    expect(url.searchParams.get('interval')).toBe('yearly');
+  });
+
+  it('sem intervalo, assume mensal', async () => {
+    const plan = await makePlan('checkout-mensal', 5);
+    const { authHeader } = await makeTenant(plan.id);
+
+    const res = await request(app)
+      .post('/api/billing/checkout')
+      .set('Authorization', authHeader)
+      .send({ planCode: plan.code, screens: 2 });
+
+    expect(res.status).toBe(200);
+    expect(new URL(res.body.checkoutUrl).searchParams.get('interval')).toBe('monthly');
+  });
+
+  it('esta rota NÃO cobra: ela só monta o link', async () => {
+    // A guarda que importa continua sendo a de `POST /plan`: nenhuma resposta
+    // daqui pode conter confirmação de pagamento nem liberar plano.
+    const plan = await makePlan('checkout-sem-cobranca', 5);
+    const { authHeader } = await makeTenant(plan.id);
+
+    const res = await request(app)
+      .post('/api/billing/checkout')
+      .set('Authorization', authHeader)
+      .send({ planCode: plan.code });
+
+    expect(res.body).not.toHaveProperty('paid');
+    expect(res.body).not.toHaveProperty('charge');
+  });
+});
+
+describe('POST /api/billing/cancel e /reactivate', () => {
+  it('cancela para o FIM DO CICLO, mantendo o acesso pago (CDC art. 51, IV)', async () => {
+    const plan = await makePlan('cancelamento', 5);
+    const { authHeader, org } = await makeTenant(plan.id);
+
+    const fimDoCiclo = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000);
+    await prisma.subscription.update({
+      where: { organizationId: org.id },
+      data: { currentPeriodEnd: fimDoCiclo },
+    });
+
+    const res = await request(app)
+      .post('/api/billing/cancel')
+      .set('Authorization', authHeader)
+      .send({ reason: 'fechei a loja' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.cancelAtPeriodEnd).toBe(true);
+    // O ponto: continua ATIVA até o fim do que foi pago.
+    expect(res.body.status).toBe('active');
+    expect(res.body.currentPeriodEnd).toBe(fimDoCiclo.toISOString());
+
+    const salva = await prisma.subscription.findUnique({ where: { organizationId: org.id } });
+    expect(salva?.cancelAtPeriodEnd).toBe(true);
+    expect(salva?.canceledAt).not.toBeNull();
+    expect(salva?.cancelReason).toBe('fechei a loja');
+    expect(salva?.status).toBe('active');
+  });
+
+  it('cancelar sem motivo é permitido — pedir justificativa para sair é padrão escuro', async () => {
+    const plan = await makePlan('cancelamento-sem-motivo', 5);
+    const { authHeader } = await makeTenant(plan.id);
+
+    const res = await request(app).post('/api/billing/cancel').set('Authorization', authHeader).send({});
+
+    expect(res.status).toBe(200);
+    expect(res.body.cancelAtPeriodEnd).toBe(true);
+  });
+
+  it('reativar desfaz o cancelamento enquanto o ciclo não terminou', async () => {
+    const plan = await makePlan('reativacao', 5);
+    const { authHeader, org } = await makeTenant(plan.id);
+
+    await request(app).post('/api/billing/cancel').set('Authorization', authHeader).send({});
+    const res = await request(app).post('/api/billing/reactivate').set('Authorization', authHeader).send({});
+
+    expect(res.status).toBe(200);
+    expect(res.body.cancelAtPeriodEnd).toBe(false);
+
+    const salva = await prisma.subscription.findUnique({ where: { organizationId: org.id } });
+    expect(salva?.cancelAtPeriodEnd).toBe(false);
+    expect(salva?.canceledAt).toBeNull();
+  });
+
+  it('assinatura já encerrada não volta por reativação: exige contratação nova', async () => {
+    const plan = await makePlan('reativacao-encerrada', 5);
+    const { authHeader, org } = await makeTenant(plan.id);
+
+    await prisma.subscription.update({
+      where: { organizationId: org.id },
+      data: { status: 'canceled' },
+    });
+
+    const res = await request(app).post('/api/billing/reactivate').set('Authorization', authHeader).send({});
+
+    expect(res.status).toBe(409);
+    expect(res.body.code).toBe('subscription_ended');
   });
 });

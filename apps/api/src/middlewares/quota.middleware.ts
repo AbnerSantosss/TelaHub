@@ -1,6 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
 import prisma from '../lib/prisma';
 import {
+  mostPermissiveLimit,
+  subscriptionOverrideService,
+} from '../services/subscription-override.service';
+import {
   QuotaResource,
   billedScreens,
   estimateMonthlyCents,
@@ -161,7 +165,7 @@ export const enforceQuota = (resource: QuotaResource) => {
       }
 
       const usage = await subscriptionService.getUsage(organizationId);
-      const entry =
+      const planEntry =
         resource === 'device'
           ? usage.devices
           : resource === 'user'
@@ -169,12 +173,43 @@ export const enforceQuota = (resource: QuotaResource) => {
             : usage.organizations;
 
       // Ilimitado.
-      if (entry.limit === null) {
+      if (planEntry.limit === null) {
         next();
         return;
       }
 
-      if (entry.used >= entry.limit) {
+      let entry = planEntry;
+
+      if (planEntry.used >= planEntry.limit) {
+        // ── Concessão manual, consultada SÓ quando o plano já ia bloquear ────
+        //
+        // Mesma ordem (e mesmas duas garantias) do `requireFeature`: quem cabe
+        // no limite do plano nunca chega a esta consulta, então uma falha ao ler
+        // a concessão não pode barrar quem tinha direito; e sem concessão no
+        // banco o comportamento é idêntico ao de antes, sem query nova no
+        // caminho quente.
+        //
+        // `organization` fica de fora de propósito: `SubscriptionOverride` só
+        // tem `maxDevices` e `maxUsers`. Conceder organizações extras não faz
+        // sentido enquanto o schema não tiver hierarquia entre elas — ver a
+        // LIMITAÇÃO CONHECIDA em `subscriptionService.countResources`.
+        const override =
+          resource === 'organization' ? null : await subscriptionOverrideService.getActive(organizationId);
+
+        const grantedLimit = mostPermissiveLimit(
+          planEntry.limit,
+          resource === 'device' ? override?.maxDevices : override?.maxUsers
+        );
+
+        if (grantedLimit === null || planEntry.used < grantedLimit) {
+          next();
+          return;
+        }
+
+        entry = { ...planEntry, limit: grantedLimit, atLimit: true };
+      }
+
+      if (entry.limit !== null && entry.used >= entry.limit) {
         const label = RESOURCE_LABEL[resource];
 
         // Caso freemium: tenant no plano grátis tentando conectar a 2ª tela.
@@ -216,7 +251,7 @@ export const enforceQuota = (resource: QuotaResource) => {
             error:
               `Seu plano ${usage.planName} inclui ${entry.limit} tela, sem prazo e sem cartão. ` +
               `Para conectar a ${screensWanted}ª tela é preciso um plano pago: a cobrança vale da ativação ` +
-              `em diante e é proporcional aos dias restantes do período — nunca retroativa, você não paga ` +
+              `em diante e é proporcional aos dias restantes do período, nunca retroativa. Você não paga ` +
               `nada pelo tempo em que usou de graça.` +
               oferta,
             // `code` continua `quota_exceeded` para não quebrar quem já trata

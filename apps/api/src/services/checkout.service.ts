@@ -62,6 +62,8 @@ export interface PublicCheckoutSession {
   phone: string | null;
   document: string | null;
   companyName: string | null;
+  /** Consentimento de novidades, para a tela refletir a escolha ao retomar a sessão. */
+  marketingOptIn: boolean;
   startedAt: string;
   lastSeenAt: string;
   identifiedAt: string | null;
@@ -193,6 +195,10 @@ function toPublic(session: CheckoutSession): PublicCheckoutSession {
     phone: session.phone,
     document: session.document,
     companyName: session.companyName,
+    // Devolvido para a tela poder REFLETIR a escolha de quem retoma a sessão
+    // por link. Sem isto a caixa voltaria limpa e o PATCH seguinte gravaria
+    // `false` — uma revogação que a pessoa não pediu.
+    marketingOptIn: session.marketingOptIn,
     startedAt: session.startedAt.toISOString(),
     lastSeenAt: session.lastSeenAt.toISOString(),
     identifiedAt: session.identifiedAt?.toISOString() ?? null,
@@ -221,13 +227,29 @@ export interface CheckoutMetrics {
   abandonmentRate: number;
   amounts: {
     currency: 'BRL';
-    /** Valor efetivamente convertido. */
+    // ⚠️ DOIS NÚMEROS DIFERENTES, e confundi-los é o defeito US-A-05 visto do
+    // lado do relatório. `*Cents` é o MENSAL EQUIVALENTE (comparável entre uma
+    // venda mensal e uma anual, é o que responde "quanto de MRR entrou").
+    // `*CashCents` é o CAIXA (o que efetivamente foi cobrado; no anual, os 12
+    // meses de uma vez). Um total só obrigaria o painel a escolher entre
+    // subestimar o caixa em 12× ou inflar o MRR em 12× — as duas versões
+    // erradas, e nenhuma delas com aviso.
+    /** Convertido, em MENSAL EQUIVALENTE. */
     paidCents: number;
-    /** Oportunidade perdida: valor parado em sessões abandonadas. */
+    /** Convertido, em CAIXA do ciclo. */
+    paidCashCents: number;
+    /** Oportunidade perdida: valor parado em sessões abandonadas (mensal equivalente). */
     abandonedCents: number;
+    abandonedCashCents: number;
     /** Valor em sessões aguardando pagamento (ainda recuperável). */
     pendingCents: number;
+    pendingCashCents: number;
   };
+  /** Vendas pagas separadas por periodicidade — o mix mensal × anual. */
+  paidByInterval: Record<
+    BillingInterval,
+    { sessions: number; monthlyEquivalentCents: number; cashCents: number }
+  >;
   /** Onde o abandono aconteceu — a informação mais acionável do relatório. */
   abandonmentByStep: Array<{ step: CheckoutStep; count: number; amountCents: number }>;
   byUtmSource: Array<{ value: string; total: number; paid: number; abandoned: number; paidCents: number }>;
@@ -396,6 +418,7 @@ export class CheckoutService {
         phone: input.phone ?? session.phone,
         document: input.document ?? session.document,
         companyName: input.companyName ?? session.companyName,
+        marketingOptIn: input.marketingOptIn ?? session.marketingOptIn,
         status,
         identifiedAt,
         lastSeenAt: now,
@@ -612,6 +635,7 @@ export class CheckoutService {
         status: true,
         planCode: true,
         amountCents: true,
+        billingInterval: true,
         identifiedAt: true,
         paymentAt: true,
         paidAt: true,
@@ -622,7 +646,18 @@ export class CheckoutService {
 
     const byStatus = CHECKOUT_STATUS_ZERO();
     const funnel = { viewed: rows.length, planSelected: 0, identified: 0, submitted: 0, paid: 0 };
-    const amounts = { paidCents: 0, abandonedCents: 0, pendingCents: 0 };
+    const amounts = {
+      paidCents: 0,
+      paidCashCents: 0,
+      abandonedCents: 0,
+      abandonedCashCents: 0,
+      pendingCents: 0,
+      pendingCashCents: 0,
+    };
+    const paidByInterval: CheckoutMetrics['paidByInterval'] = {
+      monthly: { sessions: 0, monthlyEquivalentCents: 0, cashCents: 0 },
+      yearly: { sessions: 0, monthlyEquivalentCents: 0, cashCents: 0 },
+    };
     const steps = new Map<CheckoutStep, { count: number; amountCents: number }>();
     const utmSource = new Map<string, { total: number; paid: number; abandoned: number; paidCents: number }>();
     const utmCampaign = new Map<string, { total: number; paid: number; abandoned: number; paidCents: number }>();
@@ -651,10 +686,24 @@ export class CheckoutService {
       if (row.paymentAt) funnel.submitted += 1;
       if (row.paidAt) funnel.paid += 1;
 
-      if (row.status === 'paid') amounts.paidCents += row.amountCents;
-      if (row.status === 'payment_pending') amounts.pendingCents += row.amountCents;
+      // `amountCents` da sessão é sempre MENSAL EQUIVALENTE; o caixa sai daqui.
+      const interval = normalizeInterval(row.billingInterval);
+      const cashCents = row.amountCents * (interval === 'yearly' ? 12 : 1);
+
+      if (row.status === 'paid') {
+        amounts.paidCents += row.amountCents;
+        amounts.paidCashCents += cashCents;
+        paidByInterval[interval].sessions += 1;
+        paidByInterval[interval].monthlyEquivalentCents += row.amountCents;
+        paidByInterval[interval].cashCents += cashCents;
+      }
+      if (row.status === 'payment_pending') {
+        amounts.pendingCents += row.amountCents;
+        amounts.pendingCashCents += cashCents;
+      }
       if (row.status === 'abandoned') {
         amounts.abandonedCents += row.amountCents;
+        amounts.abandonedCashCents += cashCents;
         const step = stepOf(row);
         const entry = steps.get(step) ?? { count: 0, amountCents: 0 };
         entry.count += 1;
@@ -679,6 +728,7 @@ export class CheckoutService {
       conversionRate: rate(byStatus.paid),
       abandonmentRate: rate(byStatus.abandoned),
       amounts: { currency: 'BRL', ...amounts },
+      paidByInterval,
       abandonmentByStep: stepOrder.map((step) => ({
         step,
         count: steps.get(step)?.count ?? 0,

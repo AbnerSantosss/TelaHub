@@ -2,6 +2,7 @@ import { deviceRepository } from '../repositories/device.repository';
 import { displayRepository, TenantScope } from '../repositories/display.repository';
 import { userRepository } from '../repositories/user.repository';
 import { sendDeviceOfflineAlertEmail } from './email.service';
+import { newEventId, sendMetaEventAsync } from './meta-capi.service';
 import { uptimeService } from './uptime.service';
 
 // Um device é considerado offline se não manda heartbeat há mais desse tempo.
@@ -10,6 +11,23 @@ export const ONLINE_THRESHOLD_MS = 60_000;
 // Só alertamos se o device ficar offline por mais tempo que isso — evita
 // disparar e-mail para instabilidades curtas de rede.
 export const OFFLINE_ALERT_THRESHOLD_MS = 5 * 60_000;
+
+/**
+ * Dados da requisição que acompanham o pareamento, só para medição.
+ *
+ * Quem pareia é um admin logado no painel, num navegador — por isso IP,
+ * user-agent e cookies do Pixel ainda fazem sentido aqui e melhoram muito o
+ * casamento do evento com o clique original no anúncio.
+ */
+export interface DeviceLinkContext {
+  ip?: string | null;
+  userAgent?: string | null;
+  sourceUrl?: string | null;
+  fbp?: string | null;
+  fbc?: string | null;
+  /** Id do evento gerado pelo painel, quando ele também dispara o Pixel. */
+  metaEventId?: string | null;
+}
 
 export class DeviceService {
   /** Lista devices do tenant (`null` = todas, só master). */
@@ -68,7 +86,8 @@ export class DeviceService {
     code: string,
     displayId: string,
     name: string,
-    tenantId: TenantScope
+    tenantId: TenantScope,
+    context: DeviceLinkContext = {}
   ): Promise<{ device: any } | null | 'display-not-found'> {
     const display = await displayRepository.findByIdScoped(displayId, tenantId);
     if (!display) return 'display-not-found';
@@ -81,6 +100,13 @@ export class DeviceService {
     // ativa para cobrança — só é gravado uma vez.
     const organizationId = display.organizationId ?? tenantId ?? null;
 
+    // PRIMEIRO pareamento deste aparelho. `activatedAt` já responde isso sem
+    // consulta extra: ele é gravado uma única vez, na primeira ativação, e
+    // `findByPairingCode` só devolve device `pending`. Repareamento (a TV foi
+    // trocada de sala, resetada, revendida) chega aqui com `activatedAt`
+    // preenchido e NÃO conta como ativação nova.
+    const isFirstActivation = !device.activatedAt;
+
     const updated = await deviceRepository.update(device.id, {
       displayId,
       name,
@@ -90,7 +116,60 @@ export class DeviceService {
       ...(device.activatedAt ? {} : { activatedAt: new Date() }),
     });
 
+    if (isFirstActivation) {
+      this.notifyFirstActivation(updated?.id ?? device.id, organizationId, context);
+    }
+
     return { device: updated };
+  }
+
+  /**
+   * `TelaPareada`: a ativação REAL do produto.
+   *
+   * Conta criada sem TV conectada não vale nada — ninguém vê um aviso, ninguém
+   * renova. Este é o evento pelo qual as campanhas devem otimizar, e não o
+   * `CompleteRegistration`: otimizar por cadastro compra gente que testa e some;
+   * otimizar por tela pareada compra gente que instalou o produto na parede.
+   *
+   * Não existe evento padrão do Meta para isto, então é um evento próprio — ele
+   * precisa ser criado como conversão personalizada no Gerenciador de Anúncios,
+   * senão fica registrado e invisível para as campanhas.
+   *
+   * ARMADILHA: nasce no SERVIDOR, não no navegador — não há Pixel do outro lado
+   * para deduplicar, então o `eventId` é gerado aqui mesmo. Falha de medição
+   * jamais pode derrubar o pareamento: `Async`, que engole a exceção.
+   */
+  private notifyFirstActivation(
+    deviceId: string,
+    organizationId: string | null,
+    context: DeviceLinkContext
+  ): void {
+    try {
+      sendMetaEventAsync({
+        eventName: 'TelaPareada',
+        eventId: context.metaEventId || newEventId(),
+        actionSource: 'website',
+        sourceUrl: context.sourceUrl ?? null,
+        userData: {
+          // O id da organização é o mesmo `external_id` do
+          // `CompleteRegistration` e do `Purchase` — é o fio que liga cadastro,
+          // ativação e pagamento na mesma conta dentro dos públicos da Meta.
+          externalId: organizationId,
+          ip: context.ip ?? null,
+          userAgent: context.userAgent ?? null,
+          fbp: context.fbp ?? null,
+          fbc: context.fbc ?? null,
+        },
+        custom: { device_id: deviceId },
+      });
+    } catch (err) {
+      // A TV JÁ está pareada quando isto roda. Nenhuma falha de medição pode
+      // transformar um pareamento bem-sucedido em erro na tela do cliente.
+      console.warn(
+        '[devices] falha ao medir TelaPareada (pareamento concluído):',
+        err instanceof Error ? err.message : err
+      );
+    }
   }
 
   /**

@@ -78,8 +78,18 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
+  // A ORDEM É O TESTE. Toda linha aqui apaga quem aponta antes de apagar quem é
+  // apontado; inverter derruba a limpeza numa violação de chave estrangeira.
+  //
+  // `payment` faltava, e o efeito era traiçoeiro: os cinco casos passavam e só o
+  // `afterAll` estourava com `Payment_organizationId_fkey`, deixando a suíte
+  // vermelha por causa da faxina — e, pior, deixando organizações órfãs no banco
+  // de teste, que fazem a PRÓXIMA execução partir de um estado sujo. O
+  // `paid.handler` registra `Payment` desde que a cobrança real entrou; a
+  // limpeza é que ficou para trás.
   await prisma.auditLog.deleteMany({ where: { entityId: { in: eventIds } } });
   await prisma.checkoutSession.deleteMany({ where: { id: { in: sessionIds } } });
+  await prisma.payment.deleteMany({ where: { organizationId: { in: orgIds } } });
   await prisma.subscription.deleteMany({ where: { organizationId: { in: orgIds } } });
   await prisma.user.deleteMany({ where: { organizationId: { in: orgIds } } });
   await prisma.organization.deleteMany({ where: { id: { in: orgIds } } });

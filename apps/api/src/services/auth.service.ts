@@ -1,6 +1,9 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
+import prisma from '../lib/prisma';
+import { PRIVACY_VERSION, TERMS_VERSION } from '../schemas/signup.schema';
+
 /**
  * Segredo de assinatura do JWT.
  *
@@ -99,3 +102,65 @@ export const verifyToken = (token: string): JwtUserPayload => {
     organizationId: decoded.organizationId ?? null,
   };
 };
+
+/**
+ * ─── Aceite de Termos e Privacidade ─────────────────────────────────────────
+ *
+ * Mora aqui, e não em `user.service.ts`, porque é uma condição de ACESSO: o
+ * painel decide o que mostrar na primeira resposta autenticada, junto com
+ * `mustChangePassword`. As duas perguntas — "esta sessão vale?" e "esta pessoa
+ * consentiu?" — são respondidas no mesmo lugar.
+ */
+
+/**
+ * `true` quando a pessoa ainda não aceitou, ou aceitou uma versão ANTERIOR.
+ *
+ * Duas situações caem aqui e as duas são reais:
+ *
+ * 1. Base existente: quem se cadastrou antes de 2026-09-05 tem
+ *    `termsAcceptedAt = null` porque não assinou nada. Carimbar um aceite
+ *    retroativo seria fabricar prova de consentimento — pior do que admitir
+ *    que ele não existe (LGPD art. 8º §2º: o ônus da prova é do controlador).
+ * 2. Texto novo: mudou `TERMS_VERSION`, o aceite antigo se refere a outro
+ *    documento e precisa ser renovado.
+ *
+ * Função PURA de propósito: recebe o usuário já carregado. Assim o `/me` e o
+ * login respondem sem uma consulta a mais, e o teste não precisa de banco.
+ */
+export function isTermsAcceptancePending(user: {
+  termsAcceptedAt?: Date | null;
+  termsVersion?: string | null;
+}): boolean {
+  if (!user.termsAcceptedAt) return true;
+  return user.termsVersion !== TERMS_VERSION;
+}
+
+/**
+ * Grava o aceite de quem já tinha conta. A data é a de AGORA — não existe
+ * aceite retroativo: a pessoa está consentindo neste instante, e é isso que o
+ * registro tem que dizer.
+ *
+ * Retorna `null` quando o usuário não existe (token válido de conta apagada).
+ */
+export async function recordTermsAcceptance(
+  userId: string,
+  versions: { termsVersion?: string; privacyVersion?: string } = {}
+): Promise<{ termsAcceptedAt: Date; termsVersion: string; privacyVersion: string } | null> {
+  const acceptedAt = new Date();
+  const termsVersion = versions.termsVersion || TERMS_VERSION;
+  const privacyVersion = versions.privacyVersion || PRIVACY_VERSION;
+
+  try {
+    await prisma.user.update({
+      where: { id: userId },
+      data: { termsAcceptedAt: acceptedAt, termsVersion, privacyVersion },
+    });
+  } catch (error: any) {
+    // P2025 = registro não encontrado. Qualquer outra falha é problema de
+    // banco e deve subir para a rota responder 500.
+    if (error?.code === 'P2025') return null;
+    throw error;
+  }
+
+  return { termsAcceptedAt: acceptedAt, termsVersion, privacyVersion };
+}

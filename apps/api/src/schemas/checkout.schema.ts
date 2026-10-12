@@ -134,6 +134,9 @@ export const updateCheckoutSessionSchema = z
     phone: optional(phoneField),
     document: optional(documentField),
     companyName: optional(companyNameField),
+    // Consentimento de novidades. Opcional no corpo (a tela pode mandar só o
+    // nome), mas quando vem, vem explícito: não há valor "presumido" aqui.
+    marketingOptIn: z.boolean().optional(),
   })
   .refine(
     (data) => Object.values(data).some((value) => value !== undefined),
@@ -182,6 +185,17 @@ export const startPaymentSchema = z
   .object({
     method: z.enum(PAYABLE_METHODS, { message: 'Escolha Pix ou cartão de crédito.' }),
     card: cardSchema.optional(),
+    // ── Rastreamento de conversão (Meta) ─────────────────────────────────────
+    // Chegam do NAVEGADOR e precisam ser aceitos aqui, senão o Zod os descarta
+    // em silêncio. O `metaEventId` é o mesmo id que o Pixel usou no
+    // `InitiateCheckout`; sem ele, o `Purchase` que o webhook dispara minutos
+    // depois nasce com id novo e a Meta conta a MESMA venda duas vezes — o
+    // custo por resultado do painel aparece pela metade, sem erro em lugar
+    // nenhum. `fbp`/`fbc` são os cookies do Pixel, que casam a conversão com o
+    // anúncio que a originou.
+    metaEventId: optional(z.string().trim().max(100)),
+    fbp: optional(z.string().trim().max(200)),
+    fbc: optional(z.string().trim().max(300)),
   })
   .refine((value) => value.method !== 'credit_card' || !!value.card, {
     message: 'Informe os dados do cartão.',

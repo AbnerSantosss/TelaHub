@@ -1,7 +1,5 @@
-import nodemailer from 'nodemailer';
-
 import prisma from '../../lib/prisma';
-import { settingsService } from '../settings.service';
+import { emailQueueService } from '../email-queue.service';
 import type { CheckoutEventContext, CheckoutEventHandler } from './index';
 import { auditOnce } from './shared';
 
@@ -23,13 +21,14 @@ export const SUBMIT_AUDIT_ACTION = 'checkout.submit.pending_fulfillment';
  *      humano (idempotente por `eventId`);
  *   2. avisa os `master` da plataforma por e-mail, de forma NÃO BLOQUEANTE.
  *
- * Sobre o e-mail: `email.service` não tem função para este aviso e aquele
- * arquivo pertence a outra frente de trabalho, então o envio é montado aqui
- * (mesmo compromisso que `signup.service` já assumiu). Ele é *fire-and-forget*:
- * falha de SMTP não falha o evento, porque o efeito durável e auditável é o
- * `AuditLog`, e reentregar o evento por causa de SMTP só produziria e-mail
- * repetido. Nada é prometido ao cliente aqui — o checkout já disse a ele que o
- * time comercial entra em contato, e essa promessa é cumprida por gente.
+ * Sobre o e-mail: até 2026-09-09 este aviso montava um transporter próprio com
+ * `service: 'gmail'` FIXO, ignorando o provedor que o `master` configurou no
+ * painel — a dívida que [[email-e-provedores-smtp]] registrava. Agora ele
+ * ENFILEIRA (`EmailMessage`), e quem entrega é o job `email-dispatch`, com o
+ * provedor em uso, retentativa e registro. Continua *fire-and-forget*: falha ao
+ * enfileirar não falha o evento, porque o efeito durável e auditável é o
+ * `AuditLog`. Nada é prometido ao cliente aqui — o checkout já disse a ele que
+ * o time comercial entra em contato, e essa promessa é cumprida por gente.
  */
 export const submitHandler: CheckoutEventHandler = {
   name: 'submit.notify-master',
@@ -81,49 +80,54 @@ async function notifyMasters(session: {
   phone: string | null;
   companyName: string | null;
 }): Promise<void> {
-  const smtp = await settingsService.getSmtpConfig();
-  if (!smtp) return;
-
   const masters = await prisma.user.findMany({
     where: { role: 'master' },
-    select: { email: true },
+    select: { id: true, email: true },
   });
-  const recipients = [...new Set(masters.map((m) => m.email).filter(Boolean))];
+  const recipients = masters.filter((master) => !!master.email);
   if (recipients.length === 0) return;
-
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: { user: smtp.user, pass: smtp.pass },
-  });
 
   const amount = (session.amountCents / 100).toLocaleString('pt-BR', {
     style: 'currency',
     currency: 'BRL',
   });
 
-  await transporter.sendMail({
-    from: `"TelaHub" <${smtp.user}>`,
-    to: recipients.join(', '),
-    subject: `🛒 Nova contratação aguardando atendimento — ${session.companyName || session.name || 'lead'}`,
-    html: `
+  const subject = `🛒 Nova contratação aguardando atendimento: ${session.companyName || session.name || 'lead'}`;
+  const html = `
       <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:560px;margin:0 auto;padding:24px;">
         <h2 style="margin:0 0 12px;">Contratação concluída no checkout</h2>
         <p style="line-height:1.7;color:#334155;">
-          Nenhuma cobrança foi feita — não há gateway integrado. Esta contratação depende de
+          Nenhuma cobrança foi feita, porque não há gateway integrado. Esta contratação depende de
           atendimento comercial para ser concluída.
         </p>
         <ul style="line-height:1.9;color:#334155;">
-          <li><strong>Empresa:</strong> ${escapeHtml(session.companyName) || '—'}</li>
-          <li><strong>Contato:</strong> ${escapeHtml(session.name) || '—'}</li>
-          <li><strong>E-mail:</strong> ${escapeHtml(session.email) || '—'}</li>
-          <li><strong>Telefone:</strong> ${escapeHtml(session.phone) || '—'}</li>
-          <li><strong>Plano:</strong> ${escapeHtml(session.planCode) || '—'} · ${session.screens} tela(s)</li>
+          <li><strong>Empresa:</strong> ${escapeHtml(session.companyName) || '-'}</li>
+          <li><strong>Contato:</strong> ${escapeHtml(session.name) || '-'}</li>
+          <li><strong>E-mail:</strong> ${escapeHtml(session.email) || '-'}</li>
+          <li><strong>Telefone:</strong> ${escapeHtml(session.phone) || '-'}</li>
+          <li><strong>Plano:</strong> ${escapeHtml(session.planCode) || '-'} · ${session.screens} tela(s)</li>
           <li><strong>Valor mensal estimado:</strong> ${amount}</li>
           <li><strong>Sessão:</strong> ${session.id}</li>
         </ul>
       </div>
-    `.trim(),
-  });
+    `.trim();
+
+  // Uma mensagem POR master, e não um `to` com todos: a fila é o histórico de
+  // "quem recebeu o quê", e um único registro com três endereços juntos não
+  // responde "o Fulano recebeu?" — que é a pergunta que se faz quando um lead
+  // some sem atendimento. A chave de idempotência inclui o destinatário porque
+  // é uma mensagem por pessoa.
+  for (const master of recipients) {
+    await emailQueueService.enqueue({
+      toEmail: master.email,
+      toUserId: master.id,
+      subject,
+      htmlBody: html,
+      kind: 'transactional',
+      templateKey: 'checkout_submit_notice',
+      dedupeKey: `checkout_submit_notice:${session.id}:${master.id}`,
+    });
+  }
 }
 
 function escapeHtml(value: string | null | undefined): string {

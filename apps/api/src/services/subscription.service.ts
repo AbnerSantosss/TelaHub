@@ -1,5 +1,6 @@
 import prisma from '../lib/prisma';
-import type { Plan, Prisma, Subscription } from '@prisma/client';
+import type { Plan, Prisma, Subscription, SubscriptionOverride } from '@prisma/client';
+import { cancelSubscription as cancelAsaasSubscription } from './asaas.provider';
 import { FEATURE_QUOTE_ONLY, parseFeatures, planService } from './plan.service';
 
 /**
@@ -49,6 +50,30 @@ export class PlanUpgradeRequiresPaymentError extends Error {
     );
     this.name = 'PlanUpgradeRequiresPaymentError';
   }
+}
+
+/** Tentativa de reativar uma assinatura que já terminou — a rota traduz para 409. */
+export class SubscriptionReactivationError extends Error {
+  readonly code = 'subscription_ended';
+  constructor(message: string) {
+    super(message);
+    this.name = 'SubscriptionReactivationError';
+  }
+}
+
+/**
+ * Cancela a recorrência no gateway, quando existe uma.
+ *
+ * Devolve `null` quando não havia nada a cancelar lá fora (conta simulada,
+ * plano grátis, assinatura criada antes do gateway existir), `true`/`false`
+ * quando houve tentativa. Nunca lança: ver `scheduleCancel`.
+ */
+async function cancelAtGateway(subscription: {
+  gateway: string | null;
+  gatewaySubscriptionId: string | null;
+}): Promise<boolean | null> {
+  if (subscription.gateway !== 'asaas' || !subscription.gatewaySubscriptionId) return null;
+  return cancelAsaasSubscription(subscription.gatewaySubscriptionId);
 }
 
 export interface ChangePlanOptions {
@@ -104,7 +129,24 @@ export function isPlanUpgrade(current: Plan, target: Plan, activeDevices: number
 
 export type SubscriptionStatus = 'trialing' | 'active' | 'past_due' | 'canceled';
 
-export type SubscriptionWithPlan = Subscription & { plan: Plan };
+/**
+ * A assinatura com o plano E a concessão manual, quando existir.
+ *
+ * O `override` entra AQUI, no tipo que todo mundo já usa, em vez de virar uma
+ * busca extra em cada rota que checa recurso. O motivo é uma falha real: com
+ * `getByOrganization` trazendo só o plano, `hasFeature` e
+ * `resolveVideoEntitlement` — que já sabem ler concessão — recebiam um objeto
+ * onde ela nunca estava, e liberar Power BI para um cliente pelo backoffice não
+ * desbloqueava a publicação do widget. O gate dizia "não" para uma permissão
+ * que o banco dizia "sim".
+ *
+ * Falha silenciosa, e da pior espécie: quem concede vê a tela confirmar, o
+ * cliente continua barrado, e não há erro em lugar nenhum para investigar.
+ */
+export type SubscriptionWithPlan = Subscription & {
+  plan: Plan;
+  override?: SubscriptionOverride | null;
+};
 
 /** Recursos sujeitos a quota. */
 export type QuotaResource = 'device' | 'user' | 'organization';
@@ -224,7 +266,135 @@ export function estimateMonthlyCents(
  * superfície.
  */
 export function estimateAnnualTotalCents(plan: PricedPlan, activeDevices: number): number {
-  return estimateMonthlyCents(plan, activeDevices, 'yearly') * 12;
+  return estimateMonthlyCents(plan, activeDevices, 'yearly') * MONTHS_PER_YEAR;
+}
+
+/** Meses cobertos por um ciclo de cobrança. */
+export const MONTHS_PER_YEAR = 12;
+
+export function cycleMonths(interval: BillingInterval): number {
+  return interval === 'yearly' ? MONTHS_PER_YEAR : 1;
+}
+
+/**
+ * O CAIXA de um ciclo, em centavos: o que o gateway efetivamente cobra de uma
+ * vez. Função pura.
+ *
+ * ⚠️ ESTE É O DEFEITO US-A-05, e o motivo de existirem dois nomes parecidos:
+ *
+ *   `estimateMonthlyCents`  → mensal EQUIVALENTE (o número da vitrine, o que se
+ *                             compara entre planos e intervalos);
+ *   `estimateCycleCents`    → o que entra na conta bancária no ciclo (no anual,
+ *                             os 12 meses juntos).
+ *
+ * `CheckoutSession.amountCents` guarda o PRIMEIRO; `Payment.amountCents` guarda
+ * o SEGUNDO. Copiar um no outro é o defeito: numa sessão anual isso cobraria
+ * 1/12 do combinado (ou, na direção contrária, mostraria na vitrine um preço 12
+ * vezes maior). Toda conversão entre os dois passa por aqui.
+ */
+export function estimateCycleCents(
+  plan: PricedPlan,
+  activeDevices: number,
+  interval: BillingInterval
+): number {
+  return estimateMonthlyCents(plan, activeDevices, interval) * cycleMonths(interval);
+}
+
+/**
+ * Mesma conversão, mas a partir de um valor MENSAL EQUIVALENTE já congelado.
+ *
+ * Existe separada de `estimateCycleCents` porque o checkout congela o preço no
+ * momento do passo (`CheckoutSession.amountCents`): recalcular pelo catálogo na
+ * hora de provisionar cobraria o preço de HOJE de quem viu o de ontem, que é
+ * exatamente o que congelar o valor foi feito para evitar.
+ */
+export function cycleCentsFromMonthly(
+  monthlyEquivalentCents: number,
+  interval: BillingInterval
+): number {
+  return monthlyEquivalentCents * cycleMonths(interval);
+}
+
+/**
+ * Fim do período a partir de `from`, respeitando o intervalo. Função pura.
+ *
+ * O ajuste final não é firula: `new Date(2026, 0, 31).setMonth(+1)` devolve 3 de
+ * MARÇO, porque o JS transborda em vez de saturar. Sem o clamp, quem assina no
+ * dia 31 pula fevereiro inteiro e ganha um mês de graça todo ano.
+ */
+export function addBillingInterval(from: Date, interval: BillingInterval): Date {
+  const result = new Date(from.getTime());
+  const day = result.getUTCDate();
+
+  if (interval === 'yearly') {
+    result.setUTCFullYear(result.getUTCFullYear() + 1);
+  } else {
+    result.setUTCMonth(result.getUTCMonth() + 1);
+  }
+
+  // Transbordou (31/01 → 03/03): volta para o último dia do mês pretendido.
+  if (result.getUTCDate() < day) {
+    result.setUTCDate(0);
+  }
+
+  return result;
+}
+
+/**
+ * Dias de carência entre "a cobrança falhou" e "o acesso é suspenso".
+ *
+ * ⚠️ ESTE NÚMERO ESPELHA O ITEM 9 DOS TERMOS DE USO (`/termos`, vigência
+ * 2026-09-05), que promete 10 dias. MUDAR AQUI EXIGE MUDAR O TEXTO PUBLICADO
+ * JUNTO — e vice-versa. Um termo prometendo 10 com código cortando em 7
+ * suspende o acesso de um cliente três dias antes do contratado; é promessa
+ * pública sem lastro no código, a classe de defeito que este projeto já repetiu
+ * várias vezes. Na dúvida, o lado seguro é a carência MAIOR: nunca cortar antes
+ * do prometido.
+ *
+ * O prazo generoso também é decisão comercial: a causa mais comum de `past_due`
+ * é boba e temporária (limite do cartão, Pix não pago na sexta, cartão vencido),
+ * e derrubar a TV de uma loja no primeiro dia de atraso resolve a inadimplência
+ * criando um cancelamento. A conta segue funcionando durante a carência;
+ * `pastDueSince` é o relógio.
+ */
+export const PAST_DUE_GRACE_DAYS = 10;
+
+/** Instante em que a carência termina. Função pura. */
+export function graceEndsAt(pastDueSince: Date): Date {
+  return new Date(pastDueSince.getTime() + PAST_DUE_GRACE_DAYS * 24 * 60 * 60 * 1000);
+}
+
+/**
+ * `true` quando a carência de inadimplência já venceu. Função pura.
+ *
+ * ⚠️ É DE PROPÓSITO uma função pura, e não um `setTimeout` agendado no momento
+ * em que o webhook chega: um temporizador na memória morre no primeiro deploy
+ * (que acontece toda semana) e a assinatura ficaria `past_due` para sempre,
+ * dando acesso de graça a quem não pagou. Quem chama isto é um job periódico
+ * (`runBillingMaintenance`), que sobrevive a reinício porque relê o banco.
+ */
+export function isPastDueGraceExpired(
+  pastDueSince: Date | null | undefined,
+  now: Date = new Date()
+): boolean {
+  if (!pastDueSince) return false;
+  return graceEndsAt(pastDueSince).getTime() <= now.getTime();
+}
+
+/**
+ * `true` quando um cancelamento agendado já pode virar `canceled` de fato.
+ *
+ * Sem `currentPeriodEnd` a resposta é NÃO: na dúvida o cliente continua com o
+ * acesso que pagou (CDC art. 51, IV). Cortar por falta de dado é o erro caro.
+ */
+export function isScheduledCancelDue(
+  subscription: { cancelAtPeriodEnd: boolean; currentPeriodEnd: Date | null; status: string },
+  now: Date = new Date()
+): boolean {
+  if (!subscription.cancelAtPeriodEnd) return false;
+  if (subscription.status === 'canceled') return false;
+  if (!subscription.currentPeriodEnd) return false;
+  return subscription.currentPeriodEnd.getTime() <= now.getTime();
 }
 
 /** Quantas telas entram na fatura (piso de `minScreens`). Função pura. */
@@ -286,7 +456,7 @@ export function inactiveReason(
   if (subscription.status === 'trialing') {
     // Só alcançável em assinaturas de trial promocional (o plano grátis é
     // `active` e sem prazo).
-    return 'Seu período promocional terminou. Escolha um plano para continuar usando o TelaHub — ou volte para o plano Grátis, que mantém 1 tela para sempre.';
+    return 'Seu período promocional terminou. Escolha um plano para continuar usando o TelaHub, ou volte para o plano Grátis, que mantém 1 tela para sempre.';
   }
   if (subscription.status === 'past_due') {
     return 'Há uma fatura em aberto na sua conta. Regularize o pagamento para reativar o acesso.';
@@ -331,7 +501,11 @@ export class SubscriptionService {
   async getByOrganization(organizationId: string): Promise<SubscriptionWithPlan | null> {
     return prisma.subscription.findUnique({
       where: { organizationId },
-      include: { plan: true },
+      // `override` junto do `plan`: é uma junção 1:1 por chave primária, custo
+      // desprezível, e é o que faz a concessão manual valer em TODA rota que já
+      // consulta a assinatura — inclusive as de publicação de widget, que é
+      // onde ela mais importa. Ver a nota em `SubscriptionWithPlan`.
+      include: { plan: true, override: true },
     });
   }
 
@@ -410,13 +584,193 @@ export class SubscriptionService {
     return null;
   }
 
-  async cancel(organizationId: string): Promise<SubscriptionWithPlan> {
+  /**
+   * Cancelamento IMEDIATO. Continua existindo para uso administrativo
+   * (fraude, chargeback, pedido do jurídico) e para o job que efetiva um
+   * cancelamento agendado — NÃO é o que a rota do painel chama.
+   *
+   * Quem cancela pelo painel passa por `scheduleCancel`: cortar na hora o
+   * acesso de quem já pagou o mês é cláusula abusiva (CDC art. 51, IV).
+   */
+  async cancel(organizationId: string, reason?: string | null): Promise<SubscriptionWithPlan> {
     await this.requireByOrganization(organizationId);
     return prisma.subscription.update({
       where: { organizationId },
-      data: { status: 'canceled' },
+      data: {
+        status: 'canceled',
+        canceledAt: new Date(),
+        // Opcional na assinatura do método para não quebrar quem já chamava,
+        // mas o backoffice SEMPRE passa (`admin:<motivo>`): corte imediato de
+        // acesso pago é a ação mais agressiva que existe aqui, e ela sem
+        // registro de quem fez e por quê é o que ninguém consegue explicar
+        // depois.
+        ...(reason?.trim() ? { cancelReason: reason.trim().slice(0, 500) } : {}),
+      },
       include: { plan: true },
     });
+  }
+
+  /**
+   * Agenda o cancelamento para o fim do ciclo já pago.
+   *
+   * `status` continua `active` de propósito: quem pagou até o dia 30 usa até o
+   * dia 30. O par (`cancelAtPeriodEnd`, `currentPeriodEnd`) é o que diz ao
+   * painel que a assinatura está de saída sem tirar nada de quem pagou.
+   *
+   * `canceledAt` é o instante do PEDIDO, não o do fim do acesso — é essa data
+   * que responde "quanto tempo o cliente ficou" no cálculo de churn.
+   *
+   * O cancelamento no gateway acontece junto, e uma falha ali NÃO desfaz o
+   * cancelamento local: o cliente já pediu, e um erro do Asaas não pode virar
+   * "continue pagando". A falha é registrada para reprocessamento humano.
+   */
+  async scheduleCancel(
+    organizationId: string,
+    reason?: string | null,
+    now: Date = new Date()
+  ): Promise<{ subscription: SubscriptionWithPlan; gatewayCanceled: boolean | null }> {
+    const current = await this.requireByOrganization(organizationId);
+
+    const subscription = await prisma.subscription.update({
+      where: { organizationId },
+      data: {
+        cancelAtPeriodEnd: true,
+        canceledAt: current.canceledAt ?? now,
+        cancelReason: reason?.trim() ? reason.trim().slice(0, 500) : null,
+      },
+      include: { plan: true },
+    });
+
+    const gatewayCanceled = await cancelAtGateway(current);
+
+    return { subscription, gatewayCanceled };
+  }
+
+  /**
+   * Desfaz um cancelamento agendado, enquanto o ciclo não terminou.
+   *
+   * Depois que a assinatura virou `canceled` não há o que reativar aqui: uma
+   * nova contratação passa pelo checkout, porque é preciso criar cobrança nova
+   * no gateway. Devolver "reativado" sem cobrança seria dar plano pago de
+   * graça — o mesmo buraco que `PlanUpgradeRequiresPaymentError` fecha.
+   */
+  async reactivate(organizationId: string): Promise<SubscriptionWithPlan> {
+    const current = await this.requireByOrganization(organizationId);
+
+    if (current.status === 'canceled') {
+      throw new SubscriptionReactivationError(
+        'Esta assinatura já foi encerrada. Contrate novamente pelo checkout para voltar a usar o plano.'
+      );
+    }
+
+    if (!current.cancelAtPeriodEnd) {
+      return current;
+    }
+
+    return prisma.subscription.update({
+      where: { organizationId },
+      data: { cancelAtPeriodEnd: false, canceledAt: null, cancelReason: null },
+      include: { plan: true },
+    });
+  }
+
+  /**
+   * Marca inadimplência. `pastDueSince` só é gravado na PRIMEIRA falha: se cada
+   * reenvio do webhook empurrasse a data, a carência nunca venceria e o
+   * devedor usaria o produto para sempre.
+   */
+  async markPastDue(organizationId: string, since: Date = new Date()): Promise<void> {
+    const current = await prisma.subscription.findUnique({
+      where: { organizationId },
+      select: { pastDueSince: true },
+    });
+
+    await prisma.subscription.update({
+      where: { organizationId },
+      data: { status: 'past_due', pastDueSince: current?.pastDueSince ?? since },
+    });
+  }
+
+  /**
+   * Reativa após pagamento confirmado: limpa a inadimplência e empurra o fim do
+   * período. Também usado quando o webhook confirma a primeira cobrança.
+   */
+  async markActiveFromPayment(input: {
+    organizationId: string;
+    interval: BillingInterval;
+    paidAt: Date;
+    gateway?: string | null;
+    gatewayCustomerId?: string | null;
+    gatewaySubscriptionId?: string | null;
+  }): Promise<void> {
+    await prisma.subscription.update({
+      where: { organizationId: input.organizationId },
+      data: {
+        status: 'active',
+        pastDueSince: null,
+        billingInterval: input.interval,
+        currentPeriodEnd: addBillingInterval(input.paidAt, input.interval),
+        ...(input.gateway ? { gateway: input.gateway } : {}),
+        ...(input.gatewayCustomerId ? { gatewayCustomerId: input.gatewayCustomerId } : {}),
+        ...(input.gatewaySubscriptionId
+          ? { gatewaySubscriptionId: input.gatewaySubscriptionId }
+          : {}),
+      },
+    });
+  }
+
+  /**
+   * Manutenção periódica da cobrança. Chame de um job (ver a nota em
+   * `isPastDueGraceExpired` sobre por que NÃO é um `setTimeout`).
+   *
+   * Faz duas coisas, ambas idempotentes:
+   *   1. efetiva cancelamentos agendados cujo ciclo já terminou;
+   *   2. cancela quem passou da carência de `PAST_DUE_GRACE_DAYS` em `past_due`.
+   *
+   * Rodar duas vezes no mesmo minuto não muda nada — os filtros já excluem
+   * quem foi tratado.
+   */
+  async runBillingMaintenance(now: Date = new Date()): Promise<{
+    scheduledCanceled: number;
+    graceExpired: number;
+  }> {
+    const [scheduled, overdue] = await Promise.all([
+      prisma.subscription.updateMany({
+        where: {
+          cancelAtPeriodEnd: true,
+          status: { not: 'canceled' },
+          currentPeriodEnd: { not: null, lte: now },
+        },
+        // `cancelReason` só é gravado quando ainda não há um: o motivo de quem
+        // PEDIU o cancelamento (`customer_request`, `admin`) já foi registrado
+        // no momento do pedido e é mais informativo que o do encerramento.
+        data: { status: 'canceled' },
+      }),
+      prisma.subscription.updateMany({
+        where: {
+          status: 'past_due',
+          pastDueSince: { not: null, lte: new Date(now.getTime() - PAST_DUE_GRACE_DAYS * 24 * 60 * 60 * 1000) },
+        },
+        // MOTIVO OBRIGATÓRIO AQUI. Sem ele, quem parou de pagar fica
+        // indistinguível de quem pediu para sair — e as duas listas são
+        // problemas opostos: a primeira é cobrança falhando (recuperável por
+        // e-mail e novo meio de pagamento), a segunda é produto. Até 2026-09-09
+        // este `updateMany` encerrava sem gravar motivo nenhum.
+        data: { status: 'canceled', canceledAt: now, cancelReason: 'grace_expired' },
+      }),
+    ]);
+
+    // O cancelamento agendado que venceu sem motivo registrado recebe
+    // `period_end_unpaid`. Feito em passo separado porque o `updateMany` acima
+    // não sabe distinguir linha a linha quem já tinha motivo.
+    if (scheduled.count > 0) {
+      await prisma.subscription.updateMany({
+        where: { status: 'canceled', cancelAtPeriodEnd: true, cancelReason: null },
+        data: { cancelReason: 'period_end_unpaid' },
+      });
+    }
+
+    return { scheduledCanceled: scheduled.count, graceExpired: overdue.count };
   }
 
   /** Contagem crua dos recursos consumidos por um tenant. */

@@ -24,6 +24,10 @@ router.post(
       await leadService.create(req.body, {
         ip: req.ip,
         referrer: req.get('referer'),
+        // Só para a medição (`Lead` na Conversions API): user-agent e URL de
+        // origem saem do cabeçalho, não do corpo.
+        userAgent: req.get('user-agent'),
+        sourceUrl: req.get('referer'),
       });
 
       // Não devolve o lead: o site não precisa do id, e ecoar o registro só

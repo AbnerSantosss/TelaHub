@@ -43,8 +43,15 @@ import checkoutRoutes from './routes/checkout.routes';
 import checkoutAdminRoutes from './routes/checkout-admin.routes';
 import proxyRoutes from './routes/proxy.routes';
 import leadsRoutes from './routes/leads.routes';
+import webhooksRoutes from './routes/webhooks.routes';
+import adminRoutes from './routes/admin';
+import eventsRoutes from './routes/events.routes';
+import emailPublicRoutes from './routes/email-public.routes';
 import { startCheckoutAbandonJob } from './jobs/checkout-abandon.job';
 import { startEventDispatchJob } from './jobs/event-dispatch.job';
+import { startBillingMaintenanceJob } from './jobs/billing-maintenance.job';
+import { startEmailDispatchJob } from './jobs/email-dispatch.job';
+import { startEmailAutomationJob } from './jobs/email-automation.job';
 import { errorMiddleware } from './middlewares/error.middleware';
 import { startDeviceHeartbeatAlertJob } from './jobs/device-heartbeat-alert.job';
 
@@ -76,7 +83,7 @@ if (TRUST_PROXY && TRUST_PROXY !== 'false') {
 // esquecer uma delas faz aquele app parar de falar com a API.
 const ALLOWED_ORIGINS = process.env.CORS_ORIGINS
   ? process.env.CORS_ORIGINS.split(',').map(o => o.trim())
-  : ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:3030'];
+  : ['http://localhost:3010', 'http://localhost:5173', 'http://localhost:3030'];
 
 if (process.env.NODE_ENV === 'production' && ALLOWED_ORIGINS.includes('*')) {
   console.warn(
@@ -165,6 +172,17 @@ app.use('/assets/system', express.static(iconsPath, {
 app.use('/api/signup', signupRoutes);
 app.use('/api/plans', plansRoutes);
 app.use('/api/leads', leadsRoutes);
+// Contagem própria de visitas e descadastro de novidades. Anônimas pelo mesmo
+// motivo das rotas acima: quem visita o site não tem conta, e quem sai de uma
+// lista de e-mail costuma não conseguir (nem querer) entrar na dele.
+app.use('/api/events', eventsRoutes);
+app.use('/api/email', emailPublicRoutes);
+
+// Webhooks de gateway. Sem autenticação de usuário de propósito: quem chama é
+// o servidor do Asaas, e a credencial é o token no header `asaas-access-token`
+// (conferido dentro da rota, em tempo constante). Precisa vir ANTES de
+// qualquer guarda de sessão pelo mesmo motivo das rotas de aquisição.
+app.use('/api/webhooks', webhooksRoutes);
 
 // Funil de checkout. O painel vem antes por clareza de leitura — os caminhos não
 // colidem. As rotas públicas de `/api/checkout` são anônimas de propósito: a
@@ -190,6 +208,11 @@ app.use('/api/organizations', organizationsRoutes);
 // Trilha de auditoria (feature `auditoria`, plano Loja para cima).
 app.use('/api/audit-logs', auditRoutes);
 
+// Backoffice da plataforma. A guarda de `master` está aplicada UMA vez, na raiz
+// do router (`routes/admin/index.ts`) — ver a nota lá sobre por que não é rota
+// a rota.
+app.use('/api/admin', adminRoutes);
+
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
@@ -213,6 +236,19 @@ if (process.env.NODE_ENV !== 'test') {
   // passo de reserva (`updateMany` marcando o evento antes de executar), senão
   // o mesmo evento é processado em paralelo.
   startEventDispatchJob();
+  // Efetiva cancelamentos agendados e encerra quem passou da carência de
+  // inadimplência. Sem esta chamada, `runBillingMaintenance()` existiria sem
+  // nunca rodar: quem cancela o cartão ficaria em `past_due` com acesso
+  // completo para sempre, sem aparecer em lista nenhuma.
+  startBillingMaintenanceJob();
+  // Fila de e-mail. Todo envio passa por aqui desde 2026-09-09: antes disso o
+  // envio era síncrono ao pedido, e provedor fora do ar significava e-mail
+  // PERDIDO, não adiado.
+  startEmailDispatchJob();
+  // Enfileira os avisos de vencimento, inadimplência e não-renovação. Diário e
+  // idempotente por (template, organização, fim do ciclo) — reiniciar o
+  // processo não faz o cliente receber o mesmo aviso duas vezes.
+  startEmailAutomationJob();
 }
 
 export default app;

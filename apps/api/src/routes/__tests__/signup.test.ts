@@ -3,6 +3,7 @@ import express from 'express';
 import request from 'supertest';
 
 import prisma from '../../lib/prisma';
+import { PRIVACY_VERSION, TERMS_REQUIRED_MESSAGE, TERMS_VERSION } from '../../schemas/signup.schema';
 import signupRoutes from '../signup.routes';
 import plansRoutes from '../plans.routes';
 
@@ -45,6 +46,14 @@ describe('POST /api/signup', () => {
       name: 'Fulano de Teste',
       email: EMAIL,
       password: 'senhaSegura123',
+      // Obrigatório desde 2026-09-05: sem `acceptedTerms: true` o cadastro é 400.
+      acceptedTerms: true,
+      attribution: {
+        utmSource: 'google',
+        utmMedium: 'cpc',
+        utmCampaign: 'condominio-avisos',
+        landingPath: '/planos',
+      },
     });
 
     expect(res.status).toBe(201);
@@ -70,6 +79,16 @@ describe('POST /api/signup', () => {
     expect(persisted?.users).toHaveLength(1);
     expect(persisted?.users[0].role).toBe('admin');
     expect(persisted?.users[0].password).not.toBe('senhaSegura123');
+    // Prova do consentimento: instante + versão do texto aceito.
+    expect(persisted?.users[0].termsAcceptedAt).toBeInstanceOf(Date);
+    expect(persisted?.users[0].termsVersion).toBe(TERMS_VERSION);
+    expect(persisted?.users[0].privacyVersion).toBe(PRIVACY_VERSION);
+    // Origem da conta congelada na organização — sem isto não há custo por
+    // conta por campanha, que é a métrica que decide a mídia paga.
+    expect(persisted?.utmSource).toBe('google');
+    expect(persisted?.utmMedium).toBe('cpc');
+    expect(persisted?.utmCampaign).toBe('condominio-avisos');
+    expect(persisted?.landingPath).toBe('/planos');
     expect(persisted?.subscription?.status).toBe('active');
     expect(persisted?.subscription?.plan.code).toBe('gratis');
     expect(persisted?.subscription?.trialEndsAt).toBeNull();
@@ -83,6 +102,7 @@ describe('POST /api/signup', () => {
       name: 'Outro Fulano',
       email: EMAIL,
       password: 'outraSenha123',
+      acceptedTerms: true,
     });
 
     expect(res.status).toBe(409);
@@ -97,10 +117,24 @@ describe('POST /api/signup', () => {
       name: 'Senha Curta',
       email: `curta-${SUFFIX}@telahub.test`,
       password: '1234567',
+      acceptedTerms: true,
     });
 
     expect(res.status).toBe(400);
     expect(JSON.stringify(res.body.details)).toMatch(/8 caracteres/);
+  });
+
+  it('recusa cadastro sem aceite dos termos com 400 e mensagem clara', async () => {
+    const res = await request(app).post('/api/signup').send({
+      companyName: `Empresa Signup ${SUFFIX} sem aceite`,
+      name: 'Sem Aceite',
+      email: `sem-aceite-${SUFFIX}@telahub.test`,
+      password: 'senhaSegura123',
+      acceptedTerms: false,
+    });
+
+    expect(res.status).toBe(400);
+    expect(JSON.stringify(res.body.details)).toContain(TERMS_REQUIRED_MESSAGE);
   });
 
   it('recusa payload incompleto com 400', async () => {

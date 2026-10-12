@@ -9,69 +9,35 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Executando seed do banco de dados...');
 
-  // ── Admin principal (Abner - Master) ──
-  const masterEmail = 'binho_captiva@hotmail.com';
-  const masterPassword = await bcrypt.hash('mudar@123', 10);
+  // ── Admin de desenvolvimento ──
+  // E-mail e senha vêm do `.env` (`ADMIN_EMAIL` / `ADMIN_PASSWORD`), nunca do
+  // código: o repositório é público. Até 2026-09-21 este arquivo trazia e-mails
+  // reais e senhas fixas de três contas, e isso ficou publicado no GitHub.
+  // Produção usa `seed-prod.js`, que segue a mesma regra.
+  const adminEmail = process.env.ADMIN_EMAIL?.trim();
+  const adminPlain = process.env.ADMIN_PASSWORD;
+  if (!adminEmail || !adminPlain) {
+    throw new Error('Defina ADMIN_EMAIL e ADMIN_PASSWORD no .env antes de rodar o seed.');
+  }
+  const adminPassword = await bcrypt.hash(adminPlain, 10);
 
-  const abner = await prisma.user.upsert({
+  const admin = await prisma.user.upsert({
     where: { username: 'admin' },
     update: {
-      name: 'Abner',
-      email: masterEmail,
-      password: masterPassword,
+      email: adminEmail,
+      password: adminPassword,
       role: 'master',
     },
     create: {
       username: 'admin',
-      name: 'Abner',
-      email: masterEmail,
-      password: masterPassword,
+      name: 'Admin',
+      email: adminEmail,
+      password: adminPassword,
       role: 'master',
     },
   });
 
-  console.log(`✅ Admin Master criado: ${abner.username} (role: ${abner.role})`);
-
-  // ── Usuário Jackson ──
-  const jacksonPassword = await bcrypt.hash('Mudar123', 10);
-
-  const jackson = await prisma.user.upsert({
-    where: { username: 'jackson' },
-    update: {
-      name: 'Jackson',
-      email: 'jacksonlogamebr@gmail.com',
-      password: jacksonPassword,
-      role: 'admin',
-    },
-    create: {
-      username: 'jackson',
-      name: 'Jackson',
-      email: 'jacksonlogamebr@gmail.com',
-      password: jacksonPassword,
-      role: 'admin',
-    },
-  });
-
-  console.log(`✅ Admin Jackson criado: ${jackson.username} (role: ${jackson.role})`);
-
-  // ── Usuário Dev (Para testes rápidos) ──
-  const devPassword = await bcrypt.hash('Mudar@123', 10);
-  const devUser = await prisma.user.upsert({
-    where: { username: 'admin-dev' },
-    update: {
-      email: 'admin@example.com',
-      password: devPassword,
-      role: 'admin',
-    },
-    create: {
-      username: 'admin-dev',
-      email: 'admin@example.com',
-      password: devPassword,
-      role: 'admin',
-    },
-  });
-
-  console.log(`✅ Usuário Dev criado: ${devUser.username} (role: ${devUser.role})`);
+  console.log(`✅ Admin criado: ${admin.username} (role: ${admin.role})`);
 
   // Cria display de demonstração
   const demoDisplay = await prisma.display.upsert({

@@ -117,7 +117,11 @@ router.get('/rss', proxyRateLimit, async (req: Request, res: Response): Promise<
       timeoutMs: 10_000,
       maxRedirects: 3,
       headers: {
-        'User-Agent': 'TelaHub-RSS-Reader/1.0 (+https://telahub.com.br)',
+        // Sem URL no User-Agent: o domínio que estava aqui (telahub.com.br) é de
+        // TERCEIRO desde 2025, e todo feed que registra o agente passava a
+        // apontar para o site de outra empresa. Enquanto o domínio próprio não
+        // for decidido, o identificador vai sem endereço.
+        'User-Agent': 'TelaHub-RSS-Reader/1.0',
         Accept: 'application/rss+xml, application/xml, text/xml, application/atom+xml, */*',
       },
     });

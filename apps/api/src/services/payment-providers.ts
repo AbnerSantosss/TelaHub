@@ -1,5 +1,7 @@
 import crypto from 'crypto';
 
+import { asaasProvider, isAsaasConfigured } from './asaas.provider';
+
 // ─────────────────────────────────────────────────────────────────────────────
 // PROVEDORES DE PAGAMENTO
 //
@@ -13,10 +15,15 @@ import crypto from 'crypto';
 // espalhado, cada gateway novo mexeria no caminho do dinheiro — que é
 // exatamente o código onde uma regressão custa mais caro.
 //
-// ⚠️ HOJE SÓ O PROVEDOR `simulado` ESTÁ IMPLEMENTADO. Os demais estão
-// declarados com `implemented: false` de propósito: o catálogo serve para a
+// ⚠️ IMPLEMENTADOS: `simulado` e `asaas` (2026-09-05). Os demais continuam só
+// declarados em `PLANNED_PROVIDERS`, de propósito: o catálogo serve para a
 // escolha ser explícita e para ninguém achar que "está integrado" porque o
 // nome aparece numa lista. Ver `payment.service.ts` para o ponto de encaixe.
+//
+// A seta de import é de MÃO ÚNICA: este arquivo importa `asaas.provider`, e o
+// provedor só importa TIPOS daqui de volta. Um import de valor na volta
+// fecharia um ciclo de CommonJS e deixaria metade dos símbolos `undefined`
+// conforme a ordem de carga — falha que só aparece em produção.
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** Métodos que o produto oferece. `boleto`/`transfer` existem no schema mas não são oferecidos. */
@@ -69,6 +76,21 @@ export interface ProviderCharge {
   };
   /** Motivo, quando `declined`. */
   declineReason?: string;
+  /**
+   * Ids da recorrência criada no gateway, quando houve uma. Sobem até
+   * `Subscription.gateway*` pelo metadado do evento `paid` — sem eles, a conta
+   * não sabe qual assinatura do gateway é dela e ninguém consegue cancelar.
+   */
+  gatewayCustomerId?: string;
+  gatewaySubscriptionId?: string;
+}
+
+/** Cobrança RECORRENTE: a mesma coisa, mais o intervalo do ciclo. */
+export interface CreateSubscriptionChargeInput extends CreateChargeInput {
+  /** `amountCents` acima é o CAIXA DO CICLO — no anual, os 12 meses. */
+  interval: 'monthly' | 'yearly';
+  /** Nosso id (sessão de checkout), para conciliar dos dois lados. */
+  externalReference?: string | null;
 }
 
 export interface PaymentProvider {
@@ -83,6 +105,17 @@ export interface PaymentProvider {
    */
   simulated: boolean;
   createCharge(input: CreateChargeInput): Promise<ProviderCharge>;
+  /**
+   * OPCIONAL. Quando o provedor implementa, o checkout cria RECORRÊNCIA em vez
+   * de cobrança avulsa — e é isso que faz o segundo mês ser cobrado.
+   *
+   * É opcional de propósito: o provedor simulado não tem recorrência, e obrigar
+   * todo provedor a ter uma quebraria o simulado sem ganho nenhum. Quem não
+   * implementa cai em `createCharge` e cobra UMA VEZ SÓ — honesto numa
+   * simulação, desastroso num gateway real. Todo provedor que cobre de verdade
+   * precisa implementar isto antes de entrar em `IMPLEMENTED`.
+   */
+  createSubscriptionCharge?(input: CreateSubscriptionChargeInput): Promise<ProviderCharge>;
 }
 
 // ─── Provedor simulado ───────────────────────────────────────────────────────
@@ -234,12 +267,6 @@ export interface PlannedProvider {
 
 export const PLANNED_PROVIDERS: PlannedProvider[] = [
   {
-    key: 'asaas',
-    label: 'Asaas',
-    methods: ['pix', 'credit_card'],
-    note: 'Pix e boleto recorrentes nativos, foco em PME brasileira. Exige CNPJ.',
-  },
-  {
     key: 'mercadopago',
     label: 'Mercado Pago',
     methods: ['pix', 'credit_card'],
@@ -261,6 +288,7 @@ export const PLANNED_PROVIDERS: PlannedProvider[] = [
 
 const IMPLEMENTED: Record<string, PaymentProvider> = {
   [simulatedProvider.key]: simulatedProvider,
+  [asaasProvider.key]: asaasProvider,
 };
 
 /** Erro de configuração de pagamento — a rota traduz para 5xx/4xx. */
@@ -297,6 +325,18 @@ export function resolveProvider(): PaymentProvider {
         ? `Provedor de pagamento "${key}" está previsto mas ainda não foi implementado. ` +
           `Use PAYMENT_PROVIDER=simulado enquanto a integração não existir.`
         : `Provedor de pagamento "${key}" é desconhecido. Provedores implementados: ${Object.keys(IMPLEMENTED).join(', ')}.`
+    );
+  }
+
+  // Provedor real declarado mas SEM chave é pior que provedor inexistente: ele
+  // passaria por todas as guardas e só falharia na hora de criar a cobrança,
+  // com a pessoa já na tela de pagamento. Falha aqui, na resolução, para o
+  // checkout cair no caminho de contato comercial como qualquer outro erro de
+  // configuração.
+  if (provider.key === asaasProvider.key && !isAsaasConfigured()) {
+    throw new PaymentConfigError(
+      'PAYMENT_PROVIDER=asaas está selecionado, mas ASAAS_API_KEY não foi configurada. ' +
+        'Defina a chave (sandbox ou produção) ou volte para PAYMENT_PROVIDER=simulado.'
     );
   }
 

@@ -58,23 +58,65 @@ export function parseFeatures(features: string | null | undefined): string[] {
 }
 
 /**
+ * Concessão manual, no mínimo necessário para esta função.
+ *
+ * Declarada aqui (e não importada de `subscription-override.service`) para não
+ * criar um ciclo de import: aquele serviço já depende de `parseFeatures` daqui.
+ * O formato de `extraFeatures` é o MESMO de `Plan.features` — JSON array em
+ * texto —, o que permite o mesmo parser defensivo nos dois.
+ */
+export interface FeatureOverride {
+  extraFeatures?: string | null;
+  /** `null` = concessão sem prazo. Data no passado = concessão morta. */
+  expiresAt?: Date | null;
+}
+
+/**
  * Verifica se a assinatura dá direito a uma feature. Aceita tanto uma
  * assinatura com o plano incluído quanto o plano solto, para não obrigar o
  * chamador a montar a mesma query duas vezes.
+ *
+ * ── Concessão manual (2026-09-09) ───────────────────────────────────────────
+ * Quando — e SÓ quando — o objeto recebido traz `override` (isto é, o chamador
+ * fez `include: { override: true }`), as features concedidas entram na conta.
+ * Duas consequências deliberadas:
+ *
+ *   • Sem `override` no objeto, o resultado é bit a bit o de antes. Esta função
+ *     é chamada de rotas que montam a assinatura sem a concessão
+ *     (`displays.routes`, `broadcasts.routes`); elas continuam decidindo pelo
+ *     plano, e nenhuma consulta nova é feita no caminho quente.
+ *   • A checagem de validade é feita AQUI, na leitura, e não por um job que
+ *     apaga concessões vencidas. Job parado não pode significar Power BI de
+ *     graça para sempre — é a mesma razão pela qual `isPastDueGraceExpired` é
+ *     uma função pura chamada a cada varredura, e não um `setTimeout`.
  */
 export function hasFeature(
-  subscription: { plan?: { features?: string | null } | null } | { features?: string | null } | null | undefined,
-  featureKey: string
+  subscription:
+    | { plan?: { features?: string | null } | null; override?: FeatureOverride | null }
+    | { features?: string | null }
+    | null
+    | undefined,
+  featureKey: string,
+  now: Date = new Date()
 ): boolean {
   if (!subscription) return false;
 
-  const withPlan = subscription as { plan?: { features?: string | null } | null };
+  const withPlan = subscription as {
+    plan?: { features?: string | null } | null;
+    override?: FeatureOverride | null;
+  };
   const raw =
     withPlan.plan && typeof withPlan.plan.features === 'string'
       ? withPlan.plan.features
       : (subscription as { features?: string | null }).features;
 
-  return parseFeatures(raw ?? null).includes(featureKey);
+  if (parseFeatures(raw ?? null).includes(featureKey)) return true;
+
+  const override = withPlan.override;
+  if (!override) return false;
+  if (override.expiresAt && override.expiresAt.getTime() <= now.getTime()) return false;
+
+  return parseFeatures(override.extraFeatures ?? null).includes(featureKey);
 }
 
 /** Converte um registro `Plan` no formato público (sem campos de gateway). */

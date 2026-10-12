@@ -1,11 +1,58 @@
+import crypto from 'crypto';
+import type { EmailMessage } from '@prisma/client';
 import nodemailer from 'nodemailer';
 import { settingsService } from './settings.service';
+import prisma from '../lib/prisma';
+import { emailQueueService, type OutgoingEmail } from './email-queue.service';
+import { EmailDispatchDisabledError, isEmailDispatchEnabled } from '../lib/email-dispatch';
 import fs from 'fs';
 import path from 'path';
 
+/**
+ * ─── TODO ENVIO PASSA PELA FILA DESDE 2026-09-09 ─────────────────────────────
+ *
+ * As funções `send*Email` deste arquivo NÃO falam mais com o provedor: elas
+ * MONTAM o HTML e ENFILEIRAM em `EmailMessage`. Quem entrega é
+ * `email-queue.service` (job `email-dispatch`), reusando o `createTransporter`,
+ * o `formatFrom` e o `getLogoAttachment` daqui.
+ *
+ * A assinatura pública de cada função continua a mesma de propósito: nenhum
+ * chamador (rotas, `device.service`, `auth.service`, tratadores de checkout)
+ * precisou mudar. O que mudou é o significado do retorno — "aceito para envio",
+ * não "entregue". É a troca certa: antes, provedor fora do ar significava
+ * e-mail PERDIDO; agora significa adiado, com retentativa e registro.
+ *
+ * CONSEQUÊNCIA DELIBERADA: estas funções não lançam mais
+ * "Provedor de e-mail não configurado". Uma instalação sem SMTP enfileira
+ * normalmente e as mensagens saem no dia em que o `master` configurar o
+ * provedor — em vez de sumirem uma a uma com erro 500 na cara de quem clicou.
+ */
+
 // URL base do aplicativo — configurável via variável de ambiente
-const APP_URL = process.env.APP_URL || 'https://display.proxserverabner.site';
+const APP_URL = process.env.APP_URL || 'https://devtelahubpainel.proxserverabner.site';
 const LOGIN_URL = `${APP_URL}/#/login`;
+
+/**
+ * Base pública da API, usada só no link de descadastro.
+ *
+ * Precisa ser a URL da API, e não a do painel: `GET /api/email/unsubscribe/:token`
+ * é uma rota do servidor. Em produção a API responde no mesmo domínio sob
+ * `/api`, e é esse o padrão abaixo. ARMADILHA: se um dia a API for para outro
+ * host, `API_PUBLIC_URL` PRECISA ser definida — senão o link de descadastro de
+ * toda campanha aponta para uma página que não existe, e um descadastro que não
+ * funciona é pior que nenhum (LGPD art. 18 e o requisito de um clique que
+ * Gmail/Yahoo cobram desde 2024).
+ */
+const API_PUBLIC_URL = (process.env.API_PUBLIC_URL || `${APP_URL}/api`).replace(/\/+$/, '');
+
+/** Endereço para onde o descadastro por e-mail (mailto) deve ir, quando houver. */
+const UNSUBSCRIBE_MAILTO = process.env.UNSUBSCRIBE_EMAIL?.trim() || '';
+
+/** Contexto opcional do destinatário — alimenta o histórico por organização. */
+export interface EmailContext {
+  organizationId?: string | null;
+  userId?: string | null;
+}
 
 // Logo do sistema como base64 para embedding inline no email
 function getLogoBase64(): string {
@@ -25,11 +72,13 @@ function getLogoBase64(): string {
  * Antes de 2026-07-29 isto era `service: 'gmail'` fixo, o que amarrava a
  * plataforma inteira a um provedor: mudar de e-mail exigia mudar código.
  */
-async function createTransporter(): Promise<nodemailer.Transporter | null> {
+export async function createTransporter(
+  options: { pooled?: boolean } = {}
+): Promise<nodemailer.Transporter | null> {
   const smtp = await settingsService.getSmtpConfig();
   if (!smtp || !smtp.host) return null;
 
-  return nodemailer.createTransport({
+  const transporter = nodemailer.createTransport({
     host: smtp.host,
     port: smtp.port,
     secure: smtp.secure,
@@ -37,7 +86,46 @@ async function createTransporter(): Promise<nodemailer.Transporter | null> {
       user: smtp.user,
       pass: smtp.pass,
     },
+    // ─── Pool: obrigatório para a FILA, dispensável para envio avulso ─────────
+    //
+    // Sem `pool`, o nodemailer abre uma conexão NOVA — e portanto faz um login
+    // novo — a cada `sendMail`. Reaproveitar o mesmo objeto `transporter` no
+    // laço do lote não evita isso: o que se reaproveita é a configuração, não a
+    // conexão.
+    //
+    // Foi exatamente o que aconteceu no primeiro lote real: 50 mensagens por
+    // varredura, a cada 15 segundos, viraram 50 logins, e o Gmail respondeu
+    // `454-4.7.0 Too many login attempts` em TODAS. O sintoma engana: parece
+    // credencial errada ("Invalid login"), e manda quem investiga conferir
+    // senha e provedor, quando o problema é a quantidade de conexões.
+    //
+    // `maxConnections: 1` porque o gargalo aqui nunca é vazão — é o provedor
+    // tratar rajada como abuso. `rateDelta/rateLimit` põe um teto explícito de
+    // mensagens por segundo, para que um dia de enxurrada (o alerta de tela
+    // offline escala com o número de TELAS, não de clientes) não vire bloqueio
+    // da conta inteira, que derrubaria junto convite e redefinição de senha.
+    ...(options.pooled
+      ? {
+          pool: true,
+          maxConnections: 1,
+          maxMessages: 100,
+          rateDelta: 1000,
+          rateLimit: 5,
+        }
+      : {}),
   });
+
+  // Trava de envio (INF-18): fora de produção, sem `EMAIL_DISPATCH_ENABLED`,
+  // o transporte existe (o `verify` do painel continua testando a conexão),
+  // mas `sendMail` recusa. É a segunda barreira — a primeira é a fila nem
+  // começar a varredura. Ver `lib/email-dispatch.ts`.
+  if (!isEmailDispatchEnabled()) {
+    transporter.sendMail = (async () => {
+      throw new EmailDispatchDisabledError();
+    }) as typeof transporter.sendMail;
+  }
+
+  return transporter;
 }
 
 /**
@@ -45,7 +133,7 @@ async function createTransporter(): Promise<nodemailer.Transporter | null> {
  * com o usuário literal `apikey` e o Resend com `resend` — usar isso no `from`
  * geraria um remetente inválido e a mensagem seria recusada.
  */
-function formatFrom(smtp: { fromName: string; fromEmail: string }): string {
+export function formatFrom(smtp: { fromName: string; fromEmail: string }): string {
   return `"${smtp.fromName}" <${smtp.fromEmail}>`;
 }
 
@@ -121,7 +209,7 @@ function emailLayout(content: string): string {
                 <span style="color:${COLORS.textPrimary};">Tela</span><span style="color:${COLORS.cyan};">Hub</span>
               </h1>
               <p style="margin:8px 0 0;color:${COLORS.textMuted};font-size:13px;font-weight:500;">
-                Gerenciamento inteligente de mídia digital corporativa
+                Conteúdo nas suas TVs, gerenciado pelo painel
               </p>
             </td>
           </tr>
@@ -291,14 +379,14 @@ function getWelcomeTemplate(name: string, companyName: string): string {
             2. Abra o player na TV e pareie usando o código exibido na tela.
           </p>
           <p style="margin:0;color:${COLORS.textSecondary};font-size:14px;line-height:1.7;">
-            3. Pronto: se a tela cair, você recebe um aviso por e-mail.
+            3. Pronto. Se a tela cair, você recebe um aviso por e-mail.
           </p>
         </td>
       </tr>
     </table>
 
     <p style="margin:0;color:${COLORS.textMuted};font-size:13px;line-height:1.7;">
-      Quando quiser ligar a segunda tela, a cobrança começa a partir dela e proporcional ao período —
+      Quando quiser ligar a segunda tela, a cobrança começa a partir dela e é proporcional ao período,
       nunca retroativa sobre a tela que já estava no ar.
     </p>
 
@@ -497,7 +585,7 @@ function getDeviceOfflineTemplate(deviceName: string): string {
 /**
  * Prepara o attachment do logo para usar como CID inline.
  */
-function getLogoAttachment(): nodemailer.SendMailOptions['attachments'] {
+export function getLogoAttachment(): nodemailer.SendMailOptions['attachments'] {
   try {
     const logoPath = path.resolve(__dirname, '../../icones-do-sistema/icone-office-display.png');
     if (fs.existsSync(logoPath)) {
@@ -513,24 +601,120 @@ function getLogoAttachment(): nodemailer.SendMailOptions['attachments'] {
   return [];
 }
 
+// ==============================================================================
+// DESCADASTRO DE CAMPANHA (LGPD art. 18 · List-Unsubscribe)
+// ==============================================================================
+
+/** Link público de descadastro. Vai dentro do e-mail e é clicado SEM sessão. */
+export function unsubscribeUrl(token: string): string {
+  return `${API_PUBLIC_URL}/email/unsubscribe/${encodeURIComponent(token)}`;
+}
+
 /**
- * Envia o e-mail de convite com as credenciais de acesso.
+ * Token opaco e estável do descadastro.
+ *
+ * Gerado sob demanda porque toda a base anterior a 2026-09-09 tem
+ * `unsubscribeToken` nulo — sem isto, o primeiro disparo de campanha sairia com
+ * um link quebrado justamente para os clientes mais antigos. `randomBytes(24)`
+ * e não o `id` do usuário: o link circula em caixas de entrada e em provedores
+ * de e-mail; um id previsível permitiria descadastrar terceiros por tentativa.
  */
-export async function sendInviteEmail(to: string, password: string): Promise<void> {
-  const transporter = await createTransporter();
-  if (!transporter) {
-    throw new Error('Provedor de e-mail não configurado. Configure nas Configurações do sistema.');
+async function ensureUnsubscribeToken(userId: string, current: string | null): Promise<string> {
+  if (current) return current;
+
+  const token = crypto.randomBytes(24).toString('base64url');
+  await prisma.user.update({ where: { id: userId }, data: { unsubscribeToken: token } });
+  return token;
+}
+
+/** Rodapé obrigatório de campanha. Texto curto e direto — ninguém deve caçá-lo. */
+function campaignFooter(url: string): string {
+  return `
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;margin:16px auto 0;">
+    <tr>
+      <td style="padding:16px 24px;text-align:center;color:${COLORS.textMuted};font-family:'Segoe UI',Arial,sans-serif;font-size:11px;line-height:1.7;">
+        Você recebe este e-mail porque autorizou o envio de novidades do TelaHub.<br>
+        <a href="${url}" style="color:${COLORS.cyan};text-decoration:underline;">Descadastrar-me destas novidades</a>
+      </td>
+    </tr>
+  </table>
+  `;
+}
+
+/**
+ * Prepara a entrega de uma mensagem `kind: 'campaign'`: rodapé de descadastro +
+ * cabeçalhos `List-Unsubscribe`.
+ *
+ * POR QUE NA HORA DE ENVIAR, e não ao enfileirar: o token pode não existir
+ * ainda (base antiga) e a campanha pode ficar horas na fila. Montar aqui
+ * garante que o link do e-mail que SAIU é o link válido no momento da saída.
+ *
+ * `List-Unsubscribe` + `List-Unsubscribe-Post` são exigência de Gmail e Yahoo
+ * para remetentes em volume desde fevereiro de 2024 — sem eles a campanha vai
+ * para spam e ARRASTA JUNTO a reputação do domínio, ou seja, derruba também a
+ * entrega dos transacionais (convite, redefinição de senha) que saem do mesmo
+ * remetente. Por isso o par de cabeçalhos não é opcional aqui.
+ *
+ * O `mailto:` só entra quando `UNSUBSCRIBE_EMAIL` está configurada: anunciar um
+ * endereço que ninguém lê é pior do que não anunciar.
+ */
+export async function buildCampaignDelivery(message: EmailMessage): Promise<OutgoingEmail> {
+  const user = message.toUserId
+    ? await prisma.user.findUnique({
+        where: { id: message.toUserId },
+        select: { id: true, unsubscribeToken: true },
+      })
+    : await prisma.user.findUnique({
+        where: { email: message.toEmail },
+        select: { id: true, unsubscribeToken: true },
+      });
+
+  // Sem usuário não há como descadastrar — e sem descadastro a campanha não
+  // pode sair. A fila já suprime esse caso antes de chegar aqui (ninguém sem
+  // cadastro tem opt-in demonstrável); este `throw` é a segunda tranca.
+  if (!user) {
+    throw new Error('destinatário de campanha sem usuário: não há token de descadastro');
   }
 
-  const smtp = await settingsService.getSmtpConfig();
-  const html = getInviteTemplate(to, password);
+  const token = await ensureUnsubscribeToken(user.id, user.unsubscribeToken);
+  const url = unsubscribeUrl(token);
 
-  await transporter.sendMail({
-    from: formatFrom(smtp!),
-    to,
+  const headers: Record<string, string> = {
+    'List-Unsubscribe': UNSUBSCRIBE_MAILTO
+      ? `<${url}>, <mailto:${UNSUBSCRIBE_MAILTO}>`
+      : `<${url}>`,
+    'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+  };
+
+  return {
+    to: message.toEmail,
+    subject: message.subject,
+    html: `${message.htmlBody}${campaignFooter(url)}`,
+    headers,
+  };
+}
+
+/** Layout padrão do sistema aplicado a um corpo escrito pelo `master`. */
+export function wrapInLayout(content: string): string {
+  return emailLayout(content);
+}
+
+/**
+ * Enfileira o e-mail de convite com as credenciais de acesso.
+ */
+export async function sendInviteEmail(
+  to: string,
+  password: string,
+  context: EmailContext = {}
+): Promise<void> {
+  await emailQueueService.enqueue({
+    toEmail: to,
     subject: '🎉 Você foi convidado para o TelaHub!',
-    html,
-    attachments: getLogoAttachment(),
+    htmlBody: getInviteTemplate(to, password),
+    kind: 'transactional',
+    templateKey: 'invite',
+    organizationId: context.organizationId ?? null,
+    toUserId: context.userId ?? null,
   });
 }
 
@@ -539,42 +723,39 @@ export async function sendInviteEmail(to: string, password: string): Promise<voi
  * (`POST /api/signup`). Diferente do convite, aqui a pessoa já escolheu a
  * própria senha — não há credencial a transmitir.
  */
-export async function sendWelcomeEmail(to: string, name: string, companyName: string): Promise<void> {
-  const transporter = await createTransporter();
-  if (!transporter) {
-    throw new Error('Provedor de e-mail não configurado. Configure nas Configurações do sistema.');
-  }
-
-  const smtp = await settingsService.getSmtpConfig();
-  const html = getWelcomeTemplate(name, companyName);
-
-  await transporter.sendMail({
-    from: formatFrom(smtp!),
-    to,
+export async function sendWelcomeEmail(
+  to: string,
+  name: string,
+  companyName: string,
+  context: EmailContext = {}
+): Promise<void> {
+  await emailQueueService.enqueue({
+    toEmail: to,
     subject: '👋 Sua conta TelaHub está pronta',
-    html,
-    attachments: getLogoAttachment(),
+    htmlBody: getWelcomeTemplate(name, companyName),
+    kind: 'transactional',
+    templateKey: 'welcome',
+    organizationId: context.organizationId ?? null,
+    toUserId: context.userId ?? null,
   });
 }
 
 /**
  * Envia o alerta de dispositivo offline por tempo prolongado para um administrador.
  */
-export async function sendDeviceOfflineAlertEmail(to: string, deviceName: string): Promise<void> {
-  const transporter = await createTransporter();
-  if (!transporter) {
-    throw new Error('Provedor de e-mail não configurado. Configure nas Configurações do sistema.');
-  }
-
-  const smtp = await settingsService.getSmtpConfig();
-  const html = getDeviceOfflineTemplate(deviceName);
-
-  await transporter.sendMail({
-    from: formatFrom(smtp!),
-    to,
-    subject: `📴 Tela offline — ${deviceName}`,
-    html,
-    attachments: getLogoAttachment(),
+export async function sendDeviceOfflineAlertEmail(
+  to: string,
+  deviceName: string,
+  context: EmailContext = {}
+): Promise<void> {
+  await emailQueueService.enqueue({
+    toEmail: to,
+    subject: `📴 Tela offline: ${deviceName}`,
+    htmlBody: getDeviceOfflineTemplate(deviceName),
+    kind: 'transactional',
+    templateKey: 'device_offline',
+    organizationId: context.organizationId ?? null,
+    toUserId: context.userId ?? null,
   });
 }
 
@@ -597,54 +778,51 @@ export async function sendPurchaseConfirmationEmail(
     amountCents: number;
     password: string;
     simulated: boolean;
-  }
+  },
+  context: EmailContext = {}
 ): Promise<void> {
-  const transporter = await createTransporter();
-  if (!transporter) {
-    throw new Error('Provedor de e-mail não configurado. Configure nas Configurações do sistema.');
-  }
-
-  const smtp = await settingsService.getSmtpConfig();
-  const html = getPurchaseTemplate(
-    to,
-    data.name,
-    data.planName,
-    data.screens,
-    data.amountCents,
-    data.password,
-    data.simulated
-  );
-
-  await transporter.sendMail({
-    from: formatFrom(smtp!),
-    to,
+  await emailQueueService.enqueue({
+    toEmail: to,
     subject: data.simulated
-      ? '🧪 Simulação de contratação (nenhum valor cobrado) — TelaHub'
-      : '✅ Contratação confirmada — seu acesso ao TelaHub',
-    html,
-    attachments: getLogoAttachment(),
+      ? '🧪 TelaHub: simulação de contratação (nenhum valor cobrado)'
+      : '✅ Contratação confirmada: seu acesso ao TelaHub',
+    htmlBody: getPurchaseTemplate(
+      to,
+      data.name,
+      data.planName,
+      data.screens,
+      data.amountCents,
+      data.password,
+      data.simulated
+    ),
+    kind: 'transactional',
+    templateKey: 'purchase_confirmation',
+    organizationId: context.organizationId ?? null,
+    toUserId: context.userId ?? null,
   });
 }
 
 /**
  * Envia o e-mail de redefinição de senha.
  */
-export async function sendResetPasswordEmail(to: string, token: string): Promise<void> {
-  const transporter = await createTransporter();
-  if (!transporter) {
-    throw new Error('Provedor de e-mail não configurado. Configure nas Configurações do sistema.');
-  }
-
-  const smtp = await settingsService.getSmtpConfig();
+export async function sendResetPasswordEmail(
+  to: string,
+  token: string,
+  context: EmailContext = {}
+): Promise<void> {
   const resetUrl = `${APP_URL}/#/reset-password?token=${token}`;
-  const html = getResetPasswordTemplate(resetUrl);
 
-  await transporter.sendMail({
-    from: formatFrom(smtp!),
-    to,
-    subject: '🔐 Redefinição de Senha — TelaHub',
-    html,
-    attachments: getLogoAttachment(),
+  await emailQueueService.enqueue({
+    toEmail: to,
+    subject: '🔐 Redefinição de Senha do TelaHub',
+    htmlBody: getResetPasswordTemplate(resetUrl),
+    // O motivo de a fila ter prioridade por `kind`: este e-mail é o mais
+    // urgente do sistema (a pessoa está parada na tela de login esperando) e
+    // não pode ficar atrás de uma campanha de 500 destinatários.
+    kind: 'transactional',
+    templateKey: 'reset_password',
+    organizationId: context.organizationId ?? null,
+    toUserId: context.userId ?? null,
   });
 }
 
@@ -666,13 +844,17 @@ export async function sendLeadNotificationEmail(lead: {
   referrer: string | null;
   createdAt: Date;
 }): Promise<void> {
-  const transporter = await createTransporter();
-  if (!transporter) {
-    throw new Error('Provedor de e-mail não configurado. Configure nas Configurações do sistema.');
-  }
-
   const smtp = await settingsService.getSmtpConfig();
-  const destino = process.env.COMMERCIAL_EMAIL || smtp!.fromEmail;
+  const destino = process.env.COMMERCIAL_EMAIL || smtp?.fromEmail;
+
+  // Único envio que não tem destinatário próprio: sem `COMMERCIAL_EMAIL` e sem
+  // SMTP configurado não existe caixa para onde mandar. Enfileirar com
+  // destinatário vazio criaria uma linha que nunca sai e ainda queimaria as 5
+  // tentativas — o aviso some do mesmo jeito, só que com ruído no histórico.
+  if (!destino) {
+    console.warn('[email] lead sem destinatário: configure COMMERCIAL_EMAIL ou o SMTP.');
+    return;
+  }
 
   const linha = (rotulo: string, valor: string | null) =>
     valor ? `<tr><td style="padding:6px 12px;color:#55637d">${rotulo}</td><td style="padding:6px 12px;color:#0a1223"><strong>${valor}</strong></td></tr>` : '';
@@ -683,7 +865,10 @@ export async function sendLeadNotificationEmail(lead: {
       <p style="color:#55637d;margin:0 0 16px">Recebido em ${lead.createdAt.toLocaleString('pt-BR')}.</p>
       <table style="width:100%;border-collapse:collapse;border:1px solid #dbe4ef;border-radius:8px">
         ${linha('Nome', lead.name)}
-        ${linha('E-mail', lead.email)}
+        ${/* O `replyTo` do lead se perdeu ao entrar na fila: `EmailMessage` não
+             tem coluna para ele, e inventar uma para um único caso não pagaria.
+             O e-mail vira link `mailto:` para responder continuar a um clique. */ ''}
+        ${linha('E-mail', lead.email ? `<a href="mailto:${lead.email}">${lead.email}</a>` : null)}
         ${linha('Empresa', lead.company)}
         ${linha('Telefone', lead.phone)}
         ${linha('Plano de interesse', lead.planCode)}
@@ -694,12 +879,14 @@ export async function sendLeadNotificationEmail(lead: {
     </div>
   `;
 
-  await transporter.sendMail({
-    from: formatFrom(smtp!),
-    to: destino,
-    replyTo: lead.email,
+  await emailQueueService.enqueue({
+    toEmail: destino,
     subject: `📩 Novo lead: ${lead.name}${lead.company ? ` (${lead.company})` : ''}`,
-    html,
-    attachments: getLogoAttachment(),
+    htmlBody: html,
+    kind: 'transactional',
+    templateKey: 'lead_notification',
+    // Um lead só chega uma vez: a chave impede aviso repetido se o produtor do
+    // e-mail for reexecutado (reentrega de evento, script manual).
+    dedupeKey: `lead_notification:${lead.id}`,
   });
 }
