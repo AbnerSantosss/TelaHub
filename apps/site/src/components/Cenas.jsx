@@ -37,12 +37,12 @@ const CENAS = [
   {
     setor: 'Escritório · empresa',
     hoje: '"Mandei o comunicado por e-mail. Ninguém leu. A meta do mês e os aniversariantes ficam num mural que ninguém olha."',
-    vira: 'Com a TV na recepção: aviso, agenda da sala de reunião, aniversariantes e o painel de resultados — sem imprimir nada.',
+    vira: 'Com a TV na recepção: aviso, agenda da sala de reunião, aniversariantes e o painel de resultados, sem imprimir papel.',
   },
   {
     setor: 'Clínica · consultório',
     hoje: '"Sala de espera no canal de notícias. O paciente sai sem saber que parcelo, que atendo aos sábados, que aceito o convênio novo."',
-    vira: 'Com a TV na sala de espera: seus serviços, horários e orientações em loop, sem ninguém apertar play.',
+    vira: 'Com a TV na sala de espera: seus serviços, horários e orientações passando em sequência, sem ninguém precisar apertar play.',
   },
   {
     setor: 'Loja · comércio de rua',
@@ -55,9 +55,15 @@ const CENAS = [
     vira: 'Com a TV na recepção: grade da semana, feriado e promoção de matrícula, atualizados pelo celular.',
   },
   {
-    setor: 'Rede · várias unidades',
+    // "várias unidades" saiu do rótulo e "em cada unidade" saiu do texto: essa
+    // é a palavra da FEATURE de multi-unidade (hierarquia de contas por
+    // filial), que não existe no código e já foi retirada da grade de planos
+    // por isso. O que existe é o que a cena descreve agora — várias telas na
+    // mesma conta, publicando de uma vez. A cena continua verdadeira; o rótulo
+    // é que prometia um recurso.
+    setor: 'Rede · várias telas',
     hoje: '"Mandei a campanha por WhatsApp pras sete lojas. Três imprimiram, duas imprimiram a versão antiga, duas não viram."',
-    vira: 'Com a TV em cada unidade: você publica uma vez e as sete trocam juntas. Se uma cair, chega um e-mail antes de o gerente perceber.',
+    vira: 'Com uma tela em cada loja: você publica uma vez e as sete trocam juntas. Se uma cair, chega um e-mail antes de o gerente perceber.',
   },
 ];
 
@@ -73,8 +79,8 @@ export default function Cenas() {
           Você conhece essa cena. Quem entra no seu espaço também.
         </h2>
         <p className="lead">
-          Do condomínio ao shopping, do escritório à loja da esquina. Ninguém
-          precisa de mais uma tarefa — precisa que a parede trabalhe.
+          Acontece no condomínio, no shopping, no escritório e na loja da esquina.
+          A TV da parede pode dar esse recado sem virar mais uma tarefa no seu dia.
         </p>
       </div>
 

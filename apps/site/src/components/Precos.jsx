@@ -1,4 +1,4 @@
-import { useId, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import {
   ANUAL,
   MENSAL,
@@ -10,6 +10,7 @@ import {
   telasCobradas,
   telasEmQueRedeCompensa,
 } from '../data/catalogo';
+import { EVENT, track } from '../lib/tracking';
 import './Precos.css';
 
 /**
@@ -28,6 +29,9 @@ import './Precos.css';
  * churn: um plano mensal sem fidelidade — que continua existindo e continua
  * sem multa — perde cliente todo mês por inércia; o anual corta isso por
  * construção, e o desconto por tela é o que se paga por essa previsibilidade.
+ * Por isso as abas NOMEIAM o compromisso: "Mensal — sem fidelidade" e "Anual —
+ * 12 meses, menor preço por tela". Aba que só diz "Anual — paga menos" esconde
+ * a contrapartida no exato lugar onde ela é escolhida.
  *
  * ── A frase "a partir de N telas o Rede compensa" é CALCULADA ───────────────
  * Ela muda com o intervalo: no mensal o Rede passa o Loja em 4 telas, no anual
@@ -35,25 +39,46 @@ import './Precos.css';
  * dos dois modos — e ninguém perceberia, porque quem escreve a copy olha um
  * modo só. Ver `telasEmQueRedeCompensa()`.
  *
+ * ── O piso do Rede é de TELAS, não de lojas ─────────────────────────────────
+ * A letra miúda do card dizia "R$ X/mês por 5 lojas". O piso do plano é
+ * `minScreens` — cinco TELAS, que podem estar todas no mesmo endereço. Escrito
+ * como "lojas", o texto (a) vende para quem tem cinco pontos e some para o
+ * condomínio com cinco telas na mesma torre, e (b) vira promessa de
+ * multi-unidade, recurso que não existe no código e que já saiu da grade uma
+ * vez por isso mesmo.
+ *
+ * ── "Cancela no painel" saiu enquanto o painel não tiver o botão ────────────
+ * A frase estava aqui e no RiscoZero, e a rota de cancelamento no painel ainda
+ * está sendo construída. Uma página de vendas que descreve um botão inexistente
+ * é oferta vinculante (CDC art. 30) sobre um passo que o cliente não consegue
+ * dar — e a descoberta acontece justamente no pior momento, o de cancelar. O
+ * que a página afirma hoje é o que hoje é verdade: no mensal o cancelamento é
+ * PEDIDO (pelo formulário "Falar com a gente" desta página) e vale a partir do
+ * próximo ciclo, sem multa. Quando o botão existir, a frase volta.
+ *
  * ── O que NÃO aparece aqui ──────────────────────────────────────────────────
  * "API externa" e "múltiplas unidades" saíram da grade: eram vendidos e não
  * existem no código (a mesma classe de defeito que a wiki já registrou em
  * julho — recurso na grade não é evidência de recurso no produto). Também não
  * há Pix, boleto nem NFS-e: não há gateway. E não há contador de vagas,
- * depoimento, nota nem preço riscado — nenhum desses fatos existe.
+ * depoimento, nota nem preço riscado — nenhum desses fatos existe. Saiu também
+ * "Vídeo liberado nos 7 primeiros dias": prazo de liberação não existe no
+ * catálogo do backend (FEATURES_GRATIS é `widgets-basicos` + `alerta-offline`),
+ * e prazo inventado é a família de claim que já voltou quatro vezes a esta
+ * página com o nome de "14 dias grátis".
  */
 
 /** Bullets de cada plano. Texto editorial; número nenhum mora aqui. */
 const INCLUI = {
   gratis: [
     'Texto, foto, GIF, relógio, clima',
-    'Vídeo liberado nos 7 primeiros dias',
     'Aviso imediato em todas as telas',
     'E-mail se a tela cair',
+    'Deitada 16:9 ou em pé 9:16',
   ],
   loja: [
     'Tudo do Grátis, telas ilimitadas',
-    'Vídeo sem prazo, notícias, agenda, contador',
+    'Vídeo, notícias, agenda, contador',
     'PDF, Google Docs, Office, páginas da web',
     '3 pessoas na equipe · relatório de exibição',
     'Aviso agendado por data e hora',
@@ -87,12 +112,60 @@ const Precos = ({ startConversion, abrirContato }) => {
   const [intervalo, setIntervalo] = useState(ANUAL);
   const [telas, setTelas] = useState(3);
   const idSimulador = useId();
+  const refIntervalo = useRef(null);
+  const refIndicador = useRef(null);
+
+  /**
+   * Indicador deslizante das abas: uma pílula que ANDA até a aba ativa, em vez
+   * de o fundo pular de uma aba para a outra. A posição é medida da própria aba
+   * (offsetLeft/Top/Width/Height), porque as abas têm larguras diferentes e,
+   * no celular, empilham — não dá para deduzir do índice.
+   *
+   * SSR: no HTML pré-renderizado não há medida; a aba ativa pinta o próprio
+   * fundo (.precos__aba--ativa). Só depois de medir, o contêiner ganha
+   * `--deslizante`, que passa o fundo para o indicador. Sem JavaScript, o
+   * visual é o de antes.
+   */
+  useEffect(() => {
+    const grupo = refIntervalo.current;
+    const pilula = refIndicador.current;
+    if (!grupo || !pilula) return undefined;
+
+    const posicionar = () => {
+      const ativa = grupo.querySelector('.precos__aba--ativa');
+      if (!ativa) return;
+      pilula.style.width = `${ativa.offsetWidth}px`;
+      pilula.style.height = `${ativa.offsetHeight}px`;
+      pilula.style.transform = `translate3d(${ativa.offsetLeft}px, ${ativa.offsetTop}px, 0)`;
+      grupo.classList.add('precos__intervalo--deslizante');
+    };
+
+    posicionar();
+    const ro = 'ResizeObserver' in window ? new ResizeObserver(posicionar) : null;
+    ro?.observe(grupo);
+    return () => ro?.disconnect();
+  }, [intervalo]);
 
   const anual = intervalo === ANUAL;
   const degrauRede = telasEmQueRedeCompensa(intervalo);
 
   const sugestao = melhorPlanoPago(telas, intervalo);
   const planoSugerido = sugestao ? plano(sugestao.code) : null;
+
+  /**
+   * Um clique de conversão, medido e despachado.
+   *
+   * `cta_location` é DIFERENTE em cada card de propósito: 'precos_gratis',
+   * 'precos_loja', 'precos_rede'. Um único 'precos' para os três responde
+   * "quantos clicaram na seção de preços" e não responde a única pergunta que
+   * decide preço de anúncio — qual card converte. ARMADILHA: `startConversion`
+   * (App.jsx) ainda empurra um `cta_click` próprio; enquanto ele existir, o GA4
+   * conta dois cliques por botão. A correção é lá, não aqui.
+   */
+  const converter = (code, local, rotulo, quantasTelas) => {
+    track({ event: EVENT.CTA_CLICK, params: { cta_location: local, plan: code } });
+    startConversion(code, local, rotulo, quantasTelas, intervalo);
+  };
 
   /** Preço unitário e comparação, prontos para o card. */
   const linhaDePreco = (code) => {
@@ -118,18 +191,24 @@ const Precos = ({ startConversion, abrirContato }) => {
       <div className="secao__cabeca precos__cabeca">
         <span className="chip">Preços</span>
         <h2 className="h2" id="precos-titulo">
-          Você já pagou pela TV. Já paga a internet. O que falta custa menos que a tinta da
-          impressora.
+          A TV e a internet você já tem. A primeira tela é grátis, e cada tela a mais custa por mês
+          menos que um cartaz de gráfica.
         </h2>
 
-        <div className="precos__intervalo" role="group" aria-label="Forma de cobrança">
+        <div
+          ref={refIntervalo}
+          className="precos__intervalo"
+          role="group"
+          aria-label="Forma de cobrança"
+        >
+          <span ref={refIndicador} className="precos__indicador" aria-hidden="true" />
           <button
             type="button"
             className={`precos__aba${anual ? '' : ' precos__aba--ativa'}`}
             aria-pressed={!anual}
             onClick={() => setIntervalo(MENSAL)}
           >
-            Mensal
+            Mensal, sem fidelidade
           </button>
           <button
             type="button"
@@ -137,14 +216,18 @@ const Precos = ({ startConversion, abrirContato }) => {
             aria-pressed={anual}
             onClick={() => setIntervalo(ANUAL)}
           >
-            Anual — paga menos
+            Anual (12 meses), menor preço por tela
           </button>
         </div>
       </div>
 
       <div className="grid-3 precos__grade">
-        {/* ── Grátis ─────────────────────────────────────────────────────── */}
-        <article className="card precos__card">
+        {/* ── Grátis ─────────────────────────────────────────────────────────
+            Mesmo peso visual do Loja (--destaque) e botão sólido de propósito:
+            a primeira tela grátis é a oferta de entrada da casa, e um card
+            apagado com botão fantasma comunicava o contrário — "isto aqui é o
+            plano de consolação". Não é: é por onde quase todo mundo entra. */}
+        <article className="card precos__card precos__card--destaque">
           <h3 className="precos__nome">Grátis</h3>
           <p className="precos__valor">
             {reais(precoUnitario('gratis', intervalo))}{' '}
@@ -160,12 +243,14 @@ const Precos = ({ startConversion, abrirContato }) => {
           </ul>
           <button
             type="button"
-            className="btn btn--fantasma btn--largo"
-            onClick={() => startConversion('gratis', 'precos', 'Começar grátis', 1, intervalo)}
+            className="btn btn--largo"
+            onClick={() =>
+              converter('gratis', 'precos_gratis', 'Colocar minha tela grátis no ar', 1)
+            }
           >
-            Começar grátis
+            Colocar minha tela grátis no ar
           </button>
-          <p className="micro">Não é teste. Não expira. Sem cartão.</p>
+          <p className="micro">Plano permanente: não expira e não pede cartão.</p>
         </article>
 
         {/* ── Loja ───────────────────────────────────────────────────────── */}
@@ -190,12 +275,12 @@ const Precos = ({ startConversion, abrirContato }) => {
           <button
             type="button"
             className="btn btn--largo"
-            onClick={() => startConversion('loja', 'precos', 'Assinar o Loja', telas, intervalo)}
+            onClick={() => converter('loja', 'precos_loja', 'Assinar o Loja', telas)}
           >
             Assinar o Loja
           </button>
           <p className="micro">
-            Paga só pelas telas ligadas. Desligou, para de pagar no mês seguinte.
+            Você paga só pelas telas ligadas. Se desligar uma, ela sai da cobrança no mês seguinte.
           </p>
         </article>
 
@@ -220,22 +305,22 @@ const Precos = ({ startConversion, abrirContato }) => {
             type="button"
             className="btn btn--fantasma btn--largo"
             onClick={() =>
-              startConversion(
+              converter(
                 'rede',
-                'precos',
+                'precos_rede',
                 'Assinar o Rede',
                 Math.max(telas, plano('rede').minScreens),
-                intervalo,
               )
             }
           >
             Assinar o Rede
           </button>
           <p className="micro">
-            {/* Calculado: o degrau muda entre mensal e anual (ver cabeçalho). */}
-            A partir de {degrauRede} telas já sai mais barato que o Loja —{' '}
-            {reais(faturaMensal('rede', plano('rede').minScreens, intervalo))}/mês por{' '}
-            {plano('rede').minScreens} lojas.
+            {/* Calculado: o degrau muda entre mensal e anual (ver cabeçalho).
+                E o piso é de TELAS — não escreva "lojas" aqui. */}
+            A partir de {degrauRede} telas, sai mais barato que o Loja. Com{' '}
+            {plano('rede').minScreens} telas, a fatura fica em{' '}
+            {reais(faturaMensal('rede', plano('rede').minScreens, intervalo))}/mês.
           </p>
         </article>
       </div>
@@ -275,7 +360,7 @@ const Precos = ({ startConversion, abrirContato }) => {
                   : ''}
                 {anual
                   ? ` · ${reais(sugestao.total * 12)} no ano, cobrados de uma vez`
-                  : ' · sem fidelidade, cancela no painel'}
+                  : ' · no mensal, sem fidelidade: o cancelamento é pedido e vale no próximo ciclo, sem multa'}
                 .
               </p>
             </>
@@ -286,12 +371,11 @@ const Precos = ({ startConversion, abrirContato }) => {
           type="button"
           className="btn"
           onClick={() =>
-            startConversion(
+            converter(
               sugestao.code,
-              'simulador',
+              'precos_simulador',
               `Assinar o ${planoSugerido.name}`,
               telasCobradas(sugestao.code, telas),
-              intervalo,
             )
           }
         >
@@ -320,10 +404,16 @@ const Precos = ({ startConversion, abrirContato }) => {
 
         <article className="card precos__secundario">
           <div>
-            <h3 className="precos__secundario-nome">Enterprise — sob proposta</h3>
+            <h3 className="precos__secundario-nome">Enterprise (sob proposta)</h3>
+            {/* Nomear "marca própria" e "SLA", mesmo qualificados por "sob
+                escopo", é anunciar duas coisas que NÃO existem no produto —
+                quem lê guarda a palavra, não a ressalva, e chega à conversa
+                comercial achando que já estão prontas. O que é verdade é que o
+                escopo é definido caso a caso; então é isso que a página diz.
+                A guarda de CI acusa os dois termos de propósito. */}
             <p className="lead precos__secundario-texto">
-              Shopping, rede grande, administradora de condomínios. Contrato formal; marca própria e
-              SLA só sob escopo.
+              Shopping, rede grande, administradora de condomínios. Contrato formal, com escopo e
+              preço definidos numa conversa antes de qualquer proposta.
             </p>
           </div>
           <button
@@ -337,8 +427,8 @@ const Precos = ({ startConversion, abrirContato }) => {
       </div>
 
       <p className="precos__promessa">
-        Sair do Grátis nunca cobra o que passou. Você começa a pagar do dia em que liga a segunda
-        tela.
+        Sair do Grátis nunca cobra o que passou. Você começa a pagar no dia em que liga a segunda
+        tela. No mensal, cancela quando quiser.
       </p>
     </section>
   );

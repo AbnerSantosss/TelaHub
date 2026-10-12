@@ -43,30 +43,20 @@
 }
 
 /* Botão que abre o formulário de contato. É <button>, não link: não navega,
-   dispara ação na própria página. O padding vertical com margem negativa
-   compensando dá área de toque de ~45px sem empurrar a linha do parágrafo. */
+   dispara ação na própria página. Aparência, hover e sublinhado vêm de
+   .btn--texto + .btn--sublinhado (index.css); o foco é o global de 3px — o
+   de 2px que morava aqui era a única exceção da página.
+   O que fica aqui é só o encaixe DENTRO da frase: inline, e o padding vertical
+   com margem negativa compensando dá área de toque de ~45px sem empurrar a
+   linha do parágrafo. */
 .risco__pedir {
-  display: inline-block;
+  display: inline;
+  min-height: 0;
   padding: 10px 3px;
   margin: -10px -3px;
-  border: 0;
-  background: none;
-  font: inherit;
-  font-weight: 600;
-  color: var(--marca);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  cursor: pointer;
-  border-radius: var(--raio-8);
-}
-
-.risco__pedir:hover {
-  color: var(--marca-hover);
-}
-
-.risco__pedir:focus-visible {
-  outline: 2px solid var(--marca);
-  outline-offset: 2px;
+  font-size: inherit;
+  line-height: inherit;
+  text-align: left;
 }
 
 @media (max-width: 980px) {

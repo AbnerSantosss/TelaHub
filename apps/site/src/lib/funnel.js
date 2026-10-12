@@ -26,8 +26,8 @@
  * comprar. Errar para o lado de produção é o modo de falha barato: em
  * desenvolvimento o `.env.development` sobrescreve para localhost.
  */
-const DEFAULT_CHECKOUT_URL = 'https://checkout.proxserverabner.site';
-const DEFAULT_APP_URL = 'https://telahub.proxserverabner.site';
+const DEFAULT_CHECKOUT_URL = 'https://devtelahubcheckout.proxserverabner.site';
+const DEFAULT_APP_URL = 'https://devtelahubpainel.proxserverabner.site';
 /**
  * A LP passou a ter UMA chamada de backend: `POST /api/leads`, do formulário
  * "Falar com a gente". Antes o envio era um `setTimeout` que mostrava
@@ -37,7 +37,7 @@ const DEFAULT_APP_URL = 'https://telahub.proxserverabner.site';
  * ⚠️ A origem do site precisa estar em `CORS_ORIGINS` na API, senão o
  * navegador bloqueia o envio.
  */
-const DEFAULT_API_URL = 'https://telahub.proxserverabner.site/api';
+const DEFAULT_API_URL = 'https://devtelahubpainel.proxserverabner.site/api';
 
 const env = typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env : {};
 

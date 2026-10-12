@@ -16,6 +16,14 @@
   color: var(--noite-titulo);
 }
 
+/* O subtítulo enumera seis portes numa frase só; sem trava de medida ele vira
+   uma linha larguíssima no desktop e o olho não acha o começo da seguinte.
+   Mais estreito que o título de propósito: texto corrido cansa antes. */
+.ctafinal__sub {
+  max-width: 720px;
+  color: var(--noite-texto);
+}
+
 .ctafinal__provas {
   justify-content: center;
   flex-wrap: wrap;

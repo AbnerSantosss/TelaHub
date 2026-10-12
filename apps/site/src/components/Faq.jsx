@@ -27,6 +27,19 @@ import { precoPorTela } from '../data/catalogo';
  * diferente do cobrado é exposição aos arts. 30 e 37 do CDC, não erro de
  * digitação. Se o preço mudar no catálogo, esta resposta muda junto, sozinha.
  *
+ * ── Dois claims saíram daqui, e os dois voltam se ninguém ler isto ─────────
+ * 1) "Em 2 minutos" (pergunta do técnico). A página tinha TRÊS prazos para a
+ *    mesma promessa — 5 minutos no CTA final, 2 minutos aqui, 30 segundos no
+ *    herói e na comparação. Oferta contraditória se resolve a favor do
+ *    consumidor (CDC art. 30), e nenhum dos dois maiores foi medido. Ficou só
+ *    "30 segundos", que é o que se verifica: trocar um texto e salvar. Não
+ *    reintroduza prazo de instalação aqui.
+ * 2) "Cancela no painel" (pergunta da fidelidade). O botão de cancelamento no
+ *    painel ainda está sendo construído; descrever o passo antes de ele
+ *    existir é prometer o que o cliente não consegue fazer, e ele descobre no
+ *    dia de sair. O texto agora diz o caminho real — pedido pelo formulário
+ *    desta página, valendo do próximo ciclo, sem multa.
+ *
  * ── Acessibilidade e indexação ──────────────────────────────────────────────
  * O acordeão é <details>/<summary> nativo: estado, teclado e leitor de tela
  * vêm de graça e corretos, sem estado em React. Como a página é pré-renderizada
@@ -44,7 +57,7 @@ const PERGUNTAS = [
   {
     pergunta: 'Preciso de técnico?',
     resposta:
-      'Não. Você abre o navegador da TV, digita o endereço e o código. Em 2 minutos.',
+      'Não. Você abre o navegador da TV, digita o endereço e o código de 6 dígitos que aparece na tela.',
   },
   {
     pergunta: 'Serve para tela em pé (totem, vitrine)?',
@@ -54,7 +67,7 @@ const PERGUNTAS = [
   {
     pergunta: 'E se a internet cair?',
     resposta:
-      'Se a tela já estava mostrando, continua. Se o aparelho for reiniciado sem internet, não carrega — ainda não guardamos tudo na memória da TV. Preferimos dizer agora.',
+      'Se a tela já estava mostrando, continua. Se o aparelho for reiniciado sem internet, o conteúdo não carrega, porque ainda não guardamos tudo na memória da TV.',
   },
   {
     pergunta: 'Quanto custa de verdade por mês?',
@@ -64,7 +77,7 @@ const PERGUNTAS = [
   {
     pergunta: 'Tem fidelidade? Como cancelo?',
     resposta:
-      'No mensal não tem: cancela no painel e usa até o fim do mês pago. O anual sai mais barato por tela justamente porque é um compromisso de 12 meses — e nele valem os 7 dias de arrependimento do art. 49 do CDC.',
+      'No mensal não tem: você pede o cancelamento pelo formulário "Falar com a gente" desta página, usa até o fim do ciclo já pago e não é cobrado no seguinte, sem multa. O anual sai mais barato por tela porque é um compromisso de 12 meses. Nele valem os 7 dias de arrependimento do art. 49 do CDC.',
   },
   {
     pergunta: 'Meu funcionário ou o porteiro consegue mexer?',

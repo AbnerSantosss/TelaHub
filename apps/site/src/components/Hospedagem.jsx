@@ -20,6 +20,15 @@
  * descoberta quando o cliente já subiu conteúdo e depende dele. Quando a cota for
  * decidida, o caminho é publicar o número, não ressuscitar a frase.
  *
+ * DECISÃO 3 — "cancela no painel" e "cancelamento sem conversa" saíram. As duas
+ * frases descreviam autoatendimento: um botão no painel que ainda está sendo
+ * construído. Enquanto ele não existe, a página estaria prometendo um passo que o
+ * cliente não consegue dar, e ele descobriria isso no pior momento possível — o de
+ * cancelar. Oferta publicada vincula (CDC art. 30), então o texto passou a dizer o
+ * que hoje é verdade: no mensal o cancelamento é PEDIDO e vale a partir do próximo
+ * ciclo, sem multa. O canal do pedido é o formulário desta página, que existe e
+ * responde. Quando o botão do painel subir, a frase antiga volta — e não antes.
+ *
  * Os bilhetes laranja do mockup (.pend) eram recado interno de pendência. Não são
  * conteúdo e não existem aqui.
  */
@@ -29,20 +38,20 @@ import './Hospedagem.css';
 const ITENS = [
   {
     titulo: 'Preço em real, fixo.',
-    texto: 'Não muda com o dólar. Sem taxa por vídeo, por tela em pé, por usuário.',
+    texto: 'Não muda com o dólar. Não há taxa extra por vídeo, por tela em pé ou por usuário.',
   },
   {
-    titulo: 'Mensal sem fidelidade, sem multa.',
+    titulo: 'Mensal sem fidelidade e sem multa.',
     texto:
-      'Cancela no painel. Nunca cobramos tela que passou. O anual é um compromisso de 12 meses — é o que compra o desconto.',
+      'É só pedir o cancelamento pelo formulário desta página: ele vale a partir do próximo ciclo, sem multa. Nunca cobramos tela que passou. O anual tem compromisso de 12 meses, e é isso que garante o desconto.',
   },
   {
     titulo: 'Vídeo e foto guardados com a gente.',
     texto: 'Até 50 MB por arquivo.',
   },
   {
-    titulo: 'Só você vê o seu.',
-    texto: 'Cada negócio tem seu espaço separado.',
+    titulo: 'Cada negócio no seu espaço.',
+    texto: 'Só a sua conta vê o seu conteúdo.',
   },
 ];
 
@@ -55,13 +64,13 @@ export default function Hospedagem() {
     >
       <div className="split">
         <div className="secao__cabeca reveal">
-          <span className="chip">Nossa estrutura, sua vantagem</span>
+          <span className="chip">Onde o sistema roda</span>
           <h2 id="hospedagem-titulo" className="h2">
-            Servidor próprio. Isso vira preço em real e cancelamento sem conversa.
+            Temos servidor próprio. Por isso o preço é em real e o mensal cancela sem multa.
           </h2>
           <p className="lead">
-            A maioria dos sistemas cobra em dólar e limita o espaço. O nosso roda em estrutura
-            própria — e passa a diferença para você.
+            A maioria dos sistemas cobra em dólar e limita o espaço. O TelaHub roda em estrutura
+            própria, e essa economia vai para o seu preço.
           </p>
         </div>
 

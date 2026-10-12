@@ -11,6 +11,99 @@
   padding: 88px var(--gutter) 80px;
   background: var(--papel-2);
   border-bottom: 1px solid var(--borda-2);
+  /* Contexto próprio: o fundo (.hero__fundo, z-index -1) fica acima do
+     --papel-2 e abaixo do texto. `clip` e não `hidden`: corta a luz que
+     passaria da borda sem criar um contêiner de rolagem. */
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  overflow: clip;
+}
+
+/* ── Fundo: grade + luz ──────────────────────────────────────────────────── */
+
+/* A grade é CSS e existe no HTML pré-renderizado; o canvas (HeroFundo.jsx) só
+   acende trechos dela em --marca. A máscara apaga a grade embaixo e à
+   esquerda, onde mora o texto: a textura aparece no respiro, não atrás da
+   headline. --grade-passo precisa bater com PASSO em HeroFundo.jsx. */
+.hero__fundo {
+  --grade-passo: 40px;
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, var(--grade-linha) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grade-linha) 1px, transparent 1px);
+  background-size: var(--grade-passo) var(--grade-passo);
+  background-position: 0 0;
+  -webkit-mask-image: radial-gradient(ellipse 85% 90% at 72% 30%, #000 25%, transparent 80%);
+  mask-image: radial-gradient(ellipse 85% 90% at 72% 30%, #000 25%, transparent 80%);
+}
+
+/* Um halo parado de --marca atrás da vitrine: dá profundidade mesmo sem o
+   canvas (sem JS, movimento reduzido). */
+.hero__fundo::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(40% 55% at 76% 42%, var(--brilho-marca), transparent 70%);
+}
+
+.hero__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 1.2s ease;
+}
+
+.hero__canvas--pronto {
+  opacity: 1;
+}
+
+/* ── Entrada em cascata ──────────────────────────────────────────────────── */
+
+/* CSS puro, sem JavaScript: a animação roda sobre o HTML pré-renderizado e
+   termina visível (fill-mode both). Atrasos curtos — o maior é 0,32s — para
+   não empurrar o LCP (a headline entra em 0,08s). Movimento reduzido desliga
+   tudo (index.css). */
+.hero__texto > *,
+.hero__vitrine {
+  animation: hero-subir 0.7s var(--ease-saida) both;
+}
+
+.hero__texto > :nth-child(2) {
+  animation-delay: 0.08s;
+}
+
+.hero__texto > :nth-child(3) {
+  animation-delay: 0.16s;
+}
+
+.hero__texto > :nth-child(4) {
+  animation-delay: 0.24s;
+}
+
+.hero__texto > :nth-child(5) {
+  animation-delay: 0.32s;
+}
+
+.hero__vitrine {
+  animation-duration: 0.9s;
+  animation-delay: 0.2s;
+}
+
+@keyframes hero-subir {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 16px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 .hero__texto {
@@ -34,24 +127,7 @@
   gap: 20px;
 }
 
-.hero__secundario {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  min-height: 44px;
-  padding: 0 4px;
-  border: none;
-  background: none;
-  font-weight: 600;
-  font-size: 1rem;
-  color: var(--marca);
-  cursor: pointer;
-}
-
-.hero__secundario:hover {
-  color: var(--marca-hover);
-  text-decoration: underline;
-}
+/* .hero__secundario: aparência e hover vêm de .btn--texto (index.css). */
 
 .hero__vitrine {
   display: flex;
@@ -91,7 +167,7 @@
   background: var(--noite);
   border-radius: var(--raio-12);
   padding: 10px;
-  box-shadow: 0 24px 60px rgba(7, 20, 38, 0.25);
+  box-shadow: var(--sombra-tv);
 }
 
 .tv--pe {
@@ -99,7 +175,7 @@
 }
 
 .tv__quadro {
-  border-radius: 6px;
+  border-radius: var(--raio-6);
   background: #0a1223;
   color: #ffffff;
   overflow: hidden;
@@ -159,7 +235,7 @@
 
 .tv__bloco {
   background: rgba(255, 255, 255, 0.08);
-  border-radius: 6px;
+  border-radius: var(--raio-6);
   padding: 8px;
   text-align: center;
   display: flex;
@@ -181,7 +257,7 @@
 .tv__rodape {
   margin-top: auto;
   background: rgba(255, 255, 255, 0.08);
-  border-radius: 4px;
+  border-radius: var(--raio-4);
   padding: 6px;
   font-size: 0.6875rem;
   font-weight: 700;
@@ -236,9 +312,24 @@
     width: 100%;
   }
 
+  /* A linha de confiança tem quatro fatos. Em .trust (flex wrap) ela quebrava
+     onde coubesse: em 390px sobrava um item sozinho na terceira linha e o
+     separador "·" abria a linha seguinte, como se fosse marcador de lista.
+     Duas linhas passam a ser DESENHO, não sobra: grade 2×2, separadores
+     escondidos (são decorativos e já têm aria-hidden no JSX). */
+  .hero__trust {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px 14px;
+  }
+
+  .hero__trust span[aria-hidden='true'] {
+    display: none;
+  }
+
   .tv {
     padding: 6px;
-    border-radius: 10px;
+    border-radius: var(--raio-8);
   }
 
   .tv__quadro--deitada {

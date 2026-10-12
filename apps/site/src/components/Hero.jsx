@@ -1,18 +1,20 @@
+import { EVENT, track } from '../lib/tracking';
+import HeroFundo from './HeroFundo';
 import './Hero.css';
 
 /**
  * Herói da landing v2.
  *
  * ── A headline é uma dor invisível, não um recurso ──────────────────────────
- * "Sua TV está ligada. E não está dizendo nada." é a headline A recomendada no
- * plano comercial v2 (§4). Ela funciona porque a pessoa não sabe que tem o
- * problema: a TV da recepção está lá, ligada na novela, e ninguém a contabiliza
- * como custo. Headline de recurso ("gerencie suas telas") só converte quem já
- * procura a categoria — e quem já procura é minoria neste mercado.
+ * "A TV da portaria está ligada. O aviso da assembleia ainda está no papel."
+ * Ela funciona porque a pessoa não sabe que tem o problema: a TV está lá,
+ * ligada na novela, e ninguém a contabiliza como custo. Headline de recurso
+ * ("gerencie suas telas") só converte quem já procura a categoria — e quem já
+ * procura é minoria neste mercado.
  *
  * ── Por que o produto é apresentado por PORTE, não por ramo ─────────────────
- * O primeiro parágrafo cita portaria, recepção, sala de espera e balcão nessa
- * ordem, de propósito. A pesquisa de palavra-chave apontava para comida
+ * O subtítulo cita condomínio, escritório, clínica, loja, academia e lanchonete
+ * nessa ordem, de propósito. A pesquisa de palavra-chave apontava para comida
  * ("cardápio digital", 10–20 mil buscas/mês), e o dono decidiu o contrário: o
  * termo de comida é dominado por QR/delivery, e abrir a página com cardápio faz
  * síndico, gerente de escritório e dono de clínica concluírem "não é pra mim"
@@ -25,48 +27,68 @@ import './Hero.css';
  * produto é a mentira mais fácil de cometer numa landing — as capturas REAIS
  * aparecem logo abaixo, em "Como funciona" e "Dois formatos".
  *
- * ── O que foi retirado do mockup ────────────────────────────────────────────
- * O artboard trazia um link secundário "Ver como funciona (60 s)". O vídeo de
- * 60 s ainda não existe (é a US-V-01, em Remotion, não iniciada). Prometer
- * duração de um vídeo que não foi gravado é o mesmo defeito de "14 dias
- * grátis", que já voltou quatro vezes a esta página. O link ficou, sem o "(60
- * s)", levando à seção que mostra os três passos com a TV real.
+ * ── UM prazo só na página inteira: 30 segundos ──────────────────────────────
+ * A página dizia "5 minutos" no CTA final, "2 minutos" no FAQ e "30 segundos"
+ * aqui e na comparação. Três prazos diferentes para a mesma promessa é oferta
+ * contraditória — e o art. 30 do CDC faz valer a que favorece o consumidor —,
+ * além de nenhum dos dois maiores ter sido medido. Sobrou o único verificável:
+ * trocar um texto e salvar leva 30 segundos. É o único prazo que pode aparecer
+ * em qualquer lugar desta página.
  *
- * ── "Sem fidelidade" ganhou "no mensal", e não é preciosismo ────────────────
+ * ── O ícone de play saiu do botão secundário ────────────────────────────────
+ * Ele era um círculo com o triângulo de reprodução, e não existe vídeo nenhum
+ * para reproduzir: o botão apenas rola a página até os três passos. Ícone que
+ * promete um artefato inexistente é a mesma família do "(60 s)" que já saiu
+ * daqui e do "14 dias grátis" que voltou quatro vezes a esta página. Virou uma
+ * seta para baixo, que é o que o botão de fato faz.
+ *
+ * ── "Sem fidelidade" ganhou "Mensal", e não é preciosismo ───────────────────
  * O selo dizia "Sem fidelidade" seco, herdado de quando só existia plano
  * mensal. Em 31/08 o ANUAL virou a oferta principal e vem marcado por padrão na
  * grade — e ele é, por definição, um compromisso de 12 meses. Um selo absoluto
  * ao lado de um contrato anual é a frase que o cliente cita ao pedir o dinheiro
  * de volta (CDC arts. 30 e 37), e o checkout já corrigia isso sozinho trocando
  * a garantia por "Contratação de 12 meses" — ou seja, as duas superfícies
- * diziam coisas diferentes sobre o mesmo contrato. A regra vale para as cinco
- * ocorrências da página (aqui, `CtaFinal`, `RiscoZero`, `Hospedagem` e o FAQ):
- * o mensal continua sem fidelidade, e o anual é apresentado como o que é.
+ * diziam coisas diferentes sobre o mesmo contrato. A regra vale para todas as
+ * ocorrências da página (aqui, CtaFinal, RiscoZero, Precos, Hospedagem e o
+ * FAQ): o mensal continua sem fidelidade, e o anual é apresentado como o que é.
+ *
+ * ── Medição: o track daqui é o CTA_CLICK do herói ───────────────────────────
+ * cta_location vale 'hero' e não se repete em nenhuma outra seção — é o que
+ * permite responder "qual botão trouxe o cadastro". ARMADILHA: startConversion
+ * (em App.jsx) ainda empurra um cta_click próprio; enquanto os dois existirem,
+ * o GA4 conta o clique do herói duas vezes. A correção é do lado do App.jsx —
+ * quem manda no nome e no local do evento é o botão que foi clicado.
  */
 const Hero = ({ startConversion, scrollToSection }) => (
   <header className="hero" id="topo">
+    {/* Grade com luz em --marca. Decorativa (aria-hidden) e atrás de tudo. */}
+    <HeroFundo />
+
     <div className="hero__texto">
-      <span className="chip">Avisos, ofertas, agenda e informação — na TV que você já tem</span>
+      <span className="chip">Avisos, ofertas, agenda e informação na TV que você já tem</span>
 
       <h1 className="h1">
-        Sua TV está ligada. <span className="hero__grito">E não está dizendo nada.</span>
+        A TV da portaria está ligada.{' '}
+        <span className="hero__grito">O aviso da assembleia ainda está no papel.</span>
       </h1>
 
       <p className="lead hero__lead">
-        Na portaria do condomínio, na recepção da empresa, na sala de espera, no balcão da loja: a
-        tela mostra novela ou o menu da fábrica enquanto quem passa decide o que fazer. Coloque nela
-        o seu aviso, sua oferta, sua agenda — e troque do celular quando quiser.
+        Serve para condomínio, escritório, clínica, loja, academia ou lanchonete. A TV que já está na
+        parede passa a mostrar seus avisos, ofertas e agenda, e você troca o conteúdo pelo celular em
+        30 segundos. Não precisa de técnico nem de pen-drive, e não tem aparelho para comprar.
       </p>
 
       <div className="hero__acoes">
         <button
           type="button"
           className="btn btn--grande"
-          onClick={() =>
-            startConversion('gratis', 'hero', 'Colocar minha 1ª tela no ar — grátis')
-          }
+          onClick={() => {
+            track({ event: EVENT.CTA_CLICK, params: { cta_location: 'hero', plan: 'gratis' } });
+            startConversion('gratis', 'hero', 'Colocar minha 1ª tela no ar grátis');
+          }}
         >
-          Colocar minha 1ª tela no ar — grátis
+          Colocar minha 1ª tela no ar grátis
           <svg
             width="18"
             height="18"
@@ -84,9 +106,12 @@ const Hero = ({ startConversion, scrollToSection }) => (
 
         <button
           type="button"
-          className="hero__secundario"
+          className="btn btn--texto hero__secundario"
           onClick={() => scrollToSection('#como-funciona', 'como-funciona')}
         >
+          {/* Seta para baixo: o botão ROLA a página até os passos. O ícone
+              anterior era um play dentro de um círculo, e não há vídeo nenhum
+              nesta página para ele reproduzir. */}
           <svg
             width="18"
             height="18"
@@ -98,19 +123,21 @@ const Hero = ({ startConversion, scrollToSection }) => (
             strokeLinejoin="round"
             aria-hidden="true"
           >
-            <circle cx="12" cy="12" r="9" />
-            <path d="M10 8l6 4-6 4z" />
+            <path d="M12 5v14M6 13l6 6 6-6" />
           </svg>
-          Ver como funciona
+          <span className="btn__rotulo">Ver os 3 passos</span>
         </button>
       </div>
 
-      <p className="trust">
+      {/* Quatro fatos, dois por linha no celular (ver Hero.css): em linha
+          corrida a quebra deixava um item órfão embaixo e o separador abria a
+          linha seguinte. Duas linhas aqui são decisão de layout, não acaso. */}
+      <p className="trust hero__trust">
         <span>Sem cartão</span>
         <span aria-hidden="true">·</span>
         <span>Sem técnico</span>
         <span aria-hidden="true">·</span>
-        <span>Sem fidelidade no mensal</span>
+        <span>Mensal sem fidelidade</span>
         <span aria-hidden="true">·</span>
         <span>Deitada ou em pé</span>
       </p>
@@ -143,7 +170,7 @@ const Hero = ({ startConversion, scrollToSection }) => (
               </div>
             </div>
           </div>
-          <figcaption className="cap">Deitada 16:9 — recepção da empresa</figcaption>
+          <figcaption className="cap">TV deitada (16:9) na recepção da empresa</figcaption>
         </figure>
 
         {/* Em pé 9:16 — portaria de condomínio */}
@@ -152,12 +179,12 @@ const Hero = ({ startConversion, scrollToSection }) => (
             <div className="tv__quadro tv__quadro--pe">
               <span className="tv__titulo">Condomínio Jardins</span>
               <span className="tv__linha">Assembleia: quinta, 19h30, salão de festas.</span>
-              <span className="tv__destaque">Elevador: sexta, 8h–12h.</span>
+              <span className="tv__destaque">Elevador: sexta, das 8h às 12h.</span>
               <span className="tv__ok">Coleta seletiva: ter e sex.</span>
               <span className="tv__rodape">09:41 · 26°</span>
             </div>
           </div>
-          <figcaption className="cap">Em pé 9:16 — portaria</figcaption>
+          <figcaption className="cap">TV em pé (9:16) na portaria</figcaption>
         </figure>
       </div>
 

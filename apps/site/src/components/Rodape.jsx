@@ -1,32 +1,44 @@
 import './Rodape.css';
 
 /**
- * RODAPÉ — uma linha de identificação e quatro atalhos. Nada mais.
+ * RODAPÉ — identificação do fornecedor, canal do titular e quatro atalhos.
  *
- * ── Duas omissões deliberadas. Nenhuma delas é esquecimento ─────────────────
+ * ── O CNPJ voltou, e por que ele é obrigatório aqui ─────────────────────────
+ * O rodapé anterior omitia o CNPJ porque o número não estava confirmado, e
+ * omitir era melhor do que inventar. O número agora existe e é público
+ * (74.191.667/0001-55), então volta ao lugar de onde nunca deveria ter saído: o
+ * art. 6º do CDC dá ao consumidor o direito de saber QUEM é o fornecedor antes
+ * de contratar, e uma página que cobra sem se identificar falha nisso mesmo
+ * quando todo o resto é verdade.
  *
- * 1) CNPJ. O rascunho aprovado trazia "TelaHub · CNPJ [pendente] · Feito no
- *    Brasil...". O trecho inteiro do CNPJ saiu. As três saídas possíveis eram:
- *    inventar um número (falsidade em documento de identificação empresarial,
- *    e o cliente confere), escrever "CNPJ pendente" (anuncia ao visitante que
- *    quem vai cobrar dele não tem inscrição publicada — o oposto do que o
- *    rodapé serve para fazer) ou omitir até existir. Omitir é a única que não
- *    mente nem assusta. Quando houver número, ele volta exatamente aqui, entre
- *    "TelaHub" e "Feito no Brasil".
+ * ── Os dois marcadores entre colchetes são propositais ──────────────────────
+ * [RAZÃO SOCIAL] e [ENDEREÇO] ficam à vista até o dono preencher. A alternativa
+ * seria inventar (falsidade em identificação empresarial — e o cliente confere
+ * no CNPJ público) ou omitir (volta o defeito do art. 6º). Marcador visível é
+ * a única saída que não mente e que ninguém esquece: ele incomoda a cada
+ * abertura da página, que é exatamente o efeito desejado. NÃO preencha por
+ * conta própria e NÃO apague o marcador — quem completa é o dono, com o dado
+ * do contrato social.
  *
- * 2) Privacidade e Termos de uso. Essas páginas AINDA NÃO EXISTEM. No rodapé
- *    antigo elas eram <a href="#"> com preventDefault: link que parece link,
- *    tem cursor de link, e não leva a lugar nenhum. Um link morto num rodapé
- *    é pior que a ausência do documento, porque simula conformidade — o
- *    visitante clica, nada acontece, e a impressão que fica é de descuido
- *    exatamente onde a página promete não ter letra miúda. Aqui os dois viram
- *    TEXTO, não link, marcados como "em preparação". Fica honesto e fica
- *    visível: como o site captura lead e usa cookie de campanha, a política de
- *    privacidade é exigência de LGPD, e um aviso à vista é lembrete
- *    permanente da pendência. No dia em que as páginas subirem, este bloco
- *    vira dois <a href> de verdade e a observação some.
+ * ── O canal do titular (LGPD art. 18) não é enfeite ─────────────────────────
+ * Esta página coleta nome, e-mail, empresa e telefone no formulário e usa
+ * cookie de campanha. O art. 18 dá ao titular o direito de confirmar,
+ * acessar, corrigir e eliminar esse dado — e o direito só é exercível se
+ * houver um endereço para pedir. Sem canal publicado, a coleta continua
+ * acontecendo e o titular não tem a quem recorrer. O marcador
+ * [E-MAIL DO ENCARREGADO] segue a mesma regra dos outros dois: entra caixa que
+ * alguém de fato lê, nunca um endereço criado só para não deixar o campo
+ * vazio — foi assim que o `comercial@` inventado sobreviveu meses no projeto.
  *
- * ── Os dois atalhos que ficam são links reais ───────────────────────────────
+ * ── Privacidade e Termos viraram link de verdade ────────────────────────────
+ * Eram TEXTO, marcados "em preparação", porque as páginas não existiam — e
+ * link morto num rodapé é pior que a ausência do documento, porque simula
+ * conformidade. As páginas agora existem em /privacidade e /termos (são rotas
+ * pré-renderizadas do próprio site), então os dois voltam a ser <a href>. Se
+ * um dia essas rotas saírem, o certo é voltar ao rótulo honesto — nunca deixar
+ * href="#".
+ *
+ * ── Os dois atalhos de âncora ───────────────────────────────────────────────
  * "O que ainda não fazemos" leva à FAQ (#duvidas), onde estão as limitações
  * assumidas — inclusive a da tela reiniciada sem internet. "Para o seu
  * negócio" leva às cenas por porte (#segmentos). Ambas as âncoras existem
@@ -36,20 +48,40 @@ import './Rodape.css';
 export default function Rodape({ scrollToSection }) {
   return (
     <footer className="secao secao--compacta rodape">
-      <p className="rodape__linha">
-        TelaHub · Feito no Brasil, cobrado em real, sem letra miúda.
-      </p>
+      <div className="rodape__identidade">
+        <p className="rodape__linha">
+          <strong>TelaHub</strong> · CNPJ 74.191.667/0001-55 · Feito no Brasil e cobrado em
+          real.
+        </p>
+
+        {/* Marcadores para o dono preencher. Ver o cabeçalho antes de mexer. */}
+        <p className="rodape__linha rodape__marcador">
+          Razão social: [RAZÃO SOCIAL] · Endereço: [ENDEREÇO]
+        </p>
+
+        <p className="rodape__linha rodape__marcador">
+          Pedidos sobre dados pessoais, como confirmação, acesso, correção ou exclusão (LGPD, art.
+          18):{' '}
+          [E-MAIL DO ENCARREGADO]
+        </p>
+      </div>
 
       <nav className="rodape__nav" aria-label="Rodapé">
         <ul className="rodape__links">
-          {/* Texto, não link — as páginas não existem. Ver o cabeçalho. */}
-          <li className="rodape__pendente">
-            Privacidade e Termos de uso: em preparação
+          <li>
+            <a className="btn btn--texto rodape__link" href="/privacidade">
+              Privacidade
+            </a>
+          </li>
+          <li>
+            <a className="btn btn--texto rodape__link" href="/termos">
+              Termos de uso
+            </a>
           </li>
           <li>
             <button
               type="button"
-              className="rodape__link"
+              className="btn btn--texto rodape__link"
               onClick={() => scrollToSection('#duvidas', 'duvidas')}
             >
               O que ainda não fazemos
@@ -58,7 +90,7 @@ export default function Rodape({ scrollToSection }) {
           <li>
             <button
               type="button"
-              className="rodape__link"
+              className="btn btn--texto rodape__link"
               onClick={() => scrollToSection('#segmentos', 'segmentos')}
             >
               Para o seu negócio

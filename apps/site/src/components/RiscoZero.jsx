@@ -30,6 +30,18 @@ import './RiscoZero.css';
  * página. Já "grátis para sempre" é compromisso comercial assumido pela casa e
  * está espelhado no catálogo de planos — se um dia o plano de entrada passar a
  * cobrar, esta linha cai junto.
+ *
+ * ── "Cancela no painel" saiu, e a razão é a mesma do WhatsApp acima ─────────
+ * A lista dizia "cancela no painel". A rota e o botão de cancelamento ainda
+ * estão sendo construídos — ou seja, a seção que existe para derrubar a
+ * desconfiança descrevia um passo que o cliente não consegue dar, e ele só
+ * descobriria isso no dia em que quisesse sair. É oferta vinculante (CDC art.
+ * 30) sobre funcionalidade inexistente, exatamente o defeito do "cache offline
+ * failsafe" que a wiki registra como 1ª reincidência. A frase foi trocada pelo
+ * que é verdade hoje: no mensal o cancelamento é PEDIDO, por um canal que
+ * existe e responde (o mesmo formulário desta página), e vale a partir do
+ * próximo ciclo, sem multa. Quando o botão existir no painel, a frase volta —
+ * e não antes.
  */
 
 /* Ícone único da lista. Traço 2px, herda a cor por currentColor — o mesmo
@@ -54,9 +66,9 @@ function IconeCheck() {
 }
 
 const GARANTIAS = [
-  'A primeira tela é grátis para sempre. Não é teste que vira boleto.',
-  'No mensal, sem fidelidade, sem multa e sem carência: cancela no painel. O anual é de 12 meses, e é isso que baixa o preço por tela.',
-  'Nunca cobramos tela que passou. Ligou hoje, paga de hoje em diante.',
+  'A primeira tela é grátis para sempre e não pede cartão. Ela não vira cobrança depois de um prazo.',
+  'O mensal não tem fidelidade, multa nem carência. Você pede o cancelamento pelo formulário "Falar com a gente" desta página e ele vale a partir do próximo ciclo. O anual é de 12 meses, e é isso que baixa o preço por tela.',
+  'Nunca cobramos tela que passou. Se ligou hoje, paga de hoje em diante.',
   '7 dias para desistir de plano pago e receber tudo de volta (art. 49 do CDC).',
 ];
 
@@ -86,13 +98,13 @@ export default function RiscoZero({ abrirContato }) {
           <li className="risco__item">
             <IconeCheck />
             <span>
-              Nós montamos sua primeira tela com você — é só pedir.{' '}
+              Se quiser, montamos sua primeira tela junto com você.{' '}
               <button
                 type="button"
-                className="risco__pedir"
+                className="btn btn--texto btn--sublinhado risco__pedir"
                 onClick={abrirContato}
               >
-                Quero ajuda para montar a primeira tela
+                <span className="btn__rotulo">Quero ajuda para montar a primeira tela</span>
               </button>
             </span>
           </li>

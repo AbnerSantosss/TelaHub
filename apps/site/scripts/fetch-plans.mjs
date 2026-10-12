@@ -47,7 +47,7 @@ import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const SNAPSHOT = path.resolve(__dirname, '../src/data/planos.json');
 
-const API_BASE = (process.env.PLANS_API_URL || 'https://telahub.proxserverabner.site/api').replace(/\/+$/, '');
+const API_BASE = (process.env.PLANS_API_URL || 'https://devtelahubpainel.proxserverabner.site/api').replace(/\/+$/, '');
 const TIMEOUT_MS = Number(process.env.PLANS_API_TIMEOUT_MS || 10000);
 
 /** Códigos que a página de preços precisa encontrar para renderizar. */

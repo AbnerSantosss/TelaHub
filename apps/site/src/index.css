@@ -66,9 +66,51 @@
   --raio-16: 16px;
   --raio-24: 24px;
 
+  /* Raios pequenos: só para peças DENTRO das TVs ilustradas do herói. */
+  --raio-4: 4px;
+  --raio-6: 6px;
+
   --sombra-card: 0 10px 30px rgba(7, 20, 38, 0.08);
   --sombra-shot: 0 24px 60px rgba(7, 20, 38, 0.18);
   --sombra-btn: 0 8px 24px rgba(3, 105, 161, 0.22);
+  /* Botão apertado: a sombra encolhe junto com o scale, senão o "afundar" não
+     se lê — o botão diminui mas continua flutuando na mesma altura. */
+  --sombra-btn-press: 0 3px 10px rgba(3, 105, 161, 0.26);
+  --sombra-btn-luz: 0 8px 24px rgba(56, 189, 248, 0.25);
+  --sombra-tv: 0 24px 60px rgba(7, 20, 38, 0.25);
+  --sombra-navbar: 0 6px 20px rgba(7, 20, 38, 0.07);
+  --sombra-flutuante: 0 18px 46px rgba(7, 20, 38, 0.18);
+  --sombra-modal: 0 30px 70px rgba(7, 20, 38, 0.3);
+  /* Halo do plano em destaque: um anel fino e uma luz difusa, as duas em
+     --marca. É brilho, não cor de texto — não entra na conta de contraste. */
+  --sombra-glow: 0 0 0 4px rgba(3, 105, 161, 0.1), 0 18px 48px -12px rgba(3, 105, 161, 0.38);
+  --sombra-glow-forte: 0 0 0 5px rgba(3, 105, 161, 0.14), 0 22px 56px -12px rgba(3, 105, 161, 0.5);
+
+  /* Brilhos decorativos (fundo do herói, spotlight dos cartões, aurora das
+     faixas escuras, reflexo dos botões). Nenhum deles carrega texto. */
+  --brilho-marca: rgba(3, 105, 161, 0.09);
+  --brilho-luz: rgba(56, 189, 248, 0.14);
+  --brilho-branco: rgba(255, 255, 255, 0.28);
+  --aurora-1: rgba(56, 189, 248, 0.16);
+  --aurora-2: rgba(3, 105, 161, 0.32);
+  /* Linhas da grade do herói, sobre --papel-2. */
+  --grade-linha: rgba(10, 18, 35, 0.055);
+
+  /* Hover da luz sobre --noite (sky-300). --noite sobre ela = 11,6:1. */
+  --luz-2: #7dd3fc;
+  --luz-fundo: rgba(56, 189, 248, 0.1);
+  /* Borda translúcida sobre --noite (cartões de Cenas, chip escuro). */
+  --noite-borda: rgba(168, 188, 214, 0.18);
+  --noite-borda-2: rgba(168, 188, 214, 0.28);
+
+  /* Véu atrás do modal e da gaveta do menu; anel de foco de campo. */
+  --veu: rgba(7, 20, 38, 0.55);
+  --anel-marca: 0 0 0 3px rgba(3, 105, 161, 0.18);
+  --ok-fundo: rgba(15, 122, 90, 0.12);
+
+  /* Curva de saída usada nas entradas e na gaveta: rápida no começo, macia no
+     fim — o elemento "chega" em vez de parar seco. */
+  --ease-saida: cubic-bezier(0.22, 1, 0.36, 1);
 
   /* Uma família só. O painel importava dez; §3.5 do plano corta para esta. */
   --fonte: 'Geist', 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -175,6 +217,47 @@ button {
 .secao--noite {
   background: var(--noite);
   color: var(--noite-titulo);
+  /* A aurora (::before) mora num contexto de empilhamento próprio, atrás do
+     conteúdo e à frente do fundo. `overflow: hidden` impede que ela vaze para
+     as seções vizinhas. */
+  isolation: isolate;
+  overflow: hidden;
+}
+
+/* Aurora: duas manchas de --luz/--marca que derivam devagar sobre --noite.
+   Só transform/opacity animam. A animação fica PAUSADA por padrão e só roda
+   quando `src/lib/spotlight.js` marca a faixa como visível (.is-visivel) — faixa
+   fora da tela não gasta quadro. Sem JavaScript, a aurora aparece parada. */
+.secao--noite::before {
+  content: '';
+  position: absolute;
+  inset: -40% -20%;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(38% 42% at 22% 30%, var(--aurora-2), transparent 70%),
+    radial-gradient(34% 38% at 78% 72%, var(--aurora-1), transparent 70%),
+    radial-gradient(26% 30% at 60% 18%, var(--aurora-1), transparent 70%);
+  opacity: 0.9;
+  will-change: transform;
+  animation: aurora 26s ease-in-out infinite alternate;
+  animation-play-state: paused;
+}
+
+.secao--noite.is-visivel::before {
+  animation-play-state: running;
+}
+
+@keyframes aurora {
+  0% {
+    transform: translate3d(-6%, -3%, 0) rotate(0deg) scale(1);
+  }
+  50% {
+    transform: translate3d(4%, 4%, 0) rotate(6deg) scale(1.08);
+  }
+  100% {
+    transform: translate3d(7%, -2%, 0) rotate(-4deg) scale(1.02);
+  }
 }
 
 .secao--noite .h2,
@@ -254,7 +337,8 @@ button {
   border-radius: 99px;
   border: 1px solid var(--borda);
   background: var(--papel-2);
-  font-size: 0.6875rem;
+  /* 12px: o piso. Estava em 11px — abaixo do próprio mínimo desta regra. */
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -263,14 +347,29 @@ button {
 }
 
 .secao--noite .chip {
-  background: rgba(56, 189, 248, 0.1);
-  border-color: rgba(168, 188, 214, 0.28);
+  background: var(--luz-fundo);
+  border-color: var(--noite-borda-2);
   color: var(--luz);
 }
 
 /* ── Botões ──────────────────────────────────────────────────────────────── */
 
+/* Três camadas, todas só com transform/opacity:
+     ::before — o brilho (shimmer) que atravessa o botão UMA vez no hover;
+     ::after  — o reflexo que segue o cursor, posicionado por --mx/--my (que
+                `src/lib/spotlight.js` escreve no botão sob o ponteiro);
+     :active  — o aperto: scale 0.97 e a sombra encolhe junto.
+   `isolation: isolate` cria o contexto em que as duas camadas (z-index -1)
+   ficam ACIMA do fundo do botão e ABAIXO do texto — o rótulo nunca é coberto.
+   Shimmer e reflexo só existem com mouse (`hover: hover` + `pointer: fine`):
+   no toque não há hover, e um brilho preso depois do toque parece defeito.
+   O aperto vale em qualquer aparelho. */
 .btn {
+  --mx: 50%;
+  --my: 50%;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -287,7 +386,46 @@ button {
   color: #ffffff;
   box-shadow: var(--sombra-btn);
   cursor: pointer;
-  transition: background-color 0.16s ease, transform 0.16s ease;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background-color 0.16s ease,
+    border-color 0.16s ease,
+    color 0.16s ease,
+    box-shadow 0.2s ease,
+    transform 0.16s var(--ease-saida);
+}
+
+.btn::before,
+.btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  opacity: 0;
+}
+
+/* A faixa do shimmer é mais larga que o botão e começa fora dele, à esquerda. */
+.btn::before {
+  inset: 0 auto 0 -60%;
+  width: 60%;
+  background: linear-gradient(
+    105deg,
+    transparent 0%,
+    var(--btn-brilho, var(--brilho-branco)) 50%,
+    transparent 100%
+  );
+  transform: translateX(0) skewX(-18deg);
+}
+
+.btn::after {
+  background: radial-gradient(
+    140px circle at var(--mx) var(--my),
+    var(--btn-reflexo, rgba(255, 255, 255, 0.24)),
+    transparent 65%
+  );
+  transition: opacity 0.25s ease;
 }
 
 .btn:hover {
@@ -296,28 +434,62 @@ button {
   text-decoration: none;
 }
 
+@media (hover: hover) and (pointer: fine) {
+  .btn:hover {
+    transform: translateY(-1px);
+  }
+
+  .btn:hover::before {
+    opacity: 1;
+    transform: translateX(330%) skewX(-18deg);
+    transition: transform 0.75s var(--ease-saida), opacity 0.2s ease;
+  }
+
+  .btn:hover::after {
+    opacity: 1;
+  }
+}
+
 .btn:active {
-  transform: translateY(1px);
+  transform: scale(0.97);
+  box-shadow: var(--sombra-btn-press);
+  transition-duration: 0.08s;
 }
 
 .btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  transform: none;
+}
+
+.btn:disabled::before,
+.btn:disabled::after {
+  display: none;
 }
 
 /* Sobre fundo --noite: o azul da marca desaparece no escuro, a luz não. */
 .btn--luz {
+  --btn-brilho: rgba(255, 255, 255, 0.55);
+  --btn-reflexo: rgba(255, 255, 255, 0.4);
   background: var(--luz);
   color: var(--noite);
-  box-shadow: 0 8px 24px rgba(56, 189, 248, 0.25);
+  box-shadow: var(--sombra-btn-luz);
 }
 
 .btn--luz:hover {
-  background: #7dd3fc;
+  background: var(--luz-2);
   color: var(--noite);
 }
 
+.btn--luz:active {
+  box-shadow: 0 3px 10px rgba(56, 189, 248, 0.3);
+}
+
+/* Fantasma: o brilho e o reflexo são da marca, em baixa opacidade — branco
+   sobre papel branco não apareceria. */
 .btn--fantasma {
+  --btn-brilho: var(--brilho-marca);
+  --btn-reflexo: rgba(3, 105, 161, 0.1);
   background: var(--papel);
   color: var(--marca);
   border: 1.5px solid var(--borda-3);
@@ -330,6 +502,11 @@ button {
   border-color: var(--marca);
 }
 
+.btn--fantasma:active {
+  box-shadow: none;
+  background: var(--papel-3);
+}
+
 .btn--grande {
   min-height: 56px;
   padding: 0 28px;
@@ -340,13 +517,121 @@ button {
   width: 100%;
 }
 
+/* Botão de TEXTO: o "link que é botão" (rolar até os passos, abrir o contato,
+   Entrar, atalhos do rodapé). Uma classe só para os cinco que existiam soltos,
+   cada um com hover e foco próprios — dois deles com foco de 2px, fora do
+   padrão global de 3px.
+   O sublinhado nasce da esquerda no hover (background-size, não
+   text-decoration: dá para animar e não depende do navegador). Quem precisa
+   ficar sublinhado desde o começo — link dentro de frase — usa
+   `.btn--sublinhado`. O rótulo vai num <span class="btn__rotulo"> para o
+   sublinhado não passar por baixo do ícone. Alvo de toque de 44px. Foco: o global de index.css. */
+.btn--texto {
+  min-height: 44px;
+  padding: 0 4px;
+  gap: 8px;
+  font-weight: 600;
+  background: none;
+  color: var(--marca);
+  box-shadow: none;
+  border-radius: var(--raio-8);
+  overflow: visible;
+}
+
+.btn--texto::before,
+.btn--texto::after {
+  display: none;
+}
+
+.btn--texto .btn__rotulo {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 0% 1.5px;
+  transition:
+    background-size 0.3s var(--ease-saida),
+    color 0.16s ease;
+}
+
+.btn--texto:hover {
+  background: none;
+  color: var(--marca-hover);
+  transform: none;
+  text-decoration: none;
+}
+
+.btn--texto:hover .btn__rotulo {
+  background-size: 100% 1.5px;
+}
+
+.btn--texto:active {
+  transform: scale(0.97);
+  box-shadow: none;
+}
+
+.btn--sublinhado .btn__rotulo {
+  background-size: 100% 1px;
+}
+
+.btn--sublinhado:hover .btn__rotulo {
+  background-size: 100% 2px;
+}
+
+/* A seta do "Ver os 3 passos" desce um pouco no hover: diz o que o botão faz. */
+@media (hover: hover) and (pointer: fine) {
+  .btn--texto svg {
+    transition: transform 0.25s var(--ease-saida);
+  }
+
+  .btn--texto:hover svg {
+    transform: translateY(2px);
+  }
+}
+
 /* ── Cartão, moldura de captura, selos ───────────────────────────────────── */
 
+/* Spotlight: uma luz macia de --marca que segue o mouse dentro do cartão
+   (ideia do "Feature Grid Spotlight Cards", refeita em CSS). A posição vem de
+   --mx/--my, escritas por UM listener delegado em `src/lib/spotlight.js`. Sem
+   mouse (toque) ou com movimento reduzido, a camada nem é desenhada. */
 .card {
+  --mx: 50%;
+  --my: 0%;
+  position: relative;
+  isolation: isolate;
   background: var(--papel);
   border: 1px solid var(--borda-2);
   border-radius: var(--raio-16);
   box-shadow: var(--sombra-card);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.25s ease;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background: radial-gradient(
+    420px circle at var(--mx) var(--my),
+    var(--spot-cor, var(--brilho-marca)),
+    transparent 60%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .card:hover {
+    border-color: var(--borda-3);
+  }
+
+  .card:hover::before {
+    opacity: 1;
+  }
 }
 
 .shot {
@@ -404,12 +689,26 @@ button {
 
 /* O wrapper existe para a tabela rolar DENTRO dele. Sem isso, uma tabela de
    seis colunas empurra a página inteira de lado no celular — e o defeito não
-   aparece no desktop de quem escreveu. */
+   aparece no desktop de quem escreveu.
+
+   `max-width` e `min-width` não são zelo: o wrapper vive dentro de flex e de
+   grid, e nos dois o tamanho MÍNIMO padrão de um item é o do conteúdo, não
+   zero. Sem estas duas linhas, o `min-width: 720px` da tabela abaixo empurra o
+   próprio wrapper para 720px, o `overflow-x: auto` nunca chega a agir e quem
+   rola de lado é a página — que é exatamente o defeito que este wrapper foi
+   criado para impedir. */
 .tabela {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+  max-width: 100%;
+  min-width: 0;
 }
 
+/* Os 720px preservam as colunas legíveis enquanto a tabela AINDA é tabela: no
+   tablet ela rola dentro do wrapper em vez de espremer seis colunas de texto.
+   Quem reapresenta a tabela de outro jeito (o modo cartão de Comparacao.css,
+   por exemplo) precisa zerar este mínimo, senão herda uma largura que não faz
+   mais sentido nenhum — ver a ARMADILHA 2 em Comparacao.jsx. */
 .tabela table {
   width: 100%;
   border-collapse: collapse;
@@ -477,6 +776,33 @@ button {
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
   }
+
+  /* Efeitos decorativos DESLIGADOS, não só acelerados: shimmer e reflexo dos
+     botões, spotlight dos cartões, aurora das faixas escuras, entrada em
+     cascata do herói, canvas da grade (o JS também não o inicia — ver
+     HeroFundo.jsx). O aperto do botão fica: é resposta ao toque, não enfeite. */
+  .btn::before,
+  .btn::after,
+  .card::before,
+  .cena::before,
+  .hero__canvas {
+    display: none !important;
+  }
+
+  .secao--noite::before {
+    animation: none !important;
+  }
+
+  .btn:hover {
+    transform: none;
+  }
+
+  .hero__texto > *,
+  .hero__vitrine {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
 }
 
 /* ── Formulário (usado pelo modal de contato) ────────────────────────────── */
@@ -513,7 +839,7 @@ button {
 .form-input:focus {
   border-color: var(--marca);
   outline: none;
-  box-shadow: 0 0 0 3px rgba(3, 105, 161, 0.18);
+  box-shadow: var(--anel-marca);
 }
 
 /* ── Modal de contato ────────────────────────────────────────────────────── */
@@ -522,7 +848,7 @@ button {
   position: fixed;
   inset: 0;
   z-index: 60;
-  background: rgba(7, 20, 38, 0.55);
+  background: var(--veu);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -536,7 +862,7 @@ button {
   max-width: 460px;
   background: var(--papel);
   border-radius: var(--raio-16);
-  box-shadow: 0 30px 70px rgba(7, 20, 38, 0.3);
+  box-shadow: var(--sombra-modal);
   padding: 32px;
   max-height: 92vh;
   overflow-y: auto;
@@ -585,7 +911,7 @@ button {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(15, 122, 90, 0.12);
+  background: var(--ok-fundo);
   color: var(--ok);
 }
 
@@ -616,7 +942,7 @@ button {
   background: var(--papel);
   border: 1px solid var(--borda-2);
   border-radius: var(--raio-12);
-  box-shadow: 0 18px 46px rgba(7, 20, 38, 0.18);
+  box-shadow: var(--sombra-flutuante);
 }
 
 .consent-banner-text {
@@ -624,6 +950,17 @@ button {
   font-size: 0.875rem;
   color: var(--tinta-2);
   margin: 0;
+}
+
+/* O link da Política de Privacidade dentro da faixa. Sublinhado desde o estado
+   normal de propósito: a LGPD exige que a informação sobre o tratamento esteja
+   ACESSÍVEL no momento da escolha, e link que só se revela no hover não está
+   acessível para quem decide no toque. */
+.consent-banner-text a {
+  color: var(--marca);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  font-weight: 600;
 }
 
 .consent-banner-actions {

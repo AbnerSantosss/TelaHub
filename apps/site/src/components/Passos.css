@@ -73,6 +73,14 @@
   color: var(--tinta-3);
 }
 
+/* Mesma razão do `.passos__chip`: filho de um flex column, o botão esticaria de
+   ponta a ponta e viraria uma barra. `align-self` devolve a ele a largura do
+   próprio rótulo. No celular ele ocupa a linha inteira, que é o alvo de toque
+   que se espera ali. */
+.passos__cta {
+  align-self: flex-start;
+}
+
 .passos__midia {
   display: flex;
   flex-direction: column;
@@ -99,6 +107,10 @@
 @media (max-width: 640px) {
   .passo {
     gap: 12px;
+  }
+
+  .passos__cta {
+    align-self: stretch;
   }
 
   .passo__num {

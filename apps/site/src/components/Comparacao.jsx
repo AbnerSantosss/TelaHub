@@ -24,6 +24,15 @@
  * rolando, seis colunas não se comparam num telefone — por isso o modo cartão em
  * Comparacao.css, com os papéis ARIA declarados abaixo para que a semântica de
  * tabela sobreviva ao `display: block`.
+ *
+ * ARMADILHA 2 (medida na auditoria de celular): o `min-width: 720px` de
+ * `.tabela table` continuava valendo DEPOIS de a tabela virar cartão. O modo
+ * cartão zera o motivo do min-width — não há mais colunas a preservar —, mas a
+ * regra do index.css tem seletor mais fraco e mesmo assim sobrevive, porque as
+ * regras daqui só trocavam `display` e `width`. Resultado: cada cartão nascia
+ * com 720px e a comparação inteira rolava de lado dentro do wrapper, num
+ * telefone de 390px. `min-width: 0` no modo cartão é o conserto, e ele mora em
+ * Comparacao.css junto do resto do modo cartão.
  */
 
 import './Comparacao.css';
@@ -54,7 +63,7 @@ const LINHAS = [
       'R$ 0 (e tela preta quando corrompe)',
       'Setup à parte: R$ 350 no Sistema TVi. A Screencorp pede um PC com Windows para cada TV, a R$ 109 a 169 por licença.',
       'US$ 8 a 30 por tela',
-      'R$ 0 — 1ª tela grátis',
+      'R$ 0 (1ª tela grátis)',
     ],
   },
   {
@@ -63,13 +72,22 @@ const LINHAS = [
       'Você não sabe',
       'Você não sabe',
       'Chamado técnico',
-      '—',
+      'Depende do sistema',
       'E-mail na hora',
     ],
   },
   {
     criterio: 'Cancelar',
-    valores: ['—', '—', 'Contrato', 'E-mail para suporte, em inglês', 'Pelo painel, sem multa'],
+    // "Pelo painel" saiu: o botão de cancelamento no painel ainda está sendo
+    // construído, e numa tabela comparativa a confiança é indivisível — uma
+    // célula que promete um passo inexistente contamina as outras dezenove.
+    valores: [
+      'Não se aplica',
+      'Não se aplica',
+      'Contrato',
+      'E-mail para suporte, em inglês',
+      'É só pedir: vale no próximo ciclo, sem multa',
+    ],
   },
 ];
 
@@ -79,7 +97,7 @@ export default function Comparacao() {
   return (
     <section id="comparar" className="secao comparacao-secao" aria-labelledby="comparar-titulo">
       <h2 id="comparar-titulo" className="h2 reveal">
-        O que mais você poderia fazer — e o que custa.
+        O que mais você poderia fazer, e quanto custa cada opção.
       </h2>
 
       <div className="tabela card comparacao__quadro reveal">

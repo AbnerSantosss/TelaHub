@@ -24,7 +24,7 @@ const FORMATOS = [
   {
     src: '/capturas/real-editor-16-9.jpg',
     alt: 'Editor do TelaHub com uma tela deitada 16:9 aberta na área de montagem, com os blocos de conteúdo à volta.',
-    legenda: 'Deitada 16:9 — "Recepção do escritório"',
+    legenda: 'Tela deitada 16:9 chamada "Recepção do escritório"',
   },
   {
     src: '/capturas/real-painel.jpg',

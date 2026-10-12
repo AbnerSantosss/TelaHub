@@ -1,3 +1,5 @@
+import { signupUrl } from '../lib/funnel';
+import { EVENT, track } from '../lib/tracking';
 import './Passos.css';
 
 /**
@@ -22,6 +24,20 @@ import './Passos.css';
  * cliques"), nada de "sem técnico" travestido de garantia, nada de prazo de
  * teste. O aviso de queda diz o que o sistema faz — manda um e-mail — e não
  * promete monitoramento, uptime nem funcionamento sem internet.
+ *
+ * ── Por que existe um botão aqui, e por que ele tem plano B ─────────────────
+ * Quem termina de ler os três passos acabou de perder o medo da instalação: é
+ * o segundo melhor momento da página para converter, depois do herói, e até
+ * agora a seção terminava sem saída. `cta_location: 'passos'` separa esse
+ * clique do clique do topo — sem isso, os dois somem dentro do mesmo número e
+ * não dá para saber se a objeção que a seção resolve é a que trava a venda.
+ *
+ * A `prop` é OPCIONAL de propósito: hoje `App.jsx` renderiza `<Passos />` sem
+ * nenhuma, e um botão que depende de prop inexistente seria um clique morto no
+ * ar. Sem a prop, a seção usa `signupUrl()` — o MESMO destino que
+ * `conversionDestination('gratis')` escolhe, inclusive com a atribuição de
+ * campanha na URL. Quando a prop chegar, ela ganha, porque o caminho único de
+ * conversão do `App.jsx` também dispara o `begin_checkout`.
  */
 
 const PASSOS = [
@@ -35,11 +51,25 @@ const PASSOS = [
   },
   {
     titulo: 'Digite o código na TV',
-    texto: 'Abra o navegador da TV, entre no endereço e digite os 6 dígitos que aparecem. A tela vira sua.',
+    texto: 'Abra o navegador da TV, entre no endereço e digite os 6 dígitos que aparecem. A TV passa a mostrar a sua tela.',
   },
 ];
 
-export default function Passos() {
+const ROTULO_CTA = 'Colocar minha 1ª tela no ar grátis';
+
+export default function Passos({ startConversion }) {
+  const converter = () => {
+    track({ event: EVENT.CTA_CLICK, params: { cta_location: 'passos', plan: 'gratis' } });
+
+    if (typeof startConversion === 'function') {
+      startConversion('gratis', 'passos', ROTULO_CTA, 1);
+      return;
+    }
+
+    // Plano B: o mesmo destino do funil, com a atribuição de campanha junto.
+    window.location.href = signupUrl();
+  };
+
   return (
     <section
       id="como-funciona"
@@ -69,8 +99,12 @@ export default function Passos() {
           </ol>
 
           <p className="lead passos__aviso">
-            E se a tela cair, você recebe um e-mail — antes de alguém reparar.
+            Se a tela cair, você recebe um e-mail antes de alguém reparar.
           </p>
+
+          <button type="button" className="btn passos__cta" onClick={converter}>
+            {ROTULO_CTA}
+          </button>
         </div>
 
         <figure className="passos__midia reveal">
@@ -85,7 +119,7 @@ export default function Passos() {
             />
           </div>
           <figcaption className="cap passos__legenda">
-            O que a TV mostra até você digitar o código — tela real
+            Tela real: é o que a TV mostra até você digitar o código.
           </figcaption>
         </figure>
       </div>

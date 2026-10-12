@@ -74,6 +74,13 @@ td.comparacao__nos {
     box-shadow: none;
   }
 
+  /* `min-width: 0` é o conserto do estouro medido na auditoria de celular, e é
+     tão importante quanto o `display: block`: o `min-width: 720px` de
+     `.tabela table` (index.css) existe para preservar as colunas na rolagem
+     lateral do desktop, e no modo cartão não há mais colunas a preservar — mas
+     a regra continuava valendo, dando 720px a cada cartão num aparelho de
+     390px. Trocar `width: auto` sem zerar o `min-width` não resolve nada:
+     largura mínima ganha de largura automática. */
   .tabela .comparacao__tabela,
   .tabela .comparacao__tabela tbody,
   .tabela .comparacao__tabela tr,
@@ -81,6 +88,7 @@ td.comparacao__nos {
   .tabela .comparacao__tabela td {
     display: block;
     width: auto;
+    min-width: 0;
   }
 
   /* Os rótulos de coluna passam a viver dentro de cada célula. */

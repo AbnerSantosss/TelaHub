@@ -117,9 +117,9 @@ export default function Blocos() {
       <div className="secao__cabeca reveal">
         <span className="chip">O que vai na tela</span>
         <h2 id="na-tela-titulo" className="h2">
-          Tudo o que você já tem — foto, texto, vídeo, agenda, planilha — vira conteúdo de TV.
+          A foto, o texto, o vídeo, a agenda e a planilha que você já tem viram conteúdo de TV.
         </h2>
-        <p className="lead">São os blocos que existem hoje no editor. Nada de &ldquo;em breve&rdquo;.</p>
+        <p className="lead">Todos os blocos abaixo já existem no editor hoje.</p>
       </div>
 
       <ul className="grid-3 blocos__grid reveal">
@@ -147,8 +147,8 @@ export default function Blocos() {
       </ul>
 
       <p className="lead blocos__fecho reveal">
-        Mais: aviso de emergência em todas as telas de uma vez, várias cenas por tela com tempo de
-        cada uma, e agendamento por dia e hora.
+        O editor também tem aviso de emergência em todas as telas de uma vez, várias cenas por tela
+        com o tempo de cada uma e agendamento por dia e hora.
       </p>
     </section>
   );
