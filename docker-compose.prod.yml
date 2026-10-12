@@ -65,9 +65,14 @@ services:
     image: postgres:15-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      # `:?` faz o deploy PARAR com a causa escrita quando a variável falta.
+      # Sem isso `${VAR}` vira texto vazio, o backend recebe
+      # `postgresql://:senha@db:5432/` e o Prisma responde P1010 ("acesso
+      # negado"), que aponta para permissão quando o que falta é o nome. Foi
+      # o que deixou a stack antiga fora do ar de 29/07 em diante.
+      POSTGRES_USER: ${POSTGRES_USER:?defina POSTGRES_USER na stack}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD na stack}
+      POSTGRES_DB: ${POSTGRES_DB:?defina POSTGRES_DB na stack}
     volumes:
       - pgdata:/var/lib/postgresql/data
     networks:
