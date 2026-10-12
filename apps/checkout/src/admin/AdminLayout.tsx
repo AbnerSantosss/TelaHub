@@ -9,14 +9,21 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Link, Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
+  AlertTriangle,
+  CalendarClock,
   Clock,
+  CreditCard,
   Hourglass,
   LayoutDashboard,
   LogOut,
+  Mail,
   Menu,
   Search,
   ShoppingCart,
+  TrendingDown,
   Undo2,
+  UserPlus,
+  Users,
   X,
 } from 'lucide-react';
 
@@ -42,10 +49,66 @@ const PRIMARY: NavEntry[] = [
     match: (pathname) => pathname === '/admin' || pathname === '/admin/',
   },
   {
+    to: '/admin/clientes',
+    label: 'Clientes',
+    icon: <Users aria-hidden="true" className={iconClass} />,
+    match: (pathname, search) => pathname.startsWith('/admin/clientes') && !search.get('view'),
+  },
+  {
     to: '/admin/sessions',
     label: 'Checkouts',
     icon: <ShoppingCart aria-hidden="true" className={iconClass} />,
     match: (pathname, search) => pathname.startsWith('/admin/sessions') && !search.get('status'),
+  },
+];
+
+/**
+ * Recortes da lista de clientes. São as três perguntas que o dono faz toda
+ * semana — "quem vence", "quem parou de pagar", "quem foi embora" — e cada uma
+ * é um problema DIFERENTE: a primeira é aviso, a segunda é cobrança falhando
+ * (recuperável), a terceira é produto. Juntá-las numa lista só, como estavam
+ * antes de existir `cancelReason`, é o que fazia as três parecerem a mesma coisa.
+ */
+const ASSINATURAS: NavEntry[] = [
+  {
+    to: '/admin/clientes?view=expiring',
+    label: 'Vencendo em 30 dias',
+    icon: <CalendarClock aria-hidden="true" className={iconClass} />,
+    match: (pathname, search) => pathname.startsWith('/admin/clientes') && search.get('view') === 'expiring',
+  },
+  {
+    to: '/admin/clientes?view=past_due',
+    label: 'Inadimplentes',
+    icon: <AlertTriangle aria-hidden="true" className={iconClass} />,
+    match: (pathname, search) => pathname.startsWith('/admin/clientes') && search.get('view') === 'past_due',
+  },
+  {
+    to: '/admin/clientes?view=not_renewed',
+    label: 'Não renovaram',
+    icon: <TrendingDown aria-hidden="true" className={iconClass} />,
+    match: (pathname, search) => pathname.startsWith('/admin/clientes') && search.get('view') === 'not_renewed',
+  },
+];
+
+/** Ferramentas da plataforma, não recortes de lista. */
+const PLATAFORMA: NavEntry[] = [
+  {
+    to: '/admin/email',
+    label: 'E-mail',
+    icon: <Mail aria-hidden="true" className={iconClass} />,
+    match: (pathname) => pathname.startsWith('/admin/email'),
+  },
+  {
+    to: '/admin/pagamentos',
+    label: 'Pagamentos',
+    icon: <CreditCard aria-hidden="true" className={iconClass} />,
+    match: (pathname) => pathname.startsWith('/admin/pagamentos'),
+  },
+  {
+    to: '/admin/leads',
+    label: 'Leads',
+    icon: <UserPlus aria-hidden="true" className={iconClass} />,
+    match: (pathname) => pathname.startsWith('/admin/leads'),
   },
 ];
 
@@ -114,8 +177,28 @@ const NavTree = ({
       />
     ))}
 
+    <p className="eyebrow mt-5 mb-1 px-3">Assinaturas</p>
+    {ASSINATURAS.map((entry) => (
+      <NavLinkItem
+        key={entry.to}
+        entry={entry}
+        active={entry.match(pathname, search)}
+        onNavigate={onNavigate}
+      />
+    ))}
+
     <p className="eyebrow mt-5 mb-1 px-3">Recuperação</p>
     {SECONDARY.map((entry) => (
+      <NavLinkItem
+        key={entry.to}
+        entry={entry}
+        active={entry.match(pathname, search)}
+        onNavigate={onNavigate}
+      />
+    ))}
+
+    <p className="eyebrow mt-5 mb-1 px-3">Plataforma</p>
+    {PLATAFORMA.map((entry) => (
       <NavLinkItem
         key={entry.to}
         entry={entry}
@@ -135,7 +218,7 @@ const NavTree = ({
 const ScopeBadge = () => (
   <div className="mx-3 mb-4 rounded-lg border border-line bg-app px-3 py-2.5">
     <p className="text-[13px] font-bold text-ink">TelaHub</p>
-    <p className="text-[11px] font-medium text-ink-subtle">Funil da plataforma</p>
+    <p className="text-[11px] font-medium text-ink-subtle">Backoffice da plataforma</p>
   </div>
 );
 

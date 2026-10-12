@@ -26,6 +26,12 @@ export const RECOVERY_CHANNELS = ['whatsapp', 'email', 'phone', 'other'] as cons
 
 export type RecoveryChannel = (typeof RECOVERY_CHANNELS)[number];
 
+/**
+ * Periodicidade da cobrança. O backend já mandava (`ADMIN_SESSION_SELECT` inclui
+ * `billingInterval`); era o PAINEL que não lia — e é daí que nasce a US-A-05.
+ */
+export type BillingInterval = 'monthly' | 'yearly';
+
 export interface AdminUser {
   id: string;
   username: string;
@@ -48,6 +54,20 @@ export interface AdminCheckoutSession {
 
   planCode: string | null;
   screens: number;
+  /**
+   * `monthly` ou `yearly`. Vem do banco como texto solto, então toda leitura
+   * passa por `normalizeBillingInterval` — um valor estranho tem de virar
+   * `monthly`, nunca `undefined` (que apagaria a periodicidade da tela).
+   */
+  billingInterval: BillingInterval;
+  /**
+   * ⚠️ MENSAL EQUIVALENTE, inclusive quando `billingInterval` é `yearly`.
+   *
+   * Este campo NUNCA é o caixa da venda. Numa sessão anual de 2 telas do Loja
+   * ele vale 7.800 (R$ 78,00) enquanto entraram R$ 936,00. Exibi-lo sozinho é o
+   * defeito US-A-05: a conciliação lê um doze avos do que foi cobrado. Para
+   * mostrar dinheiro use `formatCycleMoney(amountCents, billingInterval)`.
+   */
   amountCents: number;
 
   name: string | null;

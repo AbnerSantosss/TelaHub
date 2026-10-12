@@ -83,4 +83,9 @@ export const api = {
   get: <T>(path: string, auth = false) => request<T>('GET', path, undefined, auth),
   post: <T>(path: string, body?: unknown, auth = false) => request<T>('POST', path, body, auth),
   patch: <T>(path: string, body?: unknown, auth = false) => request<T>('PATCH', path, body, auth),
+  // `put` e `delete` existem para o backoffice (concessão de recurso por
+  // cliente, automações de e-mail). O checkout do comprador não usa nenhum dos
+  // dois — só lê e cria.
+  put: <T>(path: string, body?: unknown, auth = false) => request<T>('PUT', path, body, auth),
+  delete: <T>(path: string, auth = false) => request<T>('DELETE', path, undefined, auth),
 };

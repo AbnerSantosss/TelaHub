@@ -1,5 +1,6 @@
 /** Formatação pt-BR do painel. Toda data e todo valor da tela passa por aqui. */
-import type { CheckoutStatus, CheckoutStep, RecoveryChannel } from './types';
+import { cycleCashInReais } from '../lib/tracking';
+import type { BillingInterval, CheckoutStatus, CheckoutStep, RecoveryChannel } from './types';
 
 const money = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 const dateTime = new Intl.DateTimeFormat('pt-BR', {
@@ -15,24 +16,62 @@ const relative = new Intl.RelativeTimeFormat('pt-BR', { numeric: 'auto' });
 
 export const formatMoney = (cents: number): string => money.format((cents ?? 0) / 100);
 
+// ─── Periodicidade e caixa do ciclo (US-A-05) ────────────────────────────────
+//
+// O painel mostrava `amountCents` cru, sem dizer o intervalo. Numa sessão ANUAL
+// isso significa exibir o MENSAL EQUIVALENTE: a conciliação lê R$ 117,00 onde
+// entraram R$ 1.404,00 — o mesmo número, doze vezes menor, sem nada na tela que
+// denuncie a diferença. O conserto não é "multiplicar por 12 na tabela": é
+// nunca mais mostrar valor sem a periodicidade ao lado.
+
+export const BILLING_INTERVAL_LABEL: Record<BillingInterval, string> = {
+  monthly: 'Mensal',
+  yearly: 'Anual (12 meses)',
+};
+
+/** Texto solto do banco → tipo fechado. Qualquer coisa estranha vira `monthly`. */
+export const normalizeBillingInterval = (value: unknown): BillingInterval =>
+  value === 'yearly' ? 'yearly' : 'monthly';
+
+export const billingIntervalLabel = (value: unknown): string =>
+  BILLING_INTERVAL_LABEL[normalizeBillingInterval(value)];
+
+/**
+ * CAIXA DO CICLO — o que de fato foi (ou será) cobrado de uma vez.
+ *
+ * A multiplicação por 12 mora em `cycleCashInReais` (`lib/tracking.ts`), a
+ * MESMA função usada pelos eventos de conversão. Duas contas separadas para o
+ * mesmo número é como o painel e o Meta passam a discordar sobre uma venda.
+ */
+export const formatCycleMoney = (monthlyEquivalentCents: number, interval: unknown): string =>
+  money.format(cycleCashInReais(monthlyEquivalentCents, normalizeBillingInterval(interval)));
+
+/** Como chamar o número acima sem deixar dúvida: "no ano" ou "por mês". */
+export const cycleMoneyCaption = (interval: unknown): string =>
+  normalizeBillingInterval(interval) === 'yearly' ? 'no ano (12 meses)' : 'por mês';
+
+/** O mensal equivalente, sempre rotulado como tal — nunca sozinho. */
+export const formatMonthlyEquivalent = (monthlyEquivalentCents: number): string =>
+  `${formatMoney(monthlyEquivalentCents)}/mês equivalente`;
+
 export const formatNumber = (value: number): string => new Intl.NumberFormat('pt-BR').format(value ?? 0);
 
 export const formatPercent = (rate: number): string =>
   `${new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 1 }).format((rate ?? 0) * 100)}%`;
 
 export const formatDateTime = (iso: string | null): string =>
-  iso ? dateTime.format(new Date(iso)) : '—';
+  iso ? dateTime.format(new Date(iso)) : '-';
 
-export const formatDate = (iso: string | null): string => (iso ? dateOnly.format(new Date(iso)) : '—');
+export const formatDate = (iso: string | null): string => (iso ? dateOnly.format(new Date(iso)) : '-');
 
 export const formatShortDate = (iso: string | null): string =>
-  iso ? shortDate.format(new Date(iso)).replace('.', '') : '—';
+  iso ? shortDate.format(new Date(iso)).replace('.', '') : '-';
 
 /** "há 3 horas". Base do tempo relativo da lista. */
 export function formatRelative(iso: string | null): string {
-  if (!iso) return '—';
+  if (!iso) return '-';
   const then = new Date(iso).getTime();
-  if (Number.isNaN(then)) return '—';
+  if (Number.isNaN(then)) return '-';
 
   const diff = Date.now() - then;
   const abs = Math.abs(diff);
@@ -111,7 +150,7 @@ export const STATUS_LABEL: Record<CheckoutStatus, string> = {
 
 export const STATUS_HINT: Record<CheckoutStatus, string> = {
   started: 'Abriu o checkout e ainda não se identificou.',
-  identified: 'Deixou nome e e-mail — já é lead recuperável.',
+  identified: 'Deixou nome e e-mail, já é lead recuperável.',
   payment_pending: 'Finalizou o checkout e aguarda o contato comercial.',
   paid: 'Contratação concluída.',
   abandoned: 'Mais de 30 minutos sem atividade.',
@@ -133,7 +172,7 @@ export const RECOVERY_CHANNEL_LABEL: Record<RecoveryChannel, string> = {
 };
 
 export function recoveryChannelLabel(channel: string | null): string {
-  if (!channel) return '—';
+  if (!channel) return '-';
   return RECOVERY_CHANNEL_LABEL[channel as RecoveryChannel] ?? channel;
 }
 
@@ -171,7 +210,11 @@ export function parseMetadata(metadata: string | null): Record<string, unknown> 
 const METADATA_LABEL: Record<string, string> = {
   planCode: 'plano',
   screens: 'telas',
-  amountCents: 'valor',
+  // O evento não carrega o intervalo, e o valor gravado é o mensal equivalente:
+  // o rótulo tem de dizer isso, senão a linha do tempo repete o engano da
+  // US-A-05 num lugar onde não há como corrigir o número.
+  amountCents: 'valor mensal equivalente',
+  billingInterval: 'periodicidade',
   from: 'de',
   to: 'para',
   fromStatus: 'status anterior',
@@ -187,9 +230,10 @@ export function metadataLabel(key: string): string {
 }
 
 export function metadataValue(key: string, value: unknown): string {
-  if (value === null || value === undefined || value === '') return '—';
+  if (value === null || value === undefined || value === '') return '-';
   if (typeof value === 'boolean') return value ? 'sim' : 'não';
   if (key === 'amountCents' && typeof value === 'number') return formatMoney(value);
+  if (key === 'billingInterval') return billingIntervalLabel(value);
   if (key === 'step') return STEP_LABEL[value as CheckoutStep] ?? String(value);
   if (key === 'channel') return recoveryChannelLabel(String(value));
   if ((key === 'from' || key === 'to' || key === 'fromStatus') && typeof value === 'string') {

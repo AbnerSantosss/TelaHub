@@ -32,18 +32,24 @@ import { fetchSessionDetail } from './api';
 import {
   STATUS_HINT,
   STEP_LABEL,
+  billingIntervalLabel,
+  cycleMoneyCaption,
   eventLabel,
+  formatCycleMoney,
   formatDateTime,
   formatDocument,
+  formatMoney,
   formatPhone,
   formatRelative,
   metadataLabel,
   metadataValue,
+  normalizeBillingInterval,
   parseMetadata,
   recoveryChannelLabel,
 } from './format';
 import RecoveryModal from './RecoveryModal';
 import type { AdminCheckoutSession, CheckoutEventRow, SessionDetailResponse } from './types';
+import { EVENT_TONE, TONE } from './status';
 import { useAdminQuery } from './useAdminQuery';
 import {
   Button,
@@ -52,7 +58,6 @@ import {
   ErrorState,
   ForbiddenState,
   Loading,
-  Money,
   NoSendingNotice,
   PageHeader,
   StatusBadge,
@@ -77,12 +82,12 @@ const Row = ({
       {label}
     </span>
     <span className={cx('min-w-0 text-right text-[13px] font-semibold break-words text-ink', mono && 'money')}>
-      {value ?? '—'}
+      {value ?? '-'}
     </span>
   </div>
 );
 
-const empty = <span className="font-normal text-ink-subtle">—</span>;
+const empty = <span className="font-normal text-ink-subtle">-</span>;
 
 const EVENT_ICON: Record<string, React.ReactNode> = {
   view: <Eye aria-hidden="true" className="h-3.5 w-3.5" />,
@@ -97,15 +102,9 @@ const EVENT_ICON: Record<string, React.ReactNode> = {
   recovery_notified: <UserRoundPlus aria-hidden="true" className="h-3.5 w-3.5" />,
 };
 
-/** Cor do marcador na linha do tempo — mesma família semântica dos status. */
-const EVENT_TONE: Record<string, string> = {
-  paid: 'border-success/40 bg-success/10 text-[#166534]',
-  submit: 'border-warning/40 bg-warning/10 text-[#92400E]',
-  abandoned: 'border-danger/40 bg-danger/10 text-[#B91C1C]',
-  identify: 'border-info/40 bg-info/10 text-[#6D28D9]',
-  recovered: 'border-info/40 bg-info/10 text-[#6D28D9]',
-  recovery_notified: 'border-accent/40 bg-accent/10 text-[#0369A1]',
-};
+/** Cor do marcador na linha do tempo — mesma família semântica dos status (`./status`). */
+const eventMarker = (type: string): string =>
+  TONE[EVENT_TONE[type] ?? 'neutral'].marker;
 
 const TimelineItem = ({ event, last }: { event: CheckoutEventRow; last: boolean }) => {
   const metadata = parseMetadata(event.metadata);
@@ -118,7 +117,7 @@ const TimelineItem = ({ event, last }: { event: CheckoutEventRow; last: boolean 
         aria-hidden="true"
         className={cx(
           'relative z-10 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border bg-surface',
-          EVENT_TONE[event.type] ?? 'border-line bg-app text-ink-subtle'
+          eventMarker(event.type)
         )}
       >
         {EVENT_ICON[event.type] ?? <CircleDot aria-hidden="true" className="h-3.5 w-3.5" />}
@@ -186,7 +185,7 @@ const AttributionCard = ({ session }: { session: AdminCheckoutSession }) => {
         <EmptyState
           icon={<Megaphone aria-hidden="true" className="h-5 w-5" />}
           title="Sem atribuição registrada"
-          message="Chegou sem UTM e sem referrer — acesso direto, link salvo ou origem que não repassa referência. Para rastrear, divulgue o link com utm_source."
+          message="Chegou sem UTM e sem referrer: acesso direto, link salvo ou origem que não repassa referência. Para rastrear, divulgue o link com utm_source."
         />
       )}
     </Card>
@@ -311,13 +310,40 @@ const SessionDetailPage = () => {
             />
           </Card>
 
-          <Card title="Plano e valor" description="Recalculado pelo servidor a cada passo, pelo catálogo vigente.">
+          {/*
+            US-A-05 — este card mentia sobre o valor da venda.
+            Ele exibia "Valor mensal: R$ 117,00" para uma sessão ANUAL de
+            R$ 1.404,00, porque `amountCents` guarda sempre o mensal
+            equivalente. Agora a periodicidade vem PRIMEIRO, o caixa do ciclo é
+            o número em destaque e o mensal equivalente aparece rotulado
+            embaixo — nessa ordem, para ninguém conciliar pelo número errado.
+          */}
+          <Card
+            title="Plano e valor"
+            description="Recalculado pelo servidor a cada passo, pelo catálogo vigente. O valor cobrado é o do ciclo; o mensal equivalente é só a conta por mês."
+          >
             <Row label="Plano" value={session.planCode ?? <span className="font-normal text-ink-subtle">não escolheu</span>} />
             <Row label="Telas" value={session.screens} mono />
+            <Row label="Periodicidade" value={billingIntervalLabel(session.billingInterval)} />
             <Row
-              label="Valor mensal"
-              value={<Money cents={session.amountCents} className="text-[15px] font-extrabold" />}
+              label={`Total do ciclo (${cycleMoneyCaption(session.billingInterval)})`}
+              value={
+                <span className="money text-[15px] font-extrabold">
+                  {formatCycleMoney(session.amountCents, session.billingInterval)}
+                </span>
+              }
             />
+            {normalizeBillingInterval(session.billingInterval) === 'yearly' ? (
+              <Row
+                label="Mensal equivalente"
+                value={
+                  <span className="font-normal text-ink-muted">
+                    {formatMoney(session.amountCents)} (não é o que foi cobrado)
+                  </span>
+                }
+                mono
+              />
+            ) : null}
             <Row label="Passo alcançado" value={STEP_LABEL[step]} />
             <Row
               label="Token público"
@@ -332,7 +358,7 @@ const SessionDetailPage = () => {
         <div className="space-y-4 lg:col-span-2">
           <Card
             title="Recuperação"
-            description="Contato feito pela equipe — registro manual."
+            description="Contato feito pela equipe, com registro manual."
           >
             {session.recoveryNotifiedAt ? (
               <>
@@ -378,7 +404,7 @@ const SessionDetailPage = () => {
           <EmptyState
             icon={<History aria-hidden="true" className="h-5 w-5" />}
             title="Nenhum evento registrado"
-            message="Sessão criada sem eventos — situação incomum. Se repetir, é sinal de falha no registro do checkout."
+            message="Sessão criada sem eventos, o que é incomum. Se repetir, é sinal de falha no registro do checkout."
           />
         ) : (
           <ol className="pt-1">

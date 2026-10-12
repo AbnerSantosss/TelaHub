@@ -15,10 +15,15 @@ import { fetchSessions } from './api';
 import {
   STATUS_HINT,
   STATUS_LABEL,
+  billingIntervalLabel,
+  cycleMoneyCaption,
+  formatCycleMoney,
   formatDateTime,
+  formatMonthlyEquivalent,
   formatNumber,
   formatRelative,
   isoDaysAgo,
+  normalizeBillingInterval,
   recoveryChannelLabel,
 } from './format';
 import RecoveryModal from './RecoveryModal';
@@ -35,7 +40,6 @@ import {
   EmptyState,
   ErrorState,
   ForbiddenState,
-  Money,
   PageHeader,
   STATUS_STYLE,
   SkeletonRows,
@@ -75,10 +79,42 @@ const PlanCell = ({ session }: { session: AdminCheckoutSession }) => (
   <div className="min-w-0">
     <p className="truncate text-[13px] font-medium text-ink">{session.planCode ?? 'Sem plano escolhido'}</p>
     <p className="text-[12px] text-ink-subtle">
-      <span className="money">{session.screens}</span> {session.screens === 1 ? 'tela' : 'telas'}
+      <span className="money">{session.screens}</span> {session.screens === 1 ? 'tela' : 'telas'} ·{' '}
+      {billingIntervalLabel(session.billingInterval)}
     </p>
   </div>
 );
+
+/**
+ * Valor da sessão — US-A-05.
+ *
+ * O número grande é o CAIXA DO CICLO (no anual, os 12 meses), e o mensal
+ * equivalente vem embaixo, rotulado. Antes só existia o segundo, sem rótulo e
+ * sem periodicidade: uma contratação anual de R$ 1.404,00 aparecia como
+ * R$ 117,00, e quem concilia não tinha como perceber. Note que a periodicidade
+ * aparece MESMO no mensal — "o valor sem etiqueta é mensal" é justamente o
+ * pressuposto que criou o problema.
+ */
+const AmountCell = ({
+  session,
+  className,
+}: {
+  session: AdminCheckoutSession;
+  className?: string;
+}) => {
+  const yearly = normalizeBillingInterval(session.billingInterval) === 'yearly';
+  return (
+    <div className="min-w-0">
+      <p className={cx('money font-bold text-ink', className ?? 'text-[13px]')}>
+        {formatCycleMoney(session.amountCents, session.billingInterval)}
+      </p>
+      <p className="text-[12px] whitespace-nowrap text-ink-subtle">
+        {cycleMoneyCaption(session.billingInterval)}
+        {yearly ? ` · ${formatMonthlyEquivalent(session.amountCents)}` : ''}
+      </p>
+    </div>
+  );
+};
 
 const WhenCell = ({ session }: { session: AdminCheckoutSession }) => (
   <div>
@@ -135,7 +171,9 @@ const SessionCard = ({
     </div>
     <div className="mt-3 flex items-end justify-between gap-3">
       <PlanCell session={session} />
-      <Money cents={session.amountCents} className="text-[15px] font-bold text-ink" />
+      <div className="shrink-0 text-right">
+        <AmountCell session={session} className="text-[15px]" />
+      </div>
     </div>
     <p className="mt-2 text-[12px] text-ink-subtle">
       Última atividade {formatRelative(session.lastSeenAt)} ·{' '}
@@ -321,8 +359,8 @@ const SessionsPage = () => {
               title={hasFilters ? 'Nenhum checkout com esses filtros' : 'Nenhum checkout registrado'}
               message={
                 hasFilters
-                  ? 'Tente limpar o status ou ampliar o período — a busca por e-mail é parcial, mas depende de o lead já ter se identificado.'
-                  : 'Assim que alguém abrir o link de contratação, o checkout aparece aqui — inclusive quem desistir no primeiro passo.'
+                  ? 'Tente limpar o status ou ampliar o período. A busca por e-mail é parcial, mas depende de o lead já ter se identificado.'
+                  : 'Assim que alguém abrir o link de contratação, o checkout aparece aqui, inclusive de quem desistir no primeiro passo.'
               }
               action={
                 hasFilters ? (
@@ -354,8 +392,11 @@ const SessionsPage = () => {
                       <th scope="col" className={th}>
                         Plano
                       </th>
+                      {/* "Valor mensal" era MENTIRA numa linha anual: o campo
+                          guarda o mensal equivalente, e o cabeçalho fazia a
+                          coluna inteira ser lida como caixa. */}
                       <th scope="col" className={`${th} text-right`}>
-                        Valor mensal
+                        Valor do ciclo
                       </th>
                       <th scope="col" className={th}>
                         Última atividade
@@ -380,7 +421,7 @@ const SessionsPage = () => {
                           <PlanCell session={session} />
                         </td>
                         <td className="px-4 py-3 text-right">
-                          <Money cents={session.amountCents} className="text-[13px] font-bold text-ink" />
+                          <AmountCell session={session} />
                         </td>
                         <td className="px-4 py-3">
                           <WhenCell session={session} />

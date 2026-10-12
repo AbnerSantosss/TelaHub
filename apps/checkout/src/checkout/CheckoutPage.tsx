@@ -21,9 +21,9 @@ import { useCheckout, type StepId } from './useCheckout';
 import { billedScreens } from '../lib/plans';
 
 const Shell = ({ children }: { children: ReactNode }) => (
-  <div className="flex min-h-screen flex-col bg-app">
+  <div className="checkout-backdrop flex min-h-screen flex-col">
     <TrustBar />
-    <header className="border-b border-line bg-surface">
+    <header className="border-b border-line bg-surface/80 backdrop-blur-sm">
       <div className="mx-auto flex max-w-6xl items-center gap-2.5 px-4 py-3.5 sm:px-6">
         <MonitorPlay aria-hidden="true" size={20} className="text-accent" />
         <p className="text-sm font-extrabold tracking-tight text-ink">TelaHub</p>
@@ -51,7 +51,7 @@ const ErrorState = ({
   icon: ReactNode;
 }) => (
   <main className="mx-auto flex w-full max-w-lg flex-1 flex-col justify-center px-4 py-12 sm:px-6">
-    <div className="rounded-xl border border-line bg-surface p-5 sm:p-6">
+    <div className="rounded-2xl border border-line bg-surface p-5 shadow-raised sm:p-6">
       <span aria-hidden="true" className="text-ink-subtle">
         {icon}
       </span>
@@ -142,7 +142,7 @@ const CheckoutPage = () => {
         <ErrorState
           icon={<Clock size={24} />}
           title="Este link de contratação expirou"
-          description="Links de checkout valem por 30 dias. Podemos começar uma contratação nova agora — o que você já digitou nesta tela é mantido."
+          description="Links de checkout valem por 30 dias. Você pode começar uma contratação nova agora, e o que já digitou nesta tela fica guardado."
           actionLabel="Começar uma nova contratação"
           onAction={startOver}
         />
@@ -173,7 +173,7 @@ const CheckoutPage = () => {
         <ErrorState
           icon={<AlertTriangle size={24} />}
           title="Não conseguimos carregar os planos"
-          description={`${catalogError} Sem o catálogo não é possível mostrar preço — e mostrar um valor chutado seria pior.`}
+          description={`${catalogError} Sem o catálogo não temos como mostrar o preço certo.`}
           actionLabel="Tentar de novo"
           onAction={retryCatalog}
         />
@@ -280,7 +280,7 @@ const CheckoutPage = () => {
         <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-ink-muted">
           {checkout.canPayOnline
             ? 'Três passos: identificação, plano e pagamento. O acesso ao painel é liberado assim que o pagamento é confirmado.'
-            : 'Três passos. A cobrança automática ainda não está integrada, então nada é debitado nesta tela: ao concluir, nosso time comercial fecha a contratação com você.'}
+            : 'Três passos. A cobrança automática ainda não está integrada, então nada é debitado nesta tela. Ao concluir, nosso time comercial fecha a contratação com você.'}
         </p>
 
         <div className="mt-6 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
@@ -318,7 +318,7 @@ const CheckoutPage = () => {
               index={3}
               title="Pagamento"
               state={stepState('payment')}
-              summary="Solicitação enviada — aguardando contato do comercial."
+              summary="Solicitação enviada. Aguardando contato do comercial."
               onEdit={() => editStep('payment')}
               panelId="checkout-step-payment"
               panelRef={panels.payment}
@@ -345,17 +345,31 @@ const CheckoutPage = () => {
         />
       )}
 
+      {/*
+        O rodapé fala do que está sendo contratado NESTA tela, não de um plano
+        genérico. Duas correções que não podem voltar:
+
+        1. "sem fidelidade" só vale no MENSAL — dizer isso embaixo de uma
+           contratação de 12 meses é a frase que o cliente cita ao pedir o
+           dinheiro de volta (CDC, art. 37).
+        2. Não existe renovação automática hoje: o provedor é simulado e o fluxo
+           de assinatura recorrente ainda não foi ligado (ver o comentário em
+           `payment.service.ts::startPayment`). Prometer débito automático que
+           não acontece é tão errado quanto esconder um que acontece.
+      */}
       <footer className="border-t border-line bg-surface px-4 py-5 sm:px-6 lg:pb-5">
         <p className="mx-auto max-w-6xl text-[11px] leading-relaxed text-ink-subtle">
-          Assinatura mensal por tela ativa, sem fidelidade. O cancelamento é feito pelo próprio
-          painel e vale a partir do ciclo seguinte; o art. 49 do CDC garante 7 dias para desistir de
-          uma contratação feita pela internet.{' '}
+          {yearly
+            ? 'Contratação anual por tela ativa, com os 12 meses numa cobrança só.'
+            : 'Assinatura mensal por tela ativa, sem fidelidade.'}{' '}
+          O cancelamento é feito pelo próprio painel e vale a partir do ciclo seguinte; o art. 49 do
+          CDC garante 7 dias para desistir de uma contratação feita pela internet.{' '}
           <span className="flex items-center gap-1.5 pt-1">
             <RefreshCw aria-hidden="true" size={11} />
             {checkout.simulatedPayment
-              ? 'Ambiente de demonstração: nenhum valor é cobrado de verdade.'
+              ? 'Ambiente de demonstração. Nenhum valor é cobrado.'
               : checkout.canPayOnline
-                ? 'A cobrança é mensal e por tela ativa, renovada automaticamente.'
+                ? 'Esta cobrança é do período contratado. A renovação é combinada com você antes de qualquer nova cobrança.'
                 : 'Nenhuma cobrança automática é feita nesta tela.'}
           </span>
         </p>

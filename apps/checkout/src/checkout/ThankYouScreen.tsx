@@ -27,6 +27,7 @@
 //
 // Por isso o texto aqui é **"em breve você vai receber"**, com prazo honesto e
 // uma saída concreta se não chegar. Ao mexer nesta tela, mantenha o futuro.
+import { useEffect } from 'react';
 import { CheckCircle2, FlaskConical, Mail, ShieldCheck } from 'lucide-react';
 
 import { formatBRL, pluralScreens } from './format';
@@ -40,11 +41,34 @@ import type { CheckoutController } from './useCheckout';
  * podem seguir caminhos diferentes — mas vale a mesma regra: só entra aqui
  * caixa que alguém de fato lê.
  */
-const SUPPORT_EMAIL = 'binho_captiva@hotmail.com';
+// Vem de `VITE_CONTACT_EMAIL`, como no passo 3. Sem a variável, o texto some.
+const SUPPORT_EMAIL = ((import.meta as ImportMeta & { env?: { VITE_CONTACT_EMAIL?: string } }).env?.VITE_CONTACT_EMAIL ?? '').trim();
 
 export const ThankYouScreen = ({ checkout }: { checkout: CheckoutController }) => {
-  const { payment, identity, selectedPlan, screens, totalCents, yearCents, billingInterval, simulatedPayment } =
-    checkout;
+  const {
+    payment,
+    identity,
+    selectedPlan,
+    screens,
+    totalCents,
+    yearCents,
+    billingInterval,
+    simulatedPayment,
+    trackPurchaseNow,
+  } = checkout;
+
+  // `purchase` / `Purchase` — a conversão que paga a mídia.
+  //
+  // Dispara AQUI, e não no momento da resposta da API, porque esta tela só
+  // aparece com pagamento confirmado: é o instante em que a compra existe para
+  // quem comprou. O `value` enviado é o CAIXA DO CICLO (no anual, os 12 meses),
+  // montado em `analytics.ts` — nunca o mensal equivalente.
+  //
+  // A trava contra repetição mora no controlador, não aqui: no StrictMode este
+  // efeito roda duas vezes e uma trava local sairia duas conversões.
+  useEffect(() => {
+    trackPurchaseNow();
+  }, [trackPurchaseNow]);
   // O comprovante repete o intervalo contratado. Dizer "/mês" aqui depois de uma
   // cobrança anual transformaria a tela de confirmação na primeira fonte de
   // dúvida sobre o valor — exatamente onde ela precisa encerrar a dúvida.
@@ -76,7 +100,7 @@ export const ThankYouScreen = ({ checkout }: { checkout: CheckoutController }) =
         >
           {firstName ? `Obrigado, ${firstName}!` : 'Obrigado!'}
         </h1>
-        <p className="mt-2 text-sm font-semibold text-success">
+        <p className="mt-2 text-sm font-semibold text-success-ink">
           {simulatedPayment ? 'Pagamento simulado aprovado' : 'Pagamento confirmado'}
         </p>
         {payment?.message ? (
@@ -101,20 +125,25 @@ export const ThankYouScreen = ({ checkout }: { checkout: CheckoutController }) =
               ) : (
                 'no e-mail que você informou'
               )}{' '}
-              uma mensagem com o endereço do painel, o seu login e uma senha provisória — você
+              uma mensagem com o endereço do painel, o seu login e uma senha provisória. Você
               troca essa senha no primeiro acesso.
             </p>
             <p className="mt-2.5 text-xs leading-relaxed text-ink-muted">
-              Não precisa ficar nesta página: pode fechar a aba. Se em alguns minutos nada chegar,
-              confira o spam e a lixeira antes de falar com a gente em{' '}
+              Não precisa ficar nesta página, pode fechar a aba. Se em alguns minutos nada chegar,
+              confira o spam e a lixeira
+              {SUPPORT_EMAIL ? (
+                <>
+              {' '}antes de falar com a gente em{' '}
               <a
                 href={`mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(
                   'Não recebi o e-mail de acesso ao TelaHub'
                 )}`}
-                className="font-bold text-accent underline underline-offset-2"
+                className="font-bold text-accent-ink underline underline-offset-2"
               >
                 {SUPPORT_EMAIL}
               </a>
+                </>
+              ) : null}
               .
             </p>
           </div>
@@ -125,8 +154,8 @@ export const ThankYouScreen = ({ checkout }: { checkout: CheckoutController }) =
         <div className="mt-4">
           <Notice tone="warning" icon={<FlaskConical size={15} />}>
             <strong className="font-bold">Nenhum valor foi cobrado.</strong> Esta contratação foi
-            processada por um provedor de pagamento simulado — não há cobrança em cartão, Pix ou
-            fatura, e nada aparecerá no seu extrato.
+            processada por um provedor de pagamento simulado. Não houve cobrança em cartão, Pix ou
+            fatura, e nada vai aparecer no seu extrato.
           </Notice>
         </div>
       ) : null}
@@ -140,7 +169,7 @@ export const ThankYouScreen = ({ checkout }: { checkout: CheckoutController }) =
           <div className="flex items-baseline justify-between gap-3">
             <dt className="text-ink-muted">Plano</dt>
             <dd className="font-bold text-ink">
-              {selectedPlan?.name ?? '—'} · {pluralScreens(billed)}
+              {selectedPlan?.name ?? '-'} · {pluralScreens(billed)}
             </dd>
           </div>
           <div className="flex items-baseline justify-between gap-3">

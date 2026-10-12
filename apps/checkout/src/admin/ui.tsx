@@ -2,70 +2,21 @@
  * Primitivos do painel. Ficam aqui dentro de propósito: `src/ui/` é território
  * compartilhado e este app não precisa de biblioteca comum para quatro telas.
  *
- * Sobre a cor dos status: o TOM é o token do DESIGN.md (o mesmo no chip de
- * filtro, no badge e no gráfico). O TEXTO do badge usa o mesmo tom escurecido,
- * porque `--warning`/`--success`/`--accent` sobre fundo claro ficam em ~3:1 e o
- * piso de qualidade exige 4.5:1 em texto. Mesma família de cor, contraste real.
+ * Cor dos status: ver `./status.ts` (fonte única; tokens `*-ink` para texto).
  */
 import { useEffect, useId, useRef, type ReactNode } from 'react';
 import { AlertTriangle, Loader2, X } from 'lucide-react';
 
 import type { CheckoutStatus } from './types';
 import { STATUS_LABEL } from './format';
+import { STATUS_STYLE } from './status';
 
 export const cx = (...parts: Array<string | false | null | undefined>): string =>
   parts.filter(Boolean).join(' ');
 
-interface StatusStyle {
-  /** Badge da linha e do detalhe. */
-  badge: string;
-  /** Chip de filtro quando ativo. */
-  chipActive: string;
-  /** Ponto/tag e barra de gráfico — uso gráfico, cor cheia do token. */
-  dot: string;
-  bar: string;
-}
-
-export const STATUS_STYLE: Record<CheckoutStatus, StatusStyle> = {
-  started: {
-    badge: 'border-accent/25 bg-accent/10 text-[#0369A1]',
-    chipActive: 'border-accent bg-accent/10 text-[#0369A1]',
-    dot: 'bg-accent',
-    bar: 'bg-accent',
-  },
-  identified: {
-    badge: 'border-info/25 bg-info/10 text-[#6D28D9]',
-    chipActive: 'border-info bg-info/10 text-[#6D28D9]',
-    dot: 'bg-info',
-    bar: 'bg-info',
-  },
-  payment_pending: {
-    badge: 'border-warning/25 bg-warning/10 text-[#92400E]',
-    chipActive: 'border-warning bg-warning/10 text-[#92400E]',
-    dot: 'bg-warning',
-    bar: 'bg-warning',
-  },
-  paid: {
-    badge: 'border-success/25 bg-success/10 text-[#166534]',
-    chipActive: 'border-success bg-success/10 text-[#166534]',
-    dot: 'bg-success',
-    bar: 'bg-success',
-  },
-  abandoned: {
-    badge: 'border-danger/25 bg-danger/10 text-[#B91C1C]',
-    chipActive: 'border-danger bg-danger/10 text-[#B91C1C]',
-    dot: 'bg-danger',
-    bar: 'bg-danger',
-  },
-  expired: {
-    // Cinza de propósito: `--danger` já é o abandono, que é o estado acionável.
-    // Expirado é beco sem saída — não deve competir por atenção.
-    badge: 'border-line bg-app text-ink-muted',
-    chipActive: 'border-ink-subtle bg-app text-ink',
-    dot: 'bg-ink-subtle',
-    bar: 'bg-ink-subtle',
-  },
-};
+// Mapa de cor por status mora em `./status` (fonte única). Re-exportado aqui
+// porque as telas já importam `STATUS_STYLE` de `./ui`.
+export { STATUS_STYLE, type StatusStyle } from './status';
 
 export const StatusBadge = ({ status, title }: { status: CheckoutStatus; title?: string }) => (
   <span
@@ -85,10 +36,11 @@ export const StatusBadge = ({ status, title }: { status: CheckoutStatus; title?:
 type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
 
 const BUTTON_VARIANT: Record<ButtonVariant, string> = {
-  primary: 'bg-accent text-white hover:bg-[#0284C7] border border-transparent',
+  // `--accent-strong` (#0369a1) e não `--accent`: branco sobre #0ea5e9 dá 2.8:1.
+  primary: 'bg-accent-strong text-white hover:bg-accent-strong-hover border border-transparent',
   secondary: 'bg-surface text-ink border border-line hover:bg-app',
   ghost: 'bg-transparent text-ink-muted border border-transparent hover:bg-app hover:text-ink',
-  danger: 'bg-surface text-[#B91C1C] border border-danger/30 hover:bg-danger/10',
+  danger: 'bg-surface text-danger-ink border border-danger/30 hover:bg-danger/10',
 };
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -298,7 +250,7 @@ export const Field = ({
     {children}
     {hint && !error && <p className="mt-1.5 text-xs leading-snug text-ink-muted">{hint}</p>}
     {error && (
-      <p id={`${htmlFor}-error`} className="mt-1.5 flex items-start gap-1.5 text-xs font-medium text-[#B91C1C]">
+      <p id={`${htmlFor}-error`} className="mt-1.5 flex items-start gap-1.5 text-xs font-medium text-danger-ink">
         <AlertTriangle aria-hidden="true" className="mt-px h-3.5 w-3.5 shrink-0" />
         {error}
       </p>
@@ -390,14 +342,14 @@ export const Modal = ({
 export const NoSendingNotice = ({ className }: { className?: string }) => (
   <p
     className={cx(
-      'flex items-start gap-2 rounded-lg border border-warning/30 bg-warning/10 px-3 py-2.5 text-[13px] leading-relaxed text-[#92400E]',
+      'flex items-start gap-2 rounded-lg border border-warning/30 bg-warning/10 px-3 py-2.5 text-[13px] leading-relaxed text-warning-ink',
       className
     )}
   >
     <AlertTriangle aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0" />
     <span>
       Isto só <strong>registra</strong> que você entrou em contato. O sistema não envia mensagem
-      nenhuma — não existe integração de WhatsApp nem e-mail automático aqui.
+      nenhuma. Não existe integração de WhatsApp nem e-mail automático aqui.
     </span>
   </p>
 );

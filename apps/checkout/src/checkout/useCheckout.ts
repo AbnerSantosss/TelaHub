@@ -14,6 +14,7 @@ import { isApiError } from '../lib/api';
 import { declinedCard, isLuhnValid, randomCard } from '../lib/fake-data';
 import {
   annualSavingsPercent,
+  billedScreens,
   estimateMonthlyCents,
   fetchPlanCatalog,
   hasAnnualOffer,
@@ -24,6 +25,14 @@ import {
   type Plan,
   type PlanCatalog,
 } from '../lib/plans';
+import { newEventId } from '../lib/tracking';
+import {
+  purchaseDedupPayload,
+  trackAddPaymentInfo,
+  trackBeginCheckout,
+  trackPurchase,
+  type MoneySnapshot,
+} from './analytics';
 import {
   createSession,
   fetchPaymentConfig,
@@ -237,6 +246,96 @@ export function useCheckout(routeToken?: string) {
   /** O desejo da pessoa filtrado pelo plano: o intervalo que dá para contratar. */
   const requestedInterval: BillingInterval = annualAvailable ? intervalWish : 'monthly';
 
+  // ─── Valores ───────────────────────────────────────────────────────────────
+  //
+  // Este bloco fica ANTES das ações de propósito: as ações de pagamento montam
+  // o evento de conversão a partir daqui, e uma `const` declarada depois não
+  // pode entrar na lista de dependências de um `useCallback` acima dela (TDZ na
+  // hora do render, não na hora do clique — o erro aparece como tela branca).
+  const localCents = estimateMonthlyCents(selectedPlan, screens, requestedInterval);
+  const serverCents = session?.amountCents ?? 0;
+  /**
+   * Durante a ida ao servidor mostra a previsão; depois, o valor dele.
+   * Vale tanto no mensal quanto no anual: `amountCents` é sempre o MENSAL
+   * EQUIVALENTE, e o total do ano sai de multiplicar esse valor por 12.
+   */
+  const totalCents = amountSyncing ? localCents : serverCents;
+
+  /**
+   * Intervalo EXIBIDO. Segue a mesma regra do valor: previsão enquanto o PATCH
+   * está no ar, servidor assim que a resposta chega. Manter "anual" marcado
+   * sobre um `amountCents` que o servidor calculou como mensal seria exibir
+   * exatamente a divergência de preço que este seletor existe para eliminar —
+   * e desmarcar sozinho é o erro barato (a pessoa vê e clica de novo), enquanto
+   * cobrar diferente do que a tela mostra é o erro caro.
+   */
+  const billingInterval: BillingInterval = !annualAvailable
+    ? 'monthly'
+    : amountSyncing
+      ? requestedInterval
+      : (session?.billingInterval ?? requestedInterval);
+
+  /** Preço por tela/mês do intervalo em exibição (catálogo, não total). */
+  const unitCents = unitCentsFor(selectedPlan, billingInterval);
+  /** O que sai da conta no anual: 12 meses de uma vez. */
+  const yearCents = yearTotalCents(totalCents);
+  const annualSavings = annualSavingsPercent(selectedPlan);
+
+  // ─── Medição (eventos de dinheiro) ─────────────────────────────────────────
+  //
+  // O retrato que todo evento de conversão usa. Note que o valor que entra aqui
+  // é o MENSAL EQUIVALENTE: quem transforma em caixa do ciclo é
+  // `cycleCashInReais`, dentro de `analytics.ts`, num lugar só.
+  const moneySnapshot: MoneySnapshot = useMemo(
+    () => ({
+      plan: selectedPlan,
+      billedScreens: selectedPlan ? billedScreens(selectedPlan, screens) : screens,
+      monthlyEquivalentCents: totalCents,
+      unitCentsPerScreen: unitCents,
+      interval: billingInterval,
+    }),
+    [selectedPlan, screens, totalCents, unitCents, billingInterval]
+  );
+
+  /**
+   * `begin_checkout` / `InitiateCheckout` — uma vez por visita.
+   *
+   * Espera `amountSyncing` baixar de propósito: disparado antes disso, o evento
+   * levaria a PREVISÃO local em vez do valor do servidor, e o primeiro número
+   * que o Meta aprende sobre esta pessoa seria o errado. Também exige plano
+   * escolhido — "abriu o checkout sem plano" não tem valor para mandar, e um
+   * `value: 0` no meio da série estraga a média que o algoritmo usa.
+   */
+  const beginTrackedRef = useRef(false);
+
+  useEffect(() => {
+    if (beginTrackedRef.current) return;
+    if (!session || !planCode || amountSyncing) return;
+    beginTrackedRef.current = true;
+    trackBeginCheckout(moneySnapshot);
+  }, [session, planCode, amountSyncing, moneySnapshot]);
+
+  /** Métodos que já geraram `add_payment_info` — o evento não se repete por clique. */
+  const paymentInfoTrackedRef = useRef<Set<string>>(new Set());
+
+  /**
+   * `eventID` do `Purchase`, gerado no NAVEGADOR e enviado à API junto com a
+   * confirmação (campo `metaEventId`), para o webhook repetir o mesmo evento
+   * pelo servidor com o mesmo id.
+   *
+   * Nasce na primeira tentativa de cobrança e sobrevive às retentativas: cartão
+   * recusado seguido de cartão aprovado é UMA compra, e trocar o id no meio faria
+   * o servidor confirmar com um id que o navegador não usou — que é exatamente a
+   * duplicata que ele existe para evitar.
+   */
+  const purchaseEventIdRef = useRef<string | null>(null);
+  const purchaseTrackedRef = useRef(false);
+
+  const dedupForConfirmation = useCallback(() => {
+    if (!purchaseEventIdRef.current) purchaseEventIdRef.current = newEventId();
+    return purchaseDedupPayload(purchaseEventIdRef.current);
+  }, []);
+
   // ─── Carga do catálogo ─────────────────────────────────────────────────────
   useEffect(() => {
     let cancelled = false;
@@ -367,6 +466,10 @@ export function useCheckout(routeToken?: string) {
             : maskCpf(digits)
           : current.document,
         companyName: session.companyName ?? current.companyName,
+        // Volta do servidor para a sessão retomada por link: quem já marcou a
+        // caixa e voltou depois vê a própria escolha, e não uma caixa limpa
+        // que o PATCH seguinte interpretaria como revogação.
+        marketingOptIn: session.marketingOptIn ?? current.marketingOptIn,
       };
     });
 
@@ -552,6 +655,19 @@ export function useCheckout(routeToken?: string) {
   }, [planCode, screens, requestedInterval, sendPatch]);
 
   // ─── Ações de identificação ────────────────────────────────────────────────
+  /**
+   * Setter próprio para o consentimento de novidades.
+   *
+   * Não entra em `setIdentityField` porque `IdentityField` é o conjunto dos
+   * campos VALIDÁVEIS — e este não é um deles. Reaproveitar aquele setter
+   * exigiria alargar o tipo, e alargá-lo abriria a porta para o consentimento
+   * um dia participar da validação que trava o botão "Continuar". Marketing
+   * não pode bloquear compra.
+   */
+  const setMarketingOptIn = useCallback((value: boolean) => {
+    setIdentity((current) => ({ ...current, marketingOptIn: value }));
+  }, []);
+
   const setIdentityField = useCallback((field: IdentityField, value: string) => {
     setIdentity((current) => {
       if (field === 'phone') return { ...current, phone: maskPhone(value) };
@@ -604,6 +720,11 @@ export function useCheckout(routeToken?: string) {
       // número completo e não fica ambíguo no painel.
       phone: `55${onlyDigits(identity.phone)}`,
       document: digits,
+      // Vai SEMPRE, inclusive `false`: a ausência do campo significaria "não
+      // mexeu", e quem desmarca a caixa depois de tê-la marcado estaria
+      // revogando um consentimento que o servidor nunca ficaria sabendo ter
+      // sido revogado.
+      marketingOptIn: identity.marketingOptIn,
     };
     if (identity.documentKind === 'cnpj') payload.companyName = identity.companyName.trim();
 
@@ -646,12 +767,23 @@ export function useCheckout(routeToken?: string) {
     !selectedPlan?.free &&
     (session?.amountCents ?? 0) > 0;
 
-  const selectPaymentMethod = useCallback((method: PaymentMethod) => {
-    setPaymentMethod(method);
-    setPaymentError(null);
-    // Recusa anterior some ao trocar de método: o motivo era do método antigo.
-    setPayment((current) => (current && current.status === 'declined' ? null : current));
-  }, []);
+  const selectPaymentMethod = useCallback(
+    (method: PaymentMethod) => {
+      setPaymentMethod(method);
+      setPaymentError(null);
+      // Recusa anterior some ao trocar de método: o motivo era do método antigo.
+      setPayment((current) => (current && current.status === 'declined' ? null : current));
+
+      // `add_payment_info`: escolher a forma de pagamento é o passo em que a
+      // pessoa passa a preencher dados de cobrança. Uma vez por método — quem
+      // fica alternando entre Pix e cartão gera um evento por método, não um
+      // por clique, senão o denominador do relatório vira ruído.
+      if (paymentInfoTrackedRef.current.has(method)) return;
+      paymentInfoTrackedRef.current.add(method);
+      trackAddPaymentInfo(moneySnapshot, method);
+    },
+    [moneySnapshot]
+  );
 
   const setCardField = useCallback((field: CardField, value: string) => {
     setCard((current) => {
@@ -714,6 +846,17 @@ export function useCheckout(routeToken?: string) {
 
       setPaymentError(null);
       setPaying(true);
+
+      // Rede de segurança do `add_payment_info`: quando o provedor oferece um
+      // método só, ele já vem marcado sem passar por `selectPaymentMethod` (um
+      // rádio solitário obrigatório é clique sem decisão) — e o evento nunca
+      // sairia. Aqui a pessoa já preencheu e mandou cobrar, então o passo
+      // aconteceu de fato.
+      if (!paymentInfoTrackedRef.current.has(method)) {
+        paymentInfoTrackedRef.current.add(method);
+        trackAddPaymentInfo(moneySnapshot, method);
+      }
+
       try {
         const outcome = await startPayment(token, {
           method,
@@ -726,6 +869,10 @@ export function useCheckout(routeToken?: string) {
                   cvv: onlyDigits(draft.cvv),
                 }
               : undefined,
+          // O `eventID` do `Purchase` viaja JUNTO com a cobrança, antes de
+          // existir resposta: é o servidor que vai precisar dele para não
+          // duplicar a conversão quando confirmar o pagamento.
+          tracking: dedupForConfirmation(),
         });
 
         setPayment(outcome);
@@ -744,7 +891,7 @@ export function useCheckout(routeToken?: string) {
         setPaying(false);
       }
     },
-    [card, handleFatal, sendPatch]
+    [card, dedupForConfirmation, handleFatal, moneySnapshot, sendPatch]
   );
 
   /** "Eu paguei o Pix" da demonstração. Só existe enquanto o provedor é simulado. */
@@ -755,7 +902,7 @@ export function useCheckout(routeToken?: string) {
     setPaymentError(null);
     setConfirmingPix(true);
     try {
-      const outcome = await simulatePayment(token);
+      const outcome = await simulatePayment(token, dedupForConfirmation());
       if (!outcome.paid) {
         setPaymentError(outcome.message);
         return;
@@ -775,7 +922,33 @@ export function useCheckout(routeToken?: string) {
     } finally {
       setConfirmingPix(false);
     }
-  }, [handleFatal]);
+  }, [dedupForConfirmation, handleFatal]);
+
+  /**
+   * `purchase` / `Purchase` — chamado pela tela de obrigado, quando ela aparece.
+   *
+   * Fica aqui (e não dentro do componente) por causa do StrictMode: em
+   * desenvolvimento o efeito da tela roda duas vezes, e uma trava guardada no
+   * próprio componente não sobrevive à segunda montagem — sairiam dois
+   * `Purchase` com o mesmo id. O `ref` do controlador sobrevive.
+   *
+   * `transaction_id` é o `publicToken` da sessão: é o único identificador que o
+   * navegador e o servidor conhecem igual (o id da cobrança no provedor não
+   * chega ao front). Se um dia a resposta trouxer o id do gateway, os DOIS
+   * lados têm de passar a usá-lo no mesmo commit — meia troca vira pedido
+   * duplicado no relatório de e-commerce.
+   */
+  const trackPurchaseNow = useCallback(() => {
+    if (purchaseTrackedRef.current) return;
+    if (!payment?.paid) return;
+    const token = tokenRef.current ?? session?.publicToken ?? null;
+    if (!token) return;
+    purchaseTrackedRef.current = true;
+    // O id só é gerado aqui se a confirmação tiver vindo por um caminho que não
+    // passou por `dedupForConfirmation` — nesse caso não há par no servidor, e
+    // um id novo é melhor do que nenhum (o evento do navegador ainda conta).
+    trackPurchase(moneySnapshot, token, purchaseEventIdRef.current ?? newEventId());
+  }, [moneySnapshot, payment, session]);
 
   const finish = useCallback(async () => {
     // Caminho NOVO: existe provedor e o valor é cobrável — a etapa 3 cobra.
@@ -873,40 +1046,17 @@ export function useCheckout(routeToken?: string) {
     setActiveStep('identify');
     setForceCreate(true);
     setSessionAttempt((attempt) => attempt + 1);
+    // Sessão nova é outro funil: os eventos de dinheiro voltam a poder sair, e
+    // o `eventID` do `Purchase` da sessão anterior não pode ser reaproveitado
+    // (o servidor confirmaria uma compra com o id de outra contratação).
+    beginTrackedRef.current = false;
+    paymentInfoTrackedRef.current = new Set();
+    purchaseEventIdRef.current = null;
+    purchaseTrackedRef.current = false;
   }, []);
 
   const retryCatalog = useCallback(() => setCatalogAttempt((attempt) => attempt + 1), []);
   const retrySession = useCallback(() => setSessionAttempt((attempt) => attempt + 1), []);
-
-  // ─── Valores ───────────────────────────────────────────────────────────────
-  const localCents = estimateMonthlyCents(selectedPlan, screens, requestedInterval);
-  const serverCents = session?.amountCents ?? 0;
-  /**
-   * Durante a ida ao servidor mostra a previsão; depois, o valor dele.
-   * Vale tanto no mensal quanto no anual: `amountCents` é sempre o MENSAL
-   * EQUIVALENTE, e o total do ano sai de multiplicar esse valor por 12.
-   */
-  const totalCents = amountSyncing ? localCents : serverCents;
-
-  /**
-   * Intervalo EXIBIDO. Segue a mesma regra do valor: previsão enquanto o PATCH
-   * está no ar, servidor assim que a resposta chega. Manter "anual" marcado
-   * sobre um `amountCents` que o servidor calculou como mensal seria exibir
-   * exatamente a divergência de preço que este seletor existe para eliminar —
-   * e desmarcar sozinho é o erro barato (a pessoa vê e clica de novo), enquanto
-   * cobrar diferente do que a tela mostra é o erro caro.
-   */
-  const billingInterval: BillingInterval = !annualAvailable
-    ? 'monthly'
-    : amountSyncing
-      ? requestedInterval
-      : (session?.billingInterval ?? requestedInterval);
-
-  /** Preço por tela/mês do intervalo em exibição (catálogo, não total). */
-  const unitCents = unitCentsFor(selectedPlan, billingInterval);
-  /** O que sai da conta no anual: 12 meses de uma vez. */
-  const yearCents = yearTotalCents(totalCents);
-  const annualSavings = annualSavingsPercent(selectedPlan);
 
   /**
    * Pagamento online concluído, traduzido para o formato do fluxo antigo.
@@ -999,12 +1149,17 @@ export function useCheckout(routeToken?: string) {
     changeScreens,
     retrySync,
     setIdentityField,
+    setMarketingOptIn,
     setDocumentKind,
     blurIdentityField,
     submitIdentify,
     confirmPlan,
     finish,
     planError,
+
+    // medição
+    /** Dispara o `Purchase` (navegador). Chamado pela tela de obrigado. */
+    trackPurchaseNow,
 
     // ações de pagamento
     selectPaymentMethod,

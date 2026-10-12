@@ -17,6 +17,7 @@ import { AlertTriangle, Loader2, RefreshCw, ShieldCheck } from 'lucide-react';
 
 import { billedScreens } from '../lib/plans';
 import { formatBRL, pluralScreens } from './format';
+import { ctaClass } from './primitives';
 import type { CheckoutController } from './useCheckout';
 
 /**
@@ -29,8 +30,8 @@ import type { CheckoutController } from './useCheckout';
  */
 const guaranteesFor = (yearly: boolean): string[] => [
   yearly
-    ? 'Contratação de 12 meses: o valor acima cobre o período inteiro.'
-    : 'Sem fidelidade: você cancela quando quiser.',
+    ? 'Contratação de 12 meses. O valor acima cobre o período inteiro.'
+    : 'Sem fidelidade. Você cancela quando quiser.',
   'Cancelamento pelo próprio painel, sem ligar para ninguém.',
   'Direito de arrependimento de 7 dias (art. 49 do CDC).',
 ];
@@ -81,142 +82,152 @@ export const OrderSummary = ({ checkout }: { checkout: CheckoutController }) => 
   return (
     <aside
       aria-labelledby="checkout-summary-title"
-      className="rounded-xl border border-line bg-surface p-4 sm:p-5"
+      // Duas camadas, na linha do "Payment Summary" do 21st.dev: o cartão com
+      // sombra curta e, dentro dele, o total numa placa rebaixada. A sombra só
+      // separa o resumo do formulário — não é para o card "flutuar".
+      className="overflow-hidden rounded-2xl border border-line bg-surface shadow-raised"
     >
-      <h2 id="checkout-summary-title" className="eyebrow mb-3">
-        Resumo
-      </h2>
-
-      {plan ? (
-        <>
-          <div className="flex gap-3 border-b border-line pb-3.5">
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-extrabold text-ink">
-                Plano {plan.name}
-                {yearly ? ' · anual' : ''}
-              </p>
-              <p className="mt-0.5 text-xs text-ink-muted">
-                {pluralScreens(billed)} {billed === 1 ? 'cobrada' : 'cobradas'}
-                {flooredByPlan ? ` (você escolheu ${screens})` : ''}
-              </p>
-            </div>
-            {/* Valor do servidor, não uma multiplicação local: as duas contas
-                precisam ser a MESMA conta. */}
-            <p className="money shrink-0 text-sm font-bold text-ink">
-              {quoteOnly ? '—' : formatBRL(monthlyCents)}
-            </p>
-          </div>
-
-          <dl className="flex flex-col gap-2 border-b border-line py-3.5 text-xs">
-            {!quoteOnly && !free ? (
-              <div className="flex items-baseline justify-between gap-3">
-                <dt className="text-ink-muted">Periodicidade</dt>
-                <dd className="font-bold text-ink">{yearly ? 'Anual (12 meses)' : 'Mensal'}</dd>
-              </div>
-            ) : null}
-            <div className="flex items-baseline justify-between gap-3">
-              <dt className="text-ink-muted">Preço por tela/mês</dt>
-              <dd className="money font-bold text-ink">
-                {quoteOnly ? 'Sob consulta' : free ? formatBRL(0) : formatBRL(unitCents)}
-              </dd>
-            </div>
-            <div className="flex items-baseline justify-between gap-3">
-              <dt className="text-ink-muted">Telas cobradas</dt>
-              <dd className="money font-bold text-ink">{billed}</dd>
-            </div>
-            {flooredByPlan ? (
-              <div className="flex items-baseline justify-between gap-3">
-                <dt className="text-warning">Mínimo do plano</dt>
-                <dd className="money font-bold text-warning">{plan.minScreens}</dd>
-              </div>
-            ) : null}
-            {yearly && !quoteOnly ? (
-              <div className="flex items-baseline justify-between gap-3">
-                <dt className="text-ink-muted">Equivalente por mês</dt>
-                <dd className="money font-bold text-ink">{formatBRL(monthlyCents)}</dd>
-              </div>
-            ) : null}
-          </dl>
-        </>
-      ) : (
-        <p className="border-b border-line pb-3.5 text-xs leading-relaxed text-ink-muted">
-          Escolha o plano e o número de telas no passo <strong className="font-bold">2</strong> para
-          o valor aparecer aqui.
-        </p>
-      )}
-
-      <div className="flex items-end justify-between gap-3 pt-3.5">
-        <div>
-          <p className="eyebrow">{totalCaption}</p>
-          {free && plan ? (
-            <p className="mt-0.5 text-[11px] font-semibold text-success">Sem cartão de crédito</p>
-          ) : null}
-        </div>
-        <p
-          aria-live="polite"
-          className={`money text-2xl font-extrabold leading-none sm:text-[28px] ${
-            quoteOnly ? 'text-ink-muted' : 'text-success'
-          }`}
-        >
-          {totalLabel}
-        </p>
+      <div className="flex items-center justify-between gap-3 border-b border-line bg-app/60 px-4 py-3 sm:px-5">
+        <h2 id="checkout-summary-title" className="eyebrow">
+          Resumo
+        </h2>
+        <ShieldCheck aria-hidden="true" size={15} className="text-ink-subtle" />
       </div>
 
-      {/* A conta aberta do anual, por extenso. É o parágrafo que impede a
-          reclamação de "vi R$ 39 e me cobraram R$ 468": ele repete o preço
-          unitário anunciado, as telas cobradas, o equivalente mensal e o valor
-          do ano, nessa ordem, ANTES do botão de pagar. */}
-      {yearly && plan && !quoteOnly ? (
-        <p className="mt-3 rounded-lg border border-accent/35 bg-accent/8 px-3 py-2.5 text-[11px] leading-relaxed text-ink">
-          Assinatura de <strong className="font-bold">12 meses</strong>: {formatBRL(unitCents)} por
-          tela/mês × {pluralScreens(billed)} {billed === 1 ? 'cobrada' : 'cobradas'} ={' '}
-          {formatBRL(monthlyCents)} por mês, o que dá{' '}
-          <strong className="font-bold">{formatBRL(yearCents)} no ano</strong>. É este o valor da
-          contratação anual — não {formatBRL(monthlyCents)}.
-        </p>
-      ) : null}
+      <div className="p-4 sm:p-5">
+        {plan ? (
+          <>
+            <div className="flex gap-3 border-b border-dashed border-line pb-3.5">
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-extrabold text-ink">
+                  Plano {plan.name}
+                  {yearly ? ' · anual' : ''}
+                </p>
+                <p className="mt-0.5 text-xs text-ink-muted">
+                  {pluralScreens(billed)} {billed === 1 ? 'cobrada' : 'cobradas'}
+                  {flooredByPlan ? ` (você escolheu ${screens})` : ''}
+                </p>
+              </div>
+              {/* Valor do servidor, não uma multiplicação local: as duas contas
+                  precisam ser a MESMA conta. */}
+              <p className="money shrink-0 text-sm font-bold text-ink">
+                {quoteOnly ? '-' : formatBRL(monthlyCents)}
+              </p>
+            </div>
 
-      {amountSyncing ? (
-        <p className="mt-2 flex items-center justify-end gap-1.5 text-[11px] font-semibold text-ink-subtle">
-          <Loader2 aria-hidden="true" size={12} className="animate-spin" />
-          Confirmando valor…
-        </p>
-      ) : null}
-
-      {syncFailed ? (
-        <div
-          role="alert"
-          className="mt-3 flex flex-col gap-2 rounded-lg border border-danger/40 bg-danger/8 px-3 py-2.5 text-xs text-ink"
-        >
-          <p className="flex items-start gap-1.5 font-semibold">
-            <AlertTriangle aria-hidden="true" size={14} className="mt-px shrink-0 text-danger" />
-            Não conseguimos confirmar o valor com o servidor.
+            <dl className="flex flex-col gap-2.5 border-b border-dashed border-line py-3.5 text-xs">
+              {!quoteOnly && !free ? (
+                <div className="flex items-baseline justify-between gap-3">
+                  <dt className="text-ink-muted">Periodicidade</dt>
+                  <dd className="font-bold text-ink">{yearly ? 'Anual (12 meses)' : 'Mensal'}</dd>
+                </div>
+              ) : null}
+              <div className="flex items-baseline justify-between gap-3">
+                <dt className="text-ink-muted">Preço por tela/mês</dt>
+                <dd className="money font-bold text-ink">
+                  {quoteOnly ? 'Sob consulta' : free ? formatBRL(0) : formatBRL(unitCents)}
+                </dd>
+              </div>
+              <div className="flex items-baseline justify-between gap-3">
+                <dt className="text-ink-muted">Telas cobradas</dt>
+                <dd className="money font-bold text-ink">{billed}</dd>
+              </div>
+              {flooredByPlan ? (
+                <div className="flex items-baseline justify-between gap-3">
+                  <dt className="text-warning">Mínimo do plano</dt>
+                  <dd className="money font-bold text-warning">{plan.minScreens}</dd>
+                </div>
+              ) : null}
+              {yearly && !quoteOnly ? (
+                <div className="flex items-baseline justify-between gap-3">
+                  <dt className="text-ink-muted">Equivalente por mês</dt>
+                  <dd className="money font-bold text-ink">{formatBRL(monthlyCents)}</dd>
+                </div>
+              ) : null}
+            </dl>
+          </>
+        ) : (
+          <p className="border-b border-dashed border-line pb-3.5 text-xs leading-relaxed text-ink-muted">
+            Escolha o plano e o número de telas no passo <strong className="font-bold">2</strong> para
+            o valor aparecer aqui.
           </p>
-          <button
-            type="button"
-            onClick={retrySync}
-            className="flex items-center gap-1.5 self-start rounded-md border border-line bg-surface px-2.5 py-1.5 font-bold text-ink transition-colors hover:border-ink-subtle"
-          >
-            <RefreshCw aria-hidden="true" size={13} />
-            Tentar de novo
-          </button>
-        </div>
-      ) : null}
+        )}
 
-      <ul className="mt-4 flex flex-col gap-2 border-t border-line pt-3.5">
-        {guaranteesFor(yearly).map((item) => (
-          <li key={item} className="flex items-start gap-2 text-[11px] leading-relaxed text-ink-muted">
-            <ShieldCheck aria-hidden="true" size={13} className="mt-px shrink-0 text-success" />
-            <span>{item}</span>
-          </li>
-        ))}
-        {noRetroactive ? (
-          <li className="flex items-start gap-2 text-[11px] leading-relaxed text-ink-muted">
-            <ShieldCheck aria-hidden="true" size={13} className="mt-px shrink-0 text-success" />
-            <span>Nada de cobrança retroativa: período já usado nunca vira fatura depois.</span>
-          </li>
+        {/* Placa do total: rebaixada (fundo `--app` + borda interna) para o número
+            que sai da conta ser o ponto mais estável do resumo. */}
+        <div className="mt-3.5 flex flex-wrap items-end justify-between gap-x-3 gap-y-1 rounded-xl border border-line bg-app/70 px-3.5 py-3 shadow-[inset_0_1px_2px_rgb(22_24_29/0.04)]">
+          <div>
+            <p className="eyebrow">{totalCaption}</p>
+            {free && plan ? (
+              <p className="mt-0.5 text-[11px] font-semibold text-cta">Sem cartão de crédito</p>
+            ) : null}
+          </div>
+          <p
+            aria-live="polite"
+            className={`money ml-auto text-2xl font-extrabold leading-none sm:text-[28px] ${
+              quoteOnly ? 'text-ink-muted' : 'text-cta'
+            }`}
+          >
+            {totalLabel}
+          </p>
+        </div>
+
+        {/* A conta aberta do anual, por extenso. É o parágrafo que impede a
+            reclamação de "vi R$ 39 e me cobraram R$ 468": ele repete o preço
+            unitário anunciado, as telas cobradas, o equivalente mensal e o valor
+            do ano, nessa ordem, ANTES do botão de pagar. */}
+        {yearly && plan && !quoteOnly ? (
+          <p className="mt-3 rounded-lg border border-accent/35 bg-accent/8 px-3 py-2.5 text-[11px] leading-relaxed text-ink">
+            Assinatura de <strong className="font-bold">12 meses</strong>: {formatBRL(unitCents)} por
+            tela/mês × {pluralScreens(billed)} {billed === 1 ? 'cobrada' : 'cobradas'} ={' '}
+            {formatBRL(monthlyCents)} por mês, o que dá{' '}
+            <strong className="font-bold">{formatBRL(yearCents)} no ano</strong>. É este o valor da
+            contratação anual, e não {formatBRL(monthlyCents)}.
+          </p>
         ) : null}
-      </ul>
+
+        {amountSyncing ? (
+          <p className="mt-2 flex items-center justify-end gap-1.5 text-[11px] font-semibold text-ink-subtle">
+            <Loader2 aria-hidden="true" size={12} className="animate-spin" />
+            Confirmando valor…
+          </p>
+        ) : null}
+
+        {syncFailed ? (
+          <div
+            role="alert"
+            className="mt-3 flex flex-col gap-2 rounded-lg border border-danger/40 bg-danger/8 px-3 py-2.5 text-xs text-ink"
+          >
+            <p className="flex items-start gap-1.5 font-semibold">
+              <AlertTriangle aria-hidden="true" size={14} className="mt-px shrink-0 text-danger" />
+              Não conseguimos confirmar o valor com o servidor.
+            </p>
+            <button
+              type="button"
+              onClick={retrySync}
+              className="flex min-h-11 items-center gap-1.5 self-start rounded-md border border-line bg-surface px-3 py-1.5 font-bold text-ink transition-colors hover-fine:border-ink-subtle"
+            >
+              <RefreshCw aria-hidden="true" size={13} />
+              Tentar de novo
+            </button>
+          </div>
+        ) : null}
+
+        <ul className="mt-4 flex flex-col gap-2 border-t border-dashed border-line pt-3.5">
+          {guaranteesFor(yearly).map((item) => (
+            <li key={item} className="flex items-start gap-2 text-[11px] leading-relaxed text-ink-muted">
+              <ShieldCheck aria-hidden="true" size={13} className="mt-px shrink-0 text-success" />
+              <span>{item}</span>
+            </li>
+          ))}
+          {noRetroactive ? (
+            <li className="flex items-start gap-2 text-[11px] leading-relaxed text-ink-muted">
+              <ShieldCheck aria-hidden="true" size={13} className="mt-px shrink-0 text-success" />
+              <span>Não cobramos retroativo. O período já usado não vira fatura depois.</span>
+            </li>
+          ) : null}
+        </ul>
+      </div>
     </aside>
   );
 };
@@ -242,14 +253,14 @@ export const MobileSummaryBar = ({
   const { quoteOnly, totalLabel, totalCaption, yearly, billed, plan } = summaryData(checkout);
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-surface/95 px-4 py-3 backdrop-blur lg:hidden">
+    <div className="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-surface/95 px-4 py-3 shadow-[0_-8px_24px_-16px_rgb(22_24_29/0.25)] backdrop-blur lg:hidden">
       <div className="mx-auto flex max-w-2xl items-center gap-3">
         <div className="min-w-0 flex-1">
           <p className="eyebrow text-[10px]">{totalCaption}</p>
           <p
             aria-live="polite"
             className={`money truncate text-lg font-extrabold leading-tight ${
-              quoteOnly ? 'text-ink-muted' : 'text-success'
+              quoteOnly ? 'text-ink-muted' : 'text-cta'
             }`}
           >
             {totalLabel}
@@ -266,10 +277,13 @@ export const MobileSummaryBar = ({
           onClick={onAction}
           disabled={busy}
           aria-busy={busy || undefined}
-          className="flex shrink-0 items-center justify-center gap-2 rounded-lg bg-success px-4 py-3 text-xs font-extrabold uppercase tracking-[0.06em] text-white transition-colors hover:bg-success/90 disabled:cursor-not-allowed disabled:bg-success/45"
+          className={`${ctaClass} min-h-12 shrink-0 px-4 py-3 text-xs tracking-[0.06em]`}
         >
-          {busy ? <Loader2 aria-hidden="true" size={14} className="animate-spin" /> : null}
-          {actionLabel}
+          <span aria-hidden="true" className="cta-sheen motion-effect" />
+          <span className="relative flex items-center gap-2">
+            {busy ? <Loader2 aria-hidden="true" size={14} className="animate-spin" /> : null}
+            {actionLabel}
+          </span>
         </button>
       </div>
     </div>

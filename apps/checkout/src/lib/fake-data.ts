@@ -187,6 +187,11 @@ export function randomIdentity(kind?: 'cpf' | 'cnpj'): IdentityDraft {
     // Razão social só é exigida no fluxo CNPJ; no CPF fica vazia de propósito,
     // igual ao `emptyIdentity()`.
     companyName: isCnpj ? `${pick(COMPANY_PREFIXES)} ${pick(COMPANY_SUFFIXES)} ME` : '',
+    // Sempre `false`, mesmo em dado de teste. O preenchimento rápido existe
+    // para poupar digitação, não para simular consentimento — e uma sessão de
+    // teste que nasce com opt-in ligado acabaria criando registro de
+    // consentimento que ninguém deu.
+    marketingOptIn: false,
   };
 }
 

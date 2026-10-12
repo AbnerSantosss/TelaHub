@@ -6,8 +6,13 @@
 // reproduzir" no DESIGN.md.
 import { CalendarCheck, MonitorCheck, Unlock } from 'lucide-react';
 
+// ⚠️ "Sem fidelidade" SÓ vale no mensal. Sem a qualificação, esta barra fica no
+// topo de uma contratação anual de 12 meses dizendo o contrário do contrato —
+// e é justamente a frase que o cliente cita ao pedir o dinheiro de volta
+// (CDC, art. 37). A barra é fixa e não conhece o plano escolhido, então a
+// qualificação tem de estar no próprio texto.
 const FACTS = [
-  { icon: Unlock, text: 'Sem fidelidade e sem multa' },
+  { icon: Unlock, text: 'No plano mensal, sem fidelidade e sem multa' },
   { icon: MonitorCheck, text: 'Cancelamento pelo próprio painel' },
   { icon: CalendarCheck, text: '7 dias para desistir (art. 49 do CDC)' },
 ];

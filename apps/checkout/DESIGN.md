@@ -35,13 +35,32 @@ Fundo levemente quente (não branco puro) para não brilhar, como nas referênci
 | `--bg-sidebar` | `#FFFFFF` | sidebar clara |
 | `--ink` | `#16181D` | texto principal |
 | `--ink-muted` | `#5B6472` | rótulo, descrição |
-| `--ink-subtle` | `#8B93A4` | metadado, tempo relativo |
+| `--ink-subtle` | `#646B78` | metadado, tempo relativo (era `#8B93A4`, 2.8:1; agora 4.9:1 sobre `--app`) |
 | `--line` | `#E4E3DE` | divisória e borda de card |
-| `--accent` | `#0EA5E9` | ação primária, link, foco (mesmo do painel e do site) |
+| `--accent` | `#0EA5E9` | foco, ícone, barra de gráfico (mesmo do painel e do site). **Não** é fundo de botão com texto branco: 2.8:1 |
+| `--accent-strong` | `#0369A1` (hover `#025584`) | fundo do botão primário do painel — 5.9:1 com branco |
+| `--cta` | `#15803D` (hover `#166534`) | CTA verde do checkout — 5.0:1 com branco |
 | `--success` | `#16A34A` | pago, total, toggle ligado |
 | `--warning` | `#D97706` | aguardando pagamento |
 | `--danger` | `#DC2626` | cancelado, falha |
 | `--info` | `#7C3AED` | identificado / em andamento |
+
+Texto de status usa a variante escurecida do mesmo tom, porque o tom cheio fica
+em ~3:1 como texto:
+
+| Token | Valor | Contraste sobre o fundo tingido a 10% |
+|---|---|---|
+| `--accent-ink` | `#0369A1` | 5.4:1 |
+| `--info-ink` | `#6D28D9` | 6.4:1 |
+| `--success-ink` | `#166534` | 6.4:1 |
+| `--warning-ink` | `#92400E` | 6.6:1 |
+| `--danger-ink` | `#B91C1C` | 5.7:1 |
+
+Os mapas de status do painel (sessão, lead, pagamento, evento da linha do
+tempo) vivem num módulo só, `src/admin/status.ts`: cada tom (`accent`, `info`,
+`success`, `warning`, `danger`, `neutral`) é definido uma vez, e cada
+vocabulário apenas diz qual tom usa. Hex solto em classe (`text-[#…]`) não entra
+mais — use o token.
 
 Cor de status é **semântica, não decorativa**: cada estado do funil tem uma cor
 fixa e ela é a mesma no chip de filtro, no badge da linha e no gráfico. Se a cor
@@ -124,12 +143,14 @@ Pagamento com método selecionado e Pagamento sem seleção).
   concluído **colapsa em um card verde** com ✓, resumo dos dados preenchidos e um
   lápis para editar. Esse colapso é o detalhe que mais ajuda: mantém o contexto
   sem ocupar a tela.
-- **Resumo fixo à direita** (`RESUMO`): campo de cupom, linhas de valor, **total
-  grande e em verde**, e o item contratado com quantidade e valor.
+- **Resumo fixo à direita** (`RESUMO`): linhas de valor, **total grande e em
+  verde**, e o item contratado com quantidade e valor. **Sem campo de cupom**: não
+  existe desconto no backend, e campo que aceita texto e não faz nada ensina a
+  pessoa a procurar cupom em outro site (ver `OrderSummary.tsx`).
 - **CTA de largura total** ao fim de cada passo, verde, em maiúsculas.
-- Métodos de pagamento como **cards de rádio que expandem** ao serem escolhidos,
-  com selo de aprovação e marcas de bandeira/processador — anatomia pronta para
-  quando o gateway existir.
+- Métodos de pagamento como **cards de rádio que expandem** ao serem escolhidos.
+  Só aparece método que o provedor ativo aceita (hoje Pix e cartão); nada de
+  selo de aprovação.
 - Em telas estreitas, o resumo vira barra fixa no rodapé com o total e o CTA.
 
 ### Passos, adaptados a assinatura por tela
@@ -143,11 +164,17 @@ A referência é de produto único com frete. Aqui não há entrega, e a variáv
    vivo. É o passo que substitui "endereço/frete" e é o coração do produto: o
    piso de 5 telas do plano Rede precisa ficar visível aqui, não escondido em
    texto, senão o valor "não fecha" na cabeça de quem compra.
-3. **PAGAMENTO** — presente na estrutura, mas hoje **não cobra**: não há gateway
-   integrado. O passo mostra o total e encaminha para o contato comercial,
-   dizendo isso com clareza. Os cards de rádio de Pix/cartão/boleto ficam
-   implementados e desativados, com o motivo escrito — assim, quando o gateway
-   entrar, é ligar, não redesenhar.
+3. **PAGAMENTO** — cobra via **provedor de pagamento**, e o que o passo oferece
+   vem de `GET /checkout/payment-config`, não de uma lista fixa na tela. Hoje o
+   provedor ativo é **simulado** (o Asaas está pronto e liga só por variável de
+   ambiente); enquanto for simulado, o aviso "Ambiente de demonstração. [...] nenhum
+   valor será cobrado" é **permanente e fica no topo** do passo. Sem provedor
+   que cobre online, o passo encaminha para o comercial, dizendo isso com
+   clareza.
+
+   **Boleto foi removido** (2026-09-05): nenhum provedor aqui o emite, e um card
+   "indisponível" de forma de pagamento inexistente é oferta que não se cumpre
+   (CDC, arts. 30 e 37). Volta só junto com o provedor que o emitir.
 
 ### Dois padrões da referência que NÃO vamos reproduzir
 
@@ -168,8 +195,45 @@ art. 49 do CDC. Tudo verificável.
 
 ### Selo de "aprovação imediata"
 
-Só pode aparecer no método que de fato aprova na hora. Hoje, nenhum — porque não
-há cobrança. Quando o Pix entrar, ele ganha o selo; boleto, não.
+Só pode aparecer no método que de fato aprova na hora. Hoje, nenhum: o Pix nasce
+**pendente** até a confirmação do provedor, então prometer aprovação instantânea
+seria promessa que a tela não cumpre.
+
+## Acabamento visual do checkout (2026-09-21)
+
+O checkout recebe **menos efeito** que a landing e o painel: é a tela onde a
+pessoa digita documento e decide pagar, e movimento ali lê como distração ou
+truque. Tudo abaixo é CSS puro (Tailwind v4 + `index.css`), sem biblioteca de
+animação.
+
+- **CTA (`PrimaryButton`)** — verde próprio `--cta` `#15803D` (5.0:1 com o texto
+  branco; o `--success` `#16A34A` dava 3.3:1), hover um tom abaixo (`#166534`).
+  Hover só com mouse (`hover-fine:`, `@media (hover: hover) and (pointer: fine)`):
+  escurece e uma **faixa de luz cruza o botão uma vez** (`.cta-sheen`, 700ms, não
+  repete). Press com `scale(0.98)`. Ocupado mantém spinner + `busyLabel` +
+  `aria-busy`. Desabilitado: verde a 45%, sem sombra e sem efeito. A barra fixa
+  do rodapé no celular usa as MESMAS classes (`ctaClass`). Altura mínima 48px.
+- **Passos (`StepCard`)** — indicador em **badge quadrado** (referência:
+  "Stepper with Square Badges", 21st.dev, reescrito sem framer-motion): cinza no
+  pendente, escuro com halo no ativo, verde com ✓ no concluído; número e ✓
+  trocam por opacidade/escala. O passo ativo ganha borda mais forte e
+  `--shadow-raised`. Abrir/fechar anima a altura pelo truque de
+  `grid-template-rows: 0fr → 1fr`; o painel fechado fica `invisible` (fora da
+  tabulação e do leitor de tela, como o antigo `hidden`).
+- **Resumo (`OrderSummary`)** — duas camadas (referência: "Payment Summary",
+  21st.dev): cartão com `--shadow-raised` e cabeçalho em faixa `--app`; linhas
+  separadas por tracejado; total numa **placa rebaixada** em `--cta`. Nenhum dado
+  novo.
+- **Fundo** — `.checkout-backdrop`: gradiente estático de `--surface` para
+  `--app` nos primeiros 420px, com halo frio de 6% no alto. Não anima.
+- **Campos** — 16px no celular (evita o zoom do iOS), 14px a partir de `sm`;
+  anel de foco suave (`ring-accent/15`) além da borda. Toque ≥44px em todo
+  controle (inclusive os botões −/+ de telas).
+- **Movimento reduzido** — a regra global zera durações; além disso
+  `.motion-effect` (a faixa de luz) some e `.motion-press` não escala.
+
+Sombras em `@theme`: `--shadow-card` (curta, botões secundários),
+`--shadow-raised` (passo ativo, resumo, card de erro), `--shadow-cta`.
 
 ## Referências recebidas
 

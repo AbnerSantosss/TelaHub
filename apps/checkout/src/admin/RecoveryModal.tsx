@@ -52,7 +52,7 @@ const RecoveryModal = ({
       });
       onRegistered(result.session);
       toast.success('Contato registrado.', {
-        description: 'Nenhuma mensagem foi enviada pelo sistema — o envio é manual.',
+        description: 'Nenhuma mensagem foi enviada pelo sistema. O envio é manual.',
       });
       onClose();
     } catch (registerError) {
@@ -104,7 +104,7 @@ const RecoveryModal = ({
                   className={cx(
                     'flex cursor-pointer items-center justify-center gap-2 rounded-lg border px-2 py-2.5 text-[13px] font-semibold transition-colors',
                     active
-                      ? 'border-accent bg-accent/10 text-[#0369A1]'
+                      ? 'border-accent bg-accent/10 text-accent-ink'
                       : 'border-line bg-surface text-ink-muted hover:bg-app'
                   )}
                 >
@@ -151,7 +151,7 @@ const RecoveryModal = ({
         )}
 
         {error && (
-          <p role="alert" className="text-[13px] font-medium text-[#B91C1C]">
+          <p role="alert" className="text-[13px] font-medium text-danger-ink">
             {error}
           </p>
         )}

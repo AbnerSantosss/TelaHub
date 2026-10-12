@@ -1,10 +1,17 @@
 // Passo 3 — PAGAMENTO.
 //
-// A etapa agora COBRA de verdade, mas o que ela pode oferecer não é decisão
-// dela: vem de `GET /checkout/payment-config`. Pix e cartão aparecem se o
-// provedor ativo os aceitar; **boleto continua desativado**, com o motivo
-// escrito, porque o backend não o emite — o card fica no lugar para quando
-// existir, em vez de o passo precisar ser redesenhado.
+// A etapa COBRA de verdade quando há provedor, mas o que ela pode oferecer não
+// é decisão dela: vem de `GET /checkout/payment-config`. Pix e cartão aparecem
+// se o provedor ativo os aceitar.
+//
+// ⚠️ O CARD DE BOLETO FOI REMOVIDO (2026-09-05). Ele ficava na lista como
+// "Indisponível", com data de vencimento e tudo, para "já estar pronto quando
+// existir" — mas boleto não é emitido por nenhum provedor aqui, e `PaymentMethod`
+// (em `lib/session.ts`) nem admite esse valor: era uma opção que NUNCA poderia
+// acender. Uma forma de pagamento anunciada e inexistente é oferta que não se
+// cumpre (CDC, arts. 30 e 37) e ainda faz a pessoa esperar por uma alternativa
+// que não vai chegar. Quando o boleto existir de verdade, ele volta com o
+// provedor que o emitir — e não antes.
 //
 // Duas regras que este arquivo não pode quebrar:
 //
@@ -16,7 +23,6 @@
 import { useState } from 'react';
 import {
   AlertTriangle,
-  Barcode,
   Check,
   Copy,
   CreditCard,
@@ -41,11 +47,14 @@ import type { PaymentMethod } from '../lib/session';
  * publicação. Um CTA que aponta para caixa inexistente perde o lead em
  * silêncio, o que é pior do que não ter o botão. Regra ao mexer aqui: só entra
  * endereço que alguém de fato lê.
+ *
+ * Vem de `VITE_CONTACT_EMAIL` (build arg da stack no Portainer), nunca do
+ * código: o repositório é público. Sem a variável, o botão não aparece.
  */
-const SALES_EMAIL = 'binho_captiva@hotmail.com';
+const SALES_EMAIL = ((import.meta as ImportMeta & { env?: { VITE_CONTACT_EMAIL?: string } }).env?.VITE_CONTACT_EMAIL ?? '').trim();
 
 interface MethodCard {
-  id: PaymentMethod | 'boleto';
+  id: PaymentMethod;
   label: string;
   icon: typeof QrCode;
   detail: string;
@@ -62,13 +71,11 @@ const METHODS: MethodCard[] = [
     id: 'credit_card',
     label: 'Cartão de crédito',
     icon: CreditCard,
-    detail: 'Assinatura com renovação automática ao fim do período contratado.',
-  },
-  {
-    id: 'boleto',
-    label: 'Boleto',
-    icon: Barcode,
-    detail: 'Vencimento em dias úteis, conforme o banco.',
+    // Sem "renovação automática": o fluxo de assinatura recorrente ainda não
+    // existe (ver `payment.service.ts::startPayment`) e o provedor de hoje é
+    // simulado. Anunciar débito automático que não acontece é o mesmo tipo de
+    // promessa não cumprida que esconder um que acontece.
+    detail: 'Cobrança do período que você está contratando agora.',
   },
 ];
 
@@ -110,7 +117,7 @@ const TotalRow = ({
 }) => (
   <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 rounded-lg bg-app px-3.5 py-3">
     <span className="eyebrow">Total a contratar</span>
-    <span className="money text-xl font-extrabold text-success">
+    <span className="money text-xl font-extrabold text-cta">
       {quoteOnly ? 'Sob consulta' : formatBRL(yearly ? yearCents : monthlyCents)}
       {!quoteOnly ? (
         <span className="ml-1 text-xs font-bold text-ink-muted">{yearly ? '/ano' : '/mês'}</span>
@@ -211,7 +218,7 @@ export const PaymentStep = ({ checkout }: { checkout: CheckoutController }) => {
           ) : null}
           <p className="text-center text-xs leading-relaxed text-ink-muted">
             Abra o app do seu banco, escolha <strong className="font-bold">Pix</strong> e escaneie o
-            código — ou use o copia e cola abaixo.
+            código. Se preferir, use o copia e cola abaixo.
             {expiry ? ` Este código vale até as ${expiry}.` : ''}
           </p>
         </div>
@@ -294,7 +301,7 @@ export const PaymentStep = ({ checkout }: { checkout: CheckoutController }) => {
           <div className="flex items-baseline justify-between gap-3">
             <dt className="text-ink-muted">Plano solicitado</dt>
             <dd className="font-bold text-ink">
-              {selectedPlan?.name ?? '—'} · {pluralScreens(billed)}
+              {selectedPlan?.name ?? '-'} · {pluralScreens(billed)}
             </dd>
           </div>
           <div className="flex items-baseline justify-between gap-3">
@@ -312,17 +319,19 @@ export const PaymentStep = ({ checkout }: { checkout: CheckoutController }) => {
         {!result.charged ? (
           <Notice tone="info" icon={<Info size={15} />}>
             <strong className="font-bold">Nenhuma cobrança foi feita.</strong> Nada foi debitado de
-            cartão, Pix ou boleto nesta tela.
+            cartão nem de Pix nesta tela.
           </Notice>
         ) : null}
 
+        {SALES_EMAIL ? (
         <a
           href={`mailto:${SALES_EMAIL}?subject=${encodeURIComponent('Contratação TelaHub')}`}
-          className="flex w-full items-center justify-center gap-2 rounded-lg border border-line bg-surface px-4 py-3 text-sm font-bold text-ink transition-colors hover:border-ink-subtle"
+          className="flex w-full items-center justify-center gap-2 rounded-lg border border-line bg-surface px-4 py-3 text-sm font-bold text-ink transition-colors hover-fine:border-ink-subtle"
         >
           <Mail aria-hidden="true" size={15} />
           Falar agora com o comercial
         </a>
+        ) : null}
       </div>
     );
   }
@@ -363,9 +372,10 @@ export const PaymentStep = ({ checkout }: { checkout: CheckoutController }) => {
 
         <div className="flex flex-col gap-2.5">
           {METHODS.map(({ id, label, icon: Icon, detail }) => {
-            // Boleto nunca é oferecido: o backend não o emite. Os demais só
-            // ficam ativos se o provedor de verdade os listar.
-            const enabled = canPayOnline && paymentMethods.includes(id as PaymentMethod);
+            // Só fica ativo o que o provedor de verdade listar. Um método que
+            // aparece apagado ainda é uma promessa: por isso a lista tem apenas
+            // o que pode acender (ver o cabeçalho sobre o boleto removido).
+            const enabled = canPayOnline && paymentMethods.includes(id);
             const selected = enabled && paymentMethod === id;
 
             return (
@@ -375,7 +385,7 @@ export const PaymentStep = ({ checkout }: { checkout: CheckoutController }) => {
                   className={`flex gap-3 rounded-xl border p-3.5 transition-colors ${
                     enabled
                       ? `cursor-pointer bg-surface ${
-                          selected ? 'border-accent ring-1 ring-accent/30' : 'border-line hover:border-ink-subtle'
+                          selected ? 'border-accent ring-1 ring-accent/30' : 'border-line hover-fine:border-ink-subtle'
                         }`
                       : 'cursor-not-allowed border-line bg-app/60'
                   }`}
@@ -386,7 +396,7 @@ export const PaymentStep = ({ checkout }: { checkout: CheckoutController }) => {
                     value={id}
                     disabled={!enabled}
                     checked={selected}
-                    onChange={() => selectPaymentMethod(id as PaymentMethod)}
+                    onChange={() => selectPaymentMethod(id)}
                     aria-describedby={enabled ? undefined : 'checkout-methods-reason'}
                     className="mt-0.5 size-4 shrink-0 accent-accent"
                   />
@@ -479,14 +489,14 @@ export const PaymentStep = ({ checkout }: { checkout: CheckoutController }) => {
                         <button
                           type="button"
                           onClick={() => fillTestCard('approved')}
-                          className="text-xs font-bold text-accent underline underline-offset-2 transition-colors hover:text-ink"
+                          className="inline-flex min-h-11 items-center text-xs font-bold text-accent-ink underline underline-offset-2 transition-colors hover-fine:text-ink"
                         >
                           Preencher com dados de teste
                         </button>
                         <button
                           type="button"
                           onClick={() => fillTestCard('declined')}
-                          className="text-[11px] font-semibold text-ink-subtle underline underline-offset-2 transition-colors hover:text-ink-muted"
+                          className="inline-flex min-h-11 items-center text-[11px] font-semibold text-ink-subtle underline underline-offset-2 transition-colors hover-fine:text-ink-muted"
                         >
                           usar cartão recusado
                         </button>
@@ -501,7 +511,7 @@ export const PaymentStep = ({ checkout }: { checkout: CheckoutController }) => {
 
         <p id="checkout-methods-reason" className="mt-2.5 text-xs leading-relaxed text-ink-muted">
           {canPayOnline
-            ? 'O boleto está desativado porque ainda não é emitido pelo nosso provedor de pagamento. Quando existir, aparece aqui.'
+            ? 'Estas são as formas de pagamento que o nosso provedor aceita hoje. Não emitimos boleto.'
             : paymentConfigError
               ? `${paymentConfigError} A contratação segue pelo nosso time comercial, que envia a forma de pagamento combinada com você.`
               : 'Este plano não é contratado por pagamento online. A contratação é concluída pelo nosso time comercial, que entra em contato pelo e-mail e WhatsApp informados.'}
@@ -512,7 +522,7 @@ export const PaymentStep = ({ checkout }: { checkout: CheckoutController }) => {
         <Notice tone="danger" role="alert" icon={<AlertTriangle size={15} />}>
           <strong className="font-bold">Pagamento recusado.</strong>{' '}
           {declined.declineReason ?? declined.message} Nenhum valor foi cobrado. Confira os dados do
-          cartão, tente outro cartão ou pague com Pix — dá para tentar quantas vezes precisar.
+          cartão, tente outro cartão ou pague com Pix. Você pode tentar quantas vezes precisar.
         </Notice>
       ) : null}
 
@@ -524,9 +534,13 @@ export const PaymentStep = ({ checkout }: { checkout: CheckoutController }) => {
 
       {canPayOnline ? (
         <Notice tone="info" icon={<Info size={15} />}>
-          Assinatura mensal, sem fidelidade: o cancelamento é feito pelo próprio painel e vale a
-          partir do ciclo seguinte. Os dados do cartão são usados apenas para esta cobrança e não
-          ficam guardados no TelaHub.
+          {/* O texto acompanha o que está sendo contratado: "sem fidelidade"
+              embaixo de um botão que fecha 12 meses é a divergência que os
+              arts. 30 e 37 do CDC alcançam. */}
+          {yearly
+            ? 'Contratação de 12 meses, cobrada de uma vez. O cancelamento é feito pelo próprio painel e vale a partir do ciclo seguinte.'
+            : 'Assinatura mensal, sem fidelidade. O cancelamento é feito pelo próprio painel e vale a partir do ciclo seguinte.'}{' '}
+          Os dados do cartão são usados apenas para esta cobrança e não ficam guardados no TelaHub.
         </Notice>
       ) : (
         <Notice tone="info" icon={<Info size={15} />}>
@@ -539,7 +553,7 @@ export const PaymentStep = ({ checkout }: { checkout: CheckoutController }) => {
       {alreadySubmitted && !canPayOnline ? (
         <Notice tone="warning" role="status" icon={<Info size={15} />}>
           Esta solicitação já foi enviada antes. Enviar de novo só atualiza o plano e o número de
-          telas — não gera cobrança nem duplica contratação.
+          telas. Não gera cobrança nem duplica a contratação.
         </Notice>
       ) : null}
 

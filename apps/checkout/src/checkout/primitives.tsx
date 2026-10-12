@@ -42,7 +42,7 @@ export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(function T
       </label>
 
       <div
-        className={`flex items-center gap-0 rounded-lg border bg-surface transition-colors focus-within:border-accent ${
+        className={`flex items-center gap-0 rounded-lg border bg-surface shadow-[inset_0_1px_1px_rgb(22_24_29/0.03)] transition-[border-color,box-shadow] focus-within:border-accent focus-within:ring-3 focus-within:ring-accent/15 ${
           error ? 'border-danger' : 'border-line'
         }`}
       >
@@ -62,7 +62,7 @@ export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(function T
           onChange={(event) => onValueChange(event.target.value)}
           aria-invalid={error ? true : undefined}
           aria-describedby={describedBy || undefined}
-          className="w-full min-w-0 rounded-lg bg-transparent px-3 py-2.5 text-sm text-ink outline-none placeholder:text-ink-subtle"
+          className="min-h-11 w-full min-w-0 rounded-lg bg-transparent px-3 py-2.5 text-base text-ink outline-none placeholder:text-ink-subtle sm:text-sm"
         />
       </div>
 
@@ -97,7 +97,16 @@ export interface PrimaryButtonProps {
   className?: string;
 }
 
-/** CTA verde, largura total, maiúsculas — o botão de avançar de cada passo. */
+/**
+ * CTA verde, largura total, maiúsculas — o botão de avançar de cada passo.
+ *
+ * Verde próprio (`--cta`, #15803d, 5.0:1 com o branco) em vez do `--success`
+ * (3.3:1): é o texto mais importante da tela. Efeitos, todos sóbrios:
+ *   • hover (só mouse): escurece um tom e uma faixa de luz cruza o botão UMA vez;
+ *   • press: `scale(0.98)` — o toque "afunda", confirma que foi recebido;
+ *   • `prefers-reduced-motion`: sem faixa e sem escala (regras em index.css).
+ * Desabilitado e ocupado usam o mesmo verde lavado, sem sombra e sem efeito.
+ */
 export const PrimaryButton = ({
   children,
   onClick,
@@ -112,18 +121,32 @@ export const PrimaryButton = ({
     onClick={onClick}
     disabled={disabled || busy}
     aria-busy={busy || undefined}
-    className={`flex w-full items-center justify-center gap-2 rounded-lg bg-success px-4 py-3 text-sm font-extrabold uppercase tracking-[0.08em] text-white transition-colors hover:bg-success/90 disabled:cursor-not-allowed disabled:bg-success/45 ${className}`}
+    className={`${ctaClass} w-full min-h-12 px-4 py-3 text-sm tracking-[0.08em] ${className}`}
   >
-    {busy ? (
-      <>
-        <Loader2 aria-hidden="true" size={16} className="animate-spin" />
-        <span>{busyLabel}</span>
-      </>
-    ) : (
-      children
-    )}
+    <span aria-hidden="true" className="cta-sheen motion-effect" />
+    <span className="relative flex items-center justify-center gap-2">
+      {busy ? (
+        <>
+          <Loader2 aria-hidden="true" size={16} className="animate-spin" />
+          <span>{busyLabel}</span>
+        </>
+      ) : (
+        children
+      )}
+    </span>
   </button>
 );
+
+/**
+ * Classes do CTA, exportadas para a barra fixa do rodapé usar o MESMO botão
+ * visual (ela tem layout próprio, mas não pode ter outra cor nem outro efeito).
+ */
+export const ctaClass =
+  'cta motion-press relative isolate inline-flex items-center justify-center overflow-hidden ' +
+  'rounded-lg bg-cta font-extrabold uppercase text-white shadow-cta ' +
+  'transition-[background-color,box-shadow,transform] duration-150 ease-out ' +
+  'hover-fine:bg-cta-hover active:scale-[0.98] active:bg-cta-hover ' +
+  'disabled:cursor-not-allowed disabled:bg-cta/45 disabled:shadow-none disabled:active:scale-100';
 
 export const SecondaryButton = ({
   children,
@@ -138,7 +161,7 @@ export const SecondaryButton = ({
     type="button"
     onClick={onClick}
     disabled={disabled}
-    className="rounded-lg border border-line bg-surface px-4 py-2.5 text-sm font-semibold text-ink transition-colors hover:border-ink-subtle disabled:cursor-not-allowed disabled:opacity-50"
+    className="motion-press inline-flex min-h-11 items-center justify-center rounded-lg border border-line bg-surface px-4 py-2.5 text-sm font-semibold text-ink shadow-card transition-[border-color,background-color,transform] duration-150 ease-out hover-fine:border-ink-subtle hover-fine:bg-app active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none disabled:active:scale-100"
   >
     {children}
   </button>

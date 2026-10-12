@@ -25,19 +25,36 @@ import { formatBRL, onlyDigits, pluralScreens } from './format';
 import { Notice, PrimaryButton } from './primitives';
 import type { CheckoutController } from './useCheckout';
 
-/** Rótulos das features. O slug do backend não é texto de vitrine. */
+/**
+ * Rótulos das features. O slug do backend não é texto de vitrine.
+ *
+ * ⚠️ ESTA LISTA É UMA PROMESSA. Cada rótulo daqui vira um item com "✓" no card
+ * do plano — ou seja, uma característica anunciada antes da contratação (CDC,
+ * art. 30). Slug sem rótulo simplesmente NÃO aparece, e é assim que se tira uma
+ * promessa do ar: apagando a linha, não escondendo com CSS.
+ *
+ * Limpeza de 2026-09-05:
+ *
+ * - `api-externa` e `multi-org` foram RETIRADAS do catálogo em 2026-08-30 (ver
+ *   `apps/api/src/middlewares/feature.middleware.ts`) — eram vendidas sem
+ *   existir. Continuar exibindo o rótulo mantinha viva no checkout uma oferta
+ *   que o produto já tinha desfeito.
+ * - `white-label`, `sso` e `sla` saíram: marca própria, login corporativo e SLA
+ *   em contrato são compromissos que ninguém aqui pode cumprir hoje, e apareciam
+ *   como item conferido no plano mais caro.
+ * - "Widgets essenciais" virou "Blocos essenciais" e "Alerta de tela offline"
+ *   passou a dizer o que de fato acontece (um e-mail quando a tela para de
+ *   responder). Jargão não é sinônimo de precisão: quem compra fala "bloco" e
+ *   "tela", não "widget" e "offline".
+ */
 const FEATURE_LABELS: Record<string, string> = {
-  'widgets-basicos': 'Widgets essenciais',
-  'alerta-offline': 'Alerta de tela offline',
-  relatorios: 'Relatórios',
-  auditoria: 'Registro de auditoria',
-  powerbi: 'Painéis do Power BI',
-  'api-externa': 'API externa',
-  'agendamento-avancado': 'Agendamento avançado',
-  'multi-org': 'Várias organizações',
-  'white-label': 'Marca própria (white label)',
-  sso: 'Login corporativo (SSO)',
-  sla: 'SLA em contrato',
+  'widgets-basicos': 'Blocos essenciais (avisos, ofertas, agenda)',
+  'alerta-offline': 'Aviso por e-mail quando uma tela para de responder',
+  relatorios: 'Relatórios de exibição',
+  documentos: 'Documentos na tela (PDF, Google Docs e Office)',
+  auditoria: 'Registro de auditoria de publicação',
+  powerbi: 'Painéis de gestão na tela',
+  'agendamento-avancado': 'Agendamento por faixa de horário',
 };
 
 const featureLabel = (slug: string): string | null => FEATURE_LABELS[slug] ?? null;
@@ -73,7 +90,7 @@ const PlanOption = ({
       className={`flex cursor-pointer gap-3 rounded-xl border p-3.5 transition-colors sm:p-4 ${
         selected
           ? 'border-accent bg-accent/6 ring-1 ring-accent'
-          : 'border-line bg-surface hover:border-ink-subtle'
+          : 'border-line bg-surface hover-fine:border-ink-subtle'
       }`}
     >
       <input
@@ -150,7 +167,7 @@ const IntervalOption = ({
     className={`flex cursor-pointer gap-2.5 rounded-xl border p-3.5 transition-colors ${
       selected
         ? 'border-accent bg-accent/6 ring-1 ring-accent'
-        : 'border-line bg-surface hover:border-ink-subtle'
+        : 'border-line bg-surface hover-fine:border-ink-subtle'
     }`}
   >
     <input
@@ -289,7 +306,7 @@ export const SubscriptionStep = ({ checkout }: { checkout: CheckoutController })
             onClick={() => changeScreens(screens - 1)}
             disabled={screensLocked || screens <= 1}
             aria-label="Menos uma tela"
-            className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-line bg-surface text-ink transition-colors hover:border-ink-subtle disabled:cursor-not-allowed disabled:opacity-40"
+            className="motion-press flex size-11 shrink-0 items-center justify-center rounded-lg border border-line bg-surface text-ink transition-[border-color,transform] duration-150 hover-fine:border-ink-subtle active:scale-95 disabled:active:scale-100 disabled:cursor-not-allowed disabled:opacity-40"
           >
             <Minus aria-hidden="true" size={16} />
           </button>
@@ -309,7 +326,7 @@ export const SubscriptionStep = ({ checkout }: { checkout: CheckoutController })
             inputMode="numeric"
             autoComplete="off"
             aria-describedby="checkout-screens-hint"
-            className="money w-20 rounded-lg border border-line bg-surface px-3 py-2.5 text-center text-sm font-bold text-ink outline-none focus-within:border-accent disabled:bg-app disabled:text-ink-subtle"
+            className="money min-h-11 w-20 rounded-lg border border-line bg-surface px-3 py-2.5 text-center text-base font-bold sm:text-sm focus:ring-3 focus:ring-accent/15 text-ink outline-none focus-within:border-accent disabled:bg-app disabled:text-ink-subtle"
           />
 
           <button
@@ -317,7 +334,7 @@ export const SubscriptionStep = ({ checkout }: { checkout: CheckoutController })
             onClick={() => changeScreens(screens + 1)}
             disabled={screensLocked || screens >= maxScreens}
             aria-label="Mais uma tela"
-            className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-line bg-surface text-ink transition-colors hover:border-ink-subtle disabled:cursor-not-allowed disabled:opacity-40"
+            className="motion-press flex size-11 shrink-0 items-center justify-center rounded-lg border border-line bg-surface text-ink transition-[border-color,transform] duration-150 hover-fine:border-ink-subtle active:scale-95 disabled:active:scale-100 disabled:cursor-not-allowed disabled:opacity-40"
           >
             <Plus aria-hidden="true" size={16} />
           </button>
@@ -352,15 +369,15 @@ export const SubscriptionStep = ({ checkout }: { checkout: CheckoutController })
             <span>{billed === 1 ? 'tela cobrada' : 'telas cobradas'} ×</span>
             <span className="money font-bold text-ink">{formatBRL(unitCents)}</span>
             <span>=</span>
-            <span className="money font-extrabold text-success">{formatBRL(totalCents)}</span>
+            <span className="money font-extrabold text-cta">{formatBRL(totalCents)}</span>
             <span>por mês</span>
           </p>
           {yearly ? (
             <p className="flex flex-wrap items-baseline gap-x-2 gap-y-1 border-t border-line pt-1.5 text-sm text-ink-muted">
               <span>Total do ano:</span>
-              <span className="money font-extrabold text-success">{formatBRL(yearCents)}</span>
+              <span className="money font-extrabold text-cta">{formatBRL(yearCents)}</span>
               <span className="text-xs">
-                (12 × {formatBRL(totalCents)}) — é este o valor da contratação anual.
+                (12 × {formatBRL(totalCents)}). Esse é o valor da contratação anual.
               </span>
             </p>
           ) : null}
@@ -377,8 +394,8 @@ export const SubscriptionStep = ({ checkout }: { checkout: CheckoutController })
       {policy?.retroactiveCharges === false ? (
         <Notice tone="success" icon={<Check size={15} />}>
           Você pode mudar de plano ou de número de telas depois.{' '}
-          <strong className="font-bold">Não cobramos período retroativo</strong> — nada de fatura por
-          tempo que já passou.
+          <strong className="font-bold">Não cobramos período retroativo</strong>, ou seja, não sai fatura
+          por tempo que já passou.
         </Notice>
       ) : null}
 

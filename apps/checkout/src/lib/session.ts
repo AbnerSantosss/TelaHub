@@ -33,6 +33,7 @@ export interface CheckoutSession {
   phone: string | null;
   document: string | null;
   companyName: string | null;
+  marketingOptIn: boolean;
   startedAt: string | null;
   lastSeenAt: string | null;
   identifiedAt: string | null;
@@ -60,6 +61,8 @@ export interface UpdateSessionInput {
   phone?: string;
   document?: string;
   companyName?: string;
+  /** Consentimento para novidades. Só viaja quando a pessoa mexeu na caixa. */
+  marketingOptIn?: boolean;
 }
 
 /**
@@ -136,6 +139,10 @@ function normalizeSession(payload: unknown): CheckoutSession {
     phone: optionalText(raw.phone),
     document: optionalText(raw.document),
     companyName: optionalText(raw.companyName),
+    // `=== true` e não coerção: qualquer coisa que não seja o booleano
+    // verdadeiro vindo do servidor é tratada como "não consentiu". Consentimento
+    // é o único campo em que adivinhar para o lado permissivo é inaceitável.
+    marketingOptIn: raw.marketingOptIn === true,
     startedAt: optionalText(raw.startedAt),
     lastSeenAt: optionalText(raw.lastSeenAt),
     identifiedAt: optionalText(raw.identifiedAt),
@@ -244,6 +251,32 @@ export interface SimulatePaymentResult {
   message: string;
 }
 
+/**
+ * Deduplicação do `Purchase` entre o navegador e a Conversions API.
+ *
+ * Vai no CORPO da confirmação (tanto em `/pay` quanto em `/simulate-payment`)
+ * porque o servidor precisa repetir o evento com o MESMO `eventID` que o Pixel
+ * usou aqui. Sem isso a Meta conta duas conversões — não dá erro, não aparece
+ * em log nenhum, só divide por dois todo custo por resultado do painel e a
+ * decisão de mídia passa a ser tomada em cima de um número inventado.
+ *
+ * Os nomes são os mesmos de `signup.schema.ts` (`metaEventId`, `fbp`, `fbc`)
+ * de propósito: dois nomes para a mesma coisa dentro do mesmo backend é a
+ * próxima divergência garantida.
+ *
+ * ⚠️ Enquanto o backend não persistir estes campos, o Zod da rota simplesmente
+ * os descarta (o schema não é `strict`), então mandar já é seguro — e é o que
+ * permite ligar o lado do servidor sem um segundo deploy do checkout.
+ */
+export interface PaymentTrackingInput {
+  /** `eventID` gerado no navegador ANTES da confirmação. */
+  metaEventId?: string;
+  /** Cookie `_fbp`. */
+  fbp?: string;
+  /** Cookie `_fbc` (quando ausente, o servidor reconstrói do `fbclid`). */
+  fbc?: string;
+}
+
 const PAYMENT_METHODS: PaymentMethod[] = ['pix', 'credit_card'];
 
 const CHARGE_STATUSES: StartPaymentResult['status'][] = ['pending', 'approved', 'declined'];
@@ -319,13 +352,17 @@ export const fetchPaymentConfig = async (): Promise<PaymentConfig> =>
  */
 export const startPayment = async (
   publicToken: string,
-  input: { method: PaymentMethod; card?: CardInput }
+  input: { method: PaymentMethod; card?: CardInput; tracking?: PaymentTrackingInput }
 ): Promise<StartPaymentResult> =>
   normalizeStartPayment(
-    await api.post<unknown>(
-      `/checkout/sessions/${encodeURIComponent(publicToken)}/pay`,
-      input
-    ),
+    await api.post<unknown>(`/checkout/sessions/${encodeURIComponent(publicToken)}/pay`, {
+      method: input.method,
+      card: input.card,
+      // Os campos de deduplicação vão no NÍVEL DE CIMA do corpo, ao lado de
+      // `method` — mesma forma do cadastro (`signup.schema.ts`). Aninhá-los em
+      // `tracking: {...}` obrigaria o backend a conhecer duas formas.
+      ...(input.tracking ?? {}),
+    }),
     input.method
   );
 
@@ -334,10 +371,17 @@ export const startPayment = async (
  * Esta rota só existe enquanto o provedor ativo for simulado — com gateway
  * real ela responde 404, de propósito.
  */
-export const simulatePayment = async (publicToken: string): Promise<SimulatePaymentResult> => {
+export const simulatePayment = async (
+  publicToken: string,
+  tracking: PaymentTrackingInput = {}
+): Promise<SimulatePaymentResult> => {
   const raw = asRecord(
     await api.post<unknown>(
-      `/checkout/sessions/${encodeURIComponent(publicToken)}/simulate-payment`
+      `/checkout/sessions/${encodeURIComponent(publicToken)}/simulate-payment`,
+      // O Pix simulado é uma confirmação como qualquer outra: quando o webhook
+      // real existir, é ele quem vai repetir o `Purchase` do servidor — e vai
+      // precisar do mesmo `metaEventId` que sai daqui.
+      tracking
     )
   );
 

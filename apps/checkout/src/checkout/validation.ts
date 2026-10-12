@@ -15,6 +15,14 @@ export interface IdentityDraft {
   documentKind: DocumentKind;
   document: string;
   companyName: string;
+  /**
+   * Consentimento para novidades. Fica no rascunho da identificação, mas
+   * DELIBERADAMENTE fora de `IdentityField` e de `validateIdentityField`: não
+   * é campo validável e jamais pode impedir a contratação. Marketing que
+   * bloqueia compra é o pior negócio possível, e consentimento arrancado como
+   * condição de compra não é consentimento.
+   */
+  marketingOptIn: boolean;
 }
 
 export type IdentityField = 'name' | 'email' | 'phone' | 'document' | 'companyName';
@@ -37,6 +45,9 @@ export const emptyIdentity = (): IdentityDraft => ({
   documentKind: 'cpf',
   document: '',
   companyName: '',
+  // Nunca `true`. Caixa de marketing pré-marcada é o padrão escuro que a LGPD
+  // trata como consentimento inválido.
+  marketingOptIn: false,
 });
 
 export function isValidCpf(value: string): boolean {
@@ -94,7 +105,7 @@ export function validateIdentityField(
       const name = identity.name.trim();
       if (!name) return 'Informe seu nome completo.';
       if (name.length < 3) return 'O nome está curto demais.';
-      // Nome e sobrenome: é o que vai no contrato e na nota.
+      // Nome e sobrenome: é quem responde pela contratação.
       if (!/\s/.test(name) || name.split(/\s+/).some((part) => part.length < 2)) {
         return 'Informe nome e sobrenome.';
       }
@@ -130,7 +141,9 @@ export function validateIdentityField(
     case 'companyName': {
       if (!isCnpj) return undefined;
       const company = identity.companyName.trim();
-      if (!company) return 'Informe a razão social — é o nome que sai na nota.';
+      // Sem "é o nome que sai na nota": não há emissão de nota fiscal hoje (ver
+      // o cabeçalho de `IdentificationStep.tsx`).
+      if (!company) return 'Informe a razão social da empresa que está contratando.';
       if (company.length < 2) return 'O nome da empresa está curto demais.';
       return undefined;
     }

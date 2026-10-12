@@ -118,7 +118,7 @@ const LoginPage = () => {
           {expired && !error && !permissionError && (
             <p
               role="status"
-              className="mb-4 rounded-lg border border-warning/30 bg-warning/10 px-3 py-2.5 text-[13px] leading-relaxed text-[#92400E]"
+              className="mb-4 rounded-lg border border-warning/30 bg-warning/10 px-3 py-2.5 text-[13px] leading-relaxed text-warning-ink"
             >
               Sua sessão expirou por inatividade. Entre novamente para continuar.
             </p>
@@ -148,7 +148,10 @@ const LoginPage = () => {
                 value={identifier}
                 onChange={(event) => setIdentifier(event.target.value)}
                 className={inputClass}
-                placeholder="voce@telahub.com.br"
+                // Nunca telahub.com.br, nem como exemplo: o domínio é de
+                // terceiro desde 2025 e serve outro produto. Endereço de
+                // exemplo em campo de login acaba sendo digitado de verdade.
+                placeholder="voce@exemplo.com.br"
                 aria-invalid={error ? true : undefined}
               />
             </Field>
@@ -183,7 +186,7 @@ const LoginPage = () => {
           </div>
 
           {error && (
-            <p role="alert" className="mt-4 flex items-start gap-2 text-[13px] font-medium text-[#B91C1C]">
+            <p role="alert" className="mt-4 flex items-start gap-2 text-[13px] font-medium text-danger-ink">
               <ShieldAlert aria-hidden="true" className="mt-px h-4 w-4 shrink-0" />
               {error}
             </p>

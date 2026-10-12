@@ -1,8 +1,15 @@
 // Passo 1 — IDENTIFICAÇÃO.
 //
-// CPF **ou** CNPJ com alternância explícita: a contratação é B2B e a NFS-e é
-// emitida contra o CNPJ. Quando é CNPJ, a razão social passa a ser obrigatória,
-// porque é o nome que sai na nota.
+// CPF **ou** CNPJ com alternância explícita: a maior parte das contratações é de
+// empresa, e o documento é o que identifica quem contratou. Quando é CNPJ, a
+// razão social passa a ser obrigatória, porque é o nome do contratante.
+//
+// ⚠️ NÃO PROMETA NOTA FISCAL AQUI. Os textos deste passo diziam que "a nota
+// fiscal do serviço é emitida contra este CNPJ" — hoje isso não acontece: a
+// emissão de NFS-e depende do provedor real com `ASAAS_NFSE_ENABLED` ligado, e
+// o provedor ativo é simulado (nenhum valor é cobrado, nenhuma nota é emitida).
+// Anunciar documento fiscal que não sai é promessa que o produto não cumpre
+// (CDC, art. 30) e a primeira reclamação previsível de quem contrata por CNPJ.
 import { useEffect, useRef } from 'react';
 import { Building2, Lock, User, Wand2 } from 'lucide-react';
 
@@ -13,7 +20,7 @@ import type { IdentityField } from './validation';
 
 const KIND_OPTIONS = [
   { kind: 'cpf' as const, label: 'CPF', icon: User, help: 'Pessoa física' },
-  { kind: 'cnpj' as const, label: 'CNPJ', icon: Building2, help: 'Empresa (nota contra o CNPJ)' },
+  { kind: 'cnpj' as const, label: 'CNPJ', icon: Building2, help: 'Empresa' },
 ];
 
 /**
@@ -35,6 +42,7 @@ export const IdentificationStep = ({ checkout }: { checkout: CheckoutController 
     identityErrors,
     focusRequest,
     setIdentityField,
+    setMarketingOptIn,
     setDocumentKind,
     blurIdentityField,
     submitIdentify,
@@ -157,15 +165,15 @@ export const IdentificationStep = ({ checkout }: { checkout: CheckoutController 
                 type="button"
                 aria-pressed={active}
                 onClick={() => setDocumentKind(kind)}
-                className={`flex flex-1 items-center justify-center gap-2 rounded-lg border px-3 py-2.5 text-sm font-bold transition-colors ${
+                className={`flex min-h-11 flex-1 items-center justify-center gap-2 rounded-lg border px-3 py-2.5 text-sm font-bold transition-colors ${
                   active
                     ? 'border-accent bg-accent/10 text-ink'
-                    : 'border-line bg-surface text-ink-muted hover:border-ink-subtle'
+                    : 'border-line bg-surface text-ink-muted hover-fine:border-ink-subtle'
                 }`}
               >
                 <Icon aria-hidden="true" size={15} />
                 {label}
-                <span className="sr-only"> — {help}</span>
+                <span className="sr-only">. {help}</span>
               </button>
             );
           })}
@@ -187,8 +195,8 @@ export const IdentificationStep = ({ checkout }: { checkout: CheckoutController 
           placeholder={isCnpj ? '00.000.000/0000-00' : '000.000.000-00'}
           hint={
             isCnpj
-              ? 'A nota fiscal do serviço é emitida contra este CNPJ.'
-              : 'Usado no contrato e na nota fiscal.'
+              ? 'É o documento da empresa que fica registrado como contratante.'
+              : 'Identifica quem está contratando. Não fica visível na tela de ninguém.'
           }
         />
 
@@ -202,7 +210,7 @@ export const IdentificationStep = ({ checkout }: { checkout: CheckoutController 
             onBlur={() => blurIdentityField('companyName')}
             error={identityErrors.companyName}
             autoComplete="organization"
-            placeholder="Nome da empresa na nota"
+            placeholder="Razão social da empresa"
           />
         ) : null}
       </div>
@@ -210,10 +218,41 @@ export const IdentificationStep = ({ checkout }: { checkout: CheckoutController 
       <p className="flex items-start gap-2 text-xs leading-relaxed text-ink-subtle">
         <Lock aria-hidden="true" size={14} className="mt-px shrink-0" />
         <span>
-          Seus dados ficam com a gente só para concluir esta contratação e emitir a nota. Nada é
-          compartilhado com terceiros.
+          Seus dados ficam com a gente só para concluir esta contratação e liberar o seu acesso.
+          Nada é compartilhado com terceiros.
         </span>
       </p>
+
+      {/*
+        Consentimento de novidades. Três regras que não podem ser afrouxadas:
+
+        1. Nasce DESMARCADO e continua opcional — não entra na validação, não
+           trava o botão "Continuar". Consentimento obtido como condição da
+           compra não é consentimento.
+        2. Fica separado da frase de privacidade acima, que fala de outra coisa
+           (uso dos dados para executar a contratação). Juntar as duas faria uma
+           parecer consequência da outra.
+        3. A promessa de saída precisa ser verdadeira: o link de descadastro vai
+           no rodapé de toda campanha, e a rota que o atende é pública. Se algum
+           dia o descadastro passar a exigir login, este texto vira promessa
+           falsa e sai daqui junto.
+      */}
+      <label
+        htmlFor="checkout-novidades"
+        className="flex cursor-pointer items-start gap-2.5 text-xs leading-relaxed text-ink-muted"
+      >
+        <input
+          id="checkout-novidades"
+          type="checkbox"
+          checked={identity.marketingOptIn}
+          onChange={(event) => setMarketingOptIn(event.target.checked)}
+          className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-accent"
+        />
+        <span>
+          Quero receber novidades e dicas de uso por e-mail. Dá para sair quando quiser, pelo link
+          no rodapé de cada mensagem.
+        </span>
+      </label>
 
       <PrimaryButton type="submit" busy={savingIdentity} busyLabel="Salvando…">
         Continuar
@@ -227,7 +266,7 @@ export const IdentificationStep = ({ checkout }: { checkout: CheckoutController 
         <button
           type="button"
           onClick={fillWithFakeData}
-          className="flex items-center justify-center gap-2 self-center rounded-lg border border-dashed border-line px-3 py-2 text-xs font-semibold text-ink-muted transition-colors hover:border-ink-subtle hover:text-ink"
+          className="flex min-h-11 items-center justify-center gap-2 self-center rounded-lg border border-dashed border-line px-3 py-2 text-xs font-semibold text-ink-muted transition-colors hover-fine:border-ink-subtle hover-fine:text-ink"
         >
           <Wand2 aria-hidden="true" size={14} />
           Preencher com dados de teste

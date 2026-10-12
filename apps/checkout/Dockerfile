@@ -9,6 +9,9 @@ COPY package.json package-lock.json ./
 RUN npm ci --production=false
 
 COPY . .
+# Contato exibido no checkout. Vem da stack (Portainer), não do repositório.
+ARG VITE_CONTACT_EMAIL=""
+ENV VITE_CONTACT_EMAIL=$VITE_CONTACT_EMAIL
 RUN npm run build
 
 # ==============================
