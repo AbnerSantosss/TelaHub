@@ -6,10 +6,12 @@ import tailwindcss from '@tailwindcss/vite';
 export default defineConfig(() => {
     return {
       server: {
-        // 3010, não 3000: a 3000 é disputada por outros projetos desta máquina
-        // (Next.js etc.) e, no Windows, dois processos bindam a mesma porta sem
-        // erro — quem responde é o que subiu primeiro, e a LP abria o app errado.
-        port: 3010,
+        // Bloco de portas do TelaHub em dev: 4100 site, 4110 painel, 4130 checkout.
+        // Já foi 3000 e depois 3010; as duas são disputadas por outros projetos
+        // desta máquina e, no Windows, dois processos bindam a mesma porta sem
+        // erro. Quem responde é o que subiu primeiro, e o "Entrar" da LP abria
+        // outro produto. `node check-env.js` acusa quando isso acontece.
+        port: 4110,
         strictPort: true,
         host: '0.0.0.0',
         proxy: {

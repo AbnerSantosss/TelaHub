@@ -5,9 +5,11 @@ import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
   server: {
-    // 3010 é o painel e 5173 é o site de vendas — o checkout usa 3030 para os
-    // três rodarem juntos em desenvolvimento.
-    port: 3030,
+    // Bloco de portas do TelaHub em dev: 4100 site, 4110 painel, 4130 checkout.
+    // Era 3030, que outro projeto desta máquina também fixa. `strictPort` faz o
+    // Vite falhar em vez de pular de porta e deixar os planos do site no vazio.
+    port: 4130,
+    strictPort: true,
     host: '0.0.0.0',
     proxy: {
       // Em produção o Nginx faz o proxy de /api e o cliente sempre chama
