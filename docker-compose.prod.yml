@@ -176,6 +176,10 @@ services:
       # Fonte única do canonical/OG/JSON-LD. NUNCA telahub.com.br: aquele
       # domínio é de terceiro desde 2025.
       - SITE_PUBLIC_URL=${SITE_PUBLIC_URL:-https://devtelahublandingpage.proxserverabner.site}
+      # Contas de demonstração, uma por plano (`prisma/seed-demo-users.ts`).
+      # Preenchida, o boot cria ou reseta as quatro contas com esta senha e o
+      # painel mostra os botões de entrada. Vazia, nada acontece.
+      - DEMO_USER_PASSWORD=${DEMO_USER_PASSWORD:-}
     depends_on:
       db:
         condition: service_healthy
@@ -208,6 +212,9 @@ services:
     #                        aqui para o dia em que esta stack não for mais nova.
     #   3. seed-plans      — catálogo de planos (o seed-prod depende do `loja`)
     #   4. seed-prod       — admin, display demo e assinatura
+    #   5. seed-demo-users — SÓ com DEMO_USER_PASSWORD preenchida: uma conta por
+    #                        plano, resetada a cada boot. `$$` porque o compose
+    #                        interpola `$` antes do shell ver a linha.
     # Encadeado com `&&`: se o seed falhar por falta de ADMIN_PASSWORD, o
     # container NÃO sobe. É melhor do que subir sem admin.
     command: >
@@ -215,6 +222,7 @@ services:
       npx tsx prisma/backfill-tenant-scope.ts &&
       npx tsx prisma/seed-plans.ts &&
       node prisma/seed-prod.js &&
+      { [ -z \"$$DEMO_USER_PASSWORD\" ] || npx tsx prisma/seed-demo-users.ts; } &&
       npm start"
 
   frontend:
@@ -232,6 +240,11 @@ services:
         # abaixo e entra no bundle, mas só depois de um redeploy com rebuild.
         - VITE_SITE_URL=${VITE_SITE_URL:-https://devtelahublandingpage.proxserverabner.site}
         - VITE_CHECKOUT_URL=${VITE_CHECKOUT_URL:-https://devtelahubcheckout.proxserverabner.site}
+        # Botões "Entrar como plano X" na tela de login (decisão de 15/10/2026).
+        # A MESMA variável alimenta o seed das contas no backend, então senha do
+        # botão e senha da conta não têm como divergir. Vazia, não há botão nem
+        # conta. Atenção: o valor fica legível no JS público da tela de login.
+        - VITE_DEMO_PASSWORD=${DEMO_USER_PASSWORD:-}
     restart: unless-stopped
     # O Nginx desta imagem tem `proxy_pass http://backend:3001`. Nginx resolve o
     # upstream ao CARREGAR a configuração: se o container `backend` ainda não

@@ -101,6 +101,31 @@ const DEV_ACCOUNTS: DevAccount[] = import.meta.env.DEV
   : [];
 const SHOW_DEV_LOGIN = import.meta.env.DEV && DEV_ACCOUNTS.length > 0;
 
+// Atalho de DEMONSTRAÇÃO, um botão por plano, para o painel de teste online
+// (stack 117, devtelahubpainel). Decisão do dono em 15/10/2026: botão aberto na
+// tela de login, sem Cloudflare Access na frente.
+//
+// O que isso significa, escrito para ninguém esquecer: a senha vai DENTRO do
+// bundle público. Qualquer visitante entra nessas contas. Por isso:
+// - só contas de plano (`seed-demo-users`), cada uma num tenant isolado; o
+//   admin NUNCA entra aqui, ele controla o ambiente inteiro;
+// - só liga quando o build recebe `VITE_DEMO_PASSWORD`. O compose da 117 passa
+//   esse valor a partir de `DEMO_USER_PASSWORD`; a stack principal
+//   (`docker-compose.yml`, telahub-novo) não passa, então lá o bloco nem existe;
+// - o backend da 117 recria as contas com essa senha a cada boot, então quem
+//   trocar a senha de uma demo só a quebra até o próximo restart.
+const DEMO_PASSWORD = (import.meta.env.VITE_DEMO_PASSWORD as string | undefined)?.trim();
+const DEMO_ACCOUNTS: DevAccount[] = DEMO_PASSWORD
+  ? [
+      { label: 'Entrar como plano Grátis', email: 'demo.gratis@telahub.local', password: DEMO_PASSWORD },
+      { label: 'Entrar como plano Loja', email: 'demo.loja@telahub.local', password: DEMO_PASSWORD },
+      { label: 'Entrar como plano Rede', email: 'demo.rede@telahub.local', password: DEMO_PASSWORD },
+      { label: 'Entrar como plano Enterprise', email: 'demo.enterprise@telahub.local', password: DEMO_PASSWORD },
+    ]
+  : [];
+// No `npm run dev` o bloco de desenvolvimento já cobre isso; não mostrar os dois.
+const SHOW_DEMO_LOGIN = !SHOW_DEV_LOGIN && DEMO_ACCOUNTS.length > 0;
+
 /**
  * Erro de login em português, para a pessoa e não para o console.
  *
@@ -173,7 +198,7 @@ const Login: React.FC = () => {
   };
 
   const handleDevLogin = async (account: DevAccount) => {
-    if (!SHOW_DEV_LOGIN || loading) return;
+    if ((!SHOW_DEV_LOGIN && !SHOW_DEMO_LOGIN) || loading) return;
 
     // Sem valor padrão: o filtro de `DEV_ACCOUNTS` já garante que os dois vieram do `.env`.
     const devEmail = account.email as string;
@@ -376,6 +401,27 @@ const Login: React.FC = () => {
                     variáveis <code>VITE_DEV_*</code> no <code>.env</code> local.
                   </p>
                   {DEV_ACCOUNTS.map((account) => (
+                    <button
+                      key={account.label}
+                      type="button"
+                      className="auth-botao auth-botao-secundario"
+                      onClick={() => handleDevLogin(account)}
+                      disabled={loading}
+                    >
+                      {account.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Demonstração por plano: só existe no build da stack de teste,
+                  que recebe VITE_DEMO_PASSWORD. Ver o comentário em DEMO_ACCOUNTS. */}
+              {SHOW_DEMO_LOGIN && (
+                <div className="auth-dev">
+                  <p className="auth-dev-aviso">
+                    Ambiente de teste. Entre como cliente de um plano para ver o que ele libera.
+                  </p>
+                  {DEMO_ACCOUNTS.map((account) => (
                     <button
                       key={account.label}
                       type="button"

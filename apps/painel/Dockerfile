@@ -24,6 +24,13 @@ ARG VITE_CHECKOUT_URL
 ENV VITE_SITE_URL=$VITE_SITE_URL
 ENV VITE_CHECKOUT_URL=$VITE_CHECKOUT_URL
 
+# Senha das contas de demonstração (uma por plano). Preenchida, a tela de login
+# ganha os botões "Entrar como plano X" e a senha vai para o bundle público.
+# Só a stack de teste (docker-compose.prod.yml) passa este valor. Vazio, o bloco
+# não aparece. Ver `components/Login.tsx`, DEMO_ACCOUNTS.
+ARG VITE_DEMO_PASSWORD=
+ENV VITE_DEMO_PASSWORD=$VITE_DEMO_PASSWORD
+
 RUN npm run build
 
 # ── Imagem final: só Nginx + dist ────────────────────────────
