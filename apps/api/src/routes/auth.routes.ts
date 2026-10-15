@@ -5,6 +5,7 @@ import { authMiddleware } from '../middlewares/auth.middleware';
 import { authRateLimit } from '../middlewares/rate-limit.middleware';
 import { validateBody } from '../middlewares/validate.middleware';
 import { acceptTermsSchema, PRIVACY_VERSION, TERMS_VERSION } from '../schemas/signup.schema';
+import { DEMO_LOGIN_ACCOUNTS, findDemoAccount, isDemoLoginEnabled } from '../lib/demo-login';
 
 const router = Router();
 
@@ -123,6 +124,53 @@ router.post(
 );
 
 // POST /api/auth/logout (client-side — apenas confirma)
+// GET /api/auth/demo-accounts — o painel pergunta se mostra os botões de
+// demonstração. Desligado, responde lista vazia (e não erro) para a tela de
+// login não registrar falha à toa. Ver `lib/demo-login.ts`.
+router.get('/demo-accounts', (_req: Request, res: Response): void => {
+  if (!isDemoLoginEnabled()) {
+    res.json({ accounts: [] });
+    return;
+  }
+  res.json({ accounts: DEMO_LOGIN_ACCOUNTS.map(({ plan, label }) => ({ plan, label })) });
+});
+
+// POST /api/auth/demo-login { plan } — entra sem senha na conta demo do plano.
+router.post('/demo-login', authRateLimit, async (req: Request, res: Response): Promise<void> => {
+  if (!isDemoLoginEnabled()) {
+    res.status(404).json({ error: 'Não encontrado.' });
+    return;
+  }
+
+  const account = findDemoAccount(req.body?.plan);
+  if (!account) {
+    res.status(400).json({ error: 'Plano de demonstração desconhecido.' });
+    return;
+  }
+
+  try {
+    const result = await userService.loginDemo(account.email);
+    if (!result) {
+      res.status(503).json({ error: 'A conta de demonstração ainda não foi criada. Tente de novo em instantes.' });
+      return;
+    }
+
+    const stored = await userService.getById(result.user.id);
+    res.json({
+      ...result,
+      user: {
+        ...result.user,
+        termsAcceptancePending: stored ? isTermsAcceptancePending(stored) : false,
+        termsVersion: TERMS_VERSION,
+        privacyVersion: PRIVACY_VERSION,
+      },
+    });
+  } catch (error: any) {
+    console.error('Erro no login de demonstração:', error);
+    res.status(500).json({ error: 'Erro interno ao processar login.' });
+  }
+});
+
 router.post('/logout', (req: Request, res: Response): void => {
   res.json({ message: 'Logout realizado com sucesso.' });
 });

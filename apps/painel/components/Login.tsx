@@ -9,7 +9,7 @@ import {
   LogIn,
   ShieldCheck,
 } from 'lucide-react';
-import { login } from '../services/storage';
+import { demoLogin, getDemoAccounts, login } from '../services/storage';
 import { isApiError } from '../libs/api';
 // tokens e efeitos do tema claro, antes do CSS da tela
 import './claro.css';
@@ -103,28 +103,13 @@ const SHOW_DEV_LOGIN = import.meta.env.DEV && DEV_ACCOUNTS.length > 0;
 
 // Atalho de DEMONSTRAÇÃO, um botão por plano, para o painel de teste online
 // (stack 117, devtelahubpainel). Decisão do dono em 15/10/2026: botão aberto na
-// tela de login, sem Cloudflare Access na frente.
+// tela de login, sem Cloudflare Access e SEM SENHA em lugar nenhum.
 //
-// O que isso significa, escrito para ninguém esquecer: a senha vai DENTRO do
-// bundle público. Qualquer visitante entra nessas contas. Por isso:
-// - só contas de plano (`seed-demo-users`), cada uma num tenant isolado; o
-//   admin NUNCA entra aqui, ele controla o ambiente inteiro;
-// - só liga quando o build recebe `VITE_DEMO_PASSWORD`. O compose da 117 passa
-//   esse valor a partir de `DEMO_USER_PASSWORD`; a stack principal
-//   (`docker-compose.yml`, telahub-novo) não passa, então lá o bloco nem existe;
-// - o backend da 117 recria as contas com essa senha a cada boot, então quem
-//   trocar a senha de uma demo só a quebra até o próximo restart.
-const DEMO_PASSWORD = (import.meta.env.VITE_DEMO_PASSWORD as string | undefined)?.trim();
-const DEMO_ACCOUNTS: DevAccount[] = DEMO_PASSWORD
-  ? [
-      { label: 'Entrar como plano Grátis', email: 'demo.gratis@telahub.local', password: DEMO_PASSWORD },
-      { label: 'Entrar como plano Loja', email: 'demo.loja@telahub.local', password: DEMO_PASSWORD },
-      { label: 'Entrar como plano Rede', email: 'demo.rede@telahub.local', password: DEMO_PASSWORD },
-      { label: 'Entrar como plano Enterprise', email: 'demo.enterprise@telahub.local', password: DEMO_PASSWORD },
-    ]
-  : [];
-// No `npm run dev` o bloco de desenvolvimento já cobre isso; não mostrar os dois.
-const SHOW_DEMO_LOGIN = !SHOW_DEV_LOGIN && DEMO_ACCOUNTS.length > 0;
+// O painel não sabe e-mail nem senha de conta demo: pergunta à API quais planos
+// estão ligados (`GET /auth/demo-accounts`) e entra por `POST /auth/demo-login`.
+// Quem liga é a API, com `DEMO_LOGIN=true` (só o compose da 117 passa). Na stack
+// principal a lista vem vazia e o bloco nem aparece. Ver `api/src/lib/demo-login.ts`.
+type DemoAccount = { plan: string; label: string };
 
 /**
  * Erro de login em português, para a pessoa e não para o console.
@@ -156,7 +141,21 @@ const Login: React.FC = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const [demoAccounts, setDemoAccounts] = useState<DemoAccount[]>([]);
+
   const navigate = useNavigate();
+
+  // No `npm run dev` o bloco de desenvolvimento já cobre isso; não mostrar os dois.
+  useEffect(() => {
+    if (SHOW_DEV_LOGIN) return;
+    let ativo = true;
+    getDemoAccounts().then((accounts) => {
+      if (ativo) setDemoAccounts(accounts);
+    });
+    return () => {
+      ativo = false;
+    };
+  }, []);
 
   useEffect(() => {
     const savedUser = localStorage.getItem('officecom_saved_user');
@@ -198,7 +197,7 @@ const Login: React.FC = () => {
   };
 
   const handleDevLogin = async (account: DevAccount) => {
-    if ((!SHOW_DEV_LOGIN && !SHOW_DEMO_LOGIN) || loading) return;
+    if (!SHOW_DEV_LOGIN || loading) return;
 
     // Sem valor padrão: o filtro de `DEV_ACCOUNTS` já garante que os dois vieram do `.env`.
     const devEmail = account.email as string;
@@ -212,6 +211,23 @@ const Login: React.FC = () => {
     try {
       const user = await login(devEmail, devPassword);
       if (user) finishLogin(devEmail);
+      else setError('Entramos, mas não encontramos essa conta.');
+    } catch (e: any) {
+      console.error(e);
+      setError(mensagemDeErro(e));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDemoLogin = async (account: DemoAccount) => {
+    if (loading) return;
+    setLoading(true);
+    setError('');
+
+    try {
+      const user = await demoLogin(account.plan);
+      if (user) navigate('/');
       else setError('Entramos, mas não encontramos essa conta.');
     } catch (e: any) {
       console.error(e);
@@ -414,22 +430,22 @@ const Login: React.FC = () => {
                 </div>
               )}
 
-              {/* Demonstração por plano: só existe no build da stack de teste,
-                  que recebe VITE_DEMO_PASSWORD. Ver o comentário em DEMO_ACCOUNTS. */}
-              {SHOW_DEMO_LOGIN && (
+              {/* Demonstração por plano: só aparece quando a API tem DEMO_LOGIN=true
+                  (stack de teste). Ver o comentário em DemoAccount. */}
+              {demoAccounts.length > 0 && (
                 <div className="auth-dev">
                   <p className="auth-dev-aviso">
                     Ambiente de teste. Entre como cliente de um plano para ver o que ele libera.
                   </p>
-                  {DEMO_ACCOUNTS.map((account) => (
+                  {demoAccounts.map((account) => (
                     <button
-                      key={account.label}
+                      key={account.plan}
                       type="button"
                       className="auth-botao auth-botao-secundario"
-                      onClick={() => handleDevLogin(account)}
+                      onClick={() => handleDemoLogin(account)}
                       disabled={loading}
                     >
-                      {account.label}
+                      Entrar como plano {account.label}
                     </button>
                   ))}
                 </div>
