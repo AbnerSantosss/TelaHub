@@ -75,7 +75,7 @@ export const TopBar: React.FC<TopBarProps> = ({
                 letterSpacing: '0.06em'
               }}
             >
-              Bem-vindo, {currentUser?.username || 'admin'}
+              Bem-vindo, {currentUser?.name?.trim().split(/\s+/)[0] || currentUser?.username || 'admin'}
             </p>
           </div>
         </button>
