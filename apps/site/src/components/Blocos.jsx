@@ -115,7 +115,6 @@ export default function Blocos() {
   return (
     <section id="na-tela" className="secao blocos-secao" aria-labelledby="na-tela-titulo">
       <div className="secao__cabeca reveal">
-        <span className="chip">O que vai na tela</span>
         <h2 id="na-tela-titulo" className="h2">
           A foto, o texto, o vídeo, a agenda e a planilha que você já tem viram conteúdo de TV.
         </h2>

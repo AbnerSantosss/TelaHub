@@ -16,18 +16,19 @@ export const OrganizationSelector: React.FC<OrganizationSelectorProps> = ({
   if (organizations.length <= 1) return null;
 
   return (
-    <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-lg px-2.5 py-1">
-      <Building2 size={12} className="text-[var(--th-accent)]" />
+    <label className="flex min-h-11 items-center gap-2 rounded-lg border border-borda-3 bg-papel px-3 md:min-h-9 focus-within:border-marca">
+      <Building2 size={15} className="text-marca" aria-hidden="true" />
+      <span className="sr-only">Organização</span>
       <select
         value={selectedOrgId || ''}
         onChange={(e) => onChange(e.target.value || null)}
-        className="bg-transparent text-[11px] font-bold text-white uppercase tracking-wider outline-none cursor-pointer"
+        className="cursor-pointer bg-transparent text-base font-semibold text-tinta outline-none md:text-sm"
       >
-        <option value="" className="bg-slate-900">Todas as lojas</option>
+        <option value="">Todas as lojas</option>
         {organizations.map((org) => (
-          <option key={org.id} value={org.id} className="bg-slate-900">{org.name}</option>
+          <option key={org.id} value={org.id}>{org.name}</option>
         ))}
       </select>
-    </div>
+    </label>
   );
 };

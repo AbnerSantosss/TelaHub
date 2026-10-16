@@ -108,12 +108,12 @@ const empty = <span className="font-normal text-ink-subtle">-</span>;
 /** Etiqueta de origem: plano contratado × concessão manual. */
 const OriginTag = ({ manual }: { manual: boolean }) =>
   manual ? (
-    <span className="inline-flex items-center gap-1 rounded border border-info/25 bg-info/10 px-1.5 py-px text-[11px] font-semibold text-info-ink">
+    <span className="inline-flex items-center gap-1 rounded border border-info/25 bg-info/10 px-1.5 py-px text-xs font-semibold text-info-ink">
       <Sparkles aria-hidden="true" className="h-3 w-3" />
       concessão manual
     </span>
   ) : (
-    <span className="text-[11px] font-medium text-ink-subtle">do plano</span>
+    <span className="text-xs font-medium text-ink-subtle">do plano</span>
   );
 
 /** Valor de metadado da trilha: `null` e `false` são informação, não vazio. */
@@ -124,7 +124,7 @@ function metadataText(value: unknown): string {
   return String(value);
 }
 
-const th = 'px-3 py-2 text-left text-[11px] font-bold tracking-[0.1em] text-ink-subtle uppercase';
+const th = 'px-3 py-2 text-left text-xs font-semibold text-ink-subtle';
 
 const ClienteDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -202,7 +202,6 @@ const ClienteDetailPage = () => {
       {back}
 
       <PageHeader
-        eyebrow="Cliente"
         title={organization.name || 'Organização sem nome'}
         subtitle={
           <>
@@ -689,7 +688,7 @@ const ClienteDetailPage = () => {
                         <dl className="mt-1 flex flex-wrap gap-x-4 gap-y-1">
                           {Object.entries(metadata).map(([key, value]) => (
                             <div key={key} className="flex items-baseline gap-1.5">
-                              <dt className="text-[11px] font-semibold tracking-wide text-ink-subtle uppercase">
+                              <dt className="text-xs font-semibold text-ink-subtle">
                                 {key}
                               </dt>
                               <dd className="text-[12px] font-medium break-all text-ink-muted">

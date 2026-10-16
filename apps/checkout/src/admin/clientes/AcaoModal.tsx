@@ -432,7 +432,7 @@ const AcaoModal = ({
                   onClick={() => setDays(option)}
                   className={cx(
                     'rounded-full border px-3 py-1 text-[12px] font-semibold transition-colors',
-                    days === option ? 'border-nav bg-nav text-white' : 'border-line bg-surface text-ink-muted hover:bg-app'
+                    days === option ? 'border-marca bg-marca text-white' : 'border-line bg-surface text-ink-muted hover:bg-app'
                   )}
                 >
                   +{option} dias

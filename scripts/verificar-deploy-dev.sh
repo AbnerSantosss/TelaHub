@@ -53,3 +53,15 @@ curl -s -o /dev/null -w '%{http_code}\n' -A "$UA" -X POST "$P/api/leads" \
 
 echo "== 8. Checkout: meta robots"
 curl -s -A "$UA" "$C/" | grep -oE '<meta name="robots"[^>]*>' | head -1
+
+echo "== 9. Domínio único (gateway)"
+U=https://devtelahub.proxserverabner.site
+for par in "/api/health 200" "/ 200" "/app/ 200" "/checkout/c 200" "/entrar 302" "/cadastro 302"; do
+  set -- $par
+  linha=$(curl -s -o /dev/null -w '%{http_code} %{redirect_url}' -A "$UA" "$U$1")
+  printf '%-45s esperado=%s obtido=%s\n' "$U$1" "$2" "$linha"
+done
+echo "  hosts antigos devem devolver 301 para $U:"
+for h in $P $S $C; do
+  printf '%-50s %s\n' "$h/" "$(curl -s -o /dev/null -w '%{http_code} %{redirect_url}' -A "$UA" "$h/")"
+done

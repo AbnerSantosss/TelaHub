@@ -473,7 +473,7 @@ const AutomacaoCard = ({
                       title={`Prévia de ${automation.label}`}
                       srcDoc={preview.html}
                       sandbox=""
-                      className="h-72 w-full bg-white"
+                      className="h-72 w-full bg-surface"
                     />
                     <p className="border-t border-line bg-app px-3 py-2 text-xs text-ink-subtle">
                       Dados reais de {previewOrganizationName ?? 'organização selecionada'},

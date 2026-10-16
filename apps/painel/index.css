@@ -1,16 +1,32 @@
-@import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700;800&family=Geist:wght@100..900&family=Geist+Mono:wght@100..900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Syncopate:wght@400;700&family=Manrope:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap');
+/* Fontes do Google que o painel ainda precisa.
+   - Geist (a fonte da marca) vem de `@fontsource-variable/geist`, abaixo, e do
+     <link> do index.html, que o Login/Auth.css usa.
+   - Geist Mono: código de pareamento, dinheiro, número.
+   - Exo 2 e JetBrains Mono: fonte do que aparece NA TV (ver `data-superficie`
+     mais abaixo). O conteúdo exibido não troca de fonte junto com o painel.
+   - Inter e Outfit: opções de fonte da cena no editor (PropertiesPanel).
+   Space Grotesk, Orbitron, Rajdhani, Syncopate, Manrope e Share Tech Mono
+   saíram em 15/10/2026: nenhum arquivo do painel as usava. */
+@import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700;800&family=Geist+Mono:wght@100..900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
+/* Marca "Vitrine Acesa": a fonte única de cor, fonte, raio e sombra. Estes dois
+   arquivos dão as classes bg-papel, text-tinta, bg-marca, border-borda,
+   rounded-md, shadow-card etc. Nada abaixo escreve hex de cor do chrome. */
+@import "../../packages/marca/tokens.css";
+@import "../../packages/marca/tailwind-theme.css";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/geist";
 
+/* Nenhum arquivo põe `.dark` no html. As variantes `dark:` dos componentes
+   shadcn ficam inertes, e o painel é claro. */
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  --font-sans: 'Exo 2', 'Geist', 'Outfit', 'Inter', sans-serif;
-  --font-mono: 'JetBrains Mono', 'Geist Mono', monospace;
-  
-  /* Eldora UI custom animations & keyframes */
+  /* Fonte, raio e sombra vêm de packages/marca/tailwind-theme.css. Redefinir
+     --font-sans ou --radius-* aqui venceria a marca (o @theme posterior ganha). */
+
+  /* Animações usadas pelo Player e pelo editor */
   --animate-gradient-x: gradient-x 6s ease infinite;
   --animate-pulse-glow: pulse-glow 2s ease-in-out infinite;
 
@@ -23,54 +39,55 @@
     50% { opacity: 0.55; transform: translate(-50%, -50%) scale(1.02); }
   }
 
-  /* Shadcn UI tailwind v4 color variables */
-  --color-background: hsl(var(--background));
-  --color-foreground: hsl(var(--foreground));
-  --color-card: hsl(var(--card));
-  --color-card-foreground: hsl(var(--card-foreground));
-  --color-popover: hsl(var(--popover));
-  --color-popover-foreground: hsl(var(--popover-foreground));
-  --color-primary: hsl(var(--primary));
-  --color-primary-foreground: hsl(var(--primary-foreground));
-  --color-secondary: hsl(var(--secondary));
-  --color-secondary-foreground: hsl(var(--secondary-foreground));
-  --color-muted: hsl(var(--muted));
-  --color-muted-foreground: hsl(var(--muted-foreground));
-  --color-accent: hsl(var(--accent));
-  --color-accent-foreground: hsl(var(--accent-foreground));
-  --color-destructive: hsl(var(--destructive));
-  --color-destructive-foreground: hsl(var(--destructive-foreground));
-  --color-border: hsl(var(--border));
-  --color-input: hsl(var(--input));
-  --color-ring: hsl(var(--ring));
-
-  /* Superfícies dark premium */
-  --color-bg:          #0a0d16;
-  --color-surface:     rgba(255,255,255,0.025);
-  --color-surface-2:   rgba(255,255,255,0.045);
-  --color-border-hover:rgba(var(--th-accent-soft-rgb),0.40);
-
-  /* Texto */
-  --color-text:        #e8edf5;
-  --color-text-muted:  #7b8794;
-
-  /* Marca / acentos */
-  --color-accent-2:    #2563eb;   /* azul ação  */
-  --color-success:     #34d399;
-  --color-danger:      #f87171;
-  --color-warning:     #fbbf24;
-  --color-violet:      #e879f9;
-
-  /* Raio (cantos suaves consistentes) */
-  --radius-sm: 0.625rem;  /* 10px */
-  --radius:    0.875rem;  /* 14px */
-  --radius-lg: 1.125rem;  /* 18px */
-  --radius-xl: 1.25rem;   /* 20px */
-
-  /* Easing/Spring */
   --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* Cores das classes do shadcn e das classes próprias do painel. `inline` faz a
+   classe usar a variável em tempo de execução. */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Nomes antigos do painel, agora no papel claro. Mantidos para não reescrever
+     cada tela: bg-surface, text-text-muted, border-border-hover seguem valendo. */
+  --color-bg: var(--papel-2);
+  --color-surface: var(--papel);
+  --color-surface-2: var(--papel-3);
+  --color-border-hover: var(--borda-2);
+  --color-text: var(--tinta);
+  --color-text-muted: var(--tinta-3);
+  --color-accent-2: var(--marca);
+  --color-success: var(--ok);
+  --color-danger: var(--danger);
+  --color-warning: var(--warn);
+  /* `violet` era o fúcsia do tema escuro. A marca não tem um segundo matiz:
+     quem usava text-violet passa a sair na cor da marca. */
+  --color-violet: var(--marca);
+}
+
+/* ========================================================================
+   SUPERFÍCIE DA TV (react-grid e fundos animados dos widgets)
+   Conteúdo exibido na TV: fica fora da identidade do painel de propósito.
+   Única troca em 15/10/2026: o céu de `.bg-anim-clear-day` usava a cor de
+   destaque do painel e agora usa --luz (o mesmo azul-céu de antes).
+   ======================================================================== */
 .react-grid-layout {
   position: relative;
   transition: height 200ms ease;
@@ -221,7 +238,7 @@
 
 /* Clear Day */
 .bg-anim-clear-day {
-  background: linear-gradient(to bottom, var(--th-accent-soft), #bae6fd);
+  background: linear-gradient(to bottom, var(--luz), #bae6fd);
   background-size: 100% 100%;
   animation: gradient-flow 20s ease infinite;
 }
@@ -300,202 +317,77 @@
   animation: rain-fall 0.5s linear infinite, lightning 5s infinite;
 }
 
-/* --- Cor de destaque (accent) configurável --- */
+/* ========================================================================
+   VARIÁVEIS DO PAINEL (tema claro, cor da marca fixa)
+   ======================================================================== */
 /*
- * Todo o chrome do painel referencia estas variáveis em vez de hex fixo.
- * Elas são sobrescritas em runtime por `libs/theme.ts` (preset salvo em
- * localStorage). Os triplets *-rgb existem porque os glows/bordas usam
- * rgba(var(--th-accent-rgb), alpha). Widgets e Player ficam fora disso de
- * propósito: cor de conteúdo exibido na TV não deve seguir o tema do admin.
+ * Até 15/10/2026 o usuário escolhia entre seis cores de destaque e
+ * `libs/theme.ts` reescrevia estas variáveis em runtime. Agora a cor é a da
+ * marca, sem seletor. As variáveis --th-accent* continuam existindo porque
+ * telas inteiras (editor, relatórios, agenda) as referenciam; todas apontam
+ * para a marca. Os triplets *-rgb espelham --marca (3,105,161) e --marca-hover
+ * (2,85,132) para quem ainda faz rgba(var(--th-accent-rgb), alfa).
  */
 :root {
-  --th-accent:            #0ea5e9;
-  --th-accent-soft:       #38bdf8;
-  --th-accent-strong:     #0284c7;
-  --th-accent-rgb:        14, 165, 233;
-  --th-accent-soft-rgb:   56, 189, 248;
-  --th-accent-strong-rgb: 2, 132, 199;
+  --th-accent:            var(--marca);
+  --th-accent-soft:       var(--marca);
+  --th-accent-strong:     var(--marca-hover);
+  --th-accent-rgb:        var(--marca-rgb);
+  --th-accent-soft-rgb:   var(--marca-rgb);
+  --th-accent-strong-rgb: 2, 85, 132;
+  --brand-accent:         var(--marca);
+
+  /* Apelidos antigos ainda lidos por algumas telas */
+  --txt:  var(--tinta);
+  --txt2: var(--tinta-2);
+  --txt3: var(--tinta-3);
+
+  /* shadcn. Sem hsl(): cada variável já é uma cor completa. */
+  --background:             var(--papel-2);
+  --foreground:             var(--tinta);
+  --card:                   var(--papel);
+  --card-foreground:        var(--tinta);
+  --popover:                var(--papel);
+  --popover-foreground:     var(--tinta);
+  --primary:                var(--marca);
+  --primary-foreground:     var(--papel);
+  --secondary:              var(--papel-3);
+  --secondary-foreground:   var(--tinta);
+  --muted:                  var(--papel-3);
+  --muted-foreground:       var(--tinta-3);
+  /* No shadcn puro `accent` é um cinza de hover. Aqui o código inteiro usa
+     text-accent, bg-accent e border-accent como "a cor da marca", então accent
+     É a marca. O hover dos itens de menu usa bg-marca-fundo (ver ui/). */
+  --accent:                 var(--marca);
+  --accent-foreground:      var(--papel);
+  --destructive:            var(--danger);
+  --destructive-foreground: var(--papel);
+  --border:                 var(--borda);
+  --input:                  var(--borda);
+  --ring:                   var(--marca);
+  /* Raio padrão do shadcn/sonner e de `rounded-[var(--radius)]` */
+  --radius:                 var(--raio-8);
+
+  /* Mesmos valores do @theme inline, declarados também aqui para o CSS e os
+     `style={{}}` que leem var(--color-*) diretamente. */
+  --color-bg:           var(--papel-2);
+  --color-surface:      var(--papel);
+  --color-surface-2:    var(--papel-3);
+  --color-border:       var(--borda);
+  --color-border-hover: var(--borda-2);
+  --color-text:         var(--tinta);
+  --color-text-muted:   var(--tinta-3);
+  --color-accent:       var(--marca);
 }
 
-/* --- Shadcn UI core CSS variables --- */
-:root {
-  --card:        #111827;
-  --border:      #334155;
-  --border-hover:var(--th-accent);
-  --accent:      var(--th-accent);
-  --accent2:     #2563eb;
-  --accent-dim:  rgba(var(--th-accent-rgb),0.08);
-  --txt:         #f8fafc;
-  --txt2:        #cbd5e1;
-  --txt3:        #64748b;
-  --scanline:    rgba(255, 255, 255, 0.008);
+/* Utilitário de sombra ainda usado por ForgotPassword e ResetPassword */
+.shadow-soft { box-shadow: var(--sombra-card); }
 
-  --background: 225 36.8% 6.1%;
-  --foreground: 216 35.3% 93.3%;
-  --card: 225 30% 9%;
-  --card-foreground: 216 35.3% 93.3%;
-  --popover: 225 30% 7.5%;
-  --popover-foreground: 216 35.3% 93.3%;
-  --primary: 198.6 92.8% 48.4%;
-  --primary-foreground: 225 36.8% 6.1%;
-  --secondary: 225 26.8% 12.7%;
-  --secondary-foreground: 216 35.3% 93.3%;
-  --muted: 225 26.8% 12.7%;
-  --muted-foreground: 212 11% 53%;
-  --accent: 198.6 92.8% 48.4%;
-  --accent-foreground: 0 0% 100%;
-  --destructive: 0 91.3% 70.2%;
-  --destructive-foreground: 0 0% 100%;
-  --border: 225 20% 15%;
-  --input: 225 20% 15%;
-  --ring: 198.6 92.8% 48.4%;
-  --radius: 0.875rem;
-
-  /* Mapeamento de compatibilidade para código legante anterior */
-  --brand-bg: #0a0d16;
-  --brand-surface: #111420;
-  --brand-accent: var(--th-accent);
-  --brand-text-high: #e8edf5;
-  --brand-text-sec: #7b8794;
-}
-
-/* Custom utility overrides */
-.bg-brand-bg {
-  background-color: var(--brand-bg) !important;
-}
-
-.bg-brand-surface {
-  background-color: var(--brand-surface) !important;
-}
-
-.bg-brand-accent {
-  background-color: var(--brand-accent) !important;
-}
-
-.text-brand-accent {
-  color: var(--brand-accent) !important;
-}
-
-.text-brand-high {
-  color: var(--brand-text-high) !important;
-}
-
-.text-brand-sec {
-  color: var(--brand-text-sec) !important;
-}
-
-.border-brand-accent {
-  border-color: var(--brand-accent) !important;
-}
-
-.border-brand-surface {
-  border-color: var(--brand-surface) !important;
-}
-
-.border-brand-sec {
-  border-color: var(--brand-text-sec) !important;
-}
-
-/* Premium Buttons Styling */
-.btn-brand-primary {
-  background-color: var(--brand-accent) !important;
-  color: var(--brand-text-high) !important;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 0 15px rgba(var(--th-accent-rgb),0.15);
-  border-radius: 8px !important;
-}
-
-.btn-brand-primary:hover:not(:disabled) {
-  background-color: var(--th-accent-strong) !important;
-  box-shadow: 0 0 25px rgba(var(--th-accent-rgb),0.35);
-  transform: translateY(-1px);
-}
-
-.btn-brand-primary:active:not(:disabled) {
-  transform: translateY(0);
-}
-
-.btn-brand-secondary {
-  background-color: transparent !important;
-  border: 1px solid var(--brand-text-sec) !important;
-  color: var(--brand-text-high) !important;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  border-radius: 8px !important;
-}
-
-.btn-brand-secondary:hover:not(:disabled) {
-  border-color: var(--brand-text-high) !important;
-  background-color: rgba(148, 163, 184, 0.08) !important;
-}
-
-/* Corporate Solid Button — Clean Geometric Premium */
-.liquid-metal-btn {
-  background-color: var(--th-accent);
-  transition: background-color 0.2s ease-out, transform 0.15s ease-out, box-shadow 0.2s ease-out;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-  border-radius: 8px !important;
-}
-
-.liquid-metal-btn:hover:not(:disabled) {
-  background-color: var(--th-accent-strong);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(var(--th-accent-rgb),0.25);
-}
-
-.liquid-metal-btn:active:not(:disabled) {
-  transform: translateY(0);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-}
-
-/* Dot Matrix Loader Animations */
-@keyframes dot-matrix-pulse {
-  0%, 100% {
-    opacity: 0.25;
-    transform: scale(0.85);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1.15);
-  }
-}
-
-.dot-matrix-dot {
-  animation: dot-matrix-pulse 1.2s ease-in-out infinite;
-}
-
-.dot-matrix-dot:nth-child(2) {
-  animation-delay: 0.15s;
-}
-
-.dot-matrix-dot:nth-child(3) {
-  animation-delay: 0.3s;
-}
-
-.dot-matrix-dot:nth-child(4) {
-  animation-delay: 0.45s;
-}
-
-.dot-matrix-dot:nth-child(5) {
-  animation-delay: 0.6s;
-}
-
-.dot-matrix-dot:nth-child(6) {
-  animation-delay: 0.75s;
-}
-
-/* Sombras em camadas (utilitários) */
-.shadow-soft { box-shadow: 0 8px 32px rgba(0,0,0,0.30); }
-.shadow-lift { box-shadow: 0 20px 48px rgba(0,0,0,0.40), 0 0 0 1px rgba(var(--th-accent-rgb),0.15); }
-.shadow-glow { box-shadow: 0 6px 18px rgba(var(--th-accent-rgb),0.35); }
-
-/* Glows ambientes (decorativos, position fixed nos containers) */
-.glow { position: fixed; border-radius: 50%; filter: blur(120px); pointer-events: none; z-index: 0; }
-
-/* Status pulse */
+/* Pulso do carregador de pontos (DisplayGrid) */
 @keyframes pulse-dot { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
 .dot-pulse { animation: pulse-dot 2s infinite; }
 
-/* Acessibilidade — OBRIGATÓRIO com as novas animações */
+/* Acessibilidade: sem movimento para quem pediu */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
@@ -504,77 +396,70 @@
   }
 }
 
-.dark {
-  --background: 225 36.8% 5%;
-  --foreground: 216 35.3% 93.3%;
-  --card: 225 30% 9%;
-  --card-foreground: 216 35.3% 93.3%;
-  --popover: 225 30% 7.5%;
-  --popover-foreground: 216 35.3% 93.3%;
-  --primary: 198.6 92.8% 48.4%;
-  --primary-foreground: 225 36.8% 6.1%;
-  --secondary: 225 26.8% 12.7%;
-  --secondary-foreground: 216 35.3% 93.3%;
-  --muted: 225 26.8% 12.7%;
-  --muted-foreground: 212 11% 53%;
-  --accent: 198.6 92.8% 48.4%;
-  --accent-foreground: 0 0% 100%;
-  --destructive: 0 91.3% 70.2%;
-  --destructive-foreground: 0 0% 100%;
-  --border: 225 20% 15%;
-  --input: 225 20% 15%;
-  --ring: 198.6 92.8% 48.4%;
-  --radius: 0.875rem;
-
-  --chart-1: var(--th-accent);
-  --chart-2: #2563eb;
-  --chart-3: #34d399;
-  --chart-4: #e879f9;
-  --chart-5: #fbbf24;
-  --sidebar: #0a0e1a;
-  --sidebar-foreground: #e8edf5;
-  --sidebar-primary: var(--th-accent);
-  --sidebar-primary-foreground: #0a0d16;
-  --sidebar-accent: #11172a;
-  --sidebar-accent-foreground: #e8edf5;
-  --sidebar-border: rgba(255,255,255,0.07);
-  --sidebar-ring: var(--th-accent);
-}
-
 @layer base {
   * {
     @apply border-border outline-ring/50;
     box-sizing: border-box;
   }
-  /* Fundo base estático. O movimento (grade com brilho) mora no componente
-     `GridGlowBackground`, montado no App — ele fica de fora do Player (TV) e
-     pausa quando a aba está oculta. O antigo gradiente animado `corporate-flow`
-     repintava a página inteira a cada frame, inclusive com a aba em segundo
-     plano. */
-  body {
-    background: #070a12;
-    color: var(--color-text, var(--txt, #e8edf5));
-    -webkit-font-smoothing: antialiased;
-    font-family: 'Exo 2', sans-serif;
-    position: relative;
-    min-height: 100vh;
-  }
-  body::before {
-    display: none;
-  }
-  body::after {
-    display: none;
-  }
   html {
     @apply font-sans;
   }
+  /* Fundo estático em papel. A grade calma mora em `GridGlowBackground`
+     (`.th-grid-bg`), que fica de fora do Player e das telas de login. */
+  body {
+    background: var(--papel-2);
+    color: var(--tinta);
+    font-family: var(--fonte);
+    -webkit-font-smoothing: antialiased;
+    position: relative;
+    min-height: 100vh;
+  }
+}
+
+/* App.tsx envolve todas as rotas num <div class="text-tinta">. No painel é a
+   cor certa; na TV, o texto que herda cor sempre saiu em slate-100 sobre o fundo
+   escuro, e a cena do cliente não pode mudar junto com o painel. */
+html[data-superficie="tv"] #root > .text-tinta {
+  color: var(--noite-titulo);
+}
+
+/* ------------------------------------------------------------------------
+   Superfície da TV. index.tsx marca `<html data-superficie="tv">` nas rotas
+   #/player. O conteúdo exibido mantém a fonte e o fundo escuro de antes.
+   `.superficie-tv` faz o mesmo num pedaço da página (o canvas do editor, que
+   mostra os widgets como a TV vai mostrar).
+   ------------------------------------------------------------------------ */
+html[data-superficie="tv"],
+.superficie-tv {
+  --fonte: 'Exo 2', 'Geist', 'Geist Variable', 'Inter', sans-serif;
+  --fonte-mono: 'JetBrains Mono', 'Geist Mono', monospace;
+}
+.superficie-tv {
+  font-family: var(--fonte);
+  color: var(--noite-titulo);
+}
+html[data-superficie="tv"] body {
+  background: var(--noite);
+}
+
+/* Barra de rolagem clara. O index.html ainda declara a escura (#0f172a);
+   este arquivo carrega depois e vence com a mesma especificidade. */
+::-webkit-scrollbar-track {
+  background: var(--papel-3);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--borda-2);
+  border-radius: var(--raio-4);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--borda-3);
 }
 
 /* ========================================
-   TELAHUB 3.0 — DISPLAY GRID & CARDS
+   TELAS: GRADE E CARDS DO DASHBOARD
    ======================================== */
 
-/* Container — max-width centralizado */
+/* Container: largura máxima centralizada */
 .th-container {
   max-width: 1320px;
   margin: 0 auto;
@@ -583,7 +468,7 @@
 @media (min-width: 640px)  { .th-container { padding: 0 24px; } }
 @media (min-width: 1024px) { .th-container { padding: 0 32px; } }
 
-/* GRID — colunas iguais, cards de mesma altura */
+/* GRADE: colunas iguais, cards de mesma altura */
 .displays-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -608,7 +493,7 @@
   }
 }
 
-/* LIST VIEW — single column, compact cards */
+/* LISTA: uma coluna, cards compactos */
 .displays-list {
   display: flex;
   flex-direction: column;
@@ -625,7 +510,7 @@
   min-width: 140px;
   height: auto;
   border-bottom: none;
-  border-right: 1px solid var(--color-border, rgba(255,255,255,0.07));
+  border-right: 1px solid var(--borda);
   padding-top: 0;
 }
 .displays-list .display-body {
@@ -637,7 +522,7 @@
   gap: 10px;
 }
 .displays-list .display-title {
-  font-size: 14px;
+  font-size: 15px;
   flex: 1;
   min-width: 120px;
 }
@@ -651,72 +536,79 @@
 }
 .displays-list .display-code {
   width: 100%;
-  font-size: 11px;
+  font-size: 12px;
 }
 
-/* CARD — flex column, ocupa 100% da altura da célula */
+/* CARD: papel, borda fina e a sombra de card do site */
 .display-card {
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: var(--color-surface, rgba(255,255,255,0.025));
-  border: 1px solid var(--color-border, rgba(255,255,255,0.07));
-  border-radius: var(--radius-xl, 1.25rem);
+  background: var(--papel);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio-16);
   overflow: hidden;
-  transition: transform 0.3s var(--ease-spring, cubic-bezier(0.16, 1, 0.3, 1)),
+  transition: transform 0.3s var(--ease-saida),
               border-color 0.3s,
               box-shadow 0.3s;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+  box-shadow: var(--sombra-card);
   cursor: default;
 }
-.display-card:hover {
-  transform: translateY(-5px);
-  border-color: var(--color-border-hover, rgba(var(--th-accent-soft-rgb),0.35));
-  box-shadow: 0 20px 48px rgba(0,0,0,0.45), 0 0 0 1px rgba(var(--th-accent-soft-rgb),0.12);
+@media (hover: hover) and (pointer: fine) {
+  .display-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--borda-2);
+    box-shadow: var(--sombra-flutuante);
+  }
 }
 
-/* PREVIEW — ALTURA FIXA igual para todos */
+/* PRÉVIA: altura fixa igual para todos */
 .display-preview {
   position: relative;
   height: 150px;
   background:
-    radial-gradient(circle at 50% 45%, rgba(var(--th-accent-soft-rgb),0.06), transparent 70%),
-    rgba(0,0,0,0.22);
-  border-bottom: 1px solid var(--color-border, rgba(255,255,255,0.07));
+    radial-gradient(circle at 50% 45%, var(--brilho-marca), transparent 70%),
+    var(--papel-2);
+  border-bottom: 1px solid var(--borda);
   display: flex;
   align-items: center;
   justify-content: center;
-  /* top padding reserves space for the status badge */
+  /* espaço no topo para o selo de status */
   padding-top: 28px;
   flex-shrink: 0;
   overflow: hidden;
 }
 
-/* MOLDURA DE TV dentro do preview */
+/* MOLDURA DE TV dentro da prévia: a tela escura da landing, acesa */
 .tv-frame {
   height: 62%;
   aspect-ratio: 16 / 9;
-  border: 2px solid rgba(255,255,255,0.10);
-  border-radius: 10px;
-  background: rgba(0,0,0,0.25);
+  border: 2px solid var(--noite-2);
+  border-radius: var(--raio-8);
+  background: var(--noite);
+  box-shadow: var(--sombra-card);
   display: grid;
   place-items: center;
-  transition: border-color 0.3s, transform 0.3s var(--ease-spring, cubic-bezier(0.16, 1, 0.3, 1));
+  transition: transform 0.3s var(--ease-saida);
   overflow: hidden;
 }
 .tv-frame.vertical {
   height: 76%;
   aspect-ratio: 9 / 16;
 }
-.display-card:hover .tv-frame {
-  border-color: rgba(var(--th-accent-soft-rgb),0.30);
-  transform: scale(1.04);
-}
 .tv-frame svg {
-  color: rgba(255,255,255,0.18);
+  color: var(--noite-texto);
+  opacity: 0.55;
+  transition: color 0.3s, opacity 0.3s;
 }
-.display-card:hover .tv-frame svg {
-  color: rgba(var(--th-accent-soft-rgb),0.35);
+@media (hover: hover) and (pointer: fine) {
+  .display-card:hover .tv-frame {
+    transform: scale(1.03);
+  }
+  .display-card:hover .tv-frame svg {
+    color: var(--luz);
+    opacity: 1;
+  }
 }
 .tv-frame img {
   width: 100%;
@@ -724,36 +616,34 @@
   object-fit: cover;
 }
 
-/* BADGE STATUS */
+/* SELO DE STATUS: no ar em verde (--ok), fora do ar em cinza (--tinta-3) */
 .status-badge {
   position: absolute;
   top: 8px;
   left: 10px;
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  font-size: 10px;
+  gap: 6px;
+  font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.8px;
-  padding: 4px 9px;
+  letter-spacing: 0.04em;
+  padding: 4px 10px;
   border-radius: 999px;
   z-index: 10;
   text-transform: uppercase;
-  /* prevent badge from growing too wide */
   max-width: calc(100% - 52px);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  border: 1px solid var(--borda);
 }
 .status-badge.online {
-  background: rgba(52,211,153,0.12);
-  color: #34d399;
-  border: 1px solid rgba(52,211,153,0.3);
+  background: var(--ok-fundo-solido);
+  color: var(--ok);
 }
 .status-badge.offline {
-  background: rgba(123,135,148,0.12);
-  color: #8b96a3;
-  border: 1px solid rgba(123,135,148,0.25);
+  background: var(--papel);
+  color: var(--tinta-3);
 }
 .status-dot {
   width: 6px;
@@ -761,348 +651,39 @@
   border-radius: 50%;
   background: currentColor;
 }
-.status-badge.online .status-dot {
-  box-shadow: 0 0 8px currentColor;
-}
 
-/* MENU (⋮) */
-.menu-button {
+/* MENU (⋮) e ENGRENAGEM: aparecem no hover com mouse; no toque ficam sempre
+   visíveis (sem hover, eles nunca apareceriam). */
+.menu-button,
+.gear-button {
   position: absolute;
+  border-radius: 50%;
+  background: var(--papel);
+  border: 1px solid var(--borda);
+  color: var(--tinta-2);
+  box-shadow: var(--sombra-card);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s, color 0.2s, border-color 0.2s;
+  z-index: 20;
+  opacity: 0;
+}
+.menu-button {
   top: 11px;
   right: 11px;
   width: 34px;
   height: 34px;
-  border-radius: 50%;
-  background: rgba(0,0,0,0.35);
-  border: 1px solid var(--color-border, rgba(255,255,255,0.07));
-  color: var(--color-text-muted, #7b8794);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
-  z-index: 20;
-  opacity: 0;
 }
-.display-card:hover .menu-button {
-  opacity: 1;
-}
-.menu-button:hover {
-  color: var(--color-text, #e8edf5);
-  border-color: var(--color-border-hover, rgba(var(--th-accent-soft-rgb),0.35));
-}
-
-/* GEAR settings button */
 .gear-button {
-  position: absolute;
   bottom: 11px;
   left: 11px;
   width: 30px;
   height: 30px;
-  border-radius: 50%;
-  background: rgba(0,0,0,0.35);
-  border: 1px solid var(--color-border, rgba(255,255,255,0.07));
-  color: var(--color-text-muted, #7b8794);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
-  z-index: 20;
-  opacity: 0;
 }
-.display-card:hover .gear-button {
-  opacity: 1;
-}
-.gear-button:hover {
-  color: var(--color-accent, var(--th-accent-soft));
-  border-color: var(--color-border-hover, rgba(var(--th-accent-soft-rgb),0.35));
-}
-
-/* BODY — flex:1 empurra rodapé pra baixo, alinhando todos os cards */
-.display-body {
-  padding: 13px;
-  display: flex;
-  flex-direction: column;
-  gap: 9px;
-  flex: 1;
-}
-.display-title {
-  font-size: 15px;
-  font-weight: 700;
-  margin: 0;
-  line-height: 1.2;
-  color: var(--color-text, #e8edf5);
-}
-.display-code {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
-  letter-spacing: 0.5px;
-  color: var(--color-text-muted, #7b8794);
-  text-transform: uppercase;
-}
-
-/* Orientation badge */
-.orientation-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 6px;
-  border-radius: 6px;
-  background: rgba(var(--th-accent-soft-rgb),0.08);
-  border: 1px solid rgba(var(--th-accent-soft-rgb),0.2);
-  color: var(--color-accent, var(--th-accent-soft));
-  font-size: 11px;
-  font-weight: 700;
-  flex-shrink: 0;
-}
-
-/* Ações do card — os botões em si são <Button variant="glow|shimmer"> */
-.display-actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-
-/* Dashboard Nav Items (Módulos) styling classes */
-.nav-item-dashboard {
-  background-color: rgba(255, 255, 255, 0.045) !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  color: #cbd5e1 !important;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
-}
-.nav-item-dashboard:hover {
-  background-color: var(--th-accent) !important; /* Solid blue on hover! */
-  border-color: var(--th-accent-soft) !important;
-  color: #ffffff !important;
-  transform: translateY(-0.5px);
-  box-shadow: 0 4px 12px rgba(var(--th-accent-rgb),0.25) !important;
-}
-.nav-item-dashboard.active {
-  background-color: rgba(var(--th-accent-rgb),0.15) !important;
-  border-color: rgba(var(--th-accent-rgb),0.45) !important;
-  color: var(--th-accent) !important;
-  font-weight: 700 !important;
-}
-
-/* Card "Nova Tela" placeholder — mesma altura que os outros */
-.new-display-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  min-height: 250px;
-  border: 2px dashed var(--color-border, rgba(255,255,255,0.07));
-  border-radius: var(--radius-xl, 1.25rem);
-  background: rgba(255,255,255,0.015);
-  cursor: pointer;
-  transition: all 0.3s var(--ease-spring, cubic-bezier(0.16, 1, 0.3, 1));
-  gap: 12px;
-  padding: 24px;
-}
-.new-display-card:hover {
-  border-color: var(--color-accent, var(--th-accent-soft));
-  background: rgba(var(--th-accent-soft-rgb),0.04);
-  transform: translateY(-5px);
-}
-.new-display-card .icon-circle {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  border: 2px dashed rgba(255,255,255,0.12);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s;
-}
-.new-display-card:hover .icon-circle {
-  border-color: var(--color-accent, var(--th-accent-soft));
-  transform: scale(1.05);
-}
-.new-display-card .label {
-  font-size: 12px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--color-text-muted, #7b8794);
-  transition: color 0.3s;
-}
-.new-display-card:hover .label {
-  color: var(--color-accent, var(--th-accent-soft));
-}
-
-/* Section Header */
-.section-header {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 4px;
-}
-.section-title {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--color-text, #e8edf5);
-}
-.section-title .icon-box {
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 8px;
-  background: rgba(var(--th-accent-soft-rgb),0.08);
-  border: 1px solid rgba(var(--th-accent-soft-rgb),0.2);
-}
-
-/* Filter Chips */
-.filter-chips {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  overflow-x: auto;
-  padding: 4px 0;
-}
-.filter-chips::-webkit-scrollbar { display: none; }
-.filter-chip {
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  cursor: pointer;
-  border: 1px solid var(--color-border, rgba(255,255,255,0.07));
-  background: transparent;
-  color: var(--color-text-muted, #7b8794);
-  transition: all 0.2s;
-  white-space: nowrap;
-}
-.filter-chip:hover {
-  border-color: rgba(var(--th-accent-soft-rgb),0.25);
-  color: var(--color-text, #e8edf5);
-}
-.filter-chip.active {
-  background: rgba(var(--th-accent-soft-rgb),0.08);
-  border-color: rgba(var(--th-accent-soft-rgb),0.35);
-  color: var(--color-accent, var(--th-accent-soft));
-}
-
-/* ========================================
-   TELAHUB 3.0 — MODAL FIX
-   ======================================== */
-.modal-content-th {
-  width: 95vw;
-  max-width: 560px;
-  max-height: 90vh;
-  overflow-y: auto;
-  background: #0e121c;
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: var(--radius-xl, 1.25rem);
-  box-shadow: 0 24px 56px rgba(0,0,0,0.55);
-  padding: 0;
-}
-.modal-header-th {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20px;
-  border-bottom: 1px solid rgba(255,255,255,0.1);
-}
-.modal-body-th {
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-.modal-footer-th {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  padding: 16px 20px;
-  border-top: 1px solid rgba(255,255,255,0.1);
-}
-
-/* Card de Orientação do Modal */
-.orientation-btn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  padding: 16px;
-  border-radius: var(--radius, 0.875rem);
-  border: 2px solid rgba(255, 255, 255, 0.06) !important;
-  background: rgba(255, 255, 255, 0.015) !important;
-  color: var(--color-text-muted, #7b8794);
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
-}
-.orientation-btn:hover {
-  border-color: rgba(var(--th-accent-rgb),0.4) !important;
-  background: rgba(var(--th-accent-rgb),0.04) !important;
-  transform: translateY(-2px);
-  color: var(--color-text, #e8edf5);
-}
-.orientation-btn.active {
-  border-color: var(--th-accent) !important;
-  background: linear-gradient(135deg, rgba(var(--th-accent-rgb),0.15), rgba(37, 99, 235, 0.05)) !important;
-  color: var(--th-accent) !important;
-  box-shadow: 0 0 20px rgba(var(--th-accent-rgb),0.25) !important;
-  transform: scale(1.02);
-}
-
-.orientation-preview-box {
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(0, 0, 0, 0.3);
-  display: grid;
-  place-items: center;
-  transition: all 0.3s;
-}
-.orientation-btn:hover .orientation-preview-box {
-  border-color: rgba(var(--th-accent-rgb),0.4);
-}
-.orientation-btn.active .orientation-preview-box {
-  border-color: rgba(var(--th-accent-rgb),0.7);
-  background: rgba(var(--th-accent-rgb),0.08);
-  box-shadow: inset 0 0 8px rgba(var(--th-accent-rgb),0.2);
-}
-
-/* ========================================
-   UX REFACTORING UTILITIES (Design System v1.0)
-   ======================================== */
-
-/* Área de toque ativa de 48px para elementos interativos menores */
-.touch-target-48 {
-  position: relative;
-}
-.touch-target-48::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 48px;
-  height: 48px;
-  min-width: 48px;
-  min-height: 48px;
-  z-index: 10;
-}
-
-.menu-button::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 48px;
-  height: 48px;
-}
-
+/* área de toque de 48px em volta do botão */
+.menu-button::before,
 .gear-button::before {
   content: '';
   position: absolute;
@@ -1112,75 +693,253 @@
   width: 48px;
   height: 48px;
 }
+.display-card:hover .menu-button,
+.display-card:hover .gear-button,
+.display-card:focus-within .menu-button,
+.display-card:focus-within .gear-button,
+.menu-button[data-state='open'],
+.menu-button[aria-expanded='true'] {
+  opacity: 1;
+}
+@media (hover: none) {
+  .menu-button,
+  .gear-button { opacity: 1; }
+}
+.menu-button:hover,
+.gear-button:hover {
+  color: var(--marca);
+  border-color: var(--marca);
+}
 
-/* Acessibilidade de foco global */
+/* CORPO: flex:1 empurra o rodapé para baixo, alinhando todos os cards */
+.display-body {
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+}
+.display-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.25;
+  color: var(--tinta);
+}
+/* Código de pareamento: Geist Mono */
+.display-code {
+  font-family: var(--fonte-mono);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: var(--tinta-3);
+  text-transform: uppercase;
+}
+
+/* Selo de orientação */
+.orientation-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: var(--raio-6);
+  background: var(--marca-fundo);
+  color: var(--marca);
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* Ações do card: os botões são <Button variant="glow|shimmer"> */
+.display-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+/* Card "Nova tela": mesma altura dos outros */
+.new-display-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 250px;
+  border: 2px dashed var(--borda-2);
+  border-radius: var(--raio-16);
+  background: transparent;
+  cursor: pointer;
+  transition: border-color 0.3s, background-color 0.3s, transform 0.3s var(--ease-saida);
+  gap: 12px;
+  padding: 24px;
+}
+.new-display-card .icon-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 2px dashed var(--borda-2);
+  color: var(--tinta-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.3s, color 0.3s, transform 0.3s;
+}
+.new-display-card .label {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--tinta-2);
+  transition: color 0.3s;
+}
+.new-display-card:hover {
+  border-color: var(--marca);
+  background: var(--marca-fundo);
+}
+.new-display-card:hover .icon-circle {
+  border-color: var(--marca);
+  color: var(--marca);
+}
+.new-display-card:hover .label {
+  color: var(--marca);
+}
+@media (hover: hover) and (pointer: fine) {
+  .new-display-card:hover { transform: translateY(-3px); }
+  .new-display-card:hover .icon-circle { transform: scale(1.05); }
+}
+
+/* Filtros (Todas / Online / Offline) */
+.filter-chips {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px 0;
+}
+.filter-chips::-webkit-scrollbar { display: none; }
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--borda-2);
+  background: var(--papel);
+  color: var(--tinta-2);
+  transition: border-color 0.2s, background-color 0.2s, color 0.2s;
+  white-space: nowrap;
+}
+@media (pointer: coarse) {
+  .filter-chip { min-height: 44px; padding: 8px 16px; }
+}
+.filter-chip:hover {
+  border-color: var(--borda-3);
+  color: var(--tinta);
+}
+.filter-chip.active {
+  background: var(--marca-fundo);
+  border-color: var(--marca);
+  color: var(--marca);
+}
+
+/* Escolha de orientação no modal de nova tela */
+.orientation-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 16px;
+  border-radius: var(--raio-12);
+  border: 2px solid var(--borda) !important;
+  background: var(--papel) !important;
+  color: var(--tinta-2);
+  cursor: pointer;
+  transition: border-color 0.3s, background-color 0.3s, color 0.3s, transform 0.3s var(--ease-saida) !important;
+}
+.orientation-btn:hover {
+  border-color: var(--borda-3) !important;
+  color: var(--tinta);
+}
+@media (hover: hover) and (pointer: fine) {
+  .orientation-btn:hover { transform: translateY(-2px); }
+}
+.orientation-btn.active {
+  border-color: var(--marca) !important;
+  background: var(--marca-fundo) !important;
+  color: var(--marca) !important;
+}
+
+.orientation-preview-box {
+  border: 1px solid var(--borda-2);
+  background: var(--papel-2);
+  display: grid;
+  place-items: center;
+  transition: border-color 0.3s, background-color 0.3s;
+}
+.orientation-btn:hover .orientation-preview-box {
+  border-color: var(--borda-3);
+}
+.orientation-btn.active .orientation-preview-box {
+  border-color: var(--marca);
+  background: var(--papel);
+}
+
+/* Foco visível em toda a interface: anel na cor da marca */
 :focus {
   outline: none;
 }
 :focus-visible {
-  outline: 2px solid var(--color-accent, var(--th-accent));
+  outline: 2px solid var(--marca);
   outline-offset: 2px;
 }
 
 
 /* ========================================
-   EFEITOS DO PAINEL (redesign 09/2026)
-   Adaptados do 21st.dev: Glow Button (reflexo + press), Glow Card Grid
-   (borda que acende seguindo o ponteiro) e GridGlowBackground (grade com
-   brilho). Tudo segue --th-accent, então funciona com os 6 presets de
-   `libs/theme.ts`. Hover/cursor só existem com ponteiro fino; com
+   EFEITOS DO PAINEL
+   Adaptados do 21st.dev em 09/2026 e trazidos para o papel claro em
+   15/10/2026. Hover e cursor só existem com ponteiro fino; com
    prefers-reduced-motion nada se move (só muda cor).
    ======================================== */
 
-/* --- Fundo: grade com brilho (ver components/GridGlowBackground.tsx) --- */
+/* --- Fundo calmo: papel com a grade fina da landing ---
+   Estático: sem canvas, sem animação (ver components/GridGlowBackground.tsx). */
 .th-grid-bg {
   position: fixed;
   inset: 0;
-  /* -1 no contexto raiz: fica acima do fundo do body e abaixo de todo o
-     conteúdo, sem precisar mexer no z-index de ninguém. */
+  /* -1 no contexto raiz: acima do fundo do body e abaixo de todo o conteúdo */
   z-index: -1;
   pointer-events: none;
   overflow: hidden;
   background:
-    radial-gradient(ellipse 70% 45% at 50% -8%, rgba(var(--th-accent-rgb), 0.10), transparent 70%),
-    #070a12;
+    radial-gradient(ellipse 70% 45% at 50% -8%, var(--brilho-marca), transparent 70%),
+    var(--papel-2);
 }
 .th-grid-bg::before {
   content: '';
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+    linear-gradient(var(--grade-linha) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grade-linha) 1px, transparent 1px);
   background-size: 48px 48px;
-  /* a grade some nas bordas: sóbria, não "papel quadriculado" */
-  -webkit-mask-image: radial-gradient(ellipse 85% 70% at 50% 30%, #000 30%, transparent 100%);
-  mask-image: radial-gradient(ellipse 85% 70% at 50% 30%, #000 30%, transparent 100%);
-}
-.th-grid-bg canvas {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0.55;
+  /* a grade some nas bordas: sóbria, não papel quadriculado */
+  -webkit-mask-image: radial-gradient(ellipse 85% 70% at 50% 20%, black 30%, transparent 100%);
+  mask-image: radial-gradient(ellipse 85% 70% at 50% 20%, black 30%, transparent 100%);
 }
 
-/* --- Botão glow: cor de destaque + reflexo que segue o cursor --- */
-/* Texto escuro (#0a0d16) e não branco: branco sobre sky/esmeralda/âmbar fica
-   entre 2,1:1 e 2,8:1. Escuro sobre qualquer preset base dá ≥ 4,6:1. */
+/* --- Botão principal (variante glow): o botão primário do site ---
+   Marca sólida, texto branco (5,4:1), sombra com deslocamento e um reflexo
+   branco que segue o cursor. */
 .btn-fx-glow {
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  background: var(--th-accent);
-  color: #0a0d16;
-  font-weight: 700;
-  border: 1px solid rgba(var(--th-accent-soft-rgb), 0.55);
-  box-shadow:
-    0 0 0 1px rgba(var(--th-accent-rgb), 0.15),
-    0 6px 18px -6px rgba(var(--th-accent-rgb), 0.55),
-    inset 0 1px 0 rgba(255, 255, 255, 0.25);
-  transition: transform 160ms var(--ease-spring), box-shadow 220ms ease, background-color 220ms ease;
+  background: var(--marca);
+  color: var(--papel);
+  font-weight: 600;
+  border: 1px solid transparent;
+  box-shadow: var(--sombra-btn);
+  transition: transform 160ms var(--ease-saida), box-shadow 220ms ease, background-color 220ms ease;
 }
 .btn-fx-glow::before {
   content: '';
@@ -1188,36 +947,33 @@
   inset: 0;
   z-index: -1;
   border-radius: inherit;
-  background: radial-gradient(120px circle at var(--mx, 50%) var(--my, 50%), rgba(255, 255, 255, 0.38), transparent 70%);
+  background: radial-gradient(120px circle at var(--mx, 50%) var(--my, 50%), var(--brilho-branco), transparent 70%);
   opacity: 0;
   transition: opacity 220ms ease;
   pointer-events: none;
 }
+.btn-fx-glow:hover:not(:disabled) {
+  background: var(--marca-hover);
+}
 @media (hover: hover) and (pointer: fine) {
-  .btn-fx-glow:hover:not(:disabled) {
-    background: var(--th-accent-soft);
-    box-shadow:
-      0 0 0 1px rgba(var(--th-accent-soft-rgb), 0.35),
-      0 10px 28px -6px rgba(var(--th-accent-rgb), 0.7),
-      inset 0 1px 0 rgba(255, 255, 255, 0.3);
-  }
+  .btn-fx-glow:hover:not(:disabled) { transform: translateY(-1px); }
   .btn-fx-glow:hover:not(:disabled)::before { opacity: 1; }
 }
 .btn-fx-glow:active:not(:disabled) {
-  transform: translateY(1px) scale(0.97);
-  box-shadow: 0 2px 8px -2px rgba(var(--th-accent-rgb), 0.5), inset 0 2px 4px rgba(0, 0, 0, 0.18);
+  transform: translateY(0) scale(0.97);
+  box-shadow: var(--sombra-btn-press);
 }
 
-/* --- Botão shimmer: superfície discreta + faixa de luz no hover --- */
+/* --- Botão secundário (variante shimmer): papel, borda e faixa de luz --- */
 .btn-fx-shimmer {
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.045);
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  color: #cbd5e1;
+  background: var(--papel);
+  border: 1px solid var(--borda-2);
+  color: var(--tinta-2);
   font-weight: 600;
-  transition: transform 160ms var(--ease-spring), border-color 200ms ease, background-color 200ms ease, color 200ms ease;
+  transition: transform 160ms var(--ease-saida), border-color 200ms ease, background-color 200ms ease, color 200ms ease;
 }
 .btn-fx-shimmer::after {
   content: '';
@@ -1227,33 +983,32 @@
   left: 0;
   width: 60%;
   z-index: -1;
-  background: linear-gradient(100deg, transparent, rgba(var(--th-accent-soft-rgb), 0.22), rgba(255, 255, 255, 0.10), transparent);
+  background: linear-gradient(100deg, transparent, var(--brilho-marca), transparent);
   transform: translateX(-120%) skewX(-12deg);
   pointer-events: none;
 }
+.btn-fx-shimmer:hover:not(:disabled) {
+  border-color: var(--marca);
+  color: var(--marca);
+}
 @media (hover: hover) and (pointer: fine) {
-  .btn-fx-shimmer:hover:not(:disabled) {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(var(--th-accent-soft-rgb), 0.45);
-    color: #ffffff;
-  }
   .btn-fx-shimmer:hover:not(:disabled)::after {
     transform: translateX(230%) skewX(-12deg);
     transition: transform 700ms cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 .btn-fx-shimmer:active:not(:disabled) {
-  transform: translateY(1px) scale(0.97);
-  background: rgba(255, 255, 255, 0.06);
+  transform: scale(0.97);
+  background: var(--papel-2);
 }
-/* estado "Copiado!" do card de tela */
+/* estado "Copiado!" do card de tela: sucesso, então verde */
 .btn-fx-shimmer[data-copied='true'] {
-  background: rgba(52, 211, 153, 0.12);
-  color: #34d399;
-  border-color: rgba(52, 211, 153, 0.45);
+  background: var(--ok-fundo-solido);
+  color: var(--ok);
+  border-color: var(--ok);
 }
 
-/* --- Card: spotlight que segue o mouse + borda com brilho --- */
+/* --- Card: luz suave que segue o mouse + borda que acende perto dele --- */
 /* As coordenadas (--spot-x/--spot-y, em px) vêm de `lib/spotlight.ts`. */
 .fx-spotlight {
   position: relative;
@@ -1272,29 +1027,34 @@
 /* luz sobre a superfície */
 .fx-spotlight::before {
   z-index: 1;
-  background: radial-gradient(var(--spot-size, 320px) circle at var(--spot-x, 50%) var(--spot-y, 50%), rgba(var(--th-accent-soft-rgb), 0.09), transparent 65%);
+  background: radial-gradient(var(--spot-size, 320px) circle at var(--spot-x, 50%) var(--spot-y, 50%), var(--brilho-marca), transparent 65%);
 }
-/* anel da borda que acende perto do ponteiro (máscara que vaza só 1px) */
+/* anel da borda perto do ponteiro (máscara que vaza só 1px) */
 .fx-spotlight::after {
   z-index: 30;
   padding: 1px;
-  background: radial-gradient(calc(var(--spot-size, 320px) * 0.75) circle at var(--spot-x, 50%) var(--spot-y, 50%), rgba(var(--th-accent-soft-rgb), 0.85), transparent 70%);
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  background: radial-gradient(calc(var(--spot-size, 320px) * 0.75) circle at var(--spot-x, 50%) var(--spot-y, 50%), var(--marca), transparent 70%);
+  -webkit-mask: linear-gradient(black 0 0) content-box, linear-gradient(black 0 0);
   -webkit-mask-composite: xor;
-  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  mask: linear-gradient(black 0 0) content-box exclude, linear-gradient(black 0 0);
 }
 @media (hover: hover) and (pointer: fine) {
-  .fx-spotlight:hover::before,
-  .fx-spotlight:hover::after { opacity: 1; }
+  .fx-spotlight:hover::before { opacity: 1; }
+  .fx-spotlight:hover::after { opacity: 0.6; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .btn-fx-glow,
   .btn-fx-shimmer { transition: none; }
+  .btn-fx-glow:hover:not(:disabled),
   .btn-fx-glow:active:not(:disabled),
   .btn-fx-shimmer:active:not(:disabled) { transform: none; }
   .btn-fx-shimmer::after { display: none; }
-  /* o brilho continua (é cor, não movimento), mas sem esmaecer */
+  .display-card:hover,
+  .new-display-card:hover,
+  .orientation-btn:hover,
+  .display-card:hover .tv-frame { transform: none; }
+  /* a luz continua (é cor, não movimento), mas sem esmaecer */
   .fx-spotlight::before,
   .fx-spotlight::after { transition: none; }
 }

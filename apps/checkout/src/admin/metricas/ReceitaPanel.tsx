@@ -63,7 +63,7 @@ const MiniStat = ({
       <span className="text-[12px] font-semibold">{label}</span>
     </div>
     <p className="money text-xl leading-none font-extrabold text-ink">{value}</p>
-    {hint && <p className="mt-1.5 text-[11px] leading-snug text-ink-muted">{hint}</p>}
+    {hint && <p className="mt-1.5 text-xs leading-snug text-ink-muted">{hint}</p>}
   </div>
 );
 
@@ -129,7 +129,7 @@ const ReceitaPanel = ({
             que salta num mês sem a base ter crescido. Um único pagamento anual
             move este número doze vezes mais que um mensal.
           */}
-          <p className="mt-1.5 text-[11px] leading-snug text-ink-subtle">
+          <p className="mt-1.5 text-xs leading-snug text-ink-subtle">
             {formatNumber(caixaMensal.payments)} pagamento(s) mensal(is) ·{' '}
             <Money cents={caixaMensal.cashCents} />; {formatNumber(caixaAnual.payments)} anual(is) ·{' '}
             <Money cents={caixaAnual.cashCents} />
@@ -145,7 +145,7 @@ const ReceitaPanel = ({
 
       {/* Pagantes por plano — barra de MRR, sem biblioteca de gráfico. */}
       <div>
-        <p className="eyebrow mb-2.5">
+        <p className="rotulo mb-2.5">
           Pagantes por plano · {formatNumber(revenue.payingAccounts)} contas
         </p>
         {planos.length === 0 ? (
@@ -176,7 +176,7 @@ const ReceitaPanel = ({
                   />
                 </div>
                 {plan.yearlyAccounts > 0 && (
-                  <p className="mt-1 text-[11px] text-ink-subtle">
+                  <p className="mt-1 text-xs text-ink-subtle">
                     {formatNumber(plan.yearlyAccounts)} no anual
                   </p>
                 )}

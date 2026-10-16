@@ -96,18 +96,18 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
   }
 
   return (
-    <aside className={`absolute md:relative right-0 top-0 h-full w-80 bg-[#1f2937] border-l border-slate-800 p-6 overflow-y-auto z-[60] shadow-xl transition-transform duration-300 ease-in-out ${showRightSidebar ? 'translate-x-0' : 'translate-x-full md:translate-x-0'}`}>
+    <aside className={`absolute md:relative right-0 top-0 h-full w-80 bg-papel border-l border-borda p-6 overflow-y-auto z-[60] shadow-flutuante transition-transform duration-300 ease-in-out ${showRightSidebar ? 'translate-x-0' : 'translate-x-full md:translate-x-0'}`}>
       {currentWidget ? (
         <div className="space-y-6 animate-in slide-in-from-right-4 duration-200">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-4">
-            <h3 className="font-bold text-slate-200 flex items-center gap-2 text-xs uppercase tracking-wider">
-               <Settings size={14} className="text-[var(--th-accent)]" /> Configuração
+          <div className="flex items-center justify-between border-b border-borda pb-4">
+            <h3 className="font-bold text-tinta flex items-center gap-2 text-xs uppercase tracking-wider">
+               <Settings size={14} className="text-marca" /> Configuração
             </h3>
             <div className="flex items-center gap-2">
-              <button onClick={() => removeWidget(selectedWidget!)} className="text-rose-500 hover:bg-rose-500/10 p-2 rounded-lg transition-colors" title="Remover Widget">
+              <button onClick={() => removeWidget(selectedWidget!)} className="text-danger hover:bg-danger-fundo p-2 rounded-lg transition-colors" title="Remover Widget">
                 <Trash2 size={16} />
               </button>
-              <button onClick={() => setShowRightSidebar(false)} className="md:hidden text-slate-400 hover:text-white p-2 rounded-lg hover:bg-slate-800 transition-colors" title="Fechar">
+              <button onClick={() => setShowRightSidebar(false)} className="md:hidden text-tinta-3 hover:text-tinta p-2 rounded-lg hover:bg-papel-3 transition-colors" title="Fechar">
                 <X size={16} />
               </button>
             </div>
@@ -115,31 +115,30 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
 
           <div className="space-y-5">
             {currentWidget.data.fillContainer && (
-              <div className="bg-gradient-to-b from-cyan-950/40 to-slate-950/90 p-4 rounded-xl border border-cyan-500/40 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+              <div className="bg-marca-fundo p-4 rounded-xl border border-marca space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
                 <div className="flex items-center gap-2">
-                  <Maximize2 size={12} className="text-cyan-400" />
-                  <span className="text-[10px] font-black text-cyan-400 uppercase tracking-wider">Modo Tela Cheia Ativo</span>
+                  <Maximize2 size={12} className="text-marca" />
+                  <span className="text-[10px] font-black text-marca uppercase tracking-wider">Modo Tela Cheia Ativo</span>
                 </div>
 
                 <button
                   onClick={setFullScreen}
-                  className="w-full py-2.5 bg-gradient-to-r from-blue-600 to-sky-500 hover:from-blue-500 hover:to-sky-400 text-white rounded-lg text-xs font-black uppercase tracking-wider transition-all shadow-[0_4px_12px_rgba(var(--th-accent-rgb),0.25)] flex items-center justify-center gap-2 relative overflow-hidden group border border-sky-400/30"
+                  className="w-full py-2.5 bg-marca hover:bg-marca-hover text-white rounded-lg text-xs font-black uppercase tracking-wider transition-all shadow-btn flex items-center justify-center gap-2 relative overflow-hidden group border border-marca/30"
                 >
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
                   <Maximize2 size={14} className="relative z-10" />
                   <span className="relative z-10">Preencher Tela Inteira</span>
                 </button>
-                <p className="text-[8px] text-amber-400/80 text-center leading-tight">
+                <p className="text-[8px] text-warn text-center leading-tight">
                   ⚠️ Atenção: Isso removerá todos os outros widgets desta cena e deixará o widget ocupando 100% da tela como fundo.
                 </p>
                 
-                <div className="pt-2 border-t border-slate-800/60 space-y-2">
-                  <label className="text-[9px] font-black text-slate-400 uppercase block">Selecione o Background</label>
+                <div className="pt-2 border-t border-borda space-y-2">
+                  <label className="text-[9px] font-black text-tinta-3 uppercase block">Selecione o Background</label>
                   <input
                     type="text"
                     value={currentWidget.data.backgroundImage || ''}
                     onChange={e => updateWidgetData(selectedWidget!, { backgroundImage: e.target.value })}
-                    className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500"
+                    className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca"
                     placeholder="URL da imagem ou vídeo de fundo..."
                   />
                   <div className="grid grid-cols-2 gap-1.5 mt-1.5">
@@ -153,7 +152,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                           }
                         });
                       }}
-                      className="py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded text-[10px] font-bold uppercase transition-colors flex items-center justify-center gap-1.5 border border-slate-700"
+                      className="py-1.5 bg-papel-3 hover:bg-borda text-tinta rounded text-[10px] font-bold uppercase transition-colors flex items-center justify-center gap-1.5 border border-borda-2"
                     >
                       <Upload size={10} />
                       Selecionar Imagem
@@ -168,7 +167,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                           }
                         });
                       }}
-                      className="py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded text-[10px] font-bold uppercase transition-colors flex items-center justify-center gap-1.5 border border-slate-700"
+                      className="py-1.5 bg-papel-3 hover:bg-borda text-tinta rounded text-[10px] font-bold uppercase transition-colors flex items-center justify-center gap-1.5 border border-borda-2"
                     >
                       <Upload size={10} />
                       Selecionar Vídeo
@@ -179,13 +178,13 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             )}
             
             {/* Background Animation Button */}
-            <div className="bg-slate-950 p-4 rounded-xl border border-slate-800">
-              <h4 className="text-[10px] font-bold text-slate-500 uppercase mb-3 flex items-center gap-2">
+            <div className="bg-papel-2 p-4 rounded-xl border border-borda">
+              <h4 className="text-[10px] font-bold text-tinta-3 uppercase mb-3 flex items-center gap-2">
                 <MonitorPlay size={12} /> Fundo Animado
               </h4>
               <button 
                 onClick={() => setShowBgAnimModal(true)}
-                className="w-full py-2 bg-[var(--th-accent)] hover:bg-[var(--th-accent-strong)] text-white rounded-lg text-xs font-bold transition-colors shadow-lg flex items-center justify-center gap-2"
+                className="w-full py-2 bg-marca hover:bg-marca-hover text-tinta rounded-lg text-xs font-bold transition-colors shadow-card flex items-center justify-center gap-2"
               >
                 <MonitorPlay size={14} />
                 {currentWidget.data.backgroundAnimation && currentWidget.data.backgroundAnimation !== 'none' 
@@ -195,29 +194,29 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
               {currentWidget.data.backgroundAnimation && currentWidget.data.backgroundAnimation !== 'none' && (
                 <button 
                   onClick={() => updateWidgetData(selectedWidget!, { backgroundAnimation: 'none' })}
-                  className="w-full mt-2 py-1.5 bg-slate-900 hover:bg-rose-500/10 text-slate-400 hover:text-rose-500 border border-slate-800 hover:border-rose-500/30 rounded-lg text-[10px] font-bold transition-colors"
+                  className="w-full mt-2 py-1.5 bg-papel hover:bg-danger-fundo text-tinta-3 hover:text-danger border border-borda hover:border-danger/30 rounded-lg text-[10px] font-bold transition-colors"
                 >
                   Remover Animação
                 </button>
               )}
               
-              <div className="mt-4 pt-4 border-t border-slate-800 space-y-3">
-                <label className="flex items-center gap-2 text-[10px] text-slate-400 cursor-pointer bg-slate-900 p-2 rounded border border-slate-800 hover:border-slate-600 transition-colors">
+              <div className="mt-4 pt-4 border-t border-borda space-y-3">
+                <label className="flex items-center gap-2 text-[10px] text-tinta-3 cursor-pointer bg-papel p-2 rounded border border-borda hover:border-borda-3 transition-colors">
                   <input 
                     type="checkbox" 
                     checked={currentWidget.data.transparentBackground || false} 
                     onChange={(e) => updateWidgetData(selectedWidget!, { transparentBackground: e.target.checked })}
-                    className="rounded border-slate-700 bg-slate-900 text-cyan-500 focus:ring-0"
+                    className="rounded border-borda-2 bg-papel text-marca focus:ring-0"
                   />
                   Fundo Transparente
                 </label>
-                <div className="flex items-center justify-between bg-slate-900 p-2 rounded border border-slate-800">
-                  <span className="text-[10px] text-slate-400">Cor de Fundo</span>
+                <div className="flex items-center justify-between bg-papel p-2 rounded border border-borda">
+                  <span className="text-[10px] text-tinta-3">Cor de Fundo</span>
                   <div className="flex items-center gap-2">
                     {currentWidget.data.backgroundColor && (
                       <button 
                         onClick={() => updateWidgetData(selectedWidget!, { backgroundColor: undefined })}
-                        className="text-[9px] text-rose-500 hover:text-rose-400 mr-2"
+                        className="text-[9px] text-danger hover:text-danger mr-2"
                       >
                         Limpar Cor
                       </button>
@@ -235,21 +234,21 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
 
             {currentWidget.type === WidgetType.VIDEO && (
               <div className="space-y-3">
-                <label className="text-[9px] font-black text-slate-500 uppercase">Link do Vídeo (YouTube ou MP4)</label>
+                <label className="text-[9px] font-black text-tinta-3 uppercase">Link do Vídeo (YouTube ou MP4)</label>
                 <input 
                   type="text" 
                   value={currentWidget.data.videoUrl} 
                   onChange={(e) => updateWidgetData(selectedWidget!, { videoUrl: e.target.value })} 
-                  className="w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-xs text-slate-200 outline-none focus:border-cyan-500 transition-all font-mono" 
+                  className="w-full bg-papel-2 border border-borda-3 rounded-lg p-3 text-base md:text-xs text-tinta outline-none focus:border-marca transition-all font-mono" 
                   placeholder="https://youtu.be/... ou https://.../video.mp4"
                 />
                 
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-slate-800"></div>
+                    <div className="w-full border-t border-borda"></div>
                   </div>
                   <div className="relative flex justify-center text-xs">
-                    <span className="bg-slate-900 px-2 text-slate-500 font-bold uppercase text-[9px]">ou</span>
+                    <span className="bg-papel px-2 text-tinta-3 font-bold uppercase text-[9px]">ou</span>
                   </div>
                 </div>
 
@@ -263,58 +262,58 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                       }
                     });
                   }}
-                  className="flex items-center justify-center gap-2 w-full bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-3 rounded-xl font-bold text-xs uppercase tracking-wider cursor-pointer transition-all border border-slate-700 hover:border-slate-500 shadow-lg"
+                  className="flex items-center justify-center gap-2 w-full bg-papel-3 hover:bg-borda text-tinta-2 px-4 py-3 rounded-xl font-bold text-xs uppercase tracking-wider cursor-pointer transition-all border border-borda-2 hover:border-borda-3 shadow-card"
                 >
                   <Upload size={16} />
                   Selecionar Vídeo
                 </button>
 
                 <div className="grid grid-cols-2 gap-2 mt-4">
-                  <label className="flex items-center gap-2 text-[10px] text-slate-400 cursor-pointer bg-slate-950 p-2 rounded border border-slate-800 hover:border-slate-600">
+                  <label className="flex items-center gap-2 text-[10px] text-tinta-3 cursor-pointer bg-papel-2 p-2 rounded border border-borda hover:border-borda-3">
                     <input 
                       type="checkbox" 
                       checked={currentWidget.data.videoConfig?.autoplay !== false} 
                       onChange={(e) => updateWidgetData(selectedWidget!, { videoConfig: { ...currentWidget.data.videoConfig, autoplay: e.target.checked } })}
-                      className="rounded border-slate-700 bg-slate-900 text-cyan-500 focus:ring-0"
+                      className="rounded border-borda-2 bg-papel text-marca focus:ring-0"
                     />
                     Autoplay
                   </label>
-                  <label className="flex items-center gap-2 text-[10px] text-slate-400 cursor-pointer bg-slate-950 p-2 rounded border border-slate-800 hover:border-slate-600">
+                  <label className="flex items-center gap-2 text-[10px] text-tinta-3 cursor-pointer bg-papel-2 p-2 rounded border border-borda hover:border-borda-3">
                     <input 
                       type="checkbox" 
                       checked={currentWidget.data.videoConfig?.mute !== false} 
                       onChange={(e) => updateWidgetData(selectedWidget!, { videoConfig: { ...currentWidget.data.videoConfig, mute: e.target.checked } })}
-                      className="rounded border-slate-700 bg-slate-900 text-cyan-500 focus:ring-0"
+                      className="rounded border-borda-2 bg-papel text-marca focus:ring-0"
                     />
                     Mudo
                   </label>
-                  <label className="flex items-center gap-2 text-[10px] text-slate-400 cursor-pointer bg-slate-950 p-2 rounded border border-slate-800 hover:border-slate-600">
+                  <label className="flex items-center gap-2 text-[10px] text-tinta-3 cursor-pointer bg-papel-2 p-2 rounded border border-borda hover:border-borda-3">
                     <input 
                       type="checkbox" 
                       checked={currentWidget.data.videoConfig?.loop !== false} 
                       onChange={(e) => updateWidgetData(selectedWidget!, { videoConfig: { ...currentWidget.data.videoConfig, loop: e.target.checked } })}
-                      className="rounded border-slate-700 bg-slate-900 text-cyan-500 focus:ring-0"
+                      className="rounded border-borda-2 bg-papel text-marca focus:ring-0"
                     />
                     Loop
                   </label>
-                  <label className="flex items-center gap-2 text-[10px] text-slate-400 cursor-pointer bg-slate-950 p-2 rounded border border-slate-800 hover:border-slate-600">
+                  <label className="flex items-center gap-2 text-[10px] text-tinta-3 cursor-pointer bg-papel-2 p-2 rounded border border-borda hover:border-borda-3">
                     <input 
                       type="checkbox" 
                       checked={currentWidget.data.videoConfig?.controls === true} 
                       onChange={(e) => updateWidgetData(selectedWidget!, { videoConfig: { ...currentWidget.data.videoConfig, controls: e.target.checked } })}
-                      className="rounded border-slate-700 bg-slate-900 text-cyan-500 focus:ring-0"
+                      className="rounded border-borda-2 bg-papel text-marca focus:ring-0"
                     />
                     Controles
                   </label>
                 </div>
                 
                 {isYouTubeUrl(currentWidget.data.videoUrl || '') && (
-                  <div className="flex items-center justify-between bg-slate-950/50 p-2 rounded-lg border border-slate-800/50 mt-3">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase">Qualidade YouTube</label>
+                  <div className="flex items-center justify-between bg-papel-2 p-2 rounded-lg border border-borda mt-3">
+                    <label className="text-[10px] font-bold text-tinta-3 uppercase">Qualidade YouTube</label>
                     <select 
                       value={currentWidget.data.videoConfig?.youtubeQuality || 'highres'}
                       onChange={(e) => updateWidgetData(selectedWidget!, { videoConfig: { ...currentWidget.data.videoConfig, youtubeQuality: e.target.value } })}
-                      className="bg-slate-900 border border-slate-700 text-slate-300 text-[10px] rounded px-2 py-1 outline-none focus:border-cyan-500"
+                      className="bg-papel border border-borda-3 text-tinta-2 text-base md:text-[10px] rounded px-2 py-1 outline-none focus:border-marca"
                     >
                       <option value="highres">Máxima (Auto)</option>
                       <option value="hd1080">1080p</option>
@@ -329,14 +328,14 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             )}
             {currentWidget.type === WidgetType.RSS && (
               <div className="space-y-4">
-                <div className="bg-slate-950 p-3 rounded-lg border border-slate-800">
-                  <label className="text-[9px] font-black text-cyan-500 uppercase flex items-center gap-1 mb-2"><Rss size={10} /> Configuração de Feeds</label>
+                <div className="bg-papel-2 p-3 rounded-lg border border-borda">
+                  <label className="text-[9px] font-black text-marca uppercase flex items-center gap-1 mb-2"><Rss size={10} /> Configuração de Feeds</label>
                   
                   <div className="mb-4 space-y-3">
                     <div>
-                      <label className="text-[9px] font-bold text-slate-500 uppercase block mb-1.5">Fonte do Feed</label>
+                      <label className="text-[9px] font-bold text-tinta-3 uppercase block mb-1.5">Fonte do Feed</label>
                       <select
-                        className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-[10px] text-slate-400 mb-2 outline-none focus:border-cyan-500 cursor-pointer hover:border-slate-600 transition-colors"
+                        className="w-full bg-papel border border-borda-3 rounded-lg p-2 text-base md:text-[10px] text-tinta-3 mb-2 outline-none focus:border-marca cursor-pointer hover:border-borda-3 transition-colors"
                         onChange={(e) => {
                            if (e.target.value) {
                              updateWidgetData(selectedWidget!, { rssUrl: e.target.value });
@@ -359,19 +358,19 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                         placeholder="URL do Feed RSS (Ex: https://...)"
                         value={currentWidget.data.rssUrl || currentWidget.data.rssFeeds?.[0]?.url || ''}
                         onChange={(e) => updateWidgetData(selectedWidget!, { rssUrl: e.target.value })}
-                        className="w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-[10px] text-slate-200 outline-none focus:border-cyan-500 transition-all font-mono break-all"
+                        className="w-full bg-papel-2 border border-borda-3 rounded-lg p-3 text-base md:text-[10px] text-tinta outline-none focus:border-marca transition-all font-mono break-all"
                       />
                     </div>
                   </div>
                 </div>
 
-                <div className="bg-slate-950 p-3 rounded-lg border border-slate-800 mb-4">
-                    <label className="text-[9px] font-bold text-slate-500 uppercase block mb-1.5">Busca Automática (Google News)</label>
+                <div className="bg-papel-2 p-3 rounded-lg border border-borda mb-4">
+                    <label className="text-[9px] font-bold text-tinta-3 uppercase block mb-1.5">Busca Automática (Google News)</label>
                     <div className="flex gap-2">
                       <input 
                         type="text" 
                         placeholder="Ex: Inteligência Artificial..."
-                        className="flex-1 bg-slate-900 border border-slate-700 rounded-lg p-2 text-[10px] text-slate-200 outline-none focus:border-cyan-500 placeholder:text-slate-600"
+                        className="flex-1 bg-papel border border-borda-3 rounded-lg p-2 text-base md:text-[10px] text-tinta outline-none focus:border-marca placeholder:text-tinta-3"
                         onKeyDown={(e) => {
                           if (e.key === 'Enter') {
                             const target = e.target as HTMLInputElement;
@@ -391,25 +390,25 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                             updateWidgetData(selectedWidget!, { rssUrl: newUrl });
                           }
                         }}
-                        className="bg-slate-800 hover:bg-cyan-600 text-slate-400 hover:text-white px-3 rounded-lg transition-colors border border-slate-700 hover:border-cyan-500"
+                        className="bg-papel-3 hover:bg-marca-hover text-tinta-3 hover:text-white px-3 rounded-lg transition-colors border border-borda-2 hover:border-marca"
                       >
                          <Search size={14} />
                       </button>
                     </div>
-                    <p className="text-[8px] text-slate-600 mt-1.5">
+                    <p className="text-[8px] text-tinta-3 mt-1.5">
                       Digite um tema e pressione Enter. O sistema buscará as últimas notícias sobre o assunto no Google News.
                     </p>
                   </div>
 
-                <div className="pt-4 border-t border-slate-800">
-                   <label className="text-[9px] font-black text-slate-500 uppercase flex items-center gap-1 mb-2"><Settings size={10} /> Layout & Exibição</label>
+                <div className="pt-4 border-t border-borda">
+                   <label className="text-[9px] font-black text-tinta-3 uppercase flex items-center gap-1 mb-2"><Settings size={10} /> Layout & Exibição</label>
 
                    <div className="mb-4">
-                      <label className="text-[8px] font-bold text-slate-500 uppercase block mb-1">Tipo de Notícia (Imagens)</label>
+                      <label className="text-[8px] font-bold text-tinta-3 uppercase block mb-1">Tipo de Notícia (Imagens)</label>
                       <select 
                         value={currentWidget.data.rssConfig?.feedMode || 'default'}
                         onChange={(e) => updateWidgetData(selectedWidget!, { rssConfig: { ...currentWidget.data.rssConfig, feedMode: e.target.value } })}
-                        className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-[10px] text-slate-300 outline-none focus:border-cyan-500"
+                        className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-[10px] text-tinta-2 outline-none focus:border-marca"
                       >
                          <option value="default">Padrão (Misturado - com ou sem imagem)</option>
                          <option value="require-image">Obrigatório Ter Imagem (Pula se não tiver)</option>
@@ -420,14 +419,14 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                    <div className="grid grid-cols-3 gap-2 mb-3">
                       <button 
                         onClick={() => updateWidgetData(selectedWidget!, { rssConfig: { ...currentWidget.data.rssConfig, layout: 'full-image' } })}
-                        className={`p-2 rounded border text-[9px] font-bold uppercase transition-all flex flex-col items-center gap-1 ${currentWidget.data.rssConfig?.layout === 'full-image' || !currentWidget.data.rssConfig?.layout ? 'bg-cyan-500/20 border-cyan-500 text-cyan-400' : 'bg-slate-950 border-slate-800 text-slate-500 hover:border-slate-600'}`}
+                        className={`p-2 rounded border text-[9px] font-bold uppercase transition-all flex flex-col items-center gap-1 ${currentWidget.data.rssConfig?.layout === 'full-image' || !currentWidget.data.rssConfig?.layout ? 'bg-marca-fundo border-marca text-marca' : 'bg-papel-2 border-borda text-tinta-3 hover:border-borda-3'}`}
                       >
                         <div className="w-full h-4 bg-current opacity-50 rounded-sm"></div>
                         Full Imagem
                       </button>
                       <button 
                         onClick={() => updateWidgetData(selectedWidget!, { rssConfig: { ...currentWidget.data.rssConfig, layout: 'split' } })}
-                        className={`p-2 rounded border text-[9px] font-bold uppercase transition-all flex flex-col items-center gap-1 ${currentWidget.data.rssConfig?.layout === 'split' ? 'bg-cyan-500/20 border-cyan-500 text-cyan-400' : 'bg-slate-950 border-slate-800 text-slate-500 hover:border-slate-600'}`}
+                        className={`p-2 rounded border text-[9px] font-bold uppercase transition-all flex flex-col items-center gap-1 ${currentWidget.data.rssConfig?.layout === 'split' ? 'bg-marca-fundo border-marca text-marca' : 'bg-papel-2 border-borda text-tinta-3 hover:border-borda-3'}`}
                       >
                         <div className="flex flex-col gap-0.5 w-full h-4">
                            <div className="h-2 bg-current opacity-50 rounded-sm w-full"></div>
@@ -437,7 +436,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                       </button>
                       <button 
                         onClick={() => updateWidgetData(selectedWidget!, { rssConfig: { ...currentWidget.data.rssConfig, layout: 'ticker' } })}
-                        className={`p-2 rounded border text-[9px] font-bold uppercase transition-all flex flex-col items-center gap-1 ${currentWidget.data.rssConfig?.layout === 'ticker' ? 'bg-cyan-500/20 border-cyan-500 text-cyan-400' : 'bg-slate-950 border-slate-800 text-slate-500 hover:border-slate-600'}`}
+                        className={`p-2 rounded border text-[9px] font-bold uppercase transition-all flex flex-col items-center gap-1 ${currentWidget.data.rssConfig?.layout === 'ticker' ? 'bg-marca-fundo border-marca text-marca' : 'bg-papel-2 border-borda text-tinta-3 hover:border-borda-3'}`}
                       >
                         <div className="w-full h-4 flex items-center justify-center border border-current opacity-50 rounded-sm">
                            <div className="w-full h-1 bg-current rounded-full"></div>
@@ -447,16 +446,16 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                    </div>
 
                    {/* Typography & Colors - Visible for all RSS layouts */}
-                   <div className="mt-3 mb-3 p-3 bg-slate-900/50 rounded-xl border border-slate-800 space-y-4">
-                      <label className="text-[9px] font-black text-indigo-400 uppercase flex items-center gap-1 mb-1"><Palette size={10} /> Estilo do Texto</label>
+                   <div className="mt-3 mb-3 p-3 bg-papel-2 rounded-xl border border-borda space-y-4">
+                      <label className="text-[9px] font-black text-marca uppercase flex items-center gap-1 mb-1"><Palette size={10} /> Estilo do Texto</label>
                       
                       <div className="grid grid-cols-2 gap-3">
                          <div>
-                            <label className="text-[8px] text-slate-500 uppercase block mb-1">Tamanho Título</label>
+                            <label className="text-[8px] text-tinta-3 uppercase block mb-1">Tamanho Título</label>
                             <select 
                               value={currentWidget.data.rssConfig?.titleSize || 'normal'}
                               onChange={(e) => updateWidgetData(selectedWidget!, { rssConfig: { ...currentWidget.data.rssConfig, titleSize: e.target.value } })}
-                              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-[10px] text-slate-300 outline-none focus:border-cyan-500"
+                              className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-[10px] text-tinta-2 outline-none focus:border-marca"
                             >
                                <option value="small">Pequeno</option>
                                <option value="normal">Normal</option>
@@ -465,11 +464,11 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                             </select>
                          </div>
                          <div>
-                            <label className="text-[8px] text-slate-500 uppercase block mb-1">Tamanho Descrição</label>
+                            <label className="text-[8px] text-tinta-3 uppercase block mb-1">Tamanho Descrição</label>
                             <select 
                               value={currentWidget.data.rssConfig?.descriptionSize || 'normal'}
                               onChange={(e) => updateWidgetData(selectedWidget!, { rssConfig: { ...currentWidget.data.rssConfig, descriptionSize: e.target.value } })}
-                              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-[10px] text-slate-300 outline-none focus:border-cyan-500"
+                              className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-[10px] text-tinta-2 outline-none focus:border-marca"
                             >
                                <option value="small">Pequeno</option>
                                <option value="normal">Normal</option>
@@ -480,11 +479,11 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                       </div>
                       
                       <div>
-                         <label className="text-[8px] text-slate-500 uppercase block mb-1">Fonte / Tipografia</label>
+                         <label className="text-[8px] text-tinta-3 uppercase block mb-1">Fonte / Tipografia</label>
                          <select 
                            value={currentWidget.data.rssConfig?.fontFamily || 'sans'}
                            onChange={(e) => updateWidgetData(selectedWidget!, { rssConfig: { ...currentWidget.data.rssConfig, fontFamily: e.target.value } })}
-                           className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-[10px] text-slate-300 outline-none focus:border-cyan-500"
+                           className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-[10px] text-tinta-2 outline-none focus:border-marca"
                          >
                             <option value="sans">Padrão (Sans)</option>
                             <option value="serif">Serif</option>
@@ -495,7 +494,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
 
                       <div className="grid grid-cols-2 gap-3 pt-1">
                          <div>
-                            <label className="text-[8px] text-slate-500 uppercase block mb-1">Cor Título</label>
+                            <label className="text-[8px] text-tinta-3 uppercase block mb-1">Cor Título</label>
                             <div className="flex items-center gap-2">
                                <input 
                                  type="color" 
@@ -503,11 +502,11 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                                  onChange={(e) => updateWidgetData(selectedWidget!, { rssConfig: { ...currentWidget.data.rssConfig, titleColor: e.target.value } })}
                                  className="w-8 h-8 rounded bg-transparent border-none cursor-pointer"
                                />
-                               <span className="text-[9px] text-slate-400 font-mono">{currentWidget.data.rssConfig?.titleColor || '#ffffff'}</span>
+                               <span className="text-[9px] text-tinta-3 font-mono">{currentWidget.data.rssConfig?.titleColor || '#ffffff'}</span>
                             </div>
                          </div>
                          <div>
-                            <label className="text-[8px] text-slate-500 uppercase block mb-1">Cor Texto</label>
+                            <label className="text-[8px] text-tinta-3 uppercase block mb-1">Cor Texto</label>
                             <div className="flex items-center gap-2">
                                <input 
                                  type="color" 
@@ -515,41 +514,41 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                                  onChange={(e) => updateWidgetData(selectedWidget!, { rssConfig: { ...currentWidget.data.rssConfig, textColor: e.target.value } })}
                                  className="w-8 h-8 rounded bg-transparent border-none cursor-pointer"
                                />
-                               <span className="text-[9px] text-slate-400 font-mono">{currentWidget.data.rssConfig?.textColor || '#94a3b8'}</span>
+                               <span className="text-[9px] text-tinta-3 font-mono">{currentWidget.data.rssConfig?.textColor || '#94a3b8'}</span>
                             </div>
                          </div>
                       </div>
                    </div>
 
                    {currentWidget.data.rssConfig?.layout === 'split' && (
-                      <div className="mt-3 mb-3 p-2 bg-slate-900/50 rounded border border-slate-800 space-y-3">
+                      <div className="mt-3 mb-3 p-2 bg-papel-2 rounded border border-borda space-y-3">
                          <div className="flex items-center gap-2">
                            <input 
                              type="checkbox" 
                              id="rss-show-full"
                              checked={currentWidget.data.rssConfig?.showFullContent || false} 
                              onChange={(e) => updateWidgetData(selectedWidget!, { rssConfig: { ...currentWidget.data.rssConfig, showFullContent: e.target.checked } })}
-                             className="rounded border-slate-700 bg-slate-950 text-cyan-500 focus:ring-0 w-3 h-3"
+                             className="rounded border-borda-2 bg-papel-2 text-marca focus:ring-0 w-3 h-3"
                            />
-                           <label htmlFor="rss-show-full" className="text-[9px] font-bold text-slate-400 uppercase cursor-pointer select-none">
+                           <label htmlFor="rss-show-full" className="text-[9px] font-bold text-tinta-3 uppercase cursor-pointer select-none">
                              Exibir conteúdo completo
                             </label>
                          </div>
-                         <p className="text-[8px] text-slate-600 pl-5 leading-tight">
+                         <p className="text-[8px] text-tinta-3 pl-5 leading-tight">
                             Ajusta o card para exibir mais texto e evita cortes, preenchendo o espaço disponível.
                          </p>
 
                          {/* Marquee Settings */}
-                         <div className="pt-2 border-t border-slate-800/50">
+                         <div className="pt-2 border-t border-borda">
                             <div className="flex items-center gap-2 mb-2">
                                <input 
                                  type="checkbox" 
                                  id="rss-marquee"
                                  checked={currentWidget.data.rssConfig?.enableMarquee || false} 
                                  onChange={(e) => updateWidgetData(selectedWidget!, { rssConfig: { ...currentWidget.data.rssConfig, enableMarquee: e.target.checked } })}
-                                 className="rounded border-slate-700 bg-slate-950 text-cyan-500 focus:ring-0 w-3 h-3"
+                                 className="rounded border-borda-2 bg-papel-2 text-marca focus:ring-0 w-3 h-3"
                                />
-                               <label htmlFor="rss-marquee" className="text-[9px] font-bold text-slate-400 uppercase cursor-pointer select-none flex items-center gap-1">
+                               <label htmlFor="rss-marquee" className="text-[9px] font-bold text-tinta-3 uppercase cursor-pointer select-none flex items-center gap-1">
                                  <MoveHorizontal size={10} /> Animação Lateral (Marquee)
                                </label>
                             </div>
@@ -557,7 +556,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                             {currentWidget.data.rssConfig?.enableMarquee && (
                                <div className="pl-5 space-y-2">
                                   <div>
-                                     <label className="text-[8px] text-slate-500 uppercase block mb-1">Velocidade: {currentWidget.data.rssConfig?.marqueeSpeed || 50}</label>
+                                     <label className="text-[8px] text-tinta-3 uppercase block mb-1">Velocidade: {currentWidget.data.rssConfig?.marqueeSpeed || 50}</label>
                                      <input 
                                        type="range" 
                                        min="10" 
@@ -565,7 +564,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                                        step="5"
                                        value={currentWidget.data.rssConfig?.marqueeSpeed || 50}
                                        onChange={(e) => updateWidgetData(selectedWidget!, { rssConfig: { ...currentWidget.data.rssConfig, marqueeSpeed: parseInt(e.target.value) } })}
-                                       className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-500"
+                                       className="w-full h-1 bg-papel-3 rounded-lg appearance-none cursor-pointer accent-marca"
                                      />
                                   </div>
                                </div>
@@ -574,7 +573,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                       </div>
                    )}
 
-                   <p className="text-[8px] text-slate-600 mt-2 leading-relaxed">
+                   <p className="text-[8px] text-tinta-3 mt-2 leading-relaxed">
                      O modo "Faixa / Letreiro" utiliza o visual Full Imagem otimizado para ocupar toda a largura da tela (redimensione o widget na grade).
                    </p>
                 </div>
@@ -582,7 +581,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             )}
             {currentWidget.type === WidgetType.WEATHER && (
               <div className="space-y-3">
-                <label className="text-[9px] font-black text-slate-500 uppercase flex items-center gap-1"><CloudSun size={10} /> Cidade e Estado</label>
+                <label className="text-[9px] font-black text-tinta-3 uppercase flex items-center gap-1"><CloudSun size={10} /> Cidade e Estado</label>
                 <input 
                   type="text" 
                   value={currentWidget.data.city || ''} 
@@ -594,11 +593,11 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                     }
                     updateWidgetData(selectedWidget!, updates);
                   }} 
-                  className="w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-xs text-slate-200 outline-none focus:border-cyan-500 transition-all font-mono mb-2" 
+                  className="w-full bg-papel-2 border border-borda-3 rounded-lg p-3 text-base md:text-xs text-tinta outline-none focus:border-marca transition-all font-mono mb-2" 
                   placeholder="Ex: São Paulo, SP"
                 />
                 <select 
-                  className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-[10px] text-slate-400 outline-none focus:border-cyan-500 cursor-pointer mb-2"
+                  className="w-full bg-papel border border-borda-3 rounded-lg p-2 text-base md:text-[10px] text-tinta-3 outline-none focus:border-marca cursor-pointer mb-2"
                   onChange={(e) => {
                     if (e.target.value) {
                       const newCity = e.target.value;
@@ -641,9 +640,9 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                   </optgroup>
                 </select>
                 
-                <label className="text-[9px] font-black text-slate-500 uppercase flex items-center gap-1 mt-4"><Settings size={10} /> Modelo Visual</label>
+                <label className="text-[9px] font-black text-tinta-3 uppercase flex items-center gap-1 mt-4"><Settings size={10} /> Modelo Visual</label>
                 <select 
-                  className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-[10px] text-slate-200 outline-none focus:border-cyan-500 cursor-pointer"
+                  className="w-full bg-papel border border-borda-3 rounded-lg p-2 text-base md:text-[10px] text-tinta outline-none focus:border-marca cursor-pointer"
                   value={currentWidget.data.model || 'simple'}
                   onChange={(e) => {
                     const newModel = e.target.value;
@@ -665,10 +664,10 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                 </select>
                 
                 {currentWidget.data.model === 'windows' && (
-                  <div className="mt-4 pt-4 border-t border-slate-800">
-                    <label className="block text-xs font-medium text-slate-400 mb-2">Exibição do Gráfico</label>
+                  <div className="mt-4 pt-4 border-t border-borda">
+                    <label className="block text-xs font-medium text-tinta-3 mb-2">Exibição do Gráfico</label>
                     <select
-                      className="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-cyan-500 transition-colors"
+                      className="w-full bg-papel-2 border border-borda-3 rounded-lg px-3 py-2 text-base md:text-sm text-tinta focus:outline-none focus:border-marca transition-colors"
                       value={currentWidget.data.windowsView || 'precipitation'}
                       onChange={(e) => updateWidgetData(selectedWidget!, { windowsView: e.target.value })}
                     >
@@ -679,7 +678,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                   </div>
                 )}
                 
-                <div className="mt-4 pt-4 border-t border-slate-800">
+                <div className="mt-4 pt-4 border-t border-borda">
                    <SizeInput 
                      label="Escala Geral (Tamanho)"
                      value={currentWidget.data.weatherConfig?.baseFontSize}
@@ -689,23 +688,23 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                    />
                 </div>
                 
-                <p className="text-[9px] text-slate-600 leading-relaxed mt-2">
+                <p className="text-[9px] text-tinta-3 leading-relaxed mt-2">
                   Ajuste o tamanho de todos os elementos do widget de uma só vez. Use 'cqw' para tamanho relativo ou 'px' para fixo.
                 </p>
               </div>
             )}
             {currentWidget.type === WidgetType.FULL_INFO && (
               <div className="space-y-3">
-                <label className="text-[9px] font-black text-slate-500 uppercase flex items-center gap-1"><CloudSun size={10} /> Cidade e Estado</label>
+                <label className="text-[9px] font-black text-tinta-3 uppercase flex items-center gap-1"><CloudSun size={10} /> Cidade e Estado</label>
                 <input 
                   type="text" 
                   value={currentWidget.data.city || ''} 
                   onChange={(e) => updateWidgetData(selectedWidget!, { city: e.target.value })} 
-                  className="w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-xs text-slate-200 outline-none focus:border-cyan-500 transition-all font-mono mb-2" 
+                  className="w-full bg-papel-2 border border-borda-3 rounded-lg p-3 text-base md:text-xs text-tinta outline-none focus:border-marca transition-all font-mono mb-2" 
                   placeholder="Ex: São Paulo, SP"
                 />
                 <select 
-                  className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-[10px] text-slate-400 outline-none focus:border-cyan-500 cursor-pointer mb-2"
+                  className="w-full bg-papel border border-borda-3 rounded-lg p-2 text-base md:text-[10px] text-tinta-3 outline-none focus:border-marca cursor-pointer mb-2"
                   onChange={(e) => {
                     if (e.target.value) {
                       updateWidgetData(selectedWidget!, { city: e.target.value });
@@ -736,9 +735,9 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                   </optgroup>
                 </select>
 
-                <label className="text-[9px] font-black text-slate-500 uppercase flex items-center gap-1 mt-4"><Settings size={10} /> Modelo Visual</label>
+                <label className="text-[9px] font-black text-tinta-3 uppercase flex items-center gap-1 mt-4"><Settings size={10} /> Modelo Visual</label>
                 <select 
-                  className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-[10px] text-slate-200 outline-none focus:border-cyan-500 cursor-pointer"
+                  className="w-full bg-papel border border-borda-3 rounded-lg p-2 text-base md:text-[10px] text-tinta outline-none focus:border-marca cursor-pointer"
                   value={currentWidget.data.model || 'standard'}
                   onChange={(e) => updateWidgetData(selectedWidget!, { model: e.target.value })}
                 >
@@ -748,13 +747,13 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                   <option value="modern">Moderno (Dividido)</option>
                 </select>
 
-                <div className="pt-2 border-t border-slate-800/60 space-y-2 mt-4">
-                  <label className="text-[9px] font-black text-slate-500 uppercase flex items-center gap-1"><ImageIcon size={10} /> Selecione o Background</label>
+                <div className="pt-2 border-t border-borda space-y-2 mt-4">
+                  <label className="text-[9px] font-black text-tinta-3 uppercase flex items-center gap-1"><ImageIcon size={10} /> Selecione o Background</label>
                   <input 
                     type="text" 
                     value={currentWidget.data.backgroundImage || ''} 
                     onChange={(e) => updateWidgetData(selectedWidget!, { backgroundImage: e.target.value })} 
-                    className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-xs text-slate-200 outline-none focus:border-cyan-500 transition-all font-mono" 
+                    className="w-full bg-papel-2 border border-borda-3 rounded-lg p-2.5 text-base md:text-xs text-tinta outline-none focus:border-marca transition-all font-mono" 
                     placeholder="URL da imagem ou vídeo (ex: https://...)"
                   />
                   <div className="grid grid-cols-2 gap-1.5 mt-1.5">
@@ -768,7 +767,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                           }
                         });
                       }}
-                      className="py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded text-[10px] font-bold uppercase transition-colors flex items-center justify-center gap-1.5 border border-slate-700"
+                      className="py-1.5 bg-papel-3 hover:bg-borda text-tinta rounded text-[10px] font-bold uppercase transition-colors flex items-center justify-center gap-1.5 border border-borda-2"
                     >
                       <Upload size={10} />
                       Selecionar Imagem
@@ -783,22 +782,22 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                           }
                         });
                       }}
-                      className="py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded text-[10px] font-bold uppercase transition-colors flex items-center justify-center gap-1.5 border border-slate-700"
+                      className="py-1.5 bg-papel-3 hover:bg-borda text-tinta rounded text-[10px] font-bold uppercase transition-colors flex items-center justify-center gap-1.5 border border-borda-2"
                     >
                       <Upload size={10} />
                       Selecionar Vídeo
                     </button>
                   </div>
-                  <p className="text-[9px] text-slate-600 leading-relaxed mt-1">
+                  <p className="text-[9px] text-tinta-3 leading-relaxed mt-1">
                     Dica: Se deixar vazio, usará a imagem de clima baseada no clima atual.
                   </p>
                 </div>
 
-                <div className="space-y-4 mt-4 pt-4 border-t border-slate-800">
+                <div className="space-y-4 mt-4 pt-4 border-t border-borda">
                   <div>
                     <div className="flex justify-between items-center mb-2">
-                      <label className="text-[9px] font-black text-slate-500 uppercase flex items-center gap-1">Tamanho dos Textos</label>
-                      <span className="text-[10px] font-mono text-[var(--th-accent)]">{currentWidget.data.textSize || 100}%</span>
+                      <label className="text-[9px] font-black text-tinta-3 uppercase flex items-center gap-1">Tamanho dos Textos</label>
+                      <span className="text-[10px] font-mono text-marca">{currentWidget.data.textSize || 100}%</span>
                     </div>
                     <input 
                       type="range" 
@@ -807,14 +806,14 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                       step="5"
                       value={currentWidget.data.textSize || 100} 
                       onChange={(e) => updateWidgetData(selectedWidget!, { textSize: parseInt(e.target.value) })}
-                      className="w-full accent-[var(--th-accent)]"
+                      className="w-full accent-marca"
                     />
                   </div>
                   
                   <div>
                     <div className="flex justify-between items-center mb-2">
-                      <label className="text-[9px] font-black text-slate-500 uppercase flex items-center gap-1">Tamanho dos Números</label>
-                      <span className="text-[10px] font-mono text-[var(--th-accent)]">{currentWidget.data.numberSize || 100}%</span>
+                      <label className="text-[9px] font-black text-tinta-3 uppercase flex items-center gap-1">Tamanho dos Números</label>
+                      <span className="text-[10px] font-mono text-marca">{currentWidget.data.numberSize || 100}%</span>
                     </div>
                     <input 
                       type="range" 
@@ -823,7 +822,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                       step="5"
                       value={currentWidget.data.numberSize || 100} 
                       onChange={(e) => updateWidgetData(selectedWidget!, { numberSize: parseInt(e.target.value) })}
-                      className="w-full accent-[var(--th-accent)]"
+                      className="w-full accent-marca"
                     />
                   </div>
                 </div>
@@ -831,16 +830,16 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             )}
             {currentWidget.type === WidgetType.CLOCK && (
               <div className="space-y-3">
-                <label className="text-[9px] font-black text-slate-500 uppercase flex items-center gap-1"><Clock size={10} /> Cidade (Opcional)</label>
+                <label className="text-[9px] font-black text-tinta-3 uppercase flex items-center gap-1"><Clock size={10} /> Cidade (Opcional)</label>
                 <input 
                   type="text" 
                   value={currentWidget.data.city || ''} 
                   onChange={(e) => updateWidgetData(selectedWidget!, { city: e.target.value })} 
-                  className="w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-xs text-slate-200 outline-none focus:border-cyan-500 transition-all font-mono mb-2" 
+                  className="w-full bg-papel-2 border border-borda-3 rounded-lg p-3 text-base md:text-xs text-tinta outline-none focus:border-marca transition-all font-mono mb-2" 
                   placeholder="Ex: Londres, Tóquio..."
                 />
                 <select 
-                  className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-[10px] text-slate-400 outline-none focus:border-cyan-500 cursor-pointer mb-2"
+                  className="w-full bg-papel border border-borda-3 rounded-lg p-2 text-base md:text-[10px] text-tinta-3 outline-none focus:border-marca cursor-pointer mb-2"
                   onChange={(e) => {
                     if (e.target.value) {
                       updateWidgetData(selectedWidget!, { city: e.target.value });
@@ -882,9 +881,9 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                   </optgroup>
                 </select>
                 
-                <label className="text-[9px] font-black text-slate-500 uppercase flex items-center gap-1 mt-4"><Settings size={10} /> Estilo do Relógio</label>
+                <label className="text-[9px] font-black text-tinta-3 uppercase flex items-center gap-1 mt-4"><Settings size={10} /> Estilo do Relógio</label>
                 <select 
-                  className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-[10px] text-slate-200 outline-none focus:border-cyan-500 cursor-pointer"
+                  className="w-full bg-papel border border-borda-3 rounded-lg p-2 text-base md:text-[10px] text-tinta outline-none focus:border-marca cursor-pointer"
                   value={currentWidget.data.model || 'standard'}
                   onChange={(e) => updateWidgetData(selectedWidget!, { model: e.target.value })}
                 >
@@ -904,14 +903,14 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                   isFont={true}
                 />
 
-                <p className="text-[9px] text-slate-600 leading-relaxed mt-2">
+                <p className="text-[9px] text-tinta-3 leading-relaxed mt-2">
                   Se definido, o relógio mostrará o horário local dessa cidade. Caso contrário, mostrará o horário do sistema.
                 </p>
               </div>
             )}
             {currentWidget.type === WidgetType.CALENDAR && (
               <div className="space-y-3">
-                <label className="text-[9px] font-black text-slate-500 uppercase flex items-center gap-1"><Calendar size={10} /> ID do Google Calendar</label>
+                <label className="text-[9px] font-black text-tinta-3 uppercase flex items-center gap-1"><Calendar size={10} /> ID do Google Calendar</label>
                 <input 
                   type="text" 
                   value={currentWidget.data.calendarId || ''} 
@@ -928,93 +927,93 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                     } catch {}
                     updateWidgetData(selectedWidget!, { calendarId: raw });
                   }} 
-                  className="w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-xs text-slate-200 outline-none focus:border-cyan-500 transition-all font-mono" 
+                  className="w-full bg-papel-2 border border-borda-3 rounded-lg p-3 text-base md:text-xs text-tinta outline-none focus:border-marca transition-all font-mono" 
                   placeholder="Cole aqui o ID, URL ou iframe do Google Calendar"
                 />
-                <p className="text-[9px] text-emerald-500/80 leading-relaxed bg-emerald-500/5 p-2 rounded border border-emerald-500/10">
+                <p className="text-[9px] text-ok leading-relaxed bg-ok-fundo p-2 rounded border border-ok/30">
                   <strong>Dica:</strong> cole a URL do calendário, o código de incorporação (iframe) ou só o ID da agenda.
                 </p>
 
-                <details className="group bg-slate-900/60 rounded-xl border border-slate-700/50 overflow-hidden transition-all">
-                  <summary className="flex items-center justify-between cursor-pointer p-3 hover:bg-slate-800/50 transition-colors select-none">
-                    <span className="text-[10px] font-black text-cyan-400 uppercase tracking-wider flex items-center gap-2">
+                <details className="group bg-papel-2 rounded-xl border border-borda-2 overflow-hidden transition-all">
+                  <summary className="flex items-center justify-between cursor-pointer p-3 hover:bg-papel-3 transition-colors select-none">
+                    <span className="text-[10px] font-black text-marca uppercase tracking-wider flex items-center gap-2">
                       <BookOpen size={12} /> Como Conectar sua Agenda
                     </span>
-                    <ChevronDown size={14} className="text-slate-500 transition-transform duration-200 group-open:rotate-180" />
+                    <ChevronDown size={14} className="text-tinta-3 transition-transform duration-200 group-open:rotate-180" />
                   </summary>
-                  <div className="px-3 pb-3 space-y-3 border-t border-slate-800">
+                  <div className="px-3 pb-3 space-y-3 border-t border-borda">
                     <div className="mt-3 space-y-2.5">
                       <div className="flex gap-2.5 items-start">
-                        <span className="flex-shrink-0 w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 text-[10px] font-black flex items-center justify-center">1</span>
-                        <p className="text-[10px] text-slate-300 leading-relaxed">Abra o <a href="https://calendar.google.com" target="_blank" rel="noopener noreferrer" className="text-cyan-400 underline hover:text-cyan-300">Google Calendar</a> no navegador.</p>
+                        <span className="flex-shrink-0 w-5 h-5 rounded-full bg-marca-fundo text-marca text-[10px] font-black flex items-center justify-center">1</span>
+                        <p className="text-[10px] text-tinta-2 leading-relaxed">Abra o <a href="https://calendar.google.com" target="_blank" rel="noopener noreferrer" className="text-marca underline hover:text-marca-hover">Google Calendar</a> no navegador.</p>
                       </div>
                       <div className="flex gap-2.5 items-start">
-                        <span className="flex-shrink-0 w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 text-[10px] font-black flex items-center justify-center">2</span>
-                        <p className="text-[10px] text-slate-300 leading-relaxed">Clique no ícone de <strong className="text-white">⚙️ Configurações</strong> no canto superior direito.</p>
+                        <span className="flex-shrink-0 w-5 h-5 rounded-full bg-marca-fundo text-marca text-[10px] font-black flex items-center justify-center">2</span>
+                        <p className="text-[10px] text-tinta-2 leading-relaxed">Clique no ícone de <strong className="text-tinta">⚙️ Configurações</strong> no canto superior direito.</p>
                       </div>
                       <div className="flex gap-2.5 items-start">
-                        <span className="flex-shrink-0 w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 text-[10px] font-black flex items-center justify-center">3</span>
-                        <p className="text-[10px] text-slate-300 leading-relaxed">No menu lateral, selecione a <strong className="text-white">agenda desejada</strong>.</p>
+                        <span className="flex-shrink-0 w-5 h-5 rounded-full bg-marca-fundo text-marca text-[10px] font-black flex items-center justify-center">3</span>
+                        <p className="text-[10px] text-tinta-2 leading-relaxed">No menu lateral, selecione a <strong className="text-tinta">agenda desejada</strong>.</p>
                       </div>
                       <div className="flex gap-2.5 items-start">
-                        <span className="flex-shrink-0 w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 text-[10px] font-black flex items-center justify-center">4</span>
-                        <p className="text-[10px] text-slate-300 leading-relaxed">Role até a seção <strong className="text-white">"Integrar agenda"</strong>.</p>
+                        <span className="flex-shrink-0 w-5 h-5 rounded-full bg-marca-fundo text-marca text-[10px] font-black flex items-center justify-center">4</span>
+                        <p className="text-[10px] text-tinta-2 leading-relaxed">Role até a seção <strong className="text-tinta">"Integrar agenda"</strong>.</p>
                       </div>
                       <div className="flex gap-2.5 items-start">
-                        <span className="flex-shrink-0 w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 text-[10px] font-black flex items-center justify-center">5</span>
-                        <p className="text-[10px] text-slate-300 leading-relaxed">Copie o <strong className="text-white">"ID da agenda"</strong> ou o <strong className="text-white">"Código de incorporação"</strong> e cole no campo acima.</p>
+                        <span className="flex-shrink-0 w-5 h-5 rounded-full bg-marca-fundo text-marca text-[10px] font-black flex items-center justify-center">5</span>
+                        <p className="text-[10px] text-tinta-2 leading-relaxed">Copie o <strong className="text-tinta">"ID da agenda"</strong> ou o <strong className="text-tinta">"Código de incorporação"</strong> e cole no campo acima.</p>
                       </div>
                     </div>
-                    <div className="mt-3 p-2.5 bg-amber-500/10 rounded-lg border border-amber-500/20">
-                      <p className="text-[9px] text-amber-400 leading-relaxed flex items-start gap-1.5">
-                        <span className="text-amber-500 font-bold flex-shrink-0">⚠️</span>
+                    <div className="mt-3 p-2.5 bg-warn-fundo rounded-lg border border-warn/30">
+                      <p className="text-[9px] text-warn leading-relaxed flex items-start gap-1.5">
+                        <span className="text-warn font-bold flex-shrink-0">⚠️</span>
                         <span><strong>Importante:</strong> A agenda deve estar com <strong>acesso público</strong> ativado.</span>
                       </p>
                     </div>
                   </div>
                 </details>
 
-                <div className="border-t border-slate-800 pt-4 mt-4 space-y-3">
+                <div className="border-t border-borda pt-4 mt-4 space-y-3">
                   <div className="flex items-center gap-2">
                     <input 
                       type="checkbox" 
                       id="show-cal-title"
                       checked={currentWidget.data.calendarConfig?.showTitle ?? !!currentWidget.data.calendarConfig?.customTitle} 
                       onChange={(e) => updateWidgetData(selectedWidget!, { calendarConfig: { ...currentWidget.data.calendarConfig, showTitle: e.target.checked } })}
-                      className="accent-cyan-500 w-4 h-4 rounded border-slate-700 bg-slate-900 focus:ring-0"
+                      className="accent-marca w-4 h-4 rounded border-borda-2 bg-papel focus:ring-0"
                     />
-                    <label htmlFor="show-cal-title" className="text-[9px] font-black text-slate-500 uppercase flex items-center gap-1 cursor-pointer select-none">
+                    <label htmlFor="show-cal-title" className="text-[9px] font-black text-tinta-3 uppercase flex items-center gap-1 cursor-pointer select-none">
                       <Type size={10} /> Exibir Título Personalizado
                     </label>
                   </div>
 
                   {(currentWidget.data.calendarConfig?.showTitle ?? !!currentWidget.data.calendarConfig?.customTitle) && (
-                    <div className="space-y-3 pl-2 border-l-2 border-slate-800 ml-1">
+                    <div className="space-y-3 pl-2 border-l-2 border-borda ml-1">
                       <input 
                         type="text" 
                         value={currentWidget.data.calendarConfig?.customTitle || ''} 
                         onChange={(e) => updateWidgetData(selectedWidget!, { calendarConfig: { ...currentWidget.data.calendarConfig, customTitle: e.target.value } })} 
-                        className="w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-xs text-slate-200 outline-none focus:border-cyan-500 transition-all font-mono" 
+                        className="w-full bg-papel-2 border border-borda-3 rounded-lg p-3 text-base md:text-xs text-tinta outline-none focus:border-marca transition-all font-mono" 
                         placeholder="Ex: Reuniões da Diretoria"
                       />
 
                       <div className="grid grid-cols-2 gap-2">
                         <div>
-                           <label className="text-[9px] font-bold text-slate-500 uppercase block mb-1">Cor do Título</label>
-                           <div className="flex items-center gap-2 bg-slate-950 border border-slate-700 rounded p-1">
+                           <label className="text-[9px] font-bold text-tinta-3 uppercase block mb-1">Cor do Título</label>
+                           <div className="flex items-center gap-2 bg-papel-2 border border-borda-2 rounded p-1">
                              <input 
                                type="color" 
                                value={currentWidget.data.calendarConfig?.titleColor || '#ffffff'}
                                onChange={(e) => updateWidgetData(selectedWidget!, { calendarConfig: { ...currentWidget.data.calendarConfig, titleColor: e.target.value } })}
                                className="w-6 h-6 bg-transparent border-none rounded cursor-pointer"
                              />
-                             <span className="text-[10px] font-mono text-slate-400">{currentWidget.data.calendarConfig?.titleColor || '#ffffff'}</span>
+                             <span className="text-[10px] font-mono text-tinta-3">{currentWidget.data.calendarConfig?.titleColor || '#ffffff'}</span>
                            </div>
                         </div>
                         <div>
-                           <label className="text-[9px] font-bold text-slate-500 uppercase block mb-1">Tamanho Título</label>
+                           <label className="text-[9px] font-bold text-tinta-3 uppercase block mb-1">Tamanho Título</label>
                            <select 
-                             className="w-full bg-slate-900 border border-slate-700 rounded p-1.5 text-[10px] text-slate-200 outline-none h-[34px]"
+                             className="w-full bg-papel border border-borda-2 rounded p-1.5 text-[10px] text-tinta outline-none h-[34px]"
                              value={currentWidget.data.calendarConfig?.titleSize || '1.5rem'}
                              onChange={(e) => updateWidgetData(selectedWidget!, { calendarConfig: { ...currentWidget.data.calendarConfig, titleSize: e.target.value } })}
                            >
@@ -1028,9 +1027,9 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                     </div>
                   )}
 
-                  <label className="text-[9px] font-black text-slate-500 uppercase flex items-center gap-1 mt-2"><Palette size={10} /> Tema Visual</label>
+                  <label className="text-[9px] font-black text-tinta-3 uppercase flex items-center gap-1 mt-2"><Palette size={10} /> Tema Visual</label>
                   <select 
-                    className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-[10px] text-slate-200 outline-none focus:border-cyan-500 cursor-pointer"
+                    className="w-full bg-papel border border-borda-3 rounded-lg p-2 text-base md:text-[10px] text-tinta outline-none focus:border-marca cursor-pointer"
                     value={currentWidget.data.calendarConfig?.theme || 'light'}
                     onChange={(e) => updateWidgetData(selectedWidget!, { calendarConfig: { ...currentWidget.data.calendarConfig, theme: e.target.value as any } })}
                   >
@@ -1042,29 +1041,29 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                     <option value="card">Cartão (Sombreado)</option>
                   </select>
 
-                  <label className="text-[9px] font-black text-slate-500 uppercase flex items-center gap-1 mt-2"><Settings size={10} /> Estilização Avançada</label>
+                  <label className="text-[9px] font-black text-tinta-3 uppercase flex items-center gap-1 mt-2"><Settings size={10} /> Estilização Avançada</label>
                   
-                  <div className="flex items-center gap-2 text-[10px] text-slate-400 cursor-pointer bg-slate-950 p-2 rounded border border-slate-800 hover:border-slate-600">
+                  <div className="flex items-center gap-2 text-[10px] text-tinta-3 cursor-pointer bg-papel-2 p-2 rounded border border-borda hover:border-borda-3">
                     <input 
                       type="checkbox" 
                       checked={currentWidget.data.calendarConfig?.transparent || false} 
                       onChange={(e) => updateWidgetData(selectedWidget!, { calendarConfig: { ...currentWidget.data.calendarConfig, transparent: e.target.checked } })}
-                      className="rounded border-slate-700 bg-slate-900 text-cyan-500 focus:ring-0"
+                      className="rounded border-borda-2 bg-papel text-marca focus:ring-0"
                     />
                     Modo Transparente (Blend)
                   </div>
 
                   <div className="grid grid-cols-1 gap-2">
                     <div>
-                       <label className="text-[9px] font-bold text-slate-500 uppercase block mb-1">Cor de Fundo</label>
-                       <div className="flex items-center gap-2 bg-slate-950 border border-slate-700 rounded p-1">
+                       <label className="text-[9px] font-bold text-tinta-3 uppercase block mb-1">Cor de Fundo</label>
+                       <div className="flex items-center gap-2 bg-papel-2 border border-borda-2 rounded p-1">
                          <input 
                            type="color" 
                            value={currentWidget.data.calendarConfig?.backgroundColor || '#ffffff'}
                            onChange={(e) => updateWidgetData(selectedWidget!, { calendarConfig: { ...currentWidget.data.calendarConfig, backgroundColor: e.target.value } })}
                            className="w-6 h-6 bg-transparent border-none rounded cursor-pointer"
                          />
-                         <span className="text-[10px] font-mono text-slate-400">{currentWidget.data.calendarConfig?.backgroundColor || '#ffffff'}</span>
+                         <span className="text-[10px] font-mono text-tinta-3">{currentWidget.data.calendarConfig?.backgroundColor || '#ffffff'}</span>
                        </div>
                     </div>
                   </div>
@@ -1073,49 +1072,49 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             )}
             {currentWidget.type === WidgetType.IFRAME && (
               <div className="space-y-3">
-                <label className="text-[9px] font-black text-slate-500 uppercase flex items-center gap-1"><Globe size={10} /> URL do Website</label>
+                <label className="text-[9px] font-black text-tinta-3 uppercase flex items-center gap-1"><Globe size={10} /> URL do Website</label>
                 <input 
                   type="text" 
                   value={currentWidget.data.url} 
                   onChange={(e) => updateWidgetData(selectedWidget!, { url: e.target.value })} 
-                  className="w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-xs text-slate-200 outline-none focus:border-cyan-500 transition-all font-mono" 
+                  className="w-full bg-papel-2 border border-borda-3 rounded-lg p-3 text-base md:text-xs text-tinta outline-none focus:border-marca transition-all font-mono" 
                   placeholder="https://..."
                 />
-                <p className="text-[9px] text-slate-600 leading-relaxed border-l-2 border-yellow-600 pl-2">
+                <p className="text-[9px] text-tinta-3 leading-relaxed bg-warn-fundo rounded px-2 py-1.5">
                   Nota: Se aparecer um erro, o site possui proteção (X-Frame-Options) e não permite ser incorporado.
                 </p>
 
-                <div className="border-t border-slate-800 pt-4 mt-4 space-y-4">
-                  <label className="text-[9px] font-black text-slate-500 uppercase flex items-center gap-1"><Settings size={10} /> Enquadramento e Interação</label>
+                <div className="border-t border-borda pt-4 mt-4 space-y-4">
+                  <label className="text-[9px] font-black text-tinta-3 uppercase flex items-center gap-1"><Settings size={10} /> Enquadramento e Interação</label>
                   
-                  <div className="flex items-center gap-2 text-[10px] text-slate-400 cursor-pointer bg-slate-950 p-2 rounded border border-slate-800 hover:border-slate-600 mb-3">
+                  <div className="flex items-center gap-2 text-[10px] text-tinta-3 cursor-pointer bg-papel-2 p-2 rounded border border-borda hover:border-borda-3 mb-3">
                     <input 
                       type="checkbox" 
                       checked={currentWidget.data.iframeConfig?.interactive || false} 
                       onChange={(e) => updateWidgetData(selectedWidget!, { iframeConfig: { ...currentWidget.data.iframeConfig, interactive: e.target.checked } })}
-                      className="rounded border-slate-700 bg-slate-900 text-cyan-500 focus:ring-0"
+                      className="rounded border-borda-2 bg-papel text-marca focus:ring-0"
                     />
                     <div className="flex flex-col">
-                      <span className="font-bold text-slate-300">Permitir Interação</span>
-                      <span className="text-[8px] text-slate-500">Ative para interagir ou fazer login no site.</span>
+                      <span className="font-bold text-tinta-2">Permitir Interação</span>
+                      <span className="text-[8px] text-tinta-3">Ative para interagir ou fazer login no site.</span>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                       <label className="text-[9px] font-bold text-slate-500 uppercase block mb-1">Largura (px)</label>
+                       <label className="text-[9px] font-bold text-tinta-3 uppercase block mb-1">Largura (px)</label>
                        <input 
                          type="number" 
-                         className="w-full bg-slate-900 border border-slate-700 rounded p-1.5 text-[10px] text-slate-200 outline-none"
+                         className="w-full bg-papel border border-borda-2 rounded p-1.5 text-[10px] text-tinta outline-none"
                          value={currentWidget.data.iframeConfig?.viewportWidth || 1920}
                          onChange={(e) => updateWidgetData(selectedWidget!, { iframeConfig: { ...currentWidget.data.iframeConfig, viewportWidth: parseInt(e.target.value) } })}
                        />
                     </div>
                     <div>
-                       <label className="text-[9px] font-bold text-slate-500 uppercase block mb-1">Altura (px)</label>
+                       <label className="text-[9px] font-bold text-tinta-3 uppercase block mb-1">Altura (px)</label>
                        <input 
                          type="number" 
-                         className="w-full bg-slate-900 border border-slate-700 rounded p-1.5 text-[10px] text-slate-200 outline-none"
+                         className="w-full bg-papel border border-borda-2 rounded p-1.5 text-[10px] text-tinta outline-none"
                          value={currentWidget.data.iframeConfig?.viewportHeight || 1080}
                          onChange={(e) => updateWidgetData(selectedWidget!, { iframeConfig: { ...currentWidget.data.iframeConfig, viewportHeight: parseInt(e.target.value) } })}
                        />
@@ -1123,32 +1122,32 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                   </div>
 
                   <div>
-                    <label className="text-[9px] font-bold text-slate-500 uppercase block mb-1">Zoom (Escala)</label>
+                    <label className="text-[9px] font-bold text-tinta-3 uppercase block mb-1">Zoom (Escala)</label>
                     <input 
                       type="range" 
                       min="0.1" max="3" step="0.1"
-                      className="w-full accent-cyan-500"
+                      className="w-full accent-marca"
                       value={currentWidget.data.iframeConfig?.scale || 1}
                       onChange={(e) => updateWidgetData(selectedWidget!, { iframeConfig: { ...currentWidget.data.iframeConfig, scale: parseFloat(e.target.value) } })}
                     />
-                    <div className="text-right text-[9px] font-mono text-cyan-400">{currentWidget.data.iframeConfig?.scale || 1}x</div>
+                    <div className="text-right text-[9px] font-mono text-marca">{currentWidget.data.iframeConfig?.scale || 1}x</div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                       <label className="text-[9px] font-bold text-slate-500 uppercase block mb-1">Posição X</label>
+                       <label className="text-[9px] font-bold text-tinta-3 uppercase block mb-1">Posição X</label>
                        <input 
                          type="number" 
-                         className="w-full bg-slate-900 border border-slate-700 rounded p-1.5 text-[10px] text-slate-200 outline-none"
+                         className="w-full bg-papel border border-borda-2 rounded p-1.5 text-[10px] text-tinta outline-none"
                          value={currentWidget.data.iframeConfig?.offsetX || 0}
                          onChange={(e) => updateWidgetData(selectedWidget!, { iframeConfig: { ...currentWidget.data.iframeConfig, offsetX: parseInt(e.target.value) } })}
                        />
                     </div>
                     <div>
-                       <label className="text-[9px] font-bold text-slate-500 uppercase block mb-1">Posição Y</label>
+                       <label className="text-[9px] font-bold text-tinta-3 uppercase block mb-1">Posição Y</label>
                        <input 
                          type="number" 
-                         className="w-full bg-slate-900 border border-slate-700 rounded p-1.5 text-[10px] text-slate-200 outline-none"
+                         className="w-full bg-papel border border-borda-2 rounded p-1.5 text-[10px] text-tinta outline-none"
                          value={currentWidget.data.iframeConfig?.offsetY || 0}
                          onChange={(e) => updateWidgetData(selectedWidget!, { iframeConfig: { ...currentWidget.data.iframeConfig, offsetY: parseInt(e.target.value) } })}
                        />
@@ -1169,20 +1168,20 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                       }
                     });
                   }}
-                  className="w-full py-3 bg-slate-800 text-slate-300 rounded-lg font-bold text-xs hover:bg-slate-700 hover:text-white transition-all border border-slate-700 hover:border-cyan-500 flex items-center justify-center gap-2"
+                  className="w-full py-3 bg-papel-3 text-tinta-2 rounded-lg font-bold text-xs hover:bg-borda hover:text-tinta transition-all border border-borda-2 hover:border-marca flex items-center justify-center gap-2"
                 >
                   <Upload size={14} /> 
                   Selecionar Imagem
                 </button>
-                <div className="text-center text-[9px] text-slate-600 font-bold uppercase">- OU -</div>
-                <input type="text" placeholder="URL da imagem..." value={currentWidget.data.url} onChange={(e) => updateWidgetData(selectedWidget!, { url: e.target.value })} className="w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-[10px] text-slate-200 outline-none focus:border-cyan-500" />
-                <div className="border-t border-slate-800 pt-4 mt-2 space-y-4">
-                  <label className="text-[9px] font-black text-slate-500 uppercase flex items-center gap-1"><Settings size={10} /> Enquadramento e Escala</label>
+                <div className="text-center text-[9px] text-tinta-3 font-bold uppercase">- OU -</div>
+                <input type="text" placeholder="URL da imagem..." value={currentWidget.data.url} onChange={(e) => updateWidgetData(selectedWidget!, { url: e.target.value })} className="w-full bg-papel-2 border border-borda-3 rounded-lg p-3 text-base md:text-[10px] text-tinta outline-none focus:border-marca" />
+                <div className="border-t border-borda pt-4 mt-2 space-y-4">
+                  <label className="text-[9px] font-black text-tinta-3 uppercase flex items-center gap-1"><Settings size={10} /> Enquadramento e Escala</label>
                   
                   <div>
-                    <label className="text-[9px] font-bold text-slate-500 uppercase block mb-1">Ajuste da Imagem</label>
+                    <label className="text-[9px] font-bold text-tinta-3 uppercase block mb-1">Ajuste da Imagem</label>
                     <select 
-                      className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-[10px] text-slate-200 outline-none focus:border-cyan-500 cursor-pointer"
+                      className="w-full bg-papel border border-borda-3 rounded p-2 text-base md:text-[10px] text-tinta outline-none focus:border-marca cursor-pointer"
                       value={currentWidget.data.imageConfig?.objectFit || 'cover'}
                       onChange={(e) => updateWidgetData(selectedWidget!, { imageConfig: { ...currentWidget.data.imageConfig, objectFit: e.target.value as any } })}
                     >
@@ -1193,15 +1192,15 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                   </div>
 
                   <div>
-                    <label className="text-[9px] font-bold text-slate-500 uppercase block mb-1">Zoom (Escala)</label>
+                    <label className="text-[9px] font-bold text-tinta-3 uppercase block mb-1">Zoom (Escala)</label>
                     <input 
                       type="range" 
                       min="0.1" max="3" step="0.1"
-                      className="w-full accent-cyan-500"
+                      className="w-full accent-marca"
                       value={currentWidget.data.imageConfig?.scale || 1}
                       onChange={(e) => updateWidgetData(selectedWidget!, { imageConfig: { ...currentWidget.data.imageConfig, scale: parseFloat(e.target.value) } })}
                     />
-                    <div className="text-right text-[9px] font-mono text-cyan-400">{currentWidget.data.imageConfig?.scale || 1}x</div>
+                    <div className="text-right text-[9px] font-mono text-marca">{currentWidget.data.imageConfig?.scale || 1}x</div>
                   </div>
                 </div>
               </div>
@@ -1218,23 +1217,23 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                       }
                     });
                   }}
-                  className="w-full py-3 bg-slate-800 text-slate-300 rounded-lg font-bold text-xs hover:bg-slate-700 hover:text-white transition-all border border-slate-700 hover:border-cyan-500 flex items-center justify-center gap-2"
+                  className="w-full py-3 bg-papel-3 text-tinta-2 rounded-lg font-bold text-xs hover:bg-borda hover:text-tinta transition-all border border-borda-2 hover:border-marca flex items-center justify-center gap-2"
                 >
                   <Upload size={14} /> 
                   Selecionar GIF
                 </button>
-                <div className="text-center text-[9px] text-slate-600 font-bold uppercase">- OU -</div>
-                <input type="text" placeholder="URL do GIF..." value={currentWidget.data.url} onChange={(e) => updateWidgetData(selectedWidget!, { url: e.target.value })} className="w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-[10px] text-slate-200 outline-none focus:border-cyan-500" />
+                <div className="text-center text-[9px] text-tinta-3 font-bold uppercase">- OU -</div>
+                <input type="text" placeholder="URL do GIF..." value={currentWidget.data.url} onChange={(e) => updateWidgetData(selectedWidget!, { url: e.target.value })} className="w-full bg-papel-2 border border-borda-3 rounded-lg p-3 text-base md:text-[10px] text-tinta outline-none focus:border-marca" />
               </div>
             )}
             {currentWidget.type === WidgetType.TEXT && (
               <>
                 <div>
-                  <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Conteúdo</label>
+                  <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">Conteúdo</label>
                   <textarea
                     value={w => currentWidget.data.content}
                     onChange={e => updateWidgetData(selectedWidget!, { content: e.target.value })}
-                    className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500 h-24"
+                    className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca h-24"
                   />
                 </div>
                 
@@ -1252,7 +1251,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                   />
                   
                   <div>
-                    <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Cor do Texto</label>
+                    <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">Cor do Texto</label>
                     <div className="flex gap-2 h-[38px]">
                       <input
                         type="color"
@@ -1264,7 +1263,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                         type="text" 
                         value={currentWidget.data.color || '#ffffff'} 
                         onChange={e => updateWidgetData(selectedWidget!, { color: e.target.value })} 
-                        className="w-full bg-slate-950 border border-slate-700 rounded text-[10px] text-slate-300 px-2 uppercase font-mono outline-none focus:border-cyan-500" 
+                        className="w-full bg-papel-2 border border-borda-3 rounded text-base md:text-[10px] text-tinta-2 px-2 uppercase font-mono outline-none focus:border-marca" 
                       />
                     </div>
                   </div>
@@ -1272,11 +1271,11 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
 
                 <div className="space-y-3 mt-2">
                   <div>
-                    <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Alinhamento Texto</label>
+                    <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">Alinhamento Texto</label>
                     <select
                       value={currentWidget.data.textConfig?.textAlign || 'center'}
                       onChange={e => updateWidgetData(selectedWidget!, { textConfig: { ...(currentWidget.data.textConfig || {}), textAlign: e.target.value } })}
-                      className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500 cursor-pointer"
+                      className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca cursor-pointer"
                     >
                       <option value="left">Esquerda</option>
                       <option value="center">Centralizado</option>
@@ -1284,11 +1283,11 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                     </select>
                   </div>
                   <div>
-                    <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Efeito de Animação</label>
+                    <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">Efeito de Animação</label>
                     <select
                       value={currentWidget.data.textConfig?.animation || 'none'}
                       onChange={e => updateWidgetData(selectedWidget!, { textConfig: { ...(currentWidget.data.textConfig || {}), animation: e.target.value } })}
-                      className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500 cursor-pointer"
+                      className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca cursor-pointer"
                     >
                       <option value="none">Nenhuma</option>
                       <option value="fade">Esmaecer (Fade In)</option>
@@ -1299,11 +1298,11 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                     </select>
                   </div>
                   <div>
-                    <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Fonte / Tipografia</label>
+                    <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">Fonte / Tipografia</label>
                     <select
                       value={currentWidget.data.textConfig?.fontFamily || 'Inter'}
                       onChange={e => updateWidgetData(selectedWidget!, { textConfig: { ...(currentWidget.data.textConfig || {}), fontFamily: e.target.value } })}
-                      className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500 cursor-pointer"
+                      className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca cursor-pointer"
                     >
                       <option value="Inter">Inter (Padrão)</option>
                       <option value="Roboto">Roboto</option>
@@ -1319,20 +1318,20 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             {currentWidget.type === WidgetType.NOTES && (
               <div className="space-y-3">
                 <div>
-                  <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Texto da Nota</label>
+                  <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">Texto da Nota</label>
                   <textarea
                     value={currentWidget.data.content}
                     onChange={e => updateWidgetData(selectedWidget!, { content: e.target.value })}
-                    className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500 h-24"
+                    className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca h-24"
                     placeholder="Escreva sua nota aqui..."
                   />
                 </div>
                 <div>
-                  <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Estilo Visual</label>
+                  <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">Estilo Visual</label>
                   <select
                     value={currentWidget.data.notesConfig?.paperTheme || 'glass'}
                     onChange={e => updateWidgetData(selectedWidget!, { notesConfig: { ...currentWidget.data.notesConfig, paperTheme: e.target.value } })}
-                    className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500 cursor-pointer"
+                    className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca cursor-pointer"
                   >
                     <option value="glass">Glassmorphism (Translúcido)</option>
                     <option value="yellow-sticky">Post-it Amarelo</option>
@@ -1341,11 +1340,11 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                   </select>
                 </div>
                 <div>
-                  <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Fonte</label>
+                  <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">Fonte</label>
                   <select
                     value={currentWidget.data.notesConfig?.fontFamily || 'sans'}
                     onChange={e => updateWidgetData(selectedWidget!, { notesConfig: { ...currentWidget.data.notesConfig, fontFamily: e.target.value } })}
-                    className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500 cursor-pointer"
+                    className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca cursor-pointer"
                   >
                     <option value="sans">Sans-serif (Moderna)</option>
                     <option value="serif">Serif (Clássica)</option>
@@ -1365,16 +1364,16 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             {currentWidget.type === WidgetType.TODO && (
               <div className="space-y-3">
                 <div>
-                  <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Título da Lista</label>
+                  <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">Título da Lista</label>
                   <input
                     type="text"
                     value={currentWidget.data.todoConfig?.title || 'Lista de Tarefas'}
                     onChange={e => updateWidgetData(selectedWidget!, { todoConfig: { ...currentWidget.data.todoConfig, title: e.target.value } })}
-                    className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500"
+                    className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca"
                   />
                 </div>
                 <div>
-                  <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Adicionar Tarefa</label>
+                  <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">Adicionar Tarefa</label>
                   <div className="flex gap-2">
                     <input
                       type="text"
@@ -1391,7 +1390,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                           }
                         }
                       }}
-                      className="flex-1 bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500"
+                      className="flex-1 bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca"
                     />
                     <button
                       onClick={() => {
@@ -1403,16 +1402,16 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                           input.value = '';
                         }
                       }}
-                      className="bg-indigo-600 hover:bg-[var(--th-accent-strong)] px-3 rounded text-white text-xs font-bold"
+                      className="bg-marca hover:bg-marca-hover px-3 rounded text-white text-xs font-bold"
                     >
                       +
                     </button>
                   </div>
                 </div>
                 <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
-                  <label className="text-[9px] font-black text-slate-500 uppercase block">Tarefas ({currentWidget.data.todoConfig?.items?.length || 0})</label>
+                  <label className="text-[9px] font-black text-tinta-3 uppercase block">Tarefas ({currentWidget.data.todoConfig?.items?.length || 0})</label>
                   {(currentWidget.data.todoConfig?.items || []).map((item: any) => (
-                    <div key={item.id} className="flex items-center justify-between bg-slate-900/60 p-2 rounded border border-slate-800 gap-2">
+                    <div key={item.id} className="flex items-center justify-between bg-papel-2 p-2 rounded border border-borda gap-2">
                       <div className="flex items-center gap-2 truncate">
                         <input
                           type="checkbox"
@@ -1421,16 +1420,16 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                             const items = currentWidget.data.todoConfig.items.map((i: any) => i.id === item.id ? { ...i, done: e.target.checked } : i);
                             updateWidgetData(selectedWidget!, { todoConfig: { ...currentWidget.data.todoConfig, items } });
                           }}
-                          className="rounded border-slate-700 bg-slate-950 text-indigo-600 focus:ring-indigo-500"
+                          className="rounded border-borda-2 bg-papel-2 text-marca focus:ring-marca"
                         />
-                        <span className={`text-xs truncate ${item.done ? 'line-through text-slate-500' : 'text-slate-200'}`}>{item.text}</span>
+                        <span className={`text-xs truncate ${item.done ? 'line-through text-tinta-3' : 'text-tinta'}`}>{item.text}</span>
                       </div>
                       <button
                         onClick={() => {
                           const items = currentWidget.data.todoConfig.items.filter((i: any) => i.id !== item.id);
                           updateWidgetData(selectedWidget!, { todoConfig: { ...currentWidget.data.todoConfig, items } });
                         }}
-                        className="text-rose-400 hover:text-rose-300 transition-colors shrink-0"
+                        className="text-danger hover:text-danger transition-colors shrink-0"
                       >
                         <Trash2 size={12} />
                       </button>
@@ -1442,40 +1441,40 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             {currentWidget.type === WidgetType.COUNTDOWN && (
               <div className="space-y-3">
                 <div>
-                  <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Título</label>
+                  <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">Título</label>
                   <input
                     type="text"
                     value={currentWidget.data.countdownConfig?.title || ''}
                     onChange={e => updateWidgetData(selectedWidget!, { countdownConfig: { ...currentWidget.data.countdownConfig, title: e.target.value } })}
-                    className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500"
+                    className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca"
                     placeholder="Ex: Lançamento"
                   />
                 </div>
                 <div>
-                  <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Data Alvo</label>
+                  <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">Data Alvo</label>
                   <input
                     type="datetime-local"
                     value={currentWidget.data.countdownConfig?.targetDate || ''}
                     onChange={e => updateWidgetData(selectedWidget!, { countdownConfig: { ...currentWidget.data.countdownConfig, targetDate: e.target.value } })}
-                    className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500"
+                    className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca"
                   />
                 </div>
                 <div>
-                  <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Mensagem ao Terminar</label>
+                  <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">Mensagem ao Terminar</label>
                   <input
                     type="text"
                     value={currentWidget.data.countdownConfig?.expiredMessage || ''}
                     onChange={e => updateWidgetData(selectedWidget!, { countdownConfig: { ...currentWidget.data.countdownConfig, expiredMessage: e.target.value } })}
-                    className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500"
+                    className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca"
                     placeholder="Ex: Chegou o momento!"
                   />
                 </div>
                 <div>
-                  <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Tema</label>
+                  <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">Tema</label>
                   <select
                     value={currentWidget.data.countdownConfig?.theme || 'glass'}
                     onChange={e => updateWidgetData(selectedWidget!, { countdownConfig: { ...currentWidget.data.countdownConfig, theme: e.target.value as any } })}
-                    className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500 cursor-pointer"
+                    className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca cursor-pointer"
                   >
                     <option value="glass">Glassmorphism</option>
                     <option value="neon">Neon Vermelho</option>
@@ -1488,33 +1487,33 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             {currentWidget.type === WidgetType.CHORES && (
               <div className="space-y-3">
                 <div>
-                  <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Título</label>
+                  <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">Título</label>
                   <input
                     type="text"
                     value={currentWidget.data.choresConfig?.title || ''}
                     onChange={e => updateWidgetData(selectedWidget!, { choresConfig: { ...currentWidget.data.choresConfig, title: e.target.value } })}
-                    className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500"
+                    className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca"
                   />
                 </div>
                 
-                <div className="bg-slate-900/40 p-2 rounded border border-slate-800 space-y-2">
-                  <span className="text-[9px] font-black text-slate-400 uppercase block">Adicionar Dever</span>
+                <div className="bg-papel-2 p-2 rounded border border-borda space-y-2">
+                  <span className="text-[9px] font-black text-tinta-3 uppercase block">Adicionar Dever</span>
                   <input
                     type="text"
                     id={`new-chore-text-${currentWidget.i}`}
                     placeholder="Nome da atividade..."
-                    className="w-full bg-slate-950 border border-slate-700 rounded p-1.5 text-xs text-white outline-none focus:border-cyan-500"
+                    className="w-full bg-papel-2 border border-borda-3 rounded p-1.5 text-base md:text-xs text-tinta outline-none focus:border-marca"
                   />
                   <div className="grid grid-cols-2 gap-2">
                     <input
                       type="text"
                       id={`new-chore-assignee-${currentWidget.i}`}
                       placeholder="Responsável..."
-                      className="bg-slate-950 border border-slate-700 rounded p-1.5 text-xs text-white outline-none focus:border-cyan-500"
+                      className="bg-papel-2 border border-borda-3 rounded p-1.5 text-base md:text-xs text-tinta outline-none focus:border-marca"
                     />
                     <select
                       id={`new-chore-day-${currentWidget.i}`}
-                      className="bg-slate-950 border border-slate-700 rounded p-1.5 text-xs text-white outline-none focus:border-cyan-500 cursor-pointer"
+                      className="bg-papel-2 border border-borda-3 rounded p-1.5 text-base md:text-xs text-tinta outline-none focus:border-marca cursor-pointer"
                     >
                       <option value="Segunda">Segunda</option>
                       <option value="Terça">Terça</option>
@@ -1544,20 +1543,20 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                         assInput.value = '';
                       }
                     }}
-                    className="w-full py-1.5 bg-indigo-600 hover:bg-[var(--th-accent-strong)] rounded text-white text-xs font-bold transition-colors"
+                    className="w-full py-1.5 bg-marca hover:bg-marca-hover rounded text-white text-xs font-bold transition-colors"
                   >
                     Adicionar
                   </button>
                 </div>
 
                 <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
-                  <label className="text-[9px] font-black text-slate-500 uppercase block">Lista de Deveres</label>
+                  <label className="text-[9px] font-black text-tinta-3 uppercase block">Lista de Deveres</label>
                   {(currentWidget.data.choresConfig?.items || []).map((item: any) => (
-                    <div key={item.id} className="flex items-center justify-between bg-slate-900/60 p-2 rounded border border-slate-800 gap-2 text-xs">
+                    <div key={item.id} className="flex items-center justify-between bg-papel-2 p-2 rounded border border-borda gap-2 text-xs">
                       <div className="truncate flex-1">
-                        <div className="font-semibold text-slate-200 truncate">{item.chore}</div>
-                        <div className="text-[9px] text-slate-400 flex items-center gap-1.5 mt-0.5">
-                          <span className="bg-slate-850 px-1 py-0.5 rounded text-indigo-400 font-bold">{item.assignee}</span>
+                        <div className="font-semibold text-tinta truncate">{item.chore}</div>
+                        <div className="text-[9px] text-tinta-3 flex items-center gap-1.5 mt-0.5">
+                          <span className="bg-papel px-1 py-0.5 rounded text-marca font-bold">{item.assignee}</span>
                           <span>•</span>
                           <span>{item.day}</span>
                         </div>
@@ -1570,14 +1569,14 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                             const items = currentWidget.data.choresConfig.items.map((i: any) => i.id === item.id ? { ...i, done: e.target.checked } : i);
                             updateWidgetData(selectedWidget!, { choresConfig: { ...currentWidget.data.choresConfig, items } });
                           }}
-                          className="rounded border-slate-700 bg-slate-950 text-indigo-600 focus:ring-indigo-500"
+                          className="rounded border-borda-2 bg-papel-2 text-marca focus:ring-marca"
                         />
                         <button
                           onClick={() => {
                             const items = currentWidget.data.choresConfig.items.filter((i: any) => i.id !== item.id);
                             updateWidgetData(selectedWidget!, { choresConfig: { ...currentWidget.data.choresConfig, items } });
                           }}
-                          className="text-rose-400 hover:text-rose-300"
+                          className="text-danger hover:text-danger"
                         >
                           <Trash2 size={12} />
                         </button>
@@ -1590,19 +1589,19 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             {currentWidget.type === WidgetType.MEAL_PLAN && (
               <div className="space-y-3">
                 <div>
-                  <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Título</label>
+                  <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">Título</label>
                   <input
                     type="text"
                     value={currentWidget.data.mealPlanConfig?.title || ''}
                     onChange={e => updateWidgetData(selectedWidget!, { mealPlanConfig: { ...currentWidget.data.mealPlanConfig, title: e.target.value } })}
-                    className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500"
+                    className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca"
                   />
                 </div>
                 
                 <div>
-                  <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Dia para Editar</label>
+                  <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">Dia para Editar</label>
                   <select
-                    className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500 cursor-pointer"
+                    className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca cursor-pointer"
                     value={activeMealDay}
                     onChange={(e) => setActiveMealDay(e.target.value)}
                   >
@@ -1632,45 +1631,45 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                   };
 
                   return (
-                    <div className="bg-slate-900/40 p-2.5 rounded border border-slate-800 space-y-2">
-                      <span className="text-[9px] font-black text-cyan-400 uppercase block">Refeições de {activeMealDay}</span>
+                    <div className="bg-papel-2 p-2.5 rounded border border-borda space-y-2">
+                      <span className="text-[9px] font-black text-marca uppercase block">Refeições de {activeMealDay}</span>
                       <div>
-                        <label className="text-[8px] text-slate-400 block mb-0.5">Café da Manhã</label>
+                        <label className="text-[8px] text-tinta-3 block mb-0.5">Café da Manhã</label>
                         <input
                           type="text"
                           value={dayMeal.breakfast || ''}
                           onChange={e => updateMeal('breakfast', e.target.value)}
-                          className="w-full bg-slate-950 border border-slate-700 rounded p-1 text-xs text-white outline-none focus:border-cyan-500"
+                          className="w-full bg-papel-2 border border-borda-3 rounded p-1 text-base md:text-xs text-tinta outline-none focus:border-marca"
                           placeholder="Ex: Ovos, Pão e Café"
                         />
                       </div>
                       <div>
-                        <label className="text-[8px] text-slate-400 block mb-0.5">Almoço</label>
+                        <label className="text-[8px] text-tinta-3 block mb-0.5">Almoço</label>
                         <input
                           type="text"
                           value={dayMeal.lunch || ''}
                           onChange={e => updateMeal('lunch', e.target.value)}
-                          className="w-full bg-slate-950 border border-slate-700 rounded p-1 text-xs text-white outline-none focus:border-cyan-500"
+                          className="w-full bg-papel-2 border border-borda-3 rounded p-1 text-base md:text-xs text-tinta outline-none focus:border-marca"
                           placeholder="Ex: Frango com Salada e Arroz"
                         />
                       </div>
                       <div>
-                        <label className="text-[8px] text-slate-400 block mb-0.5">Jantar</label>
+                        <label className="text-[8px] text-tinta-3 block mb-0.5">Jantar</label>
                         <input
                           type="text"
                           value={dayMeal.dinner || ''}
                           onChange={e => updateMeal('dinner', e.target.value)}
-                          className="w-full bg-slate-950 border border-slate-700 rounded p-1 text-xs text-white outline-none focus:border-cyan-500"
+                          className="w-full bg-papel-2 border border-borda-3 rounded p-1 text-base md:text-xs text-tinta outline-none focus:border-marca"
                           placeholder="Ex: Sopa leve"
                         />
                       </div>
                       <div>
-                        <label className="text-[8px] text-slate-400 block mb-0.5">Lanches</label>
+                        <label className="text-[8px] text-tinta-3 block mb-0.5">Lanches</label>
                         <input
                           type="text"
                           value={dayMeal.snacks || ''}
                           onChange={e => updateMeal('snacks', e.target.value)}
-                          className="w-full bg-slate-950 border border-slate-700 rounded p-1 text-xs text-white outline-none focus:border-cyan-500"
+                          className="w-full bg-papel-2 border border-borda-3 rounded p-1 text-base md:text-xs text-tinta outline-none focus:border-marca"
                           placeholder="Ex: Frutas ou Mix de Castanhas"
                         />
                       </div>
@@ -1682,20 +1681,20 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             {currentWidget.type === WidgetType.MARKET_WATCH && (
               <div className="space-y-3">
                 <div>
-                  <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Título</label>
+                  <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">Título</label>
                   <input
                     type="text"
                     value={currentWidget.data.marketWatchConfig?.title || ''}
                     onChange={e => updateWidgetData(selectedWidget!, { marketWatchConfig: { ...currentWidget.data.marketWatchConfig, title: e.target.value } })}
-                    className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500"
+                    className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca"
                   />
                 </div>
                 <div>
-                  <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Layout</label>
+                  <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">Layout</label>
                   <select
                     value={currentWidget.data.marketWatchConfig?.layout || 'grid'}
                     onChange={e => updateWidgetData(selectedWidget!, { marketWatchConfig: { ...currentWidget.data.marketWatchConfig, layout: e.target.value as any } })}
-                    className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500 cursor-pointer"
+                    className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca cursor-pointer"
                   >
                     <option value="grid">Grade (Cards)</option>
                     <option value="list">Lista Vertical</option>
@@ -1703,13 +1702,13 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                   </select>
                 </div>
                 <div>
-                  <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Adicionar Símbolo</label>
+                  <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">Adicionar Símbolo</label>
                   <div className="flex gap-2">
                     <input
                       type="text"
                       id={`new-symbol-${currentWidget.i}`}
                       placeholder="Ex: AAPL, BTC-USD, EURUSD=X"
-                      className="flex-1 bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500 uppercase"
+                      className="flex-1 bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca uppercase"
                       onKeyDown={e => {
                         if (e.key === 'Enter') {
                           const input = e.currentTarget;
@@ -1736,7 +1735,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                           input.value = '';
                         }
                       }}
-                      className="bg-indigo-600 hover:bg-[var(--th-accent-strong)] px-3 rounded text-white text-xs font-bold"
+                      className="bg-marca hover:bg-marca-hover px-3 rounded text-white text-xs font-bold"
                     >
                       +
                     </button>
@@ -1744,14 +1743,14 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                 </div>
                 <div className="flex flex-wrap gap-1.5 pt-1">
                   {(currentWidget.data.marketWatchConfig?.symbols || []).map((sym: string) => (
-                    <span key={sym} className="flex items-center gap-1 bg-slate-900 border border-slate-700 px-2 py-0.5 rounded text-[10px] text-white font-mono font-bold">
+                    <span key={sym} className="flex items-center gap-1 bg-papel border border-borda-2 px-2 py-0.5 rounded text-[10px] text-tinta font-mono font-bold">
                       {sym}
                       <button
                         onClick={() => {
                           const symbols = currentWidget.data.marketWatchConfig.symbols.filter((s: string) => s !== sym);
                           updateWidgetData(selectedWidget!, { marketWatchConfig: { ...currentWidget.data.marketWatchConfig, symbols } });
                         }}
-                        className="text-rose-400 hover:text-rose-300 font-bold ml-1"
+                        className="text-danger hover:text-danger font-bold ml-1"
                       >
                         ×
                       </button>
@@ -1763,22 +1762,22 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             {currentWidget.type === WidgetType.BROWSER_SNAPSHOT && (
               <div className="space-y-3">
                 <div>
-                  <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">URL do Site</label>
+                  <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">URL do Site</label>
                   <input
                     type="text"
                     value={currentWidget.data.browserSnapshotConfig?.url || ''}
                     onChange={e => updateWidgetData(selectedWidget!, { browserSnapshotConfig: { ...currentWidget.data.browserSnapshotConfig, url: e.target.value } })}
-                    className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500"
+                    className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca"
                     placeholder="Ex: https://g1.globo.com"
                   />
                 </div>
                 <div>
-                  <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Intervalo de Atualização (minutos)</label>
+                  <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">Intervalo de Atualização (minutos)</label>
                   <input
                     type="number"
                     value={currentWidget.data.browserSnapshotConfig?.updateIntervalMinutes || 10}
                     onChange={e => updateWidgetData(selectedWidget!, { browserSnapshotConfig: { ...currentWidget.data.browserSnapshotConfig, updateIntervalMinutes: parseInt(e.target.value) || 10 } })}
-                    className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500"
+                    className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca"
                   />
                 </div>
               </div>
@@ -1786,11 +1785,11 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             {currentWidget.type === WidgetType.GOOGLE_DOCS && (
               <div className="space-y-3">
                 <div>
-                  <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Tipo de Documento</label>
+                  <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">Tipo de Documento</label>
                   <select
                     value={currentWidget.data.googleDocsConfig?.docType || 'document'}
                     onChange={e => updateWidgetData(selectedWidget!, { googleDocsConfig: { ...currentWidget.data.googleDocsConfig, docType: e.target.value as any } })}
-                    className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500 cursor-pointer"
+                    className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca cursor-pointer"
                   >
                     <option value="document">Google Documentos (Doc)</option>
                     <option value="spreadsheet">Google Planilhas (Sheets)</option>
@@ -1799,16 +1798,16 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                   </select>
                 </div>
                 <div>
-                  <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Link de Compartilhamento</label>
+                  <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">Link de Compartilhamento</label>
                   <input
                     type="text"
                     value={currentWidget.data.googleDocsConfig?.url || ''}
                     onChange={e => updateWidgetData(selectedWidget!, { googleDocsConfig: { ...currentWidget.data.googleDocsConfig, url: e.target.value } })}
-                    className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500"
+                    className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca"
                     placeholder="Cole o link completo do Google Docs..."
                   />
                 </div>
-                <p className="text-[9px] text-slate-400 leading-normal italic">
+                <p className="text-[9px] text-tinta-3 leading-normal italic">
                   Certifique-se de que o documento esteja visível para "Qualquer pessoa com o link".
                 </p>
               </div>
@@ -1816,11 +1815,11 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             {currentWidget.type === WidgetType.OFFICE_DOCS && (
               <div className="space-y-3">
                 <div>
-                  <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Tipo do Arquivo</label>
+                  <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">Tipo do Arquivo</label>
                   <select
                     value={currentWidget.data.officeDocsConfig?.docType || 'word'}
                     onChange={e => updateWidgetData(selectedWidget!, { officeDocsConfig: { ...currentWidget.data.officeDocsConfig, docType: e.target.value as any } })}
-                    className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500 cursor-pointer"
+                    className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca cursor-pointer"
                   >
                     <option value="word">Microsoft Word</option>
                     <option value="excel">Microsoft Excel</option>
@@ -1828,12 +1827,12 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                   </select>
                 </div>
                 <div>
-                  <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Link de Incorporação (Embed Link)</label>
+                  <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">Link de Incorporação (Embed Link)</label>
                   <input
                     type="text"
                     value={currentWidget.data.officeDocsConfig?.url || ''}
                     onChange={e => updateWidgetData(selectedWidget!, { officeDocsConfig: { ...currentWidget.data.officeDocsConfig, url: e.target.value } })}
-                    className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500"
+                    className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca"
                     placeholder="Cole o link gerado pelo OneDrive embed..."
                   />
                 </div>
@@ -1842,12 +1841,12 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             {currentWidget.type === WidgetType.POWER_BI && (
               <div className="space-y-3">
                 <div>
-                  <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">URL de Incorporação (Embed URL)</label>
+                  <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">URL de Incorporação (Embed URL)</label>
                   <input
                     type="text"
                     value={currentWidget.data.powerBiConfig?.embedUrl || ''}
                     onChange={e => updateWidgetData(selectedWidget!, { powerBiConfig: { ...currentWidget.data.powerBiConfig, embedUrl: e.target.value } })}
-                    className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500"
+                    className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca"
                     placeholder="Cole o link https://app.powerbi.com/reportEmbed..."
                   />
                 </div>
@@ -1856,11 +1855,11 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             {currentWidget.type === WidgetType.EMBED_HTML && (
               <div className="space-y-3">
                 <div>
-                  <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Código HTML / Widget Customizado</label>
+                  <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">Código HTML / Widget Customizado</label>
                   <textarea
                     value={currentWidget.data.embedHtmlConfig?.html || ''}
                     onChange={e => updateWidgetData(selectedWidget!, { embedHtmlConfig: { html: e.target.value } })}
-                    className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white font-mono outline-none focus:border-cyan-500 h-44"
+                    className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta font-mono outline-none focus:border-marca h-44"
                     placeholder="<!-- Insira seu HTML, CSS ou Script aqui -->"
                   />
                 </div>
@@ -1869,12 +1868,12 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             {currentWidget.type === WidgetType.AIRTABLE && (
               <div className="space-y-3">
                 <div>
-                  <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">URL de Compartilhamento do Airtable</label>
+                  <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">URL de Compartilhamento do Airtable</label>
                   <input
                     type="text"
                     value={currentWidget.data.airtableConfig?.shareUrl || ''}
                     onChange={e => updateWidgetData(selectedWidget!, { airtableConfig: { shareUrl: e.target.value } })}
-                    className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500"
+                    className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca"
                     placeholder="https://airtable.com/embed/shr..."
                   />
                 </div>
@@ -1883,12 +1882,12 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             {currentWidget.type === WidgetType.PDF_DOCUMENT && (
               <div className="space-y-3">
                 <div>
-                  <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">URL do Arquivo PDF</label>
+                  <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">URL do Arquivo PDF</label>
                   <input
                     type="text"
                     value={currentWidget.data.pdfDocumentConfig?.pdfUrl || ''}
                     onChange={e => updateWidgetData(selectedWidget!, { pdfDocumentConfig: { pdfUrl: e.target.value } })}
-                    className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-cyan-500"
+                    className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca"
                     placeholder="https://exemplo.com/documento.pdf"
                   />
                 </div>
@@ -1896,12 +1895,12 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             )}
             
             {/* Ajustes de Layout */}
-            <div className="pt-4 mt-4 border-t border-slate-800 space-y-4">
-              <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-wider flex items-center gap-1.5"><Layout size={12} className="text-cyan-400" /> Ajustes de Layout</h4>
+            <div className="pt-4 mt-4 border-t border-borda space-y-4">
+              <h4 className="text-[10px] font-black text-tinta-3 uppercase tracking-wider flex items-center gap-1.5"><Layout size={12} className="text-marca" /> Ajustes de Layout</h4>
               
               {/* Grid de Switches */}
               <div className="grid grid-cols-1 gap-2">
-                <label className={`flex items-center gap-3 text-[11px] text-slate-300 cursor-pointer p-2.5 rounded-lg border transition-all w-full select-none ${currentWidget.data.fillContainer ? 'bg-cyan-950/40 border-cyan-500/50 ring-1 ring-cyan-500/20' : 'bg-slate-950/60 border-slate-800/80 hover:border-cyan-500/30 hover:bg-slate-950'}`}>
+                <label className={`flex items-center gap-3 text-[11px] text-tinta-2 cursor-pointer p-2.5 rounded-lg border transition-all w-full select-none ${currentWidget.data.fillContainer ? 'bg-marca-fundo border-marca ring-1 ring-marca/30' : 'bg-papel-2 border-borda hover:border-marca/30 hover:bg-papel-2'}`}>
                   <input 
                     type="checkbox" 
                     checked={currentWidget.data.fillContainer || false} 
@@ -1919,15 +1918,15 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                         setFullScreen();
                       }
                     }}
-                    className="rounded border-slate-700 bg-slate-900 text-cyan-500 focus:ring-0 w-4 h-4 cursor-pointer"
+                    className="rounded border-borda-2 bg-papel text-marca focus:ring-0 w-4 h-4 cursor-pointer"
                   />
                   <div className="flex flex-col">
-                    <span className="font-bold text-slate-200">Preencher Container</span>
-                    <span className="text-[9px] text-slate-500 leading-tight">Ocupa a tela inteira da TV</span>
+                    <span className="font-bold text-tinta">Preencher Container</span>
+                    <span className="text-[9px] text-tinta-3 leading-tight">Ocupa a tela inteira da TV</span>
                   </div>
                 </label>
 
-                <label className={`flex items-center gap-3 text-[11px] text-slate-300 cursor-pointer p-2.5 rounded-lg border transition-all w-full select-none ${currentWidget.data.fullScreenMode ? 'bg-indigo-950/40 border-indigo-500/50 ring-1 ring-indigo-500/20' : 'bg-slate-950/60 border-slate-800/80 hover:border-cyan-500/30 hover:bg-slate-950'}`}>
+                <label className={`flex items-center gap-3 text-[11px] text-tinta-2 cursor-pointer p-2.5 rounded-lg border transition-all w-full select-none ${currentWidget.data.fullScreenMode ? 'bg-marca-fundo border-marca ring-1 ring-marca/30' : 'bg-papel-2 border-borda hover:border-marca/30 hover:bg-papel-2'}`}>
                   <input 
                     type="checkbox" 
                     checked={currentWidget.data.fullScreenMode || false} 
@@ -1947,11 +1946,11 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                         setFullScreen();
                       }
                     }}
-                    className="rounded border-slate-700 bg-slate-900 text-cyan-500 focus:ring-0 w-4 h-4 cursor-pointer"
+                    className="rounded border-borda-2 bg-papel text-marca focus:ring-0 w-4 h-4 cursor-pointer"
                   />
                   <div className="flex flex-col">
-                    <span className="font-bold text-slate-200">Tela Cheia (100% da TV)</span>
-                    <span className="text-[9px] text-slate-500 leading-tight">Força o widget a preencher toda a tela da TV</span>
+                    <span className="font-bold text-tinta">Tela Cheia (100% da TV)</span>
+                    <span className="text-[9px] text-tinta-3 leading-tight">Força o widget a preencher toda a tela da TV</span>
                   </div>
                 </label>
               </div>
@@ -1961,7 +1960,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
               {/* Alignment Controls */}
               {!currentWidget.data.fillContainer && (
                 <div className="space-y-2">
-                  <label className="text-[9px] font-black text-slate-500 uppercase block">Alinhamento Interno</label>
+                  <label className="text-[9px] font-black text-tinta-3 uppercase block">Alinhamento Interno</label>
                   <div className="grid grid-cols-4 gap-1.5">
                     {[
                       { val: "start", label: "Topo" },
@@ -1974,8 +1973,8 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                         onClick={() => updateWidgetData(selectedWidget!, { contentAlignment: align.val })}
                         className={`py-1.5 border rounded text-[9px] font-bold uppercase transition-all ${
                           (currentWidget.data.contentAlignment === align.val || (!currentWidget.data.contentAlignment && align.val === "center"))
-                            ? "bg-cyan-500/20 border-cyan-500 text-cyan-400" 
-                            : "bg-slate-950 border-slate-800 text-slate-500 hover:border-slate-700"
+                            ? "bg-marca-fundo border-marca text-marca" 
+                            : "bg-papel-2 border-borda text-tinta-3 hover:border-borda-3"
                         }`}
                       >
                         {align.label}
@@ -2002,21 +2001,21 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
               </div>
             </div>
             
-            <div className="pt-6 border-t border-slate-800 mt-auto">
-              <h4 className="text-[9px] font-black text-slate-600 uppercase mb-3">Geometria</h4>
-              <div className="grid grid-cols-2 gap-2 text-[10px] font-mono text-slate-400">
-                <div className="bg-slate-950 p-2 rounded border border-slate-800 flex justify-between"><span>W:</span> <span className="text-cyan-500">{currentWidget.w}</span></div>
-                <div className="bg-slate-950 p-2 rounded border border-slate-800 flex justify-between"><span>H:</span> <span className="text-cyan-500">{currentWidget.h}</span></div>
-                <div className="bg-slate-950 p-2 rounded border border-slate-800 flex justify-between"><span>X:</span> <span className="text-cyan-500">{currentWidget.x}</span></div>
-                <div className="bg-slate-950 p-2 rounded border border-slate-800 flex justify-between"><span>Y:</span> <span className="text-cyan-500">{currentWidget.y}</span></div>
+            <div className="pt-6 border-t border-borda mt-auto">
+              <h4 className="text-[9px] font-black text-tinta-3 uppercase mb-3">Geometria</h4>
+              <div className="grid grid-cols-2 gap-2 text-[10px] font-mono text-tinta-3">
+                <div className="bg-papel-2 p-2 rounded border border-borda flex justify-between"><span>W:</span> <span className="text-marca">{currentWidget.w}</span></div>
+                <div className="bg-papel-2 p-2 rounded border border-borda flex justify-between"><span>H:</span> <span className="text-marca">{currentWidget.h}</span></div>
+                <div className="bg-papel-2 p-2 rounded border border-borda flex justify-between"><span>X:</span> <span className="text-marca">{currentWidget.x}</span></div>
+                <div className="bg-papel-2 p-2 rounded border border-borda flex justify-between"><span>Y:</span> <span className="text-marca">{currentWidget.y}</span></div>
               </div>
             </div>
           </div>
         </div>
       ) : (
-        <div className="h-full flex flex-col items-center justify-center text-center text-slate-700 py-10 opacity-50">
+        <div className="h-full flex flex-col items-center justify-center text-center text-tinta-3 py-10 opacity-50">
           <Move size={48} className="mb-4 animate-pulse" />
-          <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">Selecione um elemento<br/>para editar</p>
+          <p className="text-[10px] font-black uppercase tracking-widest text-tinta-3">Selecione um elemento<br/>para editar</p>
         </div>
       )}
     </aside>

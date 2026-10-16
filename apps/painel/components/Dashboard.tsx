@@ -398,11 +398,37 @@ const Dashboard: React.FC = () => {
    * primeiro passo, então uma contratação que ficar pelo meio vira abandono
    * mensurável e recuperável — na página de preços ela seria invisível.
    *
-   * Sem `planCode`: quem está aqui ainda não escolheu o plano, e o checkout
-   * abre justamente no passo de escolha.
+   * Plano pago na conta (trial vencido, assinatura inválida): o checkout abre
+   * nesse mesmo plano, com as telas que a conta já usa e o intervalo de hoje,
+   * porque quem está aqui quer regularizar o que já tem. Plano grátis ou sem
+   * plano: vai sem `planCode`, e o checkout abre no passo de escolha.
+   *
+   * O formato vem de `serializeSubscription` na API (`plan.code`, `plan.free`,
+   * `billingInterval`, `usage.devices.used`), que é mais rico que o tipo
+   * `Subscription` antigo de `types.ts`; daí a leitura defensiva.
    */
   const handleChoosePlan = () => {
-    window.location.href = checkoutUrl();
+    const sub = subscription?.subscription as
+      | (SubscriptionState['subscription'] & {
+          plan?: { code?: string; free?: boolean } | null;
+          billingInterval?: string | null;
+        })
+      | undefined;
+    const planCode = sub?.plan?.code;
+    const paidPlan = !!planCode && planCode !== 'gratis' && planCode !== 'trial' && sub?.plan?.free !== true;
+
+    if (!paidPlan) {
+      window.location.href = checkoutUrl();
+      return;
+    }
+
+    const devices = (subscription?.usage as { devices?: number | { used?: number } } | undefined)?.devices;
+    const screensUsed = typeof devices === 'number' ? devices : devices?.used;
+    window.location.href = checkoutUrl(
+      planCode,
+      typeof screensUsed === 'number' && screensUsed > 0 ? screensUsed : undefined,
+      sub?.billingInterval === 'yearly' ? 'yearly' : 'monthly'
+    );
   };
 
   /**
@@ -895,7 +921,7 @@ const Dashboard: React.FC = () => {
             ) : !loading && (
               <button
                 onClick={abrirConecteSuaTV}
-                className="text-[13px] font-semibold text-[var(--th-accent)] hover:underline transition-colors"
+                className="min-h-11 text-[15px] font-semibold text-marca hover:underline underline-offset-4 transition-colors"
               >
                 {/* Era "parear dispositivo" em 11 px. Ninguém que compra uma TV
                     para a recepção fala "parear" — e 11 px some na tela. */}
@@ -930,7 +956,7 @@ const Dashboard: React.FC = () => {
         variant="outline"
         size="icon"
         onClick={() => setIsAccountModalOpen(true)}
-        className="fixed bottom-6 left-6 z-40 size-12 bg-surface/80 border border-border hover:border-accent/50 text-text-muted hover:text-accent rounded-full shadow-2xl flex items-center justify-center transition-all hover:scale-110 active:scale-95 group backdrop-blur-md"
+        className="fixed bottom-6 left-6 z-40 size-12 bg-papel border border-borda-2 hover:border-marca text-tinta-2 hover:text-marca rounded-full shadow-flutuante flex items-center justify-center transition-[color,border-color,transform] hover:-translate-y-0.5 active:translate-y-0 group"
         title="Minha Conta"
         id="gear-account-settings"
       >

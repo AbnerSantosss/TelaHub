@@ -11,10 +11,10 @@
 // Anunciar documento fiscal que não sai é promessa que o produto não cumpre
 // (CDC, art. 30) e a primeira reclamação previsível de quem contrata por CNPJ.
 import { useEffect, useRef } from 'react';
-import { Building2, Lock, User, Wand2 } from 'lucide-react';
+import { Building2, Lock, User, UserCheck, Wand2 } from 'lucide-react';
 
 import { randomIdentity } from '../lib/fake-data';
-import { PrimaryButton, TextField } from './primitives';
+import { Notice, PrimaryButton, TextField } from './primitives';
 import type { CheckoutController } from './useCheckout';
 import type { IdentityField } from './validation';
 
@@ -47,6 +47,8 @@ export const IdentificationStep = ({ checkout }: { checkout: CheckoutController 
     blurIdentityField,
     submitIdentify,
     savingIdentity,
+    loggedUser,
+    signOutLoggedUser,
   } = checkout;
 
   const isCnpj = identity.documentKind === 'cnpj';
@@ -106,6 +108,28 @@ export const IdentificationStep = ({ checkout }: { checkout: CheckoutController 
       }}
       className="flex flex-col gap-4"
     >
+      {/*
+        Conta do painel aberta neste navegador. O e-mail fica travado porque é
+        ele que liga a compra à organização da pessoa (ver `useLoggedUser.ts`);
+        "Sair" é a saída para quem está no computador de outra pessoa ou quer
+        comprar para outra conta.
+      */}
+      {loggedUser ? (
+        <Notice tone="info" icon={<UserCheck size={15} />}>
+          Você está comprando como{' '}
+          <strong className="font-bold break-all">{loggedUser.email}</strong>. O plano vai ser
+          ativado nessa conta.
+          {/* Linha própria e 44px de altura no toque: é o único jeito de trocar de conta. */}
+          <button
+            type="button"
+            onClick={signOutLoggedUser}
+            className="mt-1 flex min-h-11 items-center font-bold text-accent-ink underline underline-offset-2 sm:min-h-6"
+          >
+            Não é você? Sair
+          </button>
+        </Notice>
+      ) : null}
+
       <TextField
         ref={bindRef('name')}
         id="checkout-name"
@@ -134,7 +158,13 @@ export const IdentificationStep = ({ checkout }: { checkout: CheckoutController 
           autoCapitalize="none"
           spellCheck={false}
           placeholder="voce@empresa.com.br"
-          hint="É por aqui que enviamos o acesso ao painel."
+          readOnly={!!loggedUser}
+          aria-readonly={loggedUser ? true : undefined}
+          hint={
+            loggedUser
+              ? 'É o e-mail da sua conta. Para usar outro, saia primeiro.'
+              : 'É por aqui que enviamos o acesso ao painel.'
+          }
         />
 
         <TextField
@@ -155,7 +185,7 @@ export const IdentificationStep = ({ checkout }: { checkout: CheckoutController 
       </div>
 
       <fieldset className="min-w-0">
-        <legend className="eyebrow mb-1.5">Documento</legend>
+        <legend className="rotulo mb-1.5">Documento</legend>
         <div className="flex gap-2" role="group" aria-label="Tipo de documento">
           {KIND_OPTIONS.map(({ kind, label, icon: Icon, help }) => {
             const active = identity.documentKind === kind;
@@ -215,7 +245,7 @@ export const IdentificationStep = ({ checkout }: { checkout: CheckoutController 
         ) : null}
       </div>
 
-      <p className="flex items-start gap-2 text-xs leading-relaxed text-ink-subtle">
+      <p className="flex max-w-[56ch] items-start gap-2 text-base sm:text-xs leading-relaxed text-ink-subtle">
         <Lock aria-hidden="true" size={14} className="mt-px shrink-0" />
         <span>
           Seus dados ficam com a gente só para concluir esta contratação e liberar o seu acesso.
@@ -239,7 +269,7 @@ export const IdentificationStep = ({ checkout }: { checkout: CheckoutController 
       */}
       <label
         htmlFor="checkout-novidades"
-        className="flex cursor-pointer items-start gap-2.5 text-xs leading-relaxed text-ink-muted"
+        className="flex max-w-[56ch] cursor-pointer items-start gap-2.5 text-base sm:text-xs leading-relaxed text-ink-muted"
       >
         <input
           id="checkout-novidades"

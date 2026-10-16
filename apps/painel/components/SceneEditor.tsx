@@ -314,11 +314,11 @@ const SceneEditor: React.FC<SceneEditorProps> = ({
   const currentWidget = page.layout.find(w => w.i === selectedWidget);
 
   return (
-    <div className="flex flex-col h-full overflow-hidden bg-slate-950 rounded-2xl border border-slate-800 shadow-2xl">
+    <div className="flex flex-col h-full overflow-hidden bg-papel-2 rounded-2xl border border-borda shadow-modal">
 
       {/* TOOLBAR */}
       {!hideToolbar && (
-        <div className="bg-slate-900/80 backdrop-blur-md border-b border-slate-800 p-3 flex items-center justify-between z-30">
+        <div className="bg-papel-2 backdrop-blur-md border-b border-borda p-3 flex items-center justify-between z-30">
           <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 md:pb-0">
             {/* Básicos */}
             <WidgetTool icon="/icons3d/image.png" label="Imagem" description="Mostra imagens PNG, JPG ou SVG ajustadas ao espaço do bloco." onClick={() => addWidget(WidgetType.IMAGE)} />
@@ -327,7 +327,7 @@ const SceneEditor: React.FC<SceneEditorProps> = ({
             <WidgetTool icon="/icons3d/gif.png" label="GIF" description="Mostra animações em GIF." onClick={() => addWidget(WidgetType.GIF)} />
             <WidgetTool icon="/icons3d/web.png" label="Web" description="Mostra uma página de outro site dentro da tela." onClick={() => addWidget(WidgetType.IFRAME)} />
 
-            <div className="w-px h-6 bg-slate-800 mx-1 flex-shrink-0"></div>
+            <div className="w-px h-6 bg-papel-3 mx-1 flex-shrink-0"></div>
 
             {/* Utilitários */}
             <WidgetTool icon="/icons3d/clock.png" label="Relógio" description="Relógio digital com o horário da cidade escolhida." onClick={() => addWidget(WidgetType.CLOCK)} />
@@ -336,7 +336,7 @@ const SceneEditor: React.FC<SceneEditorProps> = ({
             <WidgetTool icon="/icons3d/rss.png" label="RSS" description="Notícias de portais como G1 e CNN, por RSS." onClick={() => addWidget(WidgetType.RSS)} />
             <WidgetTool icon="/icons3d/calendar.png" label="Agenda" description="Mostra os eventos de uma agenda do Google." onClick={() => addWidget(WidgetType.CALENDAR)} />
 
-            <div className="w-px h-6 bg-slate-800 mx-1 flex-shrink-0"></div>
+            <div className="w-px h-6 bg-papel-3 mx-1 flex-shrink-0"></div>
 
             {/* Interativos */}
             <WidgetTool icon="/icons3d/notes.png" label="Notas" description="Recados em formato de nota adesiva, com vários temas de cor." onClick={() => addWidget(WidgetType.NOTES)} />
@@ -345,7 +345,7 @@ const SceneEditor: React.FC<SceneEditorProps> = ({
             <WidgetTool icon="/icons3d/chores.png" label="Deveres" description="Quadro semanal de tarefas com o responsável por cada uma." onClick={() => addWidget(WidgetType.CHORES)} />
             <WidgetTool icon="/icons3d/meal-plan.png" label="Meal Plan" description="Cardápio da semana, passando dia a dia." onClick={() => addWidget(WidgetType.MEAL_PLAN)} />
 
-            <div className="w-px h-6 bg-slate-800 mx-1 flex-shrink-0"></div>
+            <div className="w-px h-6 bg-papel-3 mx-1 flex-shrink-0"></div>
 
             {/* Integrações */}
             <WidgetTool icon="/icons3d/market.png" label="Bolsa" description="Cotações de ações e criptomoedas." onClick={() => addWidget(WidgetType.MARKET_WATCH)} />
@@ -369,7 +369,7 @@ const SceneEditor: React.FC<SceneEditorProps> = ({
                   }
                 });
               }}
-              className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg transition-all flex items-center gap-2 text-xs font-bold border border-slate-700"
+              className="p-2 bg-papel-3 hover:bg-borda text-tinta-2 rounded-lg transition-all flex items-center gap-2 text-xs font-bold border border-borda-2"
               title="Mudar Fundo"
             >
               <Layers size={14} /> <span className="hidden sm:inline">Fundo</span>
@@ -381,19 +381,19 @@ const SceneEditor: React.FC<SceneEditorProps> = ({
       <div className="flex-1 flex overflow-hidden relative">
 
         {/* CANVAS AREA */}
-        <div className={`flex-1 bg-slate-950 custom-scrollbar relative flex justify-center ${orientation === 'vertical'
+        <div className={`flex-1 bg-papel-3 custom-scrollbar relative flex justify-center ${orientation === 'vertical'
             ? 'overflow-y-auto overflow-x-hidden items-start p-4'
             : 'overflow-hidden items-center p-4'
           }`}>
           {/* Grid Background */}
-          <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{
-            backgroundImage: `radial-gradient(#fff 1px, transparent 1px)`,
+          <div className="absolute inset-0 opacity-30 pointer-events-none" style={{
+            backgroundImage: `radial-gradient(var(--borda-3) 1px, transparent 1px)`,
             backgroundSize: `${rowHeight}px ${rowHeight}px`
           }}></div>
 
           {/* Caixa externa: tamanho visual (405×720 para 9:16) */}
           <div
-            className="relative shadow-[0_0_100px_rgba(0,0,0,0.5)] border border-slate-800 shrink-0 overflow-hidden bg-black"
+            className="relative shadow-flutuante border border-marca shrink-0 overflow-hidden bg-black"
             style={
               orientation === 'vertical'
                 ? { width: 405, height: 720 }
@@ -445,21 +445,21 @@ const SceneEditor: React.FC<SceneEditorProps> = ({
                 margin={[0, 0]}
                 onLayoutChange={handleLayoutChange}
                 draggableHandle=".drag-handle"
-                resizeHandle={<div className="absolute bottom-0 right-0 p-1 cursor-se-resize text-[var(--th-accent)] opacity-0 group-hover:opacity-100 transition-opacity"><MoveHorizontal size={12} /></div>}
+                resizeHandle={<div className="absolute bottom-0 right-0 p-1 cursor-se-resize text-marca opacity-0 group-hover:opacity-100 transition-opacity"><MoveHorizontal size={12} /></div>}
                 transformScale={orientation === 'vertical' ? 0.375 : 1}
               >
                 {page.layout.map(w => (
                   <div
                     key={w.i}
-                    className={`group relative border transition-all ${selectedWidget === w.i ? 'border-[var(--th-accent)] ring-2 ring-cyan-500/20 z-20' : 'border-transparent hover:border-slate-700'}`}
+                    className={`group relative border transition-all ${selectedWidget === w.i ? 'border-marca ring-2 ring-marca/30 z-20' : 'border-transparent hover:border-marca/50'}`}
                     onClick={(e) => { e.stopPropagation(); setSelectedWidget(w.i); }}
                   >
-                    <div className="drag-handle absolute top-0 left-0 w-full h-4 bg-slate-900/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 cursor-move flex items-center justify-center z-10 transition-opacity">
-                      <div className="w-8 h-1 bg-slate-700 rounded-full"></div>
+                    <div className="drag-handle absolute top-0 left-0 w-full h-4 bg-papel/90 opacity-0 group-hover:opacity-100 cursor-move flex items-center justify-center z-10 transition-opacity">
+                      <div className="w-8 h-1 bg-borda-3 rounded-full"></div>
                     </div>
 
                     {w.data.fullScreenMode && (
-                      <div className="absolute top-5 right-2 z-30 bg-cyan-950/80 border border-[var(--th-accent)]/50 backdrop-blur-sm text-[var(--th-accent)] text-[8px] font-black uppercase px-2 py-0.5 rounded-full shadow-[0_0_10px_rgba(6,182,212,0.3)] pointer-events-none animate-pulse flex items-center gap-1">
+                      <div className="absolute top-5 right-2 z-30 bg-papel border border-marca text-marca text-[8px] font-black uppercase px-2 py-0.5 rounded-full shadow-card pointer-events-none flex items-center gap-1">
                         <span>Tela cheia</span>
                       </div>
                     )}
@@ -485,7 +485,7 @@ const SceneEditor: React.FC<SceneEditorProps> = ({
                     {selectedWidget === w.i && (
                       <button
                         onClick={(e) => { e.stopPropagation(); removeWidget(w.i); }}
-                        className="absolute -top-2 -right-2 p-1.5 bg-rose-600 text-white rounded-full shadow-lg hover:bg-rose-500 transition-all z-30"
+                        className="absolute -top-2 -right-2 p-1.5 bg-danger text-white rounded-full shadow-card hover:bg-danger/90 transition-all z-30"
                       >
                         <Trash2 size={12} />
                       </button>
@@ -504,15 +504,15 @@ const SceneEditor: React.FC<SceneEditorProps> = ({
           <>
             {/* Backdrop overlay for mobile properties panel */}
             <div
-              className="fixed inset-0 bg-black/60 z-30 md:hidden animate-in fade-in duration-200"
+              className="fixed inset-0 bg-tinta/50 z-30 md:hidden animate-in fade-in duration-200"
               onClick={() => setSelectedWidget(null)}
             />
-            <div className="absolute md:relative right-0 top-0 h-full w-80 bg-slate-900 border-l border-slate-800 p-6 overflow-y-auto custom-scrollbar z-40 shadow-2xl transition-all duration-300 animate-in slide-in-from-right duration-300">
+            <div className="absolute md:relative right-0 top-0 h-full w-80 bg-papel border-l border-borda p-6 overflow-y-auto custom-scrollbar z-40 shadow-modal transition-all duration-300 animate-in slide-in-from-right duration-300">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="font-black text-xs uppercase tracking-widest text-slate-400 flex items-center gap-2">
-                  <Settings size={14} className="text-[var(--th-accent)]" /> Propriedades
+                <h3 className="font-black text-xs uppercase tracking-widest text-tinta-3 flex items-center gap-2">
+                  <Settings size={14} className="text-marca" /> Propriedades
                 </h3>
-                <button onClick={() => setSelectedWidget(null)} className="text-slate-500 hover:text-white transition-colors">
+                <button onClick={() => setSelectedWidget(null)} className="text-tinta-3 hover:text-tinta transition-colors">
                   <X size={18} />
                 </button>
               </div>
@@ -541,28 +541,28 @@ const SceneEditor: React.FC<SceneEditorProps> = ({
 const WidgetTool: React.FC<{ icon: React.ReactNode | string, label: string, description: string, onClick: () => void }> = ({ icon, label, description, onClick }) => (
   <button
     onClick={onClick}
-    className="relative flex flex-col items-center justify-center p-1.5 min-w-[66px] h-[66px] bg-slate-800/80 hover:bg-[var(--th-accent)]/20 hover:text-white text-slate-300 rounded-lg transition-all border border-slate-700/60 hover:border-[var(--th-accent)] hover:shadow-[0_0_12px_rgba(var(--th-accent-rgb),0.15)] active:scale-95 group cursor-pointer"
+    className="relative flex flex-col items-center justify-center p-1.5 min-w-[66px] h-[66px] bg-papel-3 hover:bg-marca-fundo hover:text-tinta text-tinta-2 rounded-lg transition-all border border-borda-2 hover:border-marca active:scale-95 group cursor-pointer"
   >
     {/* Tiny Info Icon in Corner */}
-    <div className="absolute top-1 right-1 opacity-30 group-hover:opacity-100 transition-opacity text-slate-400 group-hover:text-[var(--th-accent)]">
+    <div className="absolute top-1 right-1 opacity-30 group-hover:opacity-100 transition-opacity text-tinta-3 group-hover:text-marca">
       <Info size={8} />
     </div>
 
     {/* Elegant Pure CSS Tooltip */}
     <div className="absolute bottom-full mb-2 hidden group-hover:flex flex-col items-center pointer-events-none z-50 animate-in fade-in zoom-in-95 duration-200">
-      <div className="bg-slate-950 border border-slate-800 text-slate-200 text-[9px] font-bold py-1.5 px-3 rounded-lg shadow-xl w-48 text-center leading-relaxed">
+      <div className="bg-papel-2 border border-borda text-tinta text-[9px] font-bold py-1.5 px-3 rounded-lg shadow-flutuante w-48 text-center leading-relaxed">
         {description}
       </div>
-      <div className="w-2 h-2 bg-slate-950 border-r border-b border-slate-800 rotate-45 -mt-1"></div>
+      <div className="w-2 h-2 bg-papel-2 border-r border-b border-borda rotate-45 -mt-1"></div>
     </div>
 
     {/* Larger Icon Container with LESS Spacing */}
     <div className="flex items-center justify-center h-10 w-10">
       {typeof icon === 'string' ? (
         <img
-          src={icon}
+          src={icon.startsWith('/') ? `${import.meta.env.BASE_URL}${icon.slice(1)}` : icon}
           alt={label}
-          className="w-9 h-9 object-contain group-hover:scale-110 transition-transform duration-300 filter drop-shadow-[0_0_5px_rgba(var(--th-accent-rgb),0.1)]"
+          className="w-9 h-9 object-contain group-hover:scale-110 transition-transform duration-300 filter"
         />
       ) : (
         <div className="group-hover:scale-110 transition-transform">{icon}</div>
@@ -757,10 +757,10 @@ const renderWidgetControls = (
   return (
     <div className="space-y-4">
       {w.data.fillContainer && (
-        <div className="bg-gradient-to-b from-[var(--th-accent)]/15 to-slate-950/90 p-4 rounded-xl border border-[var(--th-accent)]/40 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+        <div className="bg-marca-fundo p-4 rounded-xl border border-marca/40 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
           <div className="flex items-center gap-2">
-            <Maximize2 size={12} className="text-[var(--th-accent)]" />
-            <span className="text-[10px] font-black text-[var(--th-accent)] uppercase tracking-wider">Modo Tela Cheia Ativo</span>
+            <Maximize2 size={12} className="text-marca" />
+            <span className="text-[10px] font-black text-marca uppercase tracking-wider">Modo Tela Cheia Ativo</span>
           </div>
 
           <button
@@ -787,23 +787,22 @@ const renderWidgetControls = (
               }
               onChange({ ...page, layout: cleanedLayout });
             }}
-            className="w-full py-2.5 bg-gradient-to-r from-blue-600 to-sky-500 hover:from-blue-500 hover:to-sky-400 text-white rounded-lg text-xs font-black uppercase tracking-wider transition-all shadow-[0_4px_12px_rgba(var(--th-accent-rgb),0.25)] flex items-center justify-center gap-2 relative overflow-hidden group border border-sky-400/30"
+            className="w-full py-2.5 bg-marca hover:bg-marca-hover text-white rounded-lg text-xs font-black uppercase tracking-wider transition-all shadow-btn flex items-center justify-center gap-2 relative overflow-hidden group border border-marca/30"
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
             <Maximize2 size={14} className="relative z-10" />
             <span className="relative z-10">Preencher Tela Inteira</span>
           </button>
-          <p className="text-[8px] text-amber-400/80 text-center leading-tight">
+          <p className="text-[8px] text-warn text-center leading-tight">
             ⚠️ Atenção: Isso removerá todos os outros widgets desta cena e deixará o widget ocupando 100% da tela como fundo.
           </p>
 
-          <div className="pt-2 border-t border-slate-800/60 space-y-2">
-            <label className="text-[9px] font-black text-slate-400 uppercase block">Selecione o Background</label>
+          <div className="pt-2 border-t border-borda space-y-2">
+            <label className="text-[9px] font-black text-tinta-3 uppercase block">Selecione o Background</label>
             <input
               type="text"
               value={w.data.backgroundImage || ''}
               onChange={e => updateData(w.i, { backgroundImage: e.target.value })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)]"
+              className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca"
               placeholder="URL da imagem ou vídeo de fundo..."
             />
             <div className="grid grid-cols-2 gap-1.5 mt-1.5">
@@ -817,7 +816,7 @@ const renderWidgetControls = (
                     }
                   });
                 }}
-                className="py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded text-[10px] font-bold uppercase transition-colors flex items-center justify-center gap-1.5 border border-slate-700"
+                className="py-1.5 bg-papel-3 hover:bg-borda text-tinta rounded text-[10px] font-bold uppercase transition-colors flex items-center justify-center gap-1.5 border border-borda-2"
               >
                 <Upload size={10} />
                 Selecionar Imagem
@@ -832,7 +831,7 @@ const renderWidgetControls = (
                     }
                   });
                 }}
-                className="py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded text-[10px] font-bold uppercase transition-colors flex items-center justify-center gap-1.5 border border-slate-700"
+                className="py-1.5 bg-papel-3 hover:bg-borda text-tinta rounded text-[10px] font-bold uppercase transition-colors flex items-center justify-center gap-1.5 border border-borda-2"
               >
                 <Upload size={10} />
                 Selecionar Vídeo
@@ -844,11 +843,11 @@ const renderWidgetControls = (
       {w.type === WidgetType.TEXT && (
         <>
           <div>
-            <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Conteúdo</label>
+            <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">Conteúdo</label>
             <textarea
               value={w.data.content}
               onChange={e => updateData(w.i, { content: e.target.value })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)] h-24"
+              className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca h-24"
             />
           </div>
 
@@ -866,7 +865,7 @@ const renderWidgetControls = (
             />
 
             <div>
-              <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Cor do Texto</label>
+              <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">Cor do Texto</label>
               <div className="flex gap-2 h-[38px]">
                 <input
                   type="color"
@@ -878,7 +877,7 @@ const renderWidgetControls = (
                   type="text"
                   value={w.data.color || '#ffffff'}
                   onChange={e => updateData(w.i, { color: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-700 rounded text-[10px] text-slate-300 px-2 uppercase font-mono outline-none focus:border-[var(--th-accent)]"
+                  className="w-full bg-papel-2 border border-borda-3 rounded text-base md:text-[10px] text-tinta-2 px-2 uppercase font-mono outline-none focus:border-marca"
                 />
               </div>
             </div>
@@ -887,12 +886,12 @@ const renderWidgetControls = (
       )}
       {w.type === WidgetType.IMAGE && (
         <div>
-          <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">URL da Imagem</label>
+          <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">URL da Imagem</label>
           <input
             type="text"
             value={w.data.url}
             onChange={e => updateData(w.i, { url: e.target.value })}
-            className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)] mb-2"
+            className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca mb-2"
           />
           <button
             onClick={() => {
@@ -904,7 +903,7 @@ const renderWidgetControls = (
                 }
               });
             }}
-            className="w-full py-2 bg-slate-800 hover:bg-slate-700 text-white rounded text-[10px] font-bold uppercase transition-colors flex items-center justify-center gap-2"
+            className="w-full py-2 bg-papel-3 hover:bg-borda text-tinta rounded text-[10px] font-bold uppercase transition-colors flex items-center justify-center gap-2"
           >
             <Upload size={12} />
             Selecionar Imagem
@@ -913,12 +912,12 @@ const renderWidgetControls = (
       )}
       {w.type === WidgetType.VIDEO && (
         <div>
-          <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">URL do Vídeo</label>
+          <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">URL do Vídeo</label>
           <input
             type="text"
             value={w.data.videoUrl}
             onChange={e => updateData(w.i, { videoUrl: e.target.value })}
-            className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)] mb-2"
+            className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca mb-2"
           />
           <button
             onClick={() => {
@@ -930,7 +929,7 @@ const renderWidgetControls = (
                 }
               });
             }}
-            className="w-full py-2 bg-slate-800 hover:bg-slate-700 text-white rounded text-[10px] font-bold uppercase transition-colors flex items-center justify-center gap-2"
+            className="w-full py-2 bg-papel-3 hover:bg-borda text-tinta rounded text-[10px] font-bold uppercase transition-colors flex items-center justify-center gap-2"
           >
             <Upload size={12} />
             Selecionar Vídeo
@@ -939,18 +938,18 @@ const renderWidgetControls = (
       )}
       {(w.type === WidgetType.WEATHER || w.type === WidgetType.CLOCK || w.type === WidgetType.FULL_INFO) && (
         <div>
-          <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Cidade</label>
+          <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">Cidade</label>
           <input
             type="text"
             value={w.data.city}
             onChange={e => updateData(w.i, { city: e.target.value })}
-            className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)] mb-2"
+            className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca mb-2"
           />
           {w.type === WidgetType.FULL_INFO && (
             <>
-              <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Modelo Visual</label>
+              <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">Modelo Visual</label>
               <select
-                className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)] mb-2"
+                className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca mb-2"
                 value={w.data.model || 'standard'}
                 onChange={(e) => updateData(w.i, { model: e.target.value })}
               >
@@ -960,13 +959,13 @@ const renderWidgetControls = (
                 <option value="modern">Moderno (Dividido)</option>
               </select>
 
-              <div className="pt-2 border-t border-slate-800/60 space-y-2 mt-2">
-                <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Selecione o Background</label>
+              <div className="pt-2 border-t border-borda space-y-2 mt-2">
+                <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">Selecione o Background</label>
                 <input
                   type="text"
                   value={w.data.backgroundImage || ''}
                   onChange={e => updateData(w.i, { backgroundImage: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)]"
+                  className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca"
                   placeholder="URL da imagem ou vídeo (ex: https://...)"
                 />
                 <div className="grid grid-cols-2 gap-1.5 mt-1.5">
@@ -980,7 +979,7 @@ const renderWidgetControls = (
                         }
                       });
                     }}
-                    className="py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded text-[10px] font-bold uppercase transition-colors flex items-center justify-center gap-1.5 border border-slate-700"
+                    className="py-1.5 bg-papel-3 hover:bg-borda text-tinta rounded text-[10px] font-bold uppercase transition-colors flex items-center justify-center gap-1.5 border border-borda-2"
                   >
                     <Upload size={10} />
                     Selecionar Imagem
@@ -995,7 +994,7 @@ const renderWidgetControls = (
                         }
                       });
                     }}
-                    className="py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded text-[10px] font-bold uppercase transition-colors flex items-center justify-center gap-1.5 border border-slate-700"
+                    className="py-1.5 bg-papel-3 hover:bg-borda text-tinta rounded text-[10px] font-bold uppercase transition-colors flex items-center justify-center gap-1.5 border border-borda-2"
                   >
                     <Upload size={10} />
                     Selecionar Vídeo
@@ -1004,12 +1003,11 @@ const renderWidgetControls = (
               </div>
 
               {!w.data.fillContainer && (
-                <div className="mt-4 pt-4 border-t border-slate-800 space-y-2">
+                <div className="mt-4 pt-4 border-t border-borda space-y-2">
                   <button
                     onClick={() => setFullScreen(w.i)}
-                    className="w-full py-2.5 bg-gradient-to-r from-blue-600 to-sky-500 hover:from-blue-500 hover:to-sky-400 text-white rounded-lg text-xs font-black uppercase tracking-wider transition-all shadow-[0_4px_12px_rgba(var(--th-accent-rgb),0.25)] flex items-center justify-center gap-2 relative overflow-hidden group border border-sky-400/30"
+                    className="w-full py-2.5 bg-marca hover:bg-marca-hover text-white rounded-lg text-xs font-black uppercase tracking-wider transition-all shadow-btn flex items-center justify-center gap-2 relative overflow-hidden group border border-marca/30"
                   >
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
                     <Maximize2 size={14} className="relative z-10" />
                     <span className="relative z-10">Preencher Tela Inteira</span>
                   </button>
@@ -1021,20 +1019,20 @@ const renderWidgetControls = (
       )}
       {w.type === WidgetType.VIDEO && (
         <div>
-          <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Link YouTube</label>
+          <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">Link YouTube</label>
           <input
             type="text"
             value={w.data.videoUrl}
             onChange={e => updateData(w.i, { videoUrl: e.target.value })}
-            className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)]"
+            className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca"
           />
 
           <div className="mt-3">
-            <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Qualidade YouTube</label>
+            <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">Qualidade YouTube</label>
             <select
               value={w.data.videoConfig?.youtubeQuality || 'highres'}
               onChange={(e) => updateData(w.i, { videoConfig: { ...w.data.videoConfig, youtubeQuality: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)]"
+              className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca"
             >
               <option value="highres">Máxima (Auto)</option>
               <option value="hd1080">1080p</option>
@@ -1045,11 +1043,11 @@ const renderWidgetControls = (
             </select>
           </div>
 
-          <div className="mt-4 pt-4 border-t border-slate-800 space-y-2">
+          <div className="mt-4 pt-4 border-t border-borda space-y-2">
             {!isFullscreen ? (
               <button
                 onClick={() => setFullScreen(w.i)}
-                className="w-full py-2 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white rounded-lg text-xs font-bold transition-all shadow-[0_4px_12px_rgba(var(--th-accent-rgb),0.2)] flex items-center justify-center gap-2"
+                className="w-full py-2 bg-marca hover:bg-marca-hover text-white rounded-lg text-xs font-bold transition-all shadow-btn flex items-center justify-center gap-2"
               >
                 <Maximize2 size={14} />
                 Preencher Tela Inteira
@@ -1057,7 +1055,7 @@ const renderWidgetControls = (
             ) : (
               <button
                 onClick={() => restoreSize(w.i)}
-                className="w-full py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-lg text-xs font-bold transition-colors shadow-lg shadow-amber-900/20 flex items-center justify-center gap-2"
+                className="w-full py-2 bg-warn hover:bg-warn/90 text-white rounded-lg text-xs font-bold transition-colors shadow-card flex items-center justify-center gap-2"
               >
                 <Minimize2 size={14} />
                 Restaurar Tamanho
@@ -1068,18 +1066,18 @@ const renderWidgetControls = (
       )}
       {w.type === WidgetType.RSS && (
         <div>
-          <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">URL do Feed RSS</label>
+          <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">URL do Feed RSS</label>
           <input
             type="text"
             value={w.data.rssUrl}
             onChange={e => updateData(w.i, { rssUrl: e.target.value })}
-            className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)]"
+            className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca"
           />
-          <div className="mt-4 pt-4 border-t border-slate-800 space-y-2">
+          <div className="mt-4 pt-4 border-t border-borda space-y-2">
             {!isFullscreen ? (
               <button
                 onClick={() => setFullScreen(w.i)}
-                className="w-full py-2 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white rounded-lg text-xs font-bold transition-all shadow-[0_4px_12px_rgba(var(--th-accent-rgb),0.2)] flex items-center justify-center gap-2"
+                className="w-full py-2 bg-marca hover:bg-marca-hover text-white rounded-lg text-xs font-bold transition-all shadow-btn flex items-center justify-center gap-2"
               >
                 <Maximize2 size={14} />
                 Preencher Tela Inteira
@@ -1087,7 +1085,7 @@ const renderWidgetControls = (
             ) : (
               <button
                 onClick={() => restoreSize(w.i)}
-                className="w-full py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-lg text-xs font-bold transition-colors shadow-lg shadow-amber-900/20 flex items-center justify-center gap-2"
+                className="w-full py-2 bg-warn hover:bg-warn/90 text-white rounded-lg text-xs font-bold transition-colors shadow-card flex items-center justify-center gap-2"
               >
                 <Minimize2 size={14} />
                 Restaurar Tamanho
@@ -1099,7 +1097,7 @@ const renderWidgetControls = (
 
       {w.type === WidgetType.CALENDAR && (
         <div className="space-y-3">
-          <label className="text-[9px] font-black text-slate-500 uppercase flex items-center gap-1"><Calendar size={10} /> ID do Google Calendar</label>
+          <label className="text-[9px] font-black text-tinta-3 uppercase flex items-center gap-1"><Calendar size={10} /> ID do Google Calendar</label>
           <input
             type="text"
             value={w.data.calendarId || ''}
@@ -1116,47 +1114,47 @@ const renderWidgetControls = (
               } catch { }
               updateData(w.i, { calendarId: raw });
             }}
-            className="w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-xs text-slate-200 outline-none focus:border-[var(--th-accent)] transition-all font-mono"
+            className="w-full bg-papel-2 border border-borda-3 rounded-lg p-3 text-base md:text-xs text-tinta outline-none focus:border-marca transition-all font-mono"
             placeholder="Cole aqui o ID, URL ou iframe do Google Calendar"
           />
-          <p className="text-[9px] text-emerald-500/80 leading-relaxed bg-emerald-500/5 p-2 rounded border border-emerald-500/10">
+          <p className="text-[9px] text-ok leading-relaxed bg-ok-fundo p-2 rounded border border-ok/30">
             <strong>Dica:</strong> cole a URL do calendário, o código de incorporação (iframe) ou só o ID da agenda.
           </p>
 
           {/* Accordion: Como conectar o Google Calendar */}
-          <details className="group bg-slate-900/60 rounded-xl border border-slate-700/50 overflow-hidden transition-all">
-            <summary className="flex items-center justify-between cursor-pointer p-3 hover:bg-slate-800/50 transition-colors select-none">
-              <span className="text-[10px] font-black text-cyan-400 uppercase tracking-wider flex items-center gap-2">
+          <details className="group bg-papel-2 rounded-xl border border-borda-2 overflow-hidden transition-all">
+            <summary className="flex items-center justify-between cursor-pointer p-3 hover:bg-papel-3 transition-colors select-none">
+              <span className="text-[10px] font-black text-marca uppercase tracking-wider flex items-center gap-2">
                 <BookOpen size={12} /> Como Conectar sua Agenda
               </span>
-              <ChevronDown size={14} className="text-slate-500 transition-transform duration-200 group-open:rotate-180" />
+              <ChevronDown size={14} className="text-tinta-3 transition-transform duration-200 group-open:rotate-180" />
             </summary>
-            <div className="px-3 pb-3 space-y-3 border-t border-slate-800">
+            <div className="px-3 pb-3 space-y-3 border-t border-borda">
               <div className="mt-3 space-y-2.5">
                 <div className="flex gap-2.5 items-start">
-                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 text-[10px] font-black flex items-center justify-center">1</span>
-                  <p className="text-[10px] text-slate-300 leading-relaxed">Abra o <a href="https://calendar.google.com" target="_blank" rel="noopener noreferrer" className="text-cyan-400 underline hover:text-cyan-300">Google Calendar</a> no navegador.</p>
+                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-marca-fundo text-marca text-[10px] font-black flex items-center justify-center">1</span>
+                  <p className="text-[10px] text-tinta-2 leading-relaxed">Abra o <a href="https://calendar.google.com" target="_blank" rel="noopener noreferrer" className="text-marca underline hover:text-marca-hover">Google Calendar</a> no navegador.</p>
                 </div>
                 <div className="flex gap-2.5 items-start">
-                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 text-[10px] font-black flex items-center justify-center">2</span>
-                  <p className="text-[10px] text-slate-300 leading-relaxed">Clique no ícone de <strong className="text-white">⚙️ Configurações</strong> (engrenagem) no canto superior direito.</p>
+                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-marca-fundo text-marca text-[10px] font-black flex items-center justify-center">2</span>
+                  <p className="text-[10px] text-tinta-2 leading-relaxed">Clique no ícone de <strong className="text-tinta">⚙️ Configurações</strong> (engrenagem) no canto superior direito.</p>
                 </div>
                 <div className="flex gap-2.5 items-start">
-                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 text-[10px] font-black flex items-center justify-center">3</span>
-                  <p className="text-[10px] text-slate-300 leading-relaxed">No menu lateral, selecione a <strong className="text-white">agenda desejada</strong>.</p>
+                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-marca-fundo text-marca text-[10px] font-black flex items-center justify-center">3</span>
+                  <p className="text-[10px] text-tinta-2 leading-relaxed">No menu lateral, selecione a <strong className="text-tinta">agenda desejada</strong>.</p>
                 </div>
                 <div className="flex gap-2.5 items-start">
-                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 text-[10px] font-black flex items-center justify-center">4</span>
-                  <p className="text-[10px] text-slate-300 leading-relaxed">Role até a seção <strong className="text-white">"Integrar agenda"</strong>.</p>
+                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-marca-fundo text-marca text-[10px] font-black flex items-center justify-center">4</span>
+                  <p className="text-[10px] text-tinta-2 leading-relaxed">Role até a seção <strong className="text-tinta">"Integrar agenda"</strong>.</p>
                 </div>
                 <div className="flex gap-2.5 items-start">
-                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 text-[10px] font-black flex items-center justify-center">5</span>
-                  <p className="text-[10px] text-slate-300 leading-relaxed">Copie o <strong className="text-white">"ID da agenda"</strong> ou o <strong className="text-white">"Código de incorporação"</strong> e cole no campo acima.</p>
+                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-marca-fundo text-marca text-[10px] font-black flex items-center justify-center">5</span>
+                  <p className="text-[10px] text-tinta-2 leading-relaxed">Copie o <strong className="text-tinta">"ID da agenda"</strong> ou o <strong className="text-tinta">"Código de incorporação"</strong> e cole no campo acima.</p>
                 </div>
               </div>
-              <div className="mt-3 p-2.5 bg-amber-500/10 rounded-lg border border-amber-500/20">
-                <p className="text-[9px] text-amber-400 leading-relaxed flex items-start gap-1.5">
-                  <span className="text-amber-500 font-bold flex-shrink-0">⚠️</span>
+              <div className="mt-3 p-2.5 bg-warn-fundo rounded-lg border border-warn/30">
+                <p className="text-[9px] text-warn leading-relaxed flex items-start gap-1.5">
+                  <span className="text-warn font-bold flex-shrink-0">⚠️</span>
                   <span><strong>Importante:</strong> A agenda deve estar com <strong>acesso público</strong> ativado. Vá em Configurações {'>'} Permissões de acesso {'>'} Marque "Tornar disponível publicamente".</span>
                 </p>
               </div>
@@ -1168,20 +1166,20 @@ const renderWidgetControls = (
       {w.type === WidgetType.NOTES && (
         <div className="space-y-3">
           <div>
-            <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Recado / Conteúdo</label>
+            <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">Recado / Conteúdo</label>
             <textarea
               value={w.data.content || ''}
               onChange={e => updateData(w.i, { content: e.target.value })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)] h-28"
+              className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca h-28"
               placeholder="Digite o recado aqui..."
             />
           </div>
           <div>
-            <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Tema do Bloco</label>
+            <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">Tema do Bloco</label>
             <select
               value={w.data.notesConfig?.paperTheme || 'glass'}
               onChange={e => updateData(w.i, { notesConfig: { ...w.data.notesConfig, paperTheme: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)]"
+              className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca"
             >
               <option value="glass">Glassmorphism (Translúcido)</option>
               <option value="yellow-sticky">Post-it Amarelo</option>
@@ -1190,11 +1188,11 @@ const renderWidgetControls = (
             </select>
           </div>
           <div>
-            <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Fonte</label>
+            <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">Fonte</label>
             <select
               value={w.data.notesConfig?.fontFamily || 'sans'}
               onChange={e => updateData(w.i, { notesConfig: { ...w.data.notesConfig, fontFamily: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)]"
+              className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca"
             >
               <option value="sans">Sans-serif (Moderna)</option>
               <option value="serif">Serif (Clássica)</option>
@@ -1215,16 +1213,16 @@ const renderWidgetControls = (
       {w.type === WidgetType.TODO && (
         <div className="space-y-3">
           <div>
-            <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Título da Lista</label>
+            <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">Título da Lista</label>
             <input
               type="text"
               value={w.data.todoConfig?.title || 'Lista de Tarefas'}
               onChange={e => updateData(w.i, { todoConfig: { ...w.data.todoConfig, title: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)]"
+              className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca"
             />
           </div>
           <div>
-            <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Adicionar Tarefa</label>
+            <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">Adicionar Tarefa</label>
             <div className="flex gap-2">
               <input
                 type="text"
@@ -1241,7 +1239,7 @@ const renderWidgetControls = (
                     }
                   }
                 }}
-                className="flex-1 bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)]"
+                className="flex-1 bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca"
               />
               <button
                 onClick={() => {
@@ -1253,16 +1251,16 @@ const renderWidgetControls = (
                     input.value = '';
                   }
                 }}
-                className="bg-indigo-600 hover:bg-sky-500 px-3 rounded text-white text-xs font-bold"
+                className="bg-marca hover:bg-marca-hover px-3 rounded text-white text-xs font-bold"
               >
                 +
               </button>
             </div>
           </div>
           <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
-            <label className="text-[9px] font-black text-slate-500 uppercase block">Tarefas ({w.data.todoConfig?.items?.length || 0})</label>
+            <label className="text-[9px] font-black text-tinta-3 uppercase block">Tarefas ({w.data.todoConfig?.items?.length || 0})</label>
             {(w.data.todoConfig?.items || []).map((item: any) => (
-              <div key={item.id} className="flex items-center justify-between bg-slate-900/60 p-2 rounded border border-slate-800 gap-2">
+              <div key={item.id} className="flex items-center justify-between bg-papel-2 p-2 rounded border border-borda gap-2">
                 <div className="flex items-center gap-2 truncate">
                   <input
                     type="checkbox"
@@ -1271,16 +1269,16 @@ const renderWidgetControls = (
                       const items = w.data.todoConfig.items.map((i: any) => i.id === item.id ? { ...i, done: e.target.checked } : i);
                       updateData(w.i, { todoConfig: { ...w.data.todoConfig, items } });
                     }}
-                    className="rounded border-slate-700 bg-slate-950 text-indigo-600 focus:ring-indigo-500"
+                    className="rounded border-borda-2 bg-papel-2 text-marca focus:ring-marca"
                   />
-                  <span className={`text-xs truncate ${item.done ? 'line-through text-slate-500' : 'text-slate-200'}`}>{item.text}</span>
+                  <span className={`text-xs truncate ${item.done ? 'line-through text-tinta-3' : 'text-tinta'}`}>{item.text}</span>
                 </div>
                 <button
                   onClick={() => {
                     const items = w.data.todoConfig.items.filter((i: any) => i.id !== item.id);
                     updateData(w.i, { todoConfig: { ...w.data.todoConfig, items } });
                   }}
-                  className="text-rose-400 hover:text-rose-300 transition-colors shrink-0"
+                  className="text-danger hover:text-danger transition-colors shrink-0"
                 >
                   <Trash2 size={12} />
                 </button>
@@ -1293,40 +1291,40 @@ const renderWidgetControls = (
       {w.type === WidgetType.COUNTDOWN && (
         <div className="space-y-3">
           <div>
-            <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Título</label>
+            <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">Título</label>
             <input
               type="text"
               value={w.data.countdownConfig?.title || ''}
               onChange={e => updateData(w.i, { countdownConfig: { ...w.data.countdownConfig, title: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)]"
+              className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca"
               placeholder="Ex: Lançamento"
             />
           </div>
           <div>
-            <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Data Alvo</label>
+            <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">Data Alvo</label>
             <input
               type="datetime-local"
               value={w.data.countdownConfig?.targetDate || ''}
               onChange={e => updateData(w.i, { countdownConfig: { ...w.data.countdownConfig, targetDate: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)]"
+              className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca"
             />
           </div>
           <div>
-            <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Mensagem ao Terminar</label>
+            <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">Mensagem ao Terminar</label>
             <input
               type="text"
               value={w.data.countdownConfig?.expiredMessage || ''}
               onChange={e => updateData(w.i, { countdownConfig: { ...w.data.countdownConfig, expiredMessage: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)]"
+              className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca"
               placeholder="Ex: Chegou o momento!"
             />
           </div>
           <div>
-            <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Tema</label>
+            <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">Tema</label>
             <select
               value={w.data.countdownConfig?.theme || 'glass'}
               onChange={e => updateData(w.i, { countdownConfig: { ...w.data.countdownConfig, theme: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)]"
+              className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca"
             >
               <option value="glass">Glassmorphism</option>
               <option value="neon">Neon Vermelho</option>
@@ -1340,33 +1338,33 @@ const renderWidgetControls = (
       {w.type === WidgetType.CHORES && (
         <div className="space-y-3">
           <div>
-            <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Título</label>
+            <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">Título</label>
             <input
               type="text"
               value={w.data.choresConfig?.title || ''}
               onChange={e => updateData(w.i, { choresConfig: { ...w.data.choresConfig, title: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)]"
+              className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca"
             />
           </div>
 
-          <div className="bg-slate-900/40 p-2 rounded border border-slate-800 space-y-2">
-            <span className="text-[9px] font-black text-slate-400 uppercase block">Adicionar Dever</span>
+          <div className="bg-papel-2 p-2 rounded border border-borda space-y-2">
+            <span className="text-[9px] font-black text-tinta-3 uppercase block">Adicionar Dever</span>
             <input
               type="text"
               id={`new-chore-text-${w.i}`}
               placeholder="Nome da atividade..."
-              className="w-full bg-slate-950 border border-slate-700 rounded p-1.5 text-xs text-white outline-none focus:border-[var(--th-accent)]"
+              className="w-full bg-papel-2 border border-borda-3 rounded p-1.5 text-base md:text-xs text-tinta outline-none focus:border-marca"
             />
             <div className="grid grid-cols-2 gap-2">
               <input
                 type="text"
                 id={`new-chore-assignee-${w.i}`}
                 placeholder="Responsável..."
-                className="bg-slate-950 border border-slate-700 rounded p-1.5 text-xs text-white outline-none focus:border-[var(--th-accent)]"
+                className="bg-papel-2 border border-borda-3 rounded p-1.5 text-base md:text-xs text-tinta outline-none focus:border-marca"
               />
               <select
                 id={`new-chore-day-${w.i}`}
-                className="bg-slate-950 border border-slate-700 rounded p-1.5 text-xs text-white outline-none focus:border-[var(--th-accent)]"
+                className="bg-papel-2 border border-borda-3 rounded p-1.5 text-base md:text-xs text-tinta outline-none focus:border-marca"
               >
                 <option value="Segunda">Segunda</option>
                 <option value="Terça">Terça</option>
@@ -1396,20 +1394,20 @@ const renderWidgetControls = (
                   assInput.value = '';
                 }
               }}
-              className="w-full py-1.5 bg-indigo-600 hover:bg-sky-500 rounded text-white text-xs font-bold transition-colors"
+              className="w-full py-1.5 bg-marca hover:bg-marca-hover rounded text-white text-xs font-bold transition-colors"
             >
               Adicionar
             </button>
           </div>
 
           <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
-            <label className="text-[9px] font-black text-slate-500 uppercase block">Lista de Deveres</label>
+            <label className="text-[9px] font-black text-tinta-3 uppercase block">Lista de Deveres</label>
             {(w.data.choresConfig?.items || []).map((item: any) => (
-              <div key={item.id} className="flex items-center justify-between bg-slate-900/60 p-2 rounded border border-slate-800 gap-2 text-xs">
+              <div key={item.id} className="flex items-center justify-between bg-papel-2 p-2 rounded border border-borda gap-2 text-xs">
                 <div className="truncate flex-1">
-                  <div className="font-semibold text-slate-200 truncate">{item.chore}</div>
-                  <div className="text-[9px] text-slate-400 flex items-center gap-1.5 mt-0.5">
-                    <span className="bg-slate-850 px-1 py-0.5 rounded text-indigo-400 font-bold">{item.assignee}</span>
+                  <div className="font-semibold text-tinta truncate">{item.chore}</div>
+                  <div className="text-[9px] text-tinta-3 flex items-center gap-1.5 mt-0.5">
+                    <span className="bg-papel px-1 py-0.5 rounded text-marca font-bold">{item.assignee}</span>
                     <span>•</span>
                     <span>{item.day}</span>
                   </div>
@@ -1422,14 +1420,14 @@ const renderWidgetControls = (
                       const items = w.data.choresConfig.items.map((i: any) => i.id === item.id ? { ...i, done: e.target.checked } : i);
                       updateData(w.i, { choresConfig: { ...w.data.choresConfig, items } });
                     }}
-                    className="rounded border-slate-700 bg-slate-950 text-indigo-600 focus:ring-indigo-500"
+                    className="rounded border-borda-2 bg-papel-2 text-marca focus:ring-marca"
                   />
                   <button
                     onClick={() => {
                       const items = w.data.choresConfig.items.filter((i: any) => i.id !== item.id);
                       updateData(w.i, { choresConfig: { ...w.data.choresConfig, items } });
                     }}
-                    className="text-rose-400 hover:text-rose-300"
+                    className="text-danger hover:text-danger"
                   >
                     <Trash2 size={12} />
                   </button>
@@ -1443,20 +1441,20 @@ const renderWidgetControls = (
       {w.type === WidgetType.MEAL_PLAN && (
         <div className="space-y-3">
           <div>
-            <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Título</label>
+            <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">Título</label>
             <input
               type="text"
               value={w.data.mealPlanConfig?.title || ''}
               onChange={e => updateData(w.i, { mealPlanConfig: { ...w.data.mealPlanConfig, title: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)]"
+              className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca"
             />
           </div>
 
           <div>
-            <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Dia para Editar</label>
+            <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">Dia para Editar</label>
             <select
               id={`meal-day-selector-${w.i}`}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)]"
+              className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca"
               defaultValue="Segunda"
               onChange={() => {
                 updateData(w.i, {});
@@ -1490,45 +1488,45 @@ const renderWidgetControls = (
             };
 
             return (
-              <div className="bg-slate-900/40 p-2.5 rounded border border-slate-800 space-y-2">
-                <span className="text-[9px] font-black text-[var(--th-accent)] uppercase block">Refeições de {currentDay}</span>
+              <div className="bg-papel-2 p-2.5 rounded border border-borda space-y-2">
+                <span className="text-[9px] font-black text-marca uppercase block">Refeições de {currentDay}</span>
                 <div>
-                  <label className="text-[8px] text-slate-400 block mb-0.5">Café da Manhã</label>
+                  <label className="text-[8px] text-tinta-3 block mb-0.5">Café da Manhã</label>
                   <input
                     type="text"
                     value={dayMeal.breakfast || ''}
                     onChange={e => updateMeal('breakfast', e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-700 rounded p-1 text-xs text-white outline-none focus:border-[var(--th-accent)]"
+                    className="w-full bg-papel-2 border border-borda-3 rounded p-1 text-base md:text-xs text-tinta outline-none focus:border-marca"
                     placeholder="Ex: Ovos, Pão e Café"
                   />
                 </div>
                 <div>
-                  <label className="text-[8px] text-slate-400 block mb-0.5">Almoço</label>
+                  <label className="text-[8px] text-tinta-3 block mb-0.5">Almoço</label>
                   <input
                     type="text"
                     value={dayMeal.lunch || ''}
                     onChange={e => updateMeal('lunch', e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-700 rounded p-1 text-xs text-white outline-none focus:border-[var(--th-accent)]"
+                    className="w-full bg-papel-2 border border-borda-3 rounded p-1 text-base md:text-xs text-tinta outline-none focus:border-marca"
                     placeholder="Ex: Frango com Salada e Arroz"
                   />
                 </div>
                 <div>
-                  <label className="text-[8px] text-slate-400 block mb-0.5">Jantar</label>
+                  <label className="text-[8px] text-tinta-3 block mb-0.5">Jantar</label>
                   <input
                     type="text"
                     value={dayMeal.dinner || ''}
                     onChange={e => updateMeal('dinner', e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-700 rounded p-1 text-xs text-white outline-none focus:border-[var(--th-accent)]"
+                    className="w-full bg-papel-2 border border-borda-3 rounded p-1 text-base md:text-xs text-tinta outline-none focus:border-marca"
                     placeholder="Ex: Sopa leve"
                   />
                 </div>
                 <div>
-                  <label className="text-[8px] text-slate-400 block mb-0.5">Lanches</label>
+                  <label className="text-[8px] text-tinta-3 block mb-0.5">Lanches</label>
                   <input
                     type="text"
                     value={dayMeal.snacks || ''}
                     onChange={e => updateMeal('snacks', e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-700 rounded p-1 text-xs text-white outline-none focus:border-[var(--th-accent)]"
+                    className="w-full bg-papel-2 border border-borda-3 rounded p-1 text-base md:text-xs text-tinta outline-none focus:border-marca"
                     placeholder="Ex: Frutas ou Mix de Castanhas"
                   />
                 </div>
@@ -1541,20 +1539,20 @@ const renderWidgetControls = (
       {w.type === WidgetType.MARKET_WATCH && (
         <div className="space-y-3">
           <div>
-            <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Título</label>
+            <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">Título</label>
             <input
               type="text"
               value={w.data.marketWatchConfig?.title || ''}
               onChange={e => updateData(w.i, { marketWatchConfig: { ...w.data.marketWatchConfig, title: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)]"
+              className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca"
             />
           </div>
           <div>
-            <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Layout</label>
+            <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">Layout</label>
             <select
               value={w.data.marketWatchConfig?.layout || 'grid'}
               onChange={e => updateData(w.i, { marketWatchConfig: { ...w.data.marketWatchConfig, layout: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)]"
+              className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca"
             >
               <option value="grid">Grade (Cards)</option>
               <option value="list">Lista Vertical</option>
@@ -1562,13 +1560,13 @@ const renderWidgetControls = (
             </select>
           </div>
           <div>
-            <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Adicionar Símbolo</label>
+            <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">Adicionar Símbolo</label>
             <div className="flex gap-2">
               <input
                 type="text"
                 id={`new-symbol-${w.i}`}
                 placeholder="Ex: AAPL, BTC-USD, EURUSD=X"
-                className="flex-1 bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)] uppercase"
+                className="flex-1 bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca uppercase"
                 onKeyDown={e => {
                   if (e.key === 'Enter') {
                     const input = e.currentTarget;
@@ -1595,7 +1593,7 @@ const renderWidgetControls = (
                     input.value = '';
                   }
                 }}
-                className="bg-indigo-600 hover:bg-sky-500 px-3 rounded text-white text-xs font-bold"
+                className="bg-marca hover:bg-marca-hover px-3 rounded text-white text-xs font-bold"
               >
                 +
               </button>
@@ -1603,14 +1601,14 @@ const renderWidgetControls = (
           </div>
           <div className="flex flex-wrap gap-1.5 pt-1">
             {(w.data.marketWatchConfig?.symbols || []).map((sym: string) => (
-              <span key={sym} className="flex items-center gap-1 bg-slate-900 border border-slate-700 px-2 py-0.5 rounded text-[10px] text-white font-mono font-bold">
+              <span key={sym} className="flex items-center gap-1 bg-papel border border-borda-2 px-2 py-0.5 rounded text-[10px] text-tinta font-mono font-bold">
                 {sym}
                 <button
                   onClick={() => {
                     const symbols = w.data.marketWatchConfig.symbols.filter((s: string) => s !== sym);
                     updateData(w.i, { marketWatchConfig: { ...w.data.marketWatchConfig, symbols } });
                   }}
-                  className="text-rose-400 hover:text-rose-300 font-bold ml-1"
+                  className="text-danger hover:text-danger font-bold ml-1"
                 >
                   ×
                 </button>
@@ -1623,22 +1621,22 @@ const renderWidgetControls = (
       {w.type === WidgetType.BROWSER_SNAPSHOT && (
         <div className="space-y-3">
           <div>
-            <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">URL do Site</label>
+            <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">URL do Site</label>
             <input
               type="text"
               value={w.data.browserSnapshotConfig?.url || ''}
               onChange={e => updateData(w.i, { browserSnapshotConfig: { ...w.data.browserSnapshotConfig, url: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)]"
+              className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca"
               placeholder="Ex: https://g1.globo.com"
             />
           </div>
           <div>
-            <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Intervalo de Atualização (minutos)</label>
+            <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">Intervalo de Atualização (minutos)</label>
             <input
               type="number"
               value={w.data.browserSnapshotConfig?.updateIntervalMinutes || 10}
               onChange={e => updateData(w.i, { browserSnapshotConfig: { ...w.data.browserSnapshotConfig, updateIntervalMinutes: parseInt(e.target.value) || 10 } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)]"
+              className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca"
             />
           </div>
         </div>
@@ -1647,11 +1645,11 @@ const renderWidgetControls = (
       {w.type === WidgetType.GOOGLE_DOCS && (
         <div className="space-y-3">
           <div>
-            <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Tipo de Documento</label>
+            <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">Tipo de Documento</label>
             <select
               value={w.data.googleDocsConfig?.docType || 'document'}
               onChange={e => updateData(w.i, { googleDocsConfig: { ...w.data.googleDocsConfig, docType: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)]"
+              className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca"
             >
               <option value="document">Google Documentos (Doc)</option>
               <option value="spreadsheet">Google Planilhas (Sheets)</option>
@@ -1660,16 +1658,16 @@ const renderWidgetControls = (
             </select>
           </div>
           <div>
-            <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Link de Compartilhamento</label>
+            <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">Link de Compartilhamento</label>
             <input
               type="text"
               value={w.data.googleDocsConfig?.url || ''}
               onChange={e => updateData(w.i, { googleDocsConfig: { ...w.data.googleDocsConfig, url: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)]"
+              className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca"
               placeholder="Cole o link completo do Google Docs..."
             />
           </div>
-          <p className="text-[9px] text-slate-400 leading-normal italic">
+          <p className="text-[9px] text-tinta-3 leading-normal italic">
             Certifique-se de que o documento esteja visível para "Qualquer pessoa com o link" para que seja exibido sem login.
           </p>
         </div>
@@ -1678,11 +1676,11 @@ const renderWidgetControls = (
       {w.type === WidgetType.OFFICE_DOCS && (
         <div className="space-y-3">
           <div>
-            <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Tipo do Arquivo</label>
+            <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">Tipo do Arquivo</label>
             <select
               value={w.data.officeDocsConfig?.docType || 'word'}
               onChange={e => updateData(w.i, { officeDocsConfig: { ...w.data.officeDocsConfig, docType: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)]"
+              className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca"
             >
               <option value="word">Microsoft Word</option>
               <option value="excel">Microsoft Excel</option>
@@ -1690,12 +1688,12 @@ const renderWidgetControls = (
             </select>
           </div>
           <div>
-            <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Link de Incorporação (Embed Link)</label>
+            <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">Link de Incorporação (Embed Link)</label>
             <input
               type="text"
               value={w.data.officeDocsConfig?.url || ''}
               onChange={e => updateData(w.i, { officeDocsConfig: { ...w.data.officeDocsConfig, url: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)]"
+              className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca"
               placeholder="Cole o link gerado pelo OneDrive embed..."
             />
           </div>
@@ -1705,12 +1703,12 @@ const renderWidgetControls = (
       {w.type === WidgetType.POWER_BI && (
         <div className="space-y-3">
           <div>
-            <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">URL de Incorporação (Embed URL)</label>
+            <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">URL de Incorporação (Embed URL)</label>
             <input
               type="text"
               value={w.data.powerBiConfig?.embedUrl || ''}
               onChange={e => updateData(w.i, { powerBiConfig: { ...w.data.powerBiConfig, embedUrl: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)]"
+              className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca"
               placeholder="Cole o link https://app.powerbi.com/reportEmbed..."
             />
           </div>
@@ -1720,11 +1718,11 @@ const renderWidgetControls = (
       {w.type === WidgetType.EMBED_HTML && (
         <div className="space-y-3">
           <div>
-            <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">Código HTML / Widget Customizado</label>
+            <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">Código HTML / Widget Customizado</label>
             <textarea
               value={w.data.embedHtmlConfig?.html || ''}
               onChange={e => updateData(w.i, { embedHtmlConfig: { html: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white font-mono outline-none focus:border-[var(--th-accent)] h-44"
+              className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta font-mono outline-none focus:border-marca h-44"
               placeholder="<!-- Insira seu HTML, CSS ou Script aqui -->"
             />
           </div>
@@ -1734,12 +1732,12 @@ const renderWidgetControls = (
       {w.type === WidgetType.AIRTABLE && (
         <div className="space-y-3">
           <div>
-            <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">URL de Compartilhamento do Airtable</label>
+            <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">URL de Compartilhamento do Airtable</label>
             <input
               type="text"
               value={w.data.airtableConfig?.shareUrl || ''}
               onChange={e => updateData(w.i, { airtableConfig: { shareUrl: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)]"
+              className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca"
               placeholder="https://airtable.com/embed/shr..."
             />
           </div>
@@ -1749,12 +1747,12 @@ const renderWidgetControls = (
       {w.type === WidgetType.PDF_DOCUMENT && (
         <div className="space-y-3">
           <div>
-            <label className="text-[9px] font-black text-slate-500 uppercase mb-1 block">URL do Arquivo PDF</label>
+            <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">URL do Arquivo PDF</label>
             <input
               type="text"
               value={w.data.pdfDocumentConfig?.pdfUrl || ''}
               onChange={e => updateData(w.i, { pdfDocumentConfig: { pdfUrl: e.target.value } })}
-              className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white outline-none focus:border-[var(--th-accent)]"
+              className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca"
               placeholder="https://exemplo.com/documento.pdf"
             />
           </div>
@@ -1762,12 +1760,12 @@ const renderWidgetControls = (
       )}
 
       {/* Ajustes de Layout */}
-      <div className="mt-4 pt-4 border-t border-slate-800 space-y-3">
-        <span className="text-[9px] font-black text-slate-500 uppercase tracking-wider block">Ajustes de Layout</span>
+      <div className="mt-4 pt-4 border-t border-borda space-y-3">
+        <span className="text-[9px] font-black text-tinta-3 uppercase tracking-wider block">Ajustes de Layout</span>
 
         {/* Grid de Switches */}
         <div className="grid grid-cols-1 gap-2">
-          <label className={`flex items-center gap-3 text-[11px] text-slate-300 cursor-pointer p-2.5 rounded-lg border transition-all w-full select-none ${w.data.fillContainer ? 'bg-[var(--th-accent)]/10 border-[var(--th-accent)]/50 ring-1 ring-[var(--th-accent)]/20' : 'bg-slate-950/60 border-slate-800/80 hover:border-[var(--th-accent)]/30 hover:bg-slate-950'}`}>
+          <label className={`flex items-center gap-3 text-[11px] text-tinta-2 cursor-pointer p-2.5 rounded-lg border transition-all w-full select-none ${w.data.fillContainer ? 'bg-marca-fundo border-marca/50 ring-1 ring-marca/20' : 'bg-papel-2 border-borda hover:border-marca/30 hover:bg-papel-2'}`}>
             <input
               type="checkbox"
               checked={w.data.fillContainer || false}
@@ -1785,15 +1783,15 @@ const renderWidgetControls = (
                   setFullScreen(w.i);
                 }
               }}
-              className="rounded border-slate-700 bg-slate-900 text-[var(--th-accent)] focus:ring-0 w-4 h-4 cursor-pointer"
+              className="rounded border-borda-2 bg-papel text-marca focus:ring-0 w-4 h-4 cursor-pointer"
             />
             <div className="flex flex-col">
-              <span className="font-bold text-slate-200">Preencher Container</span>
-              <span className="text-[9px] text-slate-500 leading-tight">Ocupa a tela inteira da TV, de canto a canto</span>
+              <span className="font-bold text-tinta">Preencher Container</span>
+              <span className="text-[9px] text-tinta-3 leading-tight">Ocupa a tela inteira da TV, de canto a canto</span>
             </div>
           </label>
 
-          <label className={`flex items-center gap-3 text-[11px] text-slate-300 cursor-pointer p-2.5 rounded-lg border transition-all w-full select-none ${w.data.fullScreenMode ? 'bg-indigo-950/40 border-indigo-500/50 ring-1 ring-indigo-500/20' : 'bg-slate-950/60 border-slate-800/80 hover:border-[var(--th-accent)]/30 hover:bg-slate-950'}`}>
+          <label className={`flex items-center gap-3 text-[11px] text-tinta-2 cursor-pointer p-2.5 rounded-lg border transition-all w-full select-none ${w.data.fullScreenMode ? 'bg-marca-fundo border-marca ring-1 ring-marca/30' : 'bg-papel-2 border-borda hover:border-marca/30 hover:bg-papel-2'}`}>
             <input
               type="checkbox"
               checked={w.data.fullScreenMode || false}
@@ -1813,11 +1811,11 @@ const renderWidgetControls = (
                   setFullScreen(w.i);
                 }
               }}
-              className="rounded border-slate-700 bg-slate-900 text-[var(--th-accent)] focus:ring-0 w-4 h-4 cursor-pointer"
+              className="rounded border-borda-2 bg-papel text-marca focus:ring-0 w-4 h-4 cursor-pointer"
             />
             <div className="flex flex-col">
-              <span className="font-bold text-slate-200">Tela Cheia (100% da TV)</span>
-              <span className="text-[9px] text-slate-500 leading-tight">Força o widget a preencher toda a tela da TV</span>
+              <span className="font-bold text-tinta">Tela Cheia (100% da TV)</span>
+              <span className="text-[9px] text-tinta-3 leading-tight">Força o widget a preencher toda a tela da TV</span>
             </div>
           </label>
         </div>
@@ -1826,8 +1824,8 @@ const renderWidgetControls = (
 
         {/* Alinhamento Interno */}
         {!w.data.fillContainer && (
-          <div className="flex flex-col gap-1 bg-slate-900 p-2 rounded border border-slate-800 animate-in fade-in duration-200">
-            <span className="text-[10px] text-slate-400 block mb-1">Alinhamento do Conteúdo</span>
+          <div className="flex flex-col gap-1 bg-papel p-2 rounded border border-borda animate-in fade-in duration-200">
+            <span className="text-[10px] text-tinta-3 block mb-1">Alinhamento do Conteúdo</span>
             <div className="grid grid-cols-4 gap-1">
               {[
                 { id: 'start', label: 'Início' },
@@ -1840,8 +1838,8 @@ const renderWidgetControls = (
                   type="button"
                   onClick={() => updateData(w.i, { contentAlignment: align.id as any })}
                   className={`py-1 text-[9px] rounded font-medium border transition-all ${(w.data.contentAlignment || 'center') === align.id
-                      ? 'bg-[var(--th-accent)]/20 text-[var(--th-accent)] border-[var(--th-accent)]'
-                      : 'bg-slate-950 text-slate-400 border-slate-800 hover:border-slate-700'
+                      ? 'bg-marca-fundo text-marca border-marca'
+                      : 'bg-papel-2 text-tinta-3 border-borda hover:border-borda-3'
                     }`}
                 >
                   {align.label}
@@ -1871,12 +1869,12 @@ const renderWidgetControls = (
 
         {/* Fit Mode para Mídias (IMAGE, GIF, VIDEO) */}
         {!w.data.fillContainer && (w.type === WidgetType.IMAGE || w.type === WidgetType.GIF || w.type === WidgetType.VIDEO) && (
-          <div className="flex flex-col gap-1 bg-slate-900 p-2 rounded border border-slate-800 animate-in fade-in duration-200">
-            <span className="text-[10px] text-slate-400">Ajuste de Preenchimento (Fit)</span>
+          <div className="flex flex-col gap-1 bg-papel p-2 rounded border border-borda animate-in fade-in duration-200">
+            <span className="text-[10px] text-tinta-3">Ajuste de Preenchimento (Fit)</span>
             <select
               value={w.data.fitContainerMode || ''}
               onChange={(e) => updateData(w.i, { fitContainerMode: e.target.value as any })}
-              className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white outline-none focus:border-[var(--th-accent)]"
+              className="w-full bg-papel-2 border border-borda rounded p-1.5 text-base md:text-xs text-tinta outline-none focus:border-marca"
             >
               <option value="">Padrão do Sistema</option>
               <option value="cover">Cortar e Preencher (Cover)</option>

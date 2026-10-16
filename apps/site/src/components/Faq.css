@@ -83,6 +83,9 @@
 .faq__resposta {
   margin: 0;
   padding: 0 34px 20px 0;
+  /* Medida de leitura: com a coluna do FAQ aberta em 1280px a resposta passava
+     de 80 caracteres por linha. */
+  max-width: 54ch;
   font-size: 15px;
   line-height: 1.55;
   color: var(--tinta-2);

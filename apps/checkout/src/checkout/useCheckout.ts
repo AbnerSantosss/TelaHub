@@ -8,9 +8,9 @@
 // 2. O VALOR É DO SERVIDOR. A estimativa local só preenche o intervalo entre o
 //    clique e a resposta; quando o PATCH volta, o `amountCents` dele é o que fica.
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { toast } from 'sonner';
 
 import { isApiError } from '../lib/api';
+import { avisoErro } from '../lib/estado-avisos';
 import { declinedCard, isLuhnValid, randomCard } from '../lib/fake-data';
 import {
   annualSavingsPercent,
@@ -52,6 +52,7 @@ import {
   type UpdateSessionInput,
 } from '../lib/session';
 import { localPhoneDigits, maskCnpj, maskCpf, maskPhone, onlyDigits } from './format';
+import { useLoggedUser } from './useLoggedUser';
 import {
   emptyIdentity,
   IDENTITY_FIELD_ORDER,
@@ -209,6 +210,8 @@ export function useCheckout(routeToken?: string) {
 
   // ─── Identificação ─────────────────────────────────────────────────────────
   const [identity, setIdentity] = useState<IdentityDraft>(emptyIdentity);
+  // Conta do painel no mesmo domínio (ver `useLoggedUser.ts`).
+  const { user: loggedUser, loading: loggedUserLoading, signOut: signOutAccount } = useLoggedUser();
   const [identityErrors, setIdentityErrors] = useState<IdentityErrors>({});
   const [focusRequest, setFocusRequest] = useState<FocusRequest | null>(null);
 
@@ -526,7 +529,7 @@ export function useCheckout(routeToken?: string) {
       } catch (error) {
         if (handleFatal(error)) return false;
         setSyncFailed(true);
-        toast.error(messageOf(error, 'Não conseguimos salvar agora. Verifique sua conexão.'));
+        avisoErro(messageOf(error, 'Não conseguimos salvar agora. Verifique sua conexão.'));
         return false;
       } finally {
         setAmountSyncing(false);
@@ -664,11 +667,38 @@ export function useCheckout(routeToken?: string) {
    * um dia participar da validação que trava o botão "Continuar". Marketing
    * não pode bloquear compra.
    */
+  // ─── Usuário logado: nome e e-mail vêm da conta ──────────────────────────
+  //
+  // Roda de novo quando a sessão chega ou muda, de propósito: a hidratação
+  // acima mescla o e-mail que a sessão guardou numa visita anterior, e esse
+  // e-mail pode não ser o da conta. O da conta sempre vence enquanto houver
+  // alguém logado, porque é ele que faz o `paid.handler.ts` ativar o plano na
+  // organização certa. O nome só entra se o campo estiver vazio: quem corrigiu
+  // o próprio nome na tela não perde a correção.
+  useEffect(() => {
+    if (!loggedUser) return;
+    setIdentity((current) => ({
+      ...current,
+      email: loggedUser.email,
+      name: current.name.trim() ? current.name : loggedUser.name || current.name,
+    }));
+    setIdentityErrors((current) => (current.email ? { ...current, email: undefined } : current));
+  }, [loggedUser, session]);
+
+  /** "Não é você? Sair": desfaz o login e devolve o e-mail para a pessoa digitar. */
+  const signOutLoggedUser = useCallback(() => {
+    const accountEmail = loggedUser?.email;
+    signOutAccount();
+    setIdentity((current) => (current.email === accountEmail ? { ...current, email: '' } : current));
+  }, [signOutAccount, loggedUser]);
+
   const setMarketingOptIn = useCallback((value: boolean) => {
     setIdentity((current) => ({ ...current, marketingOptIn: value }));
   }, []);
 
   const setIdentityField = useCallback((field: IdentityField, value: string) => {
+    // E-mail travado na conta logada: nem o preenchimento de teste o troca.
+    if (field === 'email' && loggedUser) return;
     setIdentity((current) => {
       if (field === 'phone') return { ...current, phone: maskPhone(value) };
       if (field === 'document') {
@@ -681,7 +711,7 @@ export function useCheckout(routeToken?: string) {
     });
     // Erro sai da tela ao corrigir; a revalidação acontece no blur/avançar.
     setIdentityErrors((current) => (current[field] ? { ...current, [field]: undefined } : current));
-  }, []);
+  }, [loggedUser]);
 
   const setDocumentKind = useCallback((kind: DocumentKind) => {
     setIdentity((current) =>
@@ -715,7 +745,9 @@ export function useCheckout(routeToken?: string) {
     const digits = onlyDigits(identity.document);
     const payload: UpdateSessionInput = {
       name: identity.name.trim(),
-      email: identity.email.trim(),
+      // Logado, vai o e-mail da conta mesmo que o estado ainda não tenha sido
+      // reescrito pelo efeito acima (clique rápido logo após a hidratação).
+      email: loggedUser?.email ?? identity.email.trim(),
       // `55` explícito: o campo mostra `+55` fixo, então o registro guarda o
       // número completo e não fica ambíguo no painel.
       phone: `55${onlyDigits(identity.phone)}`,
@@ -735,7 +767,7 @@ export function useCheckout(routeToken?: string) {
 
     setCompleted((current) => ({ ...current, identify: true }));
     setActiveStep('plan');
-  }, [identity, sendPatch]);
+  }, [identity, loggedUser, sendPatch]);
 
   const confirmPlan = useCallback(async () => {
     if (!planCode) {
@@ -990,7 +1022,7 @@ export function useCheckout(routeToken?: string) {
       setCompleted((current) => ({ ...current, payment: true }));
     } catch (error) {
       if (!handleFatal(error)) {
-        toast.error(messageOf(error, 'Não conseguimos concluir agora. Tente novamente.'));
+        avisoErro(messageOf(error, 'Não conseguimos concluir agora. Tente novamente.'));
       }
     } finally {
       setSubmitting(false);
@@ -1092,6 +1124,9 @@ export function useCheckout(routeToken?: string) {
     identityErrors,
     focusRequest,
     result: result ?? onlineResult,
+    /** Conta do painel aberta neste navegador, ou `null` para visitante. */
+    loggedUser,
+    loggedUserLoading,
 
     // pagamento
     paymentConfig,
@@ -1153,6 +1188,7 @@ export function useCheckout(routeToken?: string) {
     setDocumentKind,
     blurIdentityField,
     submitIdentify,
+    signOutLoggedUser,
     confirmPlan,
     finish,
     planError,

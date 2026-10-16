@@ -41,8 +41,6 @@ export default function Formatos() {
       aria-labelledby="formatos-titulo"
     >
       <div className="secao__cabeca reveal">
-        <p className="chip formatos__chip">Deitada ou em pé</p>
-
         <h2 id="formatos-titulo" className="h2">
           A TV da parede e o totem da entrada, no mesmo painel.
         </h2>

@@ -460,7 +460,8 @@ export function readSelectionHint(): {
 export function replaceUrlWithToken(publicToken: string): void {
   try {
     const url = new URL(window.location.href);
-    url.pathname = `/c/${publicToken}`;
+    // BASE_URL termina em barra (/checkout/): o caminho fica /checkout/c/<token>.
+    url.pathname = `${(import.meta as ImportMeta & { env: { BASE_URL: string } }).env.BASE_URL}c/${publicToken}`;
     window.history.replaceState(window.history.state, '', url.toString());
   } catch {
     // Sem History API: a URL fica como está; a sessão em memória segue válida.

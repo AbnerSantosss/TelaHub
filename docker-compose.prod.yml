@@ -10,19 +10,24 @@
 #    então publicar porta é obrigatório. Usar as mesmas 3025/3027 da stack
 #    antiga faria o container novo nem subir ("port is already allocated"),
 #    por isso a faixa 40xx.
-#      4025 → painel   (rota: devtelahubpainel.proxserverabner.site, que também
-#                       é o host público da API: o Nginx desta imagem faz proxy
-#                       de /api/ e /uploads/ para o backend. Ver
-#                       `apps/painel/nginx.conf`)
-#    O backend NÃO publica porta: o Nginx do frontend já faz proxy de /api.
+#      4025 → gateway  (rota: devtelahub.proxserverabner.site). Domínio único
+#                       desde 15/10/2026: site em /, painel em /app/, checkout
+#                       em /checkout/, api em /api/ e /uploads/. Ver
+#                       `apps/gateway/nginx.conf`. Os nomes antigos
+#                       (devtelahubpainel, devtelahubcheckout,
+#                       devtelahublandingpage) respondem com 301 para o
+#                       domínio único quando apontados para esta porta, e
+#                       continuam servindo /api sem redirect (webhook).
+#    O backend NÃO publica porta: o Nginx do gateway faz proxy de /api.
 #    Consequência prática, e é a que decide o roteamento no Cloudflare: TODA
 #    chamada pública à API (inclusive `/api/health` e o webhook do Asaas)
 #    atravessa a porta 4025. Não existe rota que chegue ao backend por fora
 #    dele — ver o procedimento numerado em DEPLOY.md.
 #
-#    Os outros dois apps são stacks próprias, cada uma com seu compose:
-#      4038 → site      (rota: devtelahublandingpage.proxserverabner.site)  apps/site/docker-compose.prod.yml
-#      4039 → checkout  (rota: devtelahubcheckout.proxserverabner.site)     apps/checkout/docker-compose.prod.yml
+#    As stacks próprias do site e do checkout continuam existindo só para a
+#    transição. Com os nomes antigos apontados para a 4025, elas podem parar:
+#      4038 → site      (stack 118)  apps/site/docker-compose.prod.yml
+#      4039 → checkout  (stack 119)  apps/checkout/docker-compose.prod.yml
 #    Convenção de 25/09/2026: `telahub.proxserverabner.site` é o TelaHub
 #    principal (stack antiga `telahub-novo`). Esta versão usa só nomes com
 #    prefixo `devtelahub`. Os nomes `painel.`, `vendas.` e `checkout.` saíram
@@ -100,11 +105,23 @@ services:
       # O SITE entra na lista desde que a LP passou a chamar `POST /api/leads`:
       # sem a origem exata aqui, o formulário "Falar com a gente" é bloqueado
       # pelo navegador e todo lead de plano sob consulta se perde em silêncio.
-      - CORS_ORIGINS=${CORS_ORIGINS:-https://devtelahubpainel.proxserverabner.site,https://devtelahubcheckout.proxserverabner.site,https://devtelahublandingpage.proxserverabner.site}
-      - APP_URL=${APP_URL:-https://devtelahubpainel.proxserverabner.site}
+      # Desde o domínio único (15/10/2026) os três apps chamam a api na MESMA
+      # origem, então o navegador nem manda CORS para devtelahub. Ele entra na
+      # lista assim mesmo (o Origin vai em POST). Os três nomes antigos ficam
+      # enquanto houver bundle antigo em cache ou TV pareada neles.
+      - CORS_ORIGINS=${CORS_ORIGINS:-https://devtelahub.proxserverabner.site,https://devtelahubpainel.proxserverabner.site,https://devtelahubcheckout.proxserverabner.site,https://devtelahublandingpage.proxserverabner.site}
+      # Endereço do painel nos e-mails: login (`/#/login`), redefinição de
+      # senha (`/#/reset-password`) e boas-vindas. SEM barra final.
+      - APP_URL=${APP_URL:-https://devtelahub.proxserverabner.site/app}
+      # Endereço público da api, usado no link de descadastro dos e-mails
+      # (`email.service.ts`). Sem esta linha o padrão vira `${APP_URL}/api`,
+      # que agora é /app/api e cai no painel em vez da api.
+      - API_PUBLIC_URL=${API_PUBLIC_URL:-https://devtelahub.proxserverabner.site/api}
       # Destino do botão de assinar, lido em `billing.routes.ts`. Sem esta
       # linha a variável cadastrada no Portainer nunca chega ao container.
-      - CHECKOUT_URL=${CHECKOUT_URL:-https://devtelahubcheckout.proxserverabner.site/c}
+      # Tem de terminar em /checkout/c: a api monta `${CHECKOUT_URL}?plano=...`,
+      # e /checkout?... perde a query no redirect para /checkout/c.
+      - CHECKOUT_URL=${CHECKOUT_URL:-https://devtelahub.proxserverabner.site/checkout/c}
       # Saltos até o backend: Cloudflare Tunnel → Nginx → backend = 2.
       # Com 1, o rate limit de login agrupa todos os visitantes num contador só.
       - TRUST_PROXY=${TRUST_PROXY:-2}
@@ -175,7 +192,7 @@ services:
       - PRIVACY_CONTACT_EMAIL=${PRIVACY_CONTACT_EMAIL:-}
       # Fonte única do canonical/OG/JSON-LD. NUNCA telahub.com.br: aquele
       # domínio é de terceiro desde 2025.
-      - SITE_PUBLIC_URL=${SITE_PUBLIC_URL:-https://devtelahublandingpage.proxserverabner.site}
+      - SITE_PUBLIC_URL=${SITE_PUBLIC_URL:-https://devtelahub.proxserverabner.site}
       # Botões "Entrar como plano X" na tela de login, SEM senha (decisão do
       # dono em 15/10/2026: este painel de teste é público de propósito).
       # `true` faz o boot criar as contas demo com senha aleatória e liga a rota
@@ -204,6 +221,10 @@ services:
     volumes:
       - uploads_data:/app/uploads
     networks:
+      # `default`: onde o gateway o encontra.
+      # `telahub_net`: onde o banco está e onde o checkout da stack 119 ainda
+      # o procura. Sai daqui quando a 119 for removida.
+      - default
       - telahub_net
     # Sequência de boot. A ORDEM IMPORTA:
     #   1. migrate-deploy  — aplica as MIGRAÇÕES versionadas (com baseline
@@ -228,34 +249,60 @@ services:
       { [ \"$$DEMO_LOGIN\" != true ] || npx tsx prisma/seed-demo-users.ts; } &&
       npm start"
 
-  frontend:
+  # Gateway do domínio único: serve site, painel e checkout e faz o proxy de
+  # /api e /uploads para o backend. Substitui o antigo serviço `frontend`
+  # (só o painel) e, quando o dono repontar os nomes antigos, as stacks
+  # 118 (site) e 119 (checkout). Ver apps/gateway/nginx.conf.
+  gateway:
     ports:
-      # devtelahubpainel.proxserverabner.site -> localhost:4025 (rota no túnel do host)
-      - "4025:3025"
+      # devtelahub.proxserverabner.site -> localhost:4025 (rota no túnel do host).
+      # Mesma porta do antigo `frontend`: a rota de devtelahubpainel já aponta
+      # para cá, e o gateway responde nela com 301 para o domínio novo.
+      - "4025:80"
     build:
-      context: ./apps/painel
-      dockerfile: Dockerfile
+      # Contexto na RAIZ: os apps importam arquivos de packages/.
+      context: .
+      dockerfile: apps/gateway/Dockerfile
       args:
-        # Rota relativa: o Nginx desta imagem faz o proxy de /api para o backend.
-        - VITE_API_URL=/api
-        # Os outros dois apps vivem em domínios próprios. São lidos em tempo de
-        # BUILD: uma variável da stack com o mesmo nome passa por cima do default
-        # abaixo e entra no bundle, mas só depois de um redeploy com rebuild.
-        - VITE_SITE_URL=${VITE_SITE_URL:-https://devtelahublandingpage.proxserverabner.site}
-        - VITE_CHECKOUT_URL=${VITE_CHECKOUT_URL:-https://devtelahubcheckout.proxserverabner.site}    restart: unless-stopped
-    # O Nginx desta imagem tem `proxy_pass http://backend:3001`. Nginx resolve o
-    # upstream ao CARREGAR a configuração: se o container `backend` ainda não
-    # existir, ele morre com "host not found in upstream" e não tenta de novo.
-    # `service_started` (e não `service_healthy`) porque o painel deve ficar de
-    # pé mostrando erro de API enquanto a migração roda — melhor do que não
+        # Lidos em tempo de BUILD e embutidos no bundle. Relativos de propósito:
+        # todos os apps estão no mesmo domínio, então o mesmo build serve
+        # qualquer hostname apontado para esta porta. Uma variável da stack com
+        # o mesmo nome passa por cima do default, mas só depois de rebuild.
+        - VITE_API_URL=${VITE_API_URL:-/api}
+        - VITE_APP_URL=${VITE_APP_URL:-/app}
+        - VITE_SITE_URL=${VITE_SITE_URL:-/}
+        - VITE_CHECKOUT_URL=${VITE_CHECKOUT_URL:-/checkout}
+        # Preços do build do site (scripts/fetch-plans.mjs). Se a API não
+        # responder, o build segue com o snapshot de src/data/planos.json.
+        - PLANS_API_URL=${PLANS_API_URL:-https://devtelahub.proxserverabner.site/api}
+        - VITE_CONTACT_EMAIL=${CONTACT_EMAIL:-}
+    restart: unless-stopped
+    # O nginx tem `proxy_pass http://backend:3001` e resolve o upstream ao
+    # CARREGAR a configuração: se o container `backend` ainda não existir, ele
+    # morre com "host not found in upstream" e não tenta de novo.
+    # `service_started` (e não `service_healthy`) porque o gateway deve ficar
+    # de pé mostrando erro de API enquanto a migração roda: melhor do que não
     # existir página nenhuma.
     depends_on:
       backend:
         condition: service_started
+    # Só na rede própria da stack. Na telahub_net o nome `backend` ficaria
+    # ambíguo se outra stack com um serviço `backend` entrasse nela.
     networks:
-      - telahub_net
+      - default
+    healthcheck:
+      # 127.0.0.1, não localhost: localhost resolve para ::1 dentro do
+      # container e o nginx desta imagem só escuta em IPv4.
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:80/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
 
 networks:
+  # Rede própria da stack (o compose cria `<stack>_default`). É por ela que o
+  # gateway chega ao backend.
+  default:
   # Compartilhada com as stacks do site, do checkout e do túnel.
   # Criada uma única vez:  docker network create telahub_net
   telahub_net:

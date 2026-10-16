@@ -62,8 +62,8 @@ export const DisplayCard: React.FC<DisplayCardProps> = ({
   return (
     <motion.div
       variants={cardItem}
-      whileHover={{ y: -5 }}
-      transition={{ type: 'spring', stiffness: 300, damping: 18 }}
+      // O levantar no hover é do CSS (.display-card:hover), que respeita
+      // prefers-reduced-motion. Aqui ficava um segundo, somado ao primeiro.
       style={{ height: '100%' }}
     >
       {/* fx-spotlight: luz + borda que acendem seguindo o mouse (index.css) */}
@@ -79,40 +79,40 @@ export const DisplayCard: React.FC<DisplayCardProps> = ({
           {/* Menu Button (⋮) */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="menu-button" type="button">
-                <MoreVertical size={14} />
+              <button className="menu-button" type="button" aria-label={`Ações da tela ${display.name}`}>
+                <MoreVertical size={16} />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-44 border-border bg-[#0e121c]/95 backdrop-blur-md">
+            <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuItem 
                 onClick={() => onOpenRenameModal(display)} 
-                className="flex items-center gap-2 cursor-pointer focus:bg-accent/15 focus:text-accent"
+                className="flex items-center gap-2 cursor-pointer"
               >
-                <Pencil size={12} />
+                <Pencil size={14} />
                 <span>Renomear</span>
               </DropdownMenuItem>
               <DropdownMenuItem 
                 onClick={() => onOpenCoverModal(display)} 
-                className="flex items-center gap-2 cursor-pointer focus:bg-accent/15 focus:text-accent"
+                className="flex items-center gap-2 cursor-pointer"
               >
-                <ImageIcon size={12} />
+                <ImageIcon size={14} />
                 <span>Alterar Capa</span>
               </DropdownMenuItem>
               {display.coverImage && (
                 <DropdownMenuItem 
                   onClick={() => onRemoveCover(display)} 
-                  className="flex items-center gap-2 cursor-pointer text-warning focus:bg-warning/15 focus:text-warning"
+                  className="flex items-center gap-2 cursor-pointer text-warn focus:bg-warn-fundo focus:text-warn"
                 >
-                  <X size={12} />
+                  <X size={14} />
                   <span>Remover Capa</span>
                 </DropdownMenuItem>
               )}
-              <DropdownMenuSeparator className="bg-border/50" />
+              <DropdownMenuSeparator className="bg-borda" />
               <DropdownMenuItem 
                 onClick={(e) => onDeleteDisplay(display.id, e)} 
-                className="flex items-center gap-2 cursor-pointer text-danger focus:bg-danger/15 focus:text-danger"
+                className="flex items-center gap-2 cursor-pointer text-danger focus:bg-danger-fundo focus:text-danger"
               >
-                <Trash2 size={12} />
+                <Trash2 size={14} />
                 <span>Excluir Tela</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -124,8 +124,9 @@ export const DisplayCard: React.FC<DisplayCardProps> = ({
             type="button"
             onClick={(e) => { e.stopPropagation(); onOpenDisplaySettings(display); }}
             title="Configurações do Display"
+            aria-label={`Configurações da tela ${display.name}`}
           >
-            <Settings size={13} />
+            <Settings size={15} />
           </button>
 
           {/* TV Frame — moldura de TV centralizada */}
@@ -156,7 +157,7 @@ export const DisplayCard: React.FC<DisplayCardProps> = ({
           {/* h-11 no celular = alvo de toque ≥ 44px; volta a 36px no desktop */}
           <Button
             variant="glow"
-            className="display-open mt-auto h-11 w-full gap-2 rounded-[var(--radius)] text-[13px] md:h-9"
+            className="display-open mt-auto h-11 w-full gap-2 rounded-md text-sm font-semibold md:h-9"
             onClick={() => onNavigateToEdit(display.id)}
           >
             <Pencil size={15} /> Abrir Designer
@@ -166,7 +167,7 @@ export const DisplayCard: React.FC<DisplayCardProps> = ({
             <Button
               variant="shimmer"
               data-copied={copiedId === display.id ? 'true' : undefined}
-              className="h-11 gap-1.5 rounded-[var(--radius-sm)] text-xs md:h-9"
+              className="h-11 gap-1.5 rounded-md text-[13px] font-semibold md:h-9"
               onClick={() => onCopyPlayerLink(display.publicToken || display.slug, display.id)}
             >
               {copiedId === display.id ? <Check size={13} /> : <Copy size={13} />}
@@ -175,7 +176,7 @@ export const DisplayCard: React.FC<DisplayCardProps> = ({
 
             <Button
               variant="shimmer"
-              className="h-11 gap-1.5 rounded-[var(--radius-sm)] text-xs md:h-9"
+              className="h-11 gap-1.5 rounded-md text-[13px] font-semibold md:h-9"
               onClick={() => onOpenPlayer(display.publicToken || display.slug)}
             >
               <ExternalLink size={13} /> Visualizar

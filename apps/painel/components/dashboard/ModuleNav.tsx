@@ -23,38 +23,27 @@ export const ModuleNav: React.FC<ModuleNavProps> = ({
   const isRouteActive = (route: string) => currentHash.startsWith(route);
 
   const getNavItemClass = (active: boolean) => {
-    return `flex items-center gap-2 px-1 h-[44px] font-bold text-[11.5px] uppercase tracking-wider transition-all whitespace-nowrap cursor-pointer border-b-[3px] rounded-none hover:bg-transparent ${
-      active ? 'text-[var(--th-accent)] border-[var(--th-accent)]' : 'text-slate-500 border-transparent hover:text-slate-300'
+    // Abas como os links da navbar do site: 15px, peso 600, sem caixa alta.
+    // Ativa = marca com o traço de 2px embaixo; as outras em tinta-2.
+    return `flex items-center gap-2 px-1 h-11 font-semibold text-[15px] transition-colors whitespace-nowrap cursor-pointer border-b-2 rounded-none hover:bg-transparent ${
+      active ? 'text-marca border-marca' : 'text-tinta-2 border-transparent hover:text-marca'
     }`;
   };
 
   return (
-    <div
-      className="flex gap-6 items-center relative z-10 w-full overflow-x-auto scrollbar-none px-4"
-      style={{
-        background: 'transparent',
-        borderBottom: '1px solid var(--color-border, rgba(255,255,255,0.07))',
-        height: '46px',
-        marginBottom: '24px'
-      }}
+    // O rótulo "MÓDULOS" antes das abas saiu: era um kicker em 9,5px que não
+    // dizia nada que as próprias abas não digam.
+    <nav
+      aria-label="Módulos do painel"
+      className="relative z-10 mb-6 flex h-12 w-full items-end gap-6 overflow-x-auto border-b border-borda px-1 scrollbar-none"
     >
-      <span
-        className="uppercase tracking-widest mr-2 hidden md:inline border-r pr-4 h-[18px] flex items-center shrink-0 font-bold"
-        style={{
-          fontSize: '9.5px',
-          color: 'var(--txt3)',
-          borderColor: 'var(--border)'
-        }}
-      >
-        MÓDULOS
-      </span>
 
       <Button
         variant="ghost"
         onClick={() => navigate('/scheduler')}
         className={getNavItemClass(isRouteActive('#/scheduler') || currentHash === '#/')}
       >
-        <Calendar size={14} className={isRouteActive('#/scheduler') || currentHash === '#/' ? 'text-[var(--th-accent)]' : ''} />
+        <Calendar size={14} className={isRouteActive('#/scheduler') || currentHash === '#/' ? 'text-marca' : ''} />
         <span className="hidden min-[681px]:inline">Central de Programação</span>
       </Button>
 
@@ -81,7 +70,7 @@ export const ModuleNav: React.FC<ModuleNavProps> = ({
         onClick={() => navigate('/reports')}
         className={getNavItemClass(isRouteActive('#/reports'))}
       >
-        <BarChart3 size={14} className={isRouteActive('#/reports') ? 'text-[var(--th-accent)]' : ''} />
+        <BarChart3 size={14} className={isRouteActive('#/reports') ? 'text-marca' : ''} />
         <span className="hidden min-[681px]:inline">Relatórios</span>
       </Button>
 
@@ -93,7 +82,7 @@ export const ModuleNav: React.FC<ModuleNavProps> = ({
         onClick={() => navigate('/conecte-sua-tv')}
         className={getNavItemClass(isRouteActive('#/conecte-sua-tv'))}
       >
-        <Tv size={14} className={isRouteActive('#/conecte-sua-tv') ? 'text-[var(--th-accent)]' : ''} />
+        <Tv size={14} className={isRouteActive('#/conecte-sua-tv') ? 'text-marca' : ''} />
         <span className="hidden min-[681px]:inline">Conectar TV</span>
       </Button>
 
@@ -104,7 +93,7 @@ export const ModuleNav: React.FC<ModuleNavProps> = ({
         onClick={() => navigate('/assinatura')}
         className={getNavItemClass(isRouteActive('#/assinatura'))}
       >
-        <CreditCard size={14} className={isRouteActive('#/assinatura') ? 'text-[var(--th-accent)]' : ''} />
+        <CreditCard size={14} className={isRouteActive('#/assinatura') ? 'text-marca' : ''} />
         <span className="hidden min-[681px]:inline">Assinatura</span>
       </Button>
 
@@ -118,6 +107,6 @@ export const ModuleNav: React.FC<ModuleNavProps> = ({
           <span className="hidden min-[681px]:inline">Config. E-mail</span>
         </Button>
       )}
-    </div>
+    </nav>
   );
 };

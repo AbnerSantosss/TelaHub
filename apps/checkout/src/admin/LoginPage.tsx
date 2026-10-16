@@ -17,6 +17,7 @@ import { Eye, EyeOff, Lock, ShieldAlert } from 'lucide-react';
 
 import { isApiError, setAdminToken } from '../lib/api';
 import { clearAdminSession, fetchSessions, login, setStoredUser } from './api';
+import { LogoHub } from '../checkout/primitives';
 import { Button, Field, inputClass } from './ui';
 
 interface LocationState {
@@ -103,7 +104,7 @@ const LoginPage = () => {
     <main className="flex min-h-screen flex-col items-center justify-center bg-app px-4 py-10">
       <div className="w-full max-w-sm">
         <div className="mb-6 text-center">
-          <p className="eyebrow mb-2">TelaHub</p>
+          <LogoHub className="mx-auto mb-3 size-10 text-marca" />
           <h1 className="text-2xl font-extrabold tracking-tight text-ink">Painel do funil</h1>
           <p className="mt-1.5 text-[13px] leading-relaxed text-ink-muted">
             Checkouts iniciados, abandonos e contratações.

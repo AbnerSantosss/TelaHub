@@ -17,7 +17,7 @@ export const DeviceChips: React.FC<DeviceChipsProps> = ({ devices, displays }) =
   // confere se a TV da recepção está no ar.
   return (
     <div className="flex items-center gap-1.5 flex-wrap">
-      <span className="text-[12px] uppercase tracking-widest font-bold text-slate-500 mr-0.5">TVs:</span>
+      <span className="text-sm font-semibold text-tinta-2 mr-0.5">TVs:</span>
       {linked.map(device => {
         const isOnline = device.online;
         const linkedDisplay = displays.find(d => d.id === device.display_id);
@@ -26,21 +26,19 @@ export const DeviceChips: React.FC<DeviceChipsProps> = ({ devices, displays }) =
           <div
             key={device.id}
             title={linkedDisplay ? `Exibindo: ${linkedDisplay.name}` : 'Sem conteúdo'}
-            className="flex items-center gap-1 px-2 py-0.5 rounded-md cursor-default"
-            style={{
-              background: 'rgba(255,255,255,0.04)',
-              border: '1px solid rgba(255,255,255,0.06)',
-            }}
+            className="flex items-center gap-1.5 rounded-md border border-borda bg-papel px-2.5 py-1 cursor-default"
           >
-            <div
-              className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-              style={{
-                background: isOnline ? '#22c55e' : '#475569',
-                boxShadow: isOnline ? '0 0 6px rgba(34,197,94,0.5)' : 'none',
-              }}
+            {/* No ar = ponto cheio verde; fora do ar = anel neutro. A forma muda
+                junto com a cor, para não depender só do verde. */}
+            <span
+              aria-hidden="true"
+              className={`size-2 rounded-full flex-shrink-0 ${
+                isOnline ? 'bg-ok' : 'border border-borda-3 bg-papel'
+              }`}
             />
-            <Tv size={12} className="text-slate-400 flex-shrink-0" />
-            <span className="text-[12px] font-medium text-slate-300 leading-none max-w-[110px] truncate">
+            <span className="sr-only">{isOnline ? 'No ar:' : 'Fora do ar:'}</span>
+            <Tv size={14} className="text-tinta-3 flex-shrink-0" aria-hidden="true" />
+            <span className="text-[13px] font-medium text-tinta leading-none max-w-[140px] truncate">
               {device.name || 'TV'}
             </span>
           </div>

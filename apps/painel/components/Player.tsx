@@ -550,13 +550,13 @@ const Player: React.FC = () => {
             <div className="w-24 h-24 bg-gradient-to-br from-slate-900 to-slate-950 rounded-2xl flex items-center justify-center border border-slate-800 shadow-[0_0_40px_rgba(34,211,238,0.15)] relative group p-4">
                <div className="absolute inset-0 bg-cyan-500/10 rounded-2xl blur-xl animate-pulse"></div>
                <img 
-                 src="/logo.png" 
+                 src={`${import.meta.env.BASE_URL}logo.png`} 
                  alt="Logo" 
-                 className="w-full h-full object-contain relative z-10 drop-shadow-[0_0_10px_rgba(34,211,238,0.5)]"
+                 className="w-full h-full object-contain relative z-10"
                />
             </div>
-            <h1 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-200 to-slate-400 tracking-tight">
-              Tela<span className="text-[#00D8F6]">Hub</span>
+            <h1 className="text-3xl font-black tracking-tight" style={{ color: 'var(--noite-titulo)' }}>
+              Tela<span style={{ color: 'var(--luz)' }}>Hub</span>
             </h1>
           </div>
           

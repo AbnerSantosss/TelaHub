@@ -115,9 +115,9 @@ const FunilCompleto = ({ funnel }: { funnel: PlatformFunnel }) => {
                   style={{ width: `${Math.max(step.count === 0 ? 0 : 1.5, pct)}%` }}
                 />
               </div>
-              {step.hint && <p className="mt-1 text-[11px] text-ink-subtle">{step.hint}</p>}
+              {step.hint && <p className="mt-1 text-xs text-ink-subtle">{step.hint}</p>}
               {previous !== null && dropped > 0 && (
-                <p className="mt-1 text-[11px] font-medium text-ink-subtle">
+                <p className="mt-1 text-xs font-medium text-ink-subtle">
                   {formatNumber(dropped)} não chegaram até aqui
                 </p>
               )}
@@ -141,7 +141,7 @@ const FunilCompleto = ({ funnel }: { funnel: PlatformFunnel }) => {
                 {valor === null ? '-' : formatPercent(valor)}
               </dd>
               {valor === null && (
-                <p className="mt-1 text-[11px] leading-snug text-ink-subtle">
+                <p className="mt-1 text-xs leading-snug text-ink-subtle">
                   Sem denominador no período. Não é 0%.
                 </p>
               )}
@@ -151,7 +151,7 @@ const FunilCompleto = ({ funnel }: { funnel: PlatformFunnel }) => {
       </dl>
 
       <div className="rounded-xl border border-line bg-app/60 p-3.5">
-        <p className="eyebrow mb-2.5">Saíram pelo caminho</p>
+        <p className="rotulo mb-2.5">Saíram pelo caminho</p>
         <dl className="grid grid-cols-2 gap-3">
           {saidas.map((step) => (
             <div key={step.key}>

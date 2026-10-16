@@ -77,7 +77,7 @@ jobs:
           fi
 
           if [ "$BUILD_ALL" = "1" ]; then
-            CHANGED="apps/api/ apps/painel/ apps/checkout/ apps/site/"
+            CHANGED=$(printf '%s\n' apps/api/ apps/painel/ apps/checkout/ apps/site/)
             echo "Buildando tudo (evento=$EVENT)."
           else
             CHANGED=$(git diff --name-only "$BEFORE" "$AFTER")
@@ -92,9 +92,11 @@ jobs:
           }
 
           echo "$CHANGED" | grep -q "^apps/api/"      && add '{"app":"api","image":"telahub-backend","context":"apps/api"}'      || true
-          echo "$CHANGED" | grep -q "^apps/painel/"   && add '{"app":"painel","image":"telahub-frontend","context":"apps/painel"}' || true
-          echo "$CHANGED" | grep -q "^apps/checkout/" && add '{"app":"checkout","image":"telahub-checkout","context":"apps/checkout"}' || true
-          echo "$CHANGED" | grep -q "^apps/site/"     && add '{"app":"site","image":"telahub-site","context":"apps/site"}'     || true
+          # Painel, checkout e site importam packages/marca (tokens, logo): o
+          # contexto do build é a raiz e mudança ali rebuilda os três.
+          echo "$CHANGED" | grep -qE "^(apps/painel/|packages/)"   && add '{"app":"painel","image":"telahub-frontend","context":".","dockerfile":"apps/painel/Dockerfile"}' || true
+          echo "$CHANGED" | grep -qE "^(apps/checkout/|packages/)" && add '{"app":"checkout","image":"telahub-checkout","context":".","dockerfile":"apps/checkout/Dockerfile"}' || true
+          echo "$CHANGED" | grep -qE "^(apps/site/|packages/)"     && add '{"app":"site","image":"telahub-site","context":".","dockerfile":"apps/site/Dockerfile"}'     || true
 
           if [ -z "$ENTRIES" ]; then
             echo "any=false" >> "$GITHUB_OUTPUT"
@@ -135,10 +137,14 @@ jobs:
       #
       # ⚠️ ESTES VALORES FICAM DENTRO DO BUNDLE. `VITE_*` é resolvido em tempo
       # de BUILD: domínio errado aqui não se conserta no Portainer, só
-      # rebuildando. Por isso eles precisam ser os MESMOS dos composes:
-      #   site     → https://devtelahublandingpage.proxserverabner.site  (apps/site/docker-compose.prod.yml)
-      #   painel   → https://devtelahubpainel.proxserverabner.site       (docker-compose.prod.yml)
-      #   checkout → https://devtelahubcheckout.proxserverabner.site     (apps/checkout/docker-compose.prod.yml)
+      # rebuildando.
+      #
+      # Domínio único (2026-10-15): a jornada inteira vive em
+      # https://devtelahub.proxserverabner.site (site em /, painel em /app/,
+      # checkout em /checkout/, api em /api/), servida pelo apps/gateway, que o
+      # docker-compose.prod.yml builda na VPS. Estas imagens separadas só servem
+      # os hosts antigos enquanto eles não forem repontados; por isso os links
+      # usam o domínio único absoluto, que funciona nos dois casos.
       #
       # Convenção de 25/09/2026: `telahub.proxserverabner.site` é o TelaHub
       # principal (stack antiga). Esta versão usa só nomes `devtelahub*`.
@@ -162,14 +168,14 @@ jobs:
             case "${{ matrix.app }}" in
               painel)
                 echo "VITE_API_URL=/api"
-                echo "VITE_SITE_URL=https://devtelahublandingpage.proxserverabner.site"
-                echo "VITE_CHECKOUT_URL=https://devtelahubcheckout.proxserverabner.site"
+                echo "VITE_SITE_URL=https://devtelahub.proxserverabner.site"
+                echo "VITE_CHECKOUT_URL=https://devtelahub.proxserverabner.site/checkout"
                 ;;
               site)
-                echo "VITE_CHECKOUT_URL=https://devtelahubcheckout.proxserverabner.site"
-                echo "VITE_APP_URL=https://devtelahubpainel.proxserverabner.site"
-                echo "VITE_API_URL=https://devtelahubpainel.proxserverabner.site/api"
-                echo "PLANS_API_URL=https://devtelahubpainel.proxserverabner.site/api"
+                echo "VITE_CHECKOUT_URL=https://devtelahub.proxserverabner.site/checkout"
+                echo "VITE_APP_URL=https://devtelahub.proxserverabner.site/app"
+                echo "VITE_API_URL=https://devtelahub.proxserverabner.site/api"
+                echo "PLANS_API_URL=https://devtelahub.proxserverabner.site/api"
                 ;;
               *)
                 echo ""
@@ -182,6 +188,8 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ${{ matrix.context }}
+          # Vazio para a api (Dockerfile na própria pasta): a action omite `file`.
+          file: ${{ matrix.dockerfile }}
           push: true
           tags: |
             ${{ env.REGISTRY }}/${{ env.OWNER }}/${{ matrix.image }}:latest

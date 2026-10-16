@@ -185,7 +185,7 @@ const SessionCard = ({
   </li>
 );
 
-const th = 'px-4 py-2.5 text-left text-[11px] font-bold tracking-[0.1em] text-ink-subtle uppercase';
+const th = 'px-4 py-2.5 text-left text-xs font-semibold text-ink-subtle';
 
 const SessionsPage = () => {
   const [params, setParams] = useSearchParams();
@@ -236,7 +236,6 @@ const SessionsPage = () => {
   return (
     <div className="space-y-5">
       <PageHeader
-        eyebrow="Funil de checkout"
         title="Checkouts"
         subtitle={
           <>
@@ -255,7 +254,7 @@ const SessionsPage = () => {
           onClick={() => updateParams({ status: undefined })}
           className={cx(
             'rounded-full border px-3 py-1.5 text-[13px] font-semibold transition-colors',
-            !status ? 'border-nav bg-nav text-white' : 'border-line bg-surface text-ink-muted hover:bg-app'
+            !status ? 'border-marca bg-marca text-white' : 'border-line bg-surface text-ink-muted hover:bg-app'
           )}
         >
           Todos

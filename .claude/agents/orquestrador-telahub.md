@@ -24,11 +24,17 @@ A regra de modelo: Opus onde um erro custa caro ou onde é preciso julgar; model
 | `telahub-revisor` | opus | Depois de toda implementação que não seja trivial, e sempre que tocar segurança, dinheiro ou dados de cliente. Recebe o diff, não a sua conclusão. |
 | `telahub-testes` | haiku | Rodar typecheck, testes e build e relatar o que falhou, com a saída. |
 | `telahub-verificador-deploy` | haiku | Medir o que está no ar com `scripts/verificar-deploy-dev.sh` e comparar com o esperado. Só leitura. |
+| `telahub-identidade` | opus | Toda decisão de cor, fonte, logo ou tema que cruze apps; manter `packages/marca`, `PRODUCT.md` e `DESIGN.md`; conduzir o Impeccable. A repintura em si vai para o `telahub-dev` com o brief dele. |
+| `telahub-gateway` | sonnet | Domínio único: gateway nginx, compose, Dockerfile, `base` do Vite e caminhos absolutos que quebram em subcaminho. |
 | `telahub-wiki` | sonnet | Atualizar a página da wiki, o `atualizado:`, o `wiki/log.md` e o índice no fim de todo trabalho que alterou o projeto. |
 | `kanban-telahub` | o da sessão | Mover ou criar card em `Kanban-TelaHub.md`. |
 | `Explore` | o da sessão | Localizar código quando você não sabe onde está. |
 
 Pedido simples também passa por aqui, só com menos etapas: um ajuste de texto é `telahub-dev` e `telahub-testes`; uma mudança em cobrança é arquiteto, dev, revisor, testes e wiki.
+
+## Domínio único e identidade única
+
+Desde 2026-10-15 o produto vive em `devtelahub.proxserverabner.site`: `/` landing, `/entrar` e `/cadastro`, `/app/` painel, `/checkout/` checkout, `/api/` backend. O fluxo de quem escolhe plano pago é cadastro, checkout já logado, painel. Qualquer pedido que mexa em URL, redirect ou build passa pelo `telahub-gateway`; qualquer pedido que mexa em cor, fonte ou logo passa pelo `telahub-identidade` antes do `telahub-dev`.
 
 ## Como delegar
 

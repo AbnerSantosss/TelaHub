@@ -86,11 +86,11 @@ const PlanOption = ({
   const labels = plan.features.map(featureLabel).filter((label): label is string => !!label);
 
   return (
+    // Linha de uma lista dividida por borda fina, e não um cartão dentro do
+    // cartão do passo. A escolhida ganha fundo tingido; o rádio já a marca.
     <label
-      className={`flex cursor-pointer gap-3 rounded-xl border p-3.5 transition-colors sm:p-4 ${
-        selected
-          ? 'border-accent bg-accent/6 ring-1 ring-accent'
-          : 'border-line bg-surface hover-fine:border-ink-subtle'
+      className={`flex cursor-pointer gap-3 px-3.5 py-3.5 transition-colors sm:px-4 ${
+        selected ? 'bg-accent/6' : 'hover-fine:bg-app'
       }`}
     >
       <input
@@ -111,14 +111,14 @@ const PlanOption = ({
         </span>
 
         {plan.minScreens > 1 ? (
-          <span className="mt-1.5 inline-flex items-center gap-1.5 rounded-md bg-warning/12 px-2 py-1 text-[11px] font-bold text-warning">
+          <span className="mt-1.5 inline-flex items-center gap-1.5 rounded-md bg-warning/12 px-2 py-1 text-xs font-bold text-warning">
             <AlertCircle aria-hidden="true" size={12} />
             Cobrança mínima de {pluralScreens(plan.minScreens)}
           </span>
         ) : null}
 
         {plan.free ? (
-          <span className="mt-1.5 block text-xs leading-relaxed text-ink-muted">
+          <span className="mt-1.5 block text-base sm:text-xs leading-relaxed text-ink-muted">
             1 tela para sempre, sem prazo e sem cartão.
           </span>
         ) : null}
@@ -126,7 +126,7 @@ const PlanOption = ({
         {labels.length > 0 ? (
           <span className="mt-2 flex flex-wrap gap-x-3 gap-y-1">
             {labels.map((label) => (
-              <span key={label} className="flex items-center gap-1 text-[11px] text-ink-muted">
+              <span key={label} className="flex items-center gap-1 text-base sm:text-xs text-ink-muted">
                 <Check aria-hidden="true" size={12} className="text-success" />
                 {label}
               </span>
@@ -164,10 +164,8 @@ const IntervalOption = ({
   onSelect: () => void;
 }) => (
   <label
-    className={`flex cursor-pointer gap-2.5 rounded-xl border p-3.5 transition-colors ${
-      selected
-        ? 'border-accent bg-accent/6 ring-1 ring-accent'
-        : 'border-line bg-surface hover-fine:border-ink-subtle'
+    className={`flex cursor-pointer gap-2.5 px-3.5 py-3.5 transition-colors ${
+      selected ? 'bg-accent/6' : 'hover-fine:bg-app'
     }`}
   >
     <input
@@ -182,7 +180,7 @@ const IntervalOption = ({
       <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
         <span className="text-sm font-extrabold text-ink">{label}</span>
         {badge ? (
-          <span className="rounded-md bg-success/14 px-1.5 py-0.5 text-[10px] font-extrabold uppercase tracking-[0.06em] text-success">
+          <span className="rounded-md bg-success/14 px-1.5 py-0.5 text-xs font-bold text-success">
             {badge}
           </span>
         ) : null}
@@ -190,7 +188,7 @@ const IntervalOption = ({
       <span className="money mt-1 block text-sm font-bold text-ink">
         {formatBRL(unitCents)} <span className="text-xs font-semibold text-ink-muted">por tela/mês</span>
       </span>
-      <span className="mt-1 block text-[11px] leading-relaxed text-ink-muted">{note}</span>
+      <span className="mt-1 block text-base sm:text-xs leading-relaxed text-ink-muted">{note}</span>
     </span>
   </label>
 );
@@ -239,8 +237,8 @@ export const SubscriptionStep = ({ checkout }: { checkout: CheckoutController })
       className="flex flex-col gap-4"
     >
       <fieldset className="min-w-0">
-        <legend className="eyebrow mb-2">Escolha o plano</legend>
-        <div className="flex flex-col gap-2.5">
+        <legend className="rotulo mb-2">Escolha o plano</legend>
+        <div className="flex flex-col divide-y divide-line border-y border-line">
           {plans.map((plan) => (
             <PlanOption
               key={plan.code}
@@ -258,9 +256,9 @@ export const SubscriptionStep = ({ checkout }: { checkout: CheckoutController })
           o bloco inteiro some — melhor do que um controle desabilitado que a
           pessoa tenta clicar, e muito melhor do que anunciar "economize 0%". */}
       {annualAvailable && selectedPlan ? (
-        <fieldset className="min-w-0 border-t border-line pt-4">
-          <legend className="eyebrow mb-2">Como você quer pagar</legend>
-          <div className="grid gap-2.5 sm:grid-cols-2">
+        <fieldset className="min-w-0">
+          <legend className="rotulo mb-2">Como você quer pagar</legend>
+          <div className="grid divide-y divide-line border-y border-line sm:grid-cols-2 sm:divide-x sm:divide-y-0">
             <IntervalOption
               interval="yearly"
               label="Anual"
@@ -296,7 +294,7 @@ export const SubscriptionStep = ({ checkout }: { checkout: CheckoutController })
       ) : null}
 
       <div className="flex flex-col gap-2 border-t border-line pt-4">
-        <label htmlFor="checkout-screens" className="eyebrow">
+        <label htmlFor="checkout-screens" className="rotulo">
           Quantas telas
         </label>
 
@@ -339,7 +337,7 @@ export const SubscriptionStep = ({ checkout }: { checkout: CheckoutController })
             <Plus aria-hidden="true" size={16} />
           </button>
 
-          <span id="checkout-screens-hint" className="text-xs leading-snug text-ink-subtle">
+          <span id="checkout-screens-hint" className="text-base sm:text-xs leading-snug text-ink-subtle">
             {screensLocked
               ? 'O plano de entrada é de 1 tela. Para mais telas, escolha um plano pago.'
               : 'Telas que vão exibir conteúdo ao mesmo tempo.'}
@@ -363,7 +361,7 @@ export const SubscriptionStep = ({ checkout }: { checkout: CheckoutController })
           SERVIDOR. Duas contas do mesmo total em telas diferentes é como um
           arredondamento vira uma reclamação. */}
       {paid && selectedPlan ? (
-        <div className="flex flex-col gap-1.5 rounded-lg bg-app px-3.5 py-3">
+        <div className="flex flex-col gap-1.5 border-t border-line pt-4">
           <p className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-sm text-ink-muted">
             <span className="money font-bold text-ink">{billed}</span>
             <span>{billed === 1 ? 'tela cobrada' : 'telas cobradas'} ×</span>
@@ -376,7 +374,7 @@ export const SubscriptionStep = ({ checkout }: { checkout: CheckoutController })
             <p className="flex flex-wrap items-baseline gap-x-2 gap-y-1 border-t border-line pt-1.5 text-sm text-ink-muted">
               <span>Total do ano:</span>
               <span className="money font-extrabold text-cta">{formatBRL(yearCents)}</span>
-              <span className="text-xs">
+              <span className="text-base sm:text-xs">
                 (12 × {formatBRL(totalCents)}). Esse é o valor da contratação anual.
               </span>
             </p>
@@ -400,7 +398,7 @@ export const SubscriptionStep = ({ checkout }: { checkout: CheckoutController })
       ) : null}
 
       {planError ? (
-        <p role="alert" className="flex items-center gap-1.5 text-xs font-semibold text-danger">
+        <p role="alert" className="flex items-center gap-1.5 text-base sm:text-xs font-semibold text-danger">
           <AlertCircle aria-hidden="true" size={14} />
           {planError}
         </p>

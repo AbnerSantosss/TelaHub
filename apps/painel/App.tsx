@@ -48,7 +48,7 @@ const VendasRedirect: React.FC = () => {
   }, []);
 
   return (
-    <div className="flex h-screen w-full items-center justify-center bg-slate-950 text-slate-400">
+    <div className="flex h-screen w-full items-center justify-center bg-papel-2 text-tinta-3">
       <Loader2 className="mr-2 h-5 w-5 animate-spin" />
       Redirecionando para os planos…
     </div>
@@ -115,8 +115,8 @@ const ProtectedRoute = ({ children }: { children?: React.ReactNode }) => {
 
   if (loading) {
     return (
-      <div className="h-screen w-screen bg-gray-900 flex items-center justify-center">
-        <Loader2 className="animate-spin text-sky-500" size={32} />
+      <div className="h-screen w-screen bg-papel-2 flex items-center justify-center">
+        <Loader2 className="animate-spin text-marca" size={32} />
       </div>
     );
   }
@@ -143,14 +143,14 @@ const App: React.FC = () => {
     // o prefers-reduced-motion do sistema (transform/layout viram instantâneos).
     <MotionConfig reducedMotion="user">
     <HashRouter>
-      <div className="min-h-screen bg-transparent text-slate-100 selection:bg-sky-500/30 selection:text-sky-200">
+      <div className="min-h-screen bg-transparent text-tinta">
         {/* Grade com brilho atrás de tudo (fica fora do Player e das telas claras) */}
         <GridGlowBackground />
-        <Toaster closeButton theme="dark" position="top-right" />
+        <Toaster closeButton theme="light" position="top-right" />
         <Suspense fallback={
-          <div className="h-screen w-screen bg-slate-950 flex flex-col items-center justify-center gap-4">
-            <Loader2 className="animate-spin text-[var(--th-accent)]" size={32} />
-            <p className="text-xs uppercase tracking-widest font-bold text-slate-500">Carregando...</p>
+          <div className="h-screen w-screen bg-papel-2 flex flex-col items-center justify-center gap-4">
+            <Loader2 className="animate-spin text-marca" size={32} />
+            <p className="text-sm font-medium text-tinta-3">Carregando…</p>
           </div>
         }>
           <Routes>

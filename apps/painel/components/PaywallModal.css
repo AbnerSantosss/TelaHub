@@ -156,7 +156,7 @@
 /* ─── Erro do servidor ────────────────────────────────────────────────────── */
 
 .pwl-erro {
-  background: #fdecea;
+  background: var(--danger-fundo-solido);
   color: var(--pwl-erro);
   border-radius: 12px;
   padding: 12px 14px;

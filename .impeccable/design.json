@@ -1,0 +1,786 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-15T23:51:31.081Z",
+  "title": "Design System: TelaHub",
+  "extensions": {
+    "colorMeta": {
+      "papel": {
+        "role": "neutral",
+        "displayName": "Papel",
+        "canonical": "#ffffff",
+        "oklch": "oklch(100.0% 0.000 89.9)",
+        "cssVar": "--papel",
+        "tonalRamp": [
+          "oklch(15% 0.000 89.9)",
+          "oklch(25% 0.000 89.9)",
+          "oklch(35% 0.000 89.9)",
+          "oklch(45% 0.000 89.9)",
+          "oklch(55% 0.000 89.9)",
+          "oklch(65% 0.000 89.9)",
+          "oklch(80% 0.000 89.9)",
+          "oklch(95% 0.000 89.9)"
+        ]
+      },
+      "papel-2": {
+        "role": "neutral",
+        "displayName": "Papel Frio",
+        "canonical": "#f4f7fb",
+        "oklch": "oklch(97.5% 0.006 255.5)",
+        "cssVar": "--papel-2",
+        "tonalRamp": [
+          "oklch(15% 0.006 255.5)",
+          "oklch(25% 0.006 255.5)",
+          "oklch(35% 0.006 255.5)",
+          "oklch(45% 0.006 255.5)",
+          "oklch(55% 0.006 255.5)",
+          "oklch(65% 0.006 255.5)",
+          "oklch(80% 0.006 255.5)",
+          "oklch(95% 0.006 255.5)"
+        ]
+      },
+      "papel-3": {
+        "role": "neutral",
+        "displayName": "Papel Fechado",
+        "canonical": "#e9eff7",
+        "oklch": "oklch(95.0% 0.013 255.5)",
+        "cssVar": "--papel-3",
+        "tonalRamp": [
+          "oklch(15% 0.013 255.5)",
+          "oklch(25% 0.013 255.5)",
+          "oklch(35% 0.013 255.5)",
+          "oklch(45% 0.013 255.5)",
+          "oklch(55% 0.013 255.5)",
+          "oklch(65% 0.013 255.5)",
+          "oklch(80% 0.013 255.5)",
+          "oklch(95% 0.013 255.5)"
+        ]
+      },
+      "tinta": {
+        "role": "neutral",
+        "displayName": "Tinta",
+        "canonical": "#0a1223",
+        "oklch": "oklch(18.4% 0.037 264.0)",
+        "cssVar": "--tinta",
+        "tonalRamp": [
+          "oklch(15% 0.037 264.0)",
+          "oklch(25% 0.037 264.0)",
+          "oklch(35% 0.037 264.0)",
+          "oklch(45% 0.037 264.0)",
+          "oklch(55% 0.037 264.0)",
+          "oklch(65% 0.037 264.0)",
+          "oklch(80% 0.037 264.0)",
+          "oklch(95% 0.037 264.0)"
+        ]
+      },
+      "tinta-2": {
+        "role": "neutral",
+        "displayName": "Tinta Média",
+        "canonical": "#33415c",
+        "oklch": "oklch(37.5% 0.050 263.1)",
+        "cssVar": "--tinta-2",
+        "tonalRamp": [
+          "oklch(15% 0.050 263.1)",
+          "oklch(25% 0.050 263.1)",
+          "oklch(35% 0.050 263.1)",
+          "oklch(45% 0.050 263.1)",
+          "oklch(55% 0.050 263.1)",
+          "oklch(65% 0.050 263.1)",
+          "oklch(80% 0.050 263.1)",
+          "oklch(95% 0.050 263.1)"
+        ]
+      },
+      "tinta-3": {
+        "role": "neutral",
+        "displayName": "Tinta Discreta",
+        "canonical": "#55637d",
+        "oklch": "oklch(49.8% 0.045 262.7)",
+        "cssVar": "--tinta-3",
+        "tonalRamp": [
+          "oklch(15% 0.045 262.7)",
+          "oklch(25% 0.045 262.7)",
+          "oklch(35% 0.045 262.7)",
+          "oklch(45% 0.045 262.7)",
+          "oklch(55% 0.045 262.7)",
+          "oklch(65% 0.045 262.7)",
+          "oklch(80% 0.045 262.7)",
+          "oklch(95% 0.045 262.7)"
+        ]
+      },
+      "marca": {
+        "role": "primary",
+        "displayName": "Azul Vitrine",
+        "canonical": "#0369a1",
+        "oklch": "oklch(50.0% 0.119 242.7)",
+        "cssVar": "--marca",
+        "tonalRamp": [
+          "oklch(15% 0.119 242.7)",
+          "oklch(25% 0.119 242.7)",
+          "oklch(35% 0.119 242.7)",
+          "oklch(45% 0.119 242.7)",
+          "oklch(55% 0.119 242.7)",
+          "oklch(65% 0.119 242.7)",
+          "oklch(80% 0.119 242.7)",
+          "oklch(95% 0.119 242.7)"
+        ]
+      },
+      "marca-hover": {
+        "role": "primary",
+        "displayName": "Azul Vitrine Fechado",
+        "canonical": "#025584",
+        "oklch": "oklch(43.2% 0.103 243.0)",
+        "cssVar": "--marca-hover",
+        "tonalRamp": [
+          "oklch(15% 0.103 243.0)",
+          "oklch(25% 0.103 243.0)",
+          "oklch(35% 0.103 243.0)",
+          "oklch(45% 0.103 243.0)",
+          "oklch(55% 0.103 243.0)",
+          "oklch(65% 0.103 243.0)",
+          "oklch(80% 0.103 243.0)",
+          "oklch(95% 0.103 243.0)"
+        ]
+      },
+      "marca-fundo": {
+        "role": "primary",
+        "displayName": "Névoa da Marca",
+        "canonical": "#e6f0f7",
+        "oklch": "oklch(95.0% 0.014 238.0)",
+        "cssVar": "--marca-fundo",
+        "tonalRamp": [
+          "oklch(15% 0.014 238.0)",
+          "oklch(25% 0.014 238.0)",
+          "oklch(35% 0.014 238.0)",
+          "oklch(45% 0.014 238.0)",
+          "oklch(55% 0.014 238.0)",
+          "oklch(65% 0.014 238.0)",
+          "oklch(80% 0.014 238.0)",
+          "oklch(95% 0.014 238.0)"
+        ]
+      },
+      "marca-borda": {
+        "role": "primary",
+        "displayName": "Contorno da Marca",
+        "canonical": "#bfe0f2",
+        "oklch": "oklch(88.8% 0.043 231.8)",
+        "cssVar": "--marca-borda",
+        "tonalRamp": [
+          "oklch(15% 0.043 231.8)",
+          "oklch(25% 0.043 231.8)",
+          "oklch(35% 0.043 231.8)",
+          "oklch(45% 0.043 231.8)",
+          "oklch(55% 0.043 231.8)",
+          "oklch(65% 0.043 231.8)",
+          "oklch(80% 0.043 231.8)",
+          "oklch(95% 0.043 231.8)"
+        ]
+      },
+      "noite": {
+        "role": "neutral",
+        "displayName": "Noite",
+        "canonical": "#071426",
+        "oklch": "oklch(19.0% 0.041 256.5)",
+        "cssVar": "--noite",
+        "tonalRamp": [
+          "oklch(15% 0.041 256.5)",
+          "oklch(25% 0.041 256.5)",
+          "oklch(35% 0.041 256.5)",
+          "oklch(45% 0.041 256.5)",
+          "oklch(55% 0.041 256.5)",
+          "oklch(65% 0.041 256.5)",
+          "oklch(80% 0.041 256.5)",
+          "oklch(95% 0.041 256.5)"
+        ]
+      },
+      "noite-2": {
+        "role": "neutral",
+        "displayName": "Noite Alta",
+        "canonical": "#0c1e36",
+        "oklch": "oklch(23.4% 0.052 256.3)",
+        "cssVar": "--noite-2",
+        "tonalRamp": [
+          "oklch(15% 0.052 256.3)",
+          "oklch(25% 0.052 256.3)",
+          "oklch(35% 0.052 256.3)",
+          "oklch(45% 0.052 256.3)",
+          "oklch(55% 0.052 256.3)",
+          "oklch(65% 0.052 256.3)",
+          "oklch(80% 0.052 256.3)",
+          "oklch(95% 0.052 256.3)"
+        ]
+      },
+      "noite-texto": {
+        "role": "neutral",
+        "displayName": "Texto Noturno",
+        "canonical": "#c5d3e6",
+        "oklch": "oklch(86.2% 0.030 256.0)",
+        "cssVar": "--noite-texto",
+        "tonalRamp": [
+          "oklch(15% 0.030 256.0)",
+          "oklch(25% 0.030 256.0)",
+          "oklch(35% 0.030 256.0)",
+          "oklch(45% 0.030 256.0)",
+          "oklch(55% 0.030 256.0)",
+          "oklch(65% 0.030 256.0)",
+          "oklch(80% 0.030 256.0)",
+          "oklch(95% 0.030 256.0)"
+        ]
+      },
+      "noite-titulo": {
+        "role": "neutral",
+        "displayName": "Título Noturno",
+        "canonical": "#e9f0fa",
+        "oklch": "oklch(95.3% 0.015 257.2)",
+        "cssVar": "--noite-titulo",
+        "tonalRamp": [
+          "oklch(15% 0.015 257.2)",
+          "oklch(25% 0.015 257.2)",
+          "oklch(35% 0.015 257.2)",
+          "oklch(45% 0.015 257.2)",
+          "oklch(55% 0.015 257.2)",
+          "oklch(65% 0.015 257.2)",
+          "oklch(80% 0.015 257.2)",
+          "oklch(95% 0.015 257.2)"
+        ]
+      },
+      "luz": {
+        "role": "secondary",
+        "displayName": "Luz",
+        "canonical": "#38bdf8",
+        "oklch": "oklch(75.4% 0.139 232.7)",
+        "cssVar": "--luz",
+        "tonalRamp": [
+          "oklch(15% 0.139 232.7)",
+          "oklch(25% 0.139 232.7)",
+          "oklch(35% 0.139 232.7)",
+          "oklch(45% 0.139 232.7)",
+          "oklch(55% 0.139 232.7)",
+          "oklch(65% 0.139 232.7)",
+          "oklch(80% 0.139 232.7)",
+          "oklch(95% 0.139 232.7)"
+        ]
+      },
+      "luz-2": {
+        "role": "secondary",
+        "displayName": "Luz Clara",
+        "canonical": "#7dd3fc",
+        "oklch": "oklch(82.8% 0.101 230.3)",
+        "cssVar": "--luz-2",
+        "tonalRamp": [
+          "oklch(15% 0.101 230.3)",
+          "oklch(25% 0.101 230.3)",
+          "oklch(35% 0.101 230.3)",
+          "oklch(45% 0.101 230.3)",
+          "oklch(55% 0.101 230.3)",
+          "oklch(65% 0.101 230.3)",
+          "oklch(80% 0.101 230.3)",
+          "oklch(95% 0.101 230.3)"
+        ]
+      },
+      "borda": {
+        "role": "neutral",
+        "displayName": "Borda",
+        "canonical": "#dbe4ef",
+        "oklch": "oklch(91.5% 0.018 253.3)",
+        "cssVar": "--borda",
+        "tonalRamp": [
+          "oklch(15% 0.018 253.3)",
+          "oklch(25% 0.018 253.3)",
+          "oklch(35% 0.018 253.3)",
+          "oklch(45% 0.018 253.3)",
+          "oklch(55% 0.018 253.3)",
+          "oklch(65% 0.018 253.3)",
+          "oklch(80% 0.018 253.3)",
+          "oklch(95% 0.018 253.3)"
+        ]
+      },
+      "borda-2": {
+        "role": "neutral",
+        "displayName": "Borda Média",
+        "canonical": "#c9d5e3",
+        "oklch": "oklch(86.8% 0.023 252.2)",
+        "cssVar": "--borda-2",
+        "tonalRamp": [
+          "oklch(15% 0.023 252.2)",
+          "oklch(25% 0.023 252.2)",
+          "oklch(35% 0.023 252.2)",
+          "oklch(45% 0.023 252.2)",
+          "oklch(55% 0.023 252.2)",
+          "oklch(65% 0.023 252.2)",
+          "oklch(80% 0.023 252.2)",
+          "oklch(95% 0.023 252.2)"
+        ]
+      },
+      "borda-3": {
+        "role": "neutral",
+        "displayName": "Borda de Campo",
+        "canonical": "#7d8ca0",
+        "oklch": "oklch(63.5% 0.035 255.6)",
+        "cssVar": "--borda-3",
+        "tonalRamp": [
+          "oklch(15% 0.035 255.6)",
+          "oklch(25% 0.035 255.6)",
+          "oklch(35% 0.035 255.6)",
+          "oklch(45% 0.035 255.6)",
+          "oklch(55% 0.035 255.6)",
+          "oklch(65% 0.035 255.6)",
+          "oklch(80% 0.035 255.6)",
+          "oklch(95% 0.035 255.6)"
+        ]
+      },
+      "ok": {
+        "role": "status",
+        "displayName": "Verde No Ar",
+        "canonical": "#0f7a5a",
+        "oklch": "oklch(51.6% 0.103 166.1)",
+        "cssVar": "--ok",
+        "tonalRamp": [
+          "oklch(15% 0.103 166.1)",
+          "oklch(25% 0.103 166.1)",
+          "oklch(35% 0.103 166.1)",
+          "oklch(45% 0.103 166.1)",
+          "oklch(55% 0.103 166.1)",
+          "oklch(65% 0.103 166.1)",
+          "oklch(80% 0.103 166.1)",
+          "oklch(95% 0.103 166.1)"
+        ]
+      },
+      "warn": {
+        "role": "status",
+        "displayName": "Âmbar Aviso",
+        "canonical": "#a35a06",
+        "oklch": "oklch(54.2% 0.126 59.5)",
+        "cssVar": "--warn",
+        "tonalRamp": [
+          "oklch(15% 0.126 59.5)",
+          "oklch(25% 0.126 59.5)",
+          "oklch(35% 0.126 59.5)",
+          "oklch(45% 0.126 59.5)",
+          "oklch(55% 0.126 59.5)",
+          "oklch(65% 0.126 59.5)",
+          "oklch(80% 0.126 59.5)",
+          "oklch(95% 0.126 59.5)"
+        ]
+      },
+      "danger": {
+        "role": "status",
+        "displayName": "Vermelho Erro",
+        "canonical": "#b3261e",
+        "oklch": "oklch(50.1% 0.178 28.7)",
+        "cssVar": "--danger",
+        "tonalRamp": [
+          "oklch(15% 0.150 28.7)",
+          "oklch(25% 0.150 28.7)",
+          "oklch(35% 0.150 28.7)",
+          "oklch(45% 0.150 28.7)",
+          "oklch(55% 0.150 28.7)",
+          "oklch(65% 0.150 28.7)",
+          "oklch(80% 0.150 28.7)",
+          "oklch(95% 0.150 28.7)"
+        ]
+      },
+      "ok-fundo-solido": {
+        "role": "status",
+        "displayName": "Fundo No Ar",
+        "canonical": "#e7f2ee",
+        "oklch": "oklch(95.2% 0.013 172.4)",
+        "cssVar": "--ok-fundo-solido",
+        "tonalRamp": [
+          "oklch(15% 0.013 172.4)",
+          "oklch(25% 0.013 172.4)",
+          "oklch(35% 0.013 172.4)",
+          "oklch(45% 0.013 172.4)",
+          "oklch(55% 0.013 172.4)",
+          "oklch(65% 0.013 172.4)",
+          "oklch(80% 0.013 172.4)",
+          "oklch(95% 0.013 172.4)"
+        ]
+      },
+      "warn-fundo-solido": {
+        "role": "status",
+        "displayName": "Fundo Aviso",
+        "canonical": "#fbf1e4",
+        "oklch": "oklch(96.2% 0.020 74.7)",
+        "cssVar": "--warn-fundo-solido",
+        "tonalRamp": [
+          "oklch(15% 0.020 74.7)",
+          "oklch(25% 0.020 74.7)",
+          "oklch(35% 0.020 74.7)",
+          "oklch(45% 0.020 74.7)",
+          "oklch(55% 0.020 74.7)",
+          "oklch(65% 0.020 74.7)",
+          "oklch(80% 0.020 74.7)",
+          "oklch(95% 0.020 74.7)"
+        ]
+      },
+      "danger-fundo-solido": {
+        "role": "status",
+        "displayName": "Fundo Erro",
+        "canonical": "#fbeceb",
+        "oklch": "oklch(95.5% 0.016 22.1)",
+        "cssVar": "--danger-fundo-solido",
+        "tonalRamp": [
+          "oklch(15% 0.016 22.1)",
+          "oklch(25% 0.016 22.1)",
+          "oklch(35% 0.016 22.1)",
+          "oklch(45% 0.016 22.1)",
+          "oklch(55% 0.016 22.1)",
+          "oklch(65% 0.016 22.1)",
+          "oklch(80% 0.016 22.1)",
+          "oklch(95% 0.016 22.1)"
+        ]
+      },
+      "ok-tinta": {
+        "role": "status",
+        "displayName": "Tinta No Ar",
+        "canonical": "#0b5a43",
+        "oklch": "oklch(41.7% 0.081 167.2)",
+        "cssVar": "--ok-tinta",
+        "tonalRamp": [
+          "oklch(15% 0.081 167.2)",
+          "oklch(25% 0.081 167.2)",
+          "oklch(35% 0.081 167.2)",
+          "oklch(45% 0.081 167.2)",
+          "oklch(55% 0.081 167.2)",
+          "oklch(65% 0.081 167.2)",
+          "oklch(80% 0.081 167.2)",
+          "oklch(95% 0.081 167.2)"
+        ]
+      },
+      "warn-tinta": {
+        "role": "status",
+        "displayName": "Tinta Aviso",
+        "canonical": "#7a4305",
+        "oklch": "oklch(44.1% 0.101 60.2)",
+        "cssVar": "--warn-tinta",
+        "tonalRamp": [
+          "oklch(15% 0.101 60.2)",
+          "oklch(25% 0.101 60.2)",
+          "oklch(35% 0.101 60.2)",
+          "oklch(45% 0.101 60.2)",
+          "oklch(55% 0.101 60.2)",
+          "oklch(65% 0.101 60.2)",
+          "oklch(80% 0.101 60.2)",
+          "oklch(95% 0.101 60.2)"
+        ]
+      },
+      "danger-tinta": {
+        "role": "status",
+        "displayName": "Tinta Erro",
+        "canonical": "#8c1e18",
+        "oklch": "oklch(42.1% 0.147 28.4)",
+        "cssVar": "--danger-tinta",
+        "tonalRamp": [
+          "oklch(15% 0.147 28.4)",
+          "oklch(25% 0.147 28.4)",
+          "oklch(35% 0.147 28.4)",
+          "oklch(45% 0.147 28.4)",
+          "oklch(55% 0.147 28.4)",
+          "oklch(65% 0.147 28.4)",
+          "oklch(80% 0.147 28.4)",
+          "oklch(95% 0.147 28.4)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Título do herói da landing."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Título de seção da landing."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Título de cartão no painel e no checkout."
+      },
+      "lead": {
+        "displayName": "Lead",
+        "purpose": "Subtítulo de seção, medida de 54ch."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Texto corrido em toda superfície; 16px no celular."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Rótulo de campo e de grupo, chip, pílula de contagem. Caixa normal."
+      },
+      "mono": {
+        "displayName": "Mono",
+        "purpose": "Código de pareamento, identificador, dinheiro e contadores, com numeral tabular."
+      }
+    },
+    "shadows": [
+      {
+        "name": "sombra-card",
+        "value": "0 10px 30px rgba(0, 0, 0, 0.08)",
+        "purpose": "Cartão da landing e do checkout."
+      },
+      {
+        "name": "sombra-navbar",
+        "value": "0 6px 20px rgba(0, 0, 0, 0.07)",
+        "purpose": "Barra do site e TopBar do painel."
+      },
+      {
+        "name": "sombra-shot",
+        "value": "0 6px 12px rgba(0, 0, 0, 0.14)",
+        "purpose": "Moldura de captura do produto."
+      },
+      {
+        "name": "sombra-flutuante",
+        "value": "0 6px 12px rgba(0, 0, 0, 0.18)",
+        "purpose": "Menu e popover."
+      },
+      {
+        "name": "sombra-modal",
+        "value": "0 30px 70px rgba(0, 0, 0, 0.3)",
+        "purpose": "Diálogo, sobre o véu rgba(7, 20, 38, 0.55)."
+      },
+      {
+        "name": "sombra-tv",
+        "value": "0 12px 24px rgba(0, 0, 0, 0.22)",
+        "purpose": "TV ilustrada."
+      },
+      {
+        "name": "sombra-destaque",
+        "value": "0 6px 12px rgba(0, 0, 0, 0.1)",
+        "purpose": "Acompanha a borda de 2px do cartão em destaque."
+      },
+      {
+        "name": "sombra-destaque-forte",
+        "value": "0 8px 12px rgba(0, 0, 0, 0.14)",
+        "purpose": "Destaque em hover."
+      },
+      {
+        "name": "sombra-btn",
+        "value": "0 8px 24px rgba(3, 105, 161, 0.22)",
+        "purpose": "Primário do painel e do checkout; o site usa 0 2px 4px rgba(0, 0, 0, 0.2)."
+      },
+      {
+        "name": "sombra-btn-press",
+        "value": "0 3px 10px rgba(3, 105, 161, 0.26)",
+        "purpose": "Primário pressionado no painel."
+      },
+      {
+        "name": "anel-marca",
+        "value": "0 0 0 3px rgba(3, 105, 161, 0.18)",
+        "purpose": "Foco de campo. Só foco, nunca decoração."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-saida",
+        "value": "cubic-bezier(0.22, 1, 0.36, 1)",
+        "purpose": "Curva padrão de transform em botão e sublinhado."
+      },
+      {
+        "name": "press",
+        "value": "scale(0.97) em 80ms",
+        "purpose": "Aperto do botão em qualquer aparelho; 0.98 no checkout."
+      },
+      {
+        "name": "hover-fino",
+        "value": "@media (hover: hover) and (pointer: fine)",
+        "purpose": "Único contexto em que hover move, brilha ou reflete."
+      },
+      {
+        "name": "reduzido",
+        "value": "@media (prefers-reduced-motion: reduce)",
+        "purpose": "Corta animação, transição e escala de pressão."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "celular",
+        "value": "640px"
+      },
+      {
+        "name": "grade-2",
+        "value": "900px"
+      },
+      {
+        "name": "tablet",
+        "value": "980px"
+      },
+      {
+        "name": "lg-painel",
+        "value": "1024px"
+      },
+      {
+        "name": "notebook",
+        "value": "1280px"
+      },
+      {
+        "name": "artboard",
+        "value": "1440px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Botão primário",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Ação principal em qualquer superfície clara.",
+      "html": "<button class=\"ds-btn\">Criar conta grátis</button>",
+      "css": ".ds-btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:52px;padding:14px 24px;border:none;border-radius:var(--raio-8);font-family:var(--fonte);font-weight:700;font-size:1rem;line-height:1.2;background:var(--marca);color:var(--papel);box-shadow:0 2px 4px rgba(0,0,0,.2);cursor:pointer;transition:background-color .16s ease,box-shadow .2s ease,transform .16s var(--ease-saida)}.ds-btn:hover{background:var(--marca-hover)}@media (hover:hover) and (pointer:fine){.ds-btn:hover{transform:translateY(-1px)}}.ds-btn:active{transform:scale(.97);box-shadow:0 1px 2px rgba(0,0,0,.2)}.ds-btn:focus-visible{outline:3px solid var(--marca);outline-offset:2px}"
+    },
+    {
+      "name": "Botão fantasma",
+      "kind": "button",
+      "refersTo": "button-fantasma",
+      "description": "Ação secundária ao lado do primário.",
+      "html": "<button class=\"ds-btn-fantasma\">Ver os 3 passos</button>",
+      "css": ".ds-btn-fantasma{display:inline-flex;align-items:center;justify-content:center;min-height:52px;padding:14px 24px;border:1.5px solid var(--borda-3);border-radius:var(--raio-8);font-family:var(--fonte);font-weight:700;font-size:1rem;background:var(--papel);color:var(--marca);cursor:pointer;transition:background-color .16s ease,border-color .16s ease,color .16s ease,transform .16s var(--ease-saida)}.ds-btn-fantasma:hover{background:var(--papel-2);color:var(--marca-hover);border-color:var(--marca)}.ds-btn-fantasma:active{background:var(--papel-3);transform:scale(.97)}.ds-btn-fantasma:focus-visible{outline:3px solid var(--marca);outline-offset:2px}"
+    },
+    {
+      "name": "Botão luz",
+      "kind": "button",
+      "refersTo": "button-luz",
+      "description": "Primário sobre faixa noite.",
+      "html": "<div class=\"ds-faixa-noite\"><button class=\"ds-btn-luz\">Começar agora</button></div>",
+      "css": ".ds-faixa-noite{background:var(--noite);padding:24px}.ds-btn-luz{display:inline-flex;align-items:center;justify-content:center;min-height:52px;padding:14px 24px;border:none;border-radius:var(--raio-8);font-family:var(--fonte);font-weight:700;font-size:1rem;background:var(--luz);color:var(--noite);cursor:pointer;transition:background-color .16s ease,transform .16s var(--ease-saida)}.ds-btn-luz:hover{background:var(--luz-2)}.ds-btn-luz:active{transform:scale(.97)}.ds-btn-luz:focus-visible{outline:3px solid var(--luz);outline-offset:2px}"
+    },
+    {
+      "name": "Botão desabilitado",
+      "kind": "button",
+      "refersTo": "button-desabilitado",
+      "description": "Par sólido de tokens, nunca opacity; o motivo vai em texto ao lado.",
+      "html": "<button class=\"ds-btn-off\" disabled>Criar conta</button>",
+      "css": ".ds-btn-off{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:12px 18px;border:1px solid var(--borda);border-radius:var(--raio-8);font-family:var(--fonte);font-weight:600;font-size:15px;background:var(--papel-3);color:var(--tinta-3);box-shadow:none;cursor:not-allowed}"
+    },
+    {
+      "name": "Campo de texto",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Rótulo acima, ajuda visível abaixo, foco com anel da marca.",
+      "html": "<label class=\"ds-rotulo\" for=\"ds-email\">E-mail</label><input id=\"ds-email\" class=\"ds-input\" placeholder=\"voce@empresa.com.br\">",
+      "css": ".ds-rotulo{display:block;margin-bottom:6px;font-family:var(--fonte);font-size:.8125rem;font-weight:600;line-height:1.3;color:var(--tinta-2)}.ds-input{width:100%;min-height:44px;padding:10px 12px;border:1px solid var(--borda-3);border-radius:var(--raio-8);background:var(--papel);color:var(--tinta);font-family:var(--fonte);font-size:16px;outline:none;transition:border-color .15s ease,box-shadow .15s ease}.ds-input::placeholder{color:var(--tinta-3)}.ds-input:hover{border-color:var(--tinta-3)}.ds-input:focus,.ds-input:focus-visible{border-color:var(--marca);box-shadow:var(--anel-marca)}"
+    },
+    {
+      "name": "Chip",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "Etiqueta em caixa normal; nunca acima de título.",
+      "html": "<span class=\"ds-chip\">5 telas</span>",
+      "css": ".ds-chip{display:inline-flex;align-items:center;gap:8px;min-height:28px;padding:4px 12px;border-radius:99px;border:1px solid var(--borda);background:var(--papel-2);font-family:var(--fonte);font-size:.8125rem;font-weight:600;color:var(--marca)}"
+    },
+    {
+      "name": "Cartão",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Superfície de conteúdo; nunca aninhado.",
+      "html": "<div class=\"ds-card\"><div class=\"ds-card-titulo\">Loja</div><p class=\"ds-card-texto\">Documentos na tela e aviso agendado.</p></div>",
+      "css": ".ds-card{background:var(--papel);border:1px solid var(--borda-2);border-radius:var(--raio-16);box-shadow:var(--sombra-card);padding:16px;font-family:var(--fonte);transition:border-color .2s ease}.ds-card:hover{border-color:var(--borda-3)}.ds-card-titulo{font-size:1rem;font-weight:500;line-height:1.375;color:var(--tinta)}.ds-card-texto{margin:4px 0 0;font-size:.875rem;color:var(--tinta-3)}"
+    },
+    {
+      "name": "Aviso",
+      "kind": "custom",
+      "refersTo": "aviso-info",
+      "description": "Faixa tingida sem borda nem raio dentro de cartão.",
+      "html": "<div class=\"ds-aviso\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"M12 16v-4M12 8h.01\"/></svg><span>Sem cobrança enquanto a conta estiver no plano Grátis.</span></div>",
+      "css": ".ds-aviso{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;background:var(--marca-fundo);color:var(--tinta);font-family:var(--fonte);font-size:.75rem;line-height:1.6;max-width:56ch}.ds-aviso svg{flex:none;margin-top:2px;color:var(--marca)}"
+    },
+    {
+      "name": "Barra do topo",
+      "kind": "nav",
+      "refersTo": "topbar",
+      "description": "Barra do painel igual à navbar do site: papel, borda fina, sombra Navbar.",
+      "html": "<div class=\"ds-topbar\"><span class=\"ds-topbar-marca\"><span class=\"ds-topbar-logo\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"var(--papel)\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"2\" y=\"5\" width=\"20\" height=\"13\" rx=\"2\"/><path d=\"M8 22h8M12 18v4\"/></svg></span>TelaHub</span><span class=\"ds-pilula\">Telas <b>3</b></span></div>",
+      "css": ".ds-topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 20px;background:var(--papel);border:1px solid var(--borda);border-radius:var(--raio-16);box-shadow:var(--sombra-navbar);font-family:var(--fonte)}.ds-topbar-marca{display:inline-flex;align-items:center;gap:10px;font-size:1.125rem;font-weight:800;letter-spacing:-.01em;color:var(--tinta)}.ds-topbar-logo{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:var(--raio-8);background:var(--marca)}.ds-pilula{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border:1px solid var(--borda);border-radius:var(--raio-8);background:var(--papel-2);font-size:13px;font-weight:500;color:var(--tinta-2)}.ds-pilula b{font-family:var(--fonte-mono);font-variant-numeric:tabular-nums;font-size:.875rem;font-weight:600;color:var(--tinta)}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Vitrine Acesa",
+    "overview": "Uma vitrine iluminada num dia claro: papel branco, tinta azul-marinho quase preta e um único azul de marca que carrega ação, link e seleção. A landing, as telas de entrar e cadastrar, o checkout e o painel importam o mesmo `packages/marca/tokens.css`, e quem passa de uma etapa à outra não troca de produto. A densidade vai de folgada na landing (seções de 96px, respiro lateral de 160px a 1440) a compacta no painel, sem mudar de cor, fonte ou raio.\n\nO mundo tem dois climas e só dois. O claro (papel) é o chrome inteiro: venda, conta, pagamento, operação. O escuro (noite) aparece em faixas da landing, na moldura das TVs ilustradas e na própria TV: o Player e o canvas do editor vivem em `--noite`, com o azul-céu `--luz` como destaque, porque o que vai para a parede é visto de longe e não é a interface. Todo par de cor tem contraste medido e anotado no cabeçalho de `tokens.css`; cor nova entra lá primeiro, com a medida.\n\nMovimento é sóbrio e só com mouse de verdade: o botão escurece um tom, sobe 1px e afunda em `scale(0.97)` ao toque; faixas de brilho e reflexo existem apenas com `(hover: hover) and (pointer: fine)` e somem com `prefers-reduced-motion`. Curva padrão `--ease-saida` (`cubic-bezier(0.22, 1, 0.36, 1)`).",
+    "keyCharacteristics": [
+      "Uma família tipográfica (Geist) em todo o chrome, com Geist Mono para código de pareamento, identificador e número tabular.",
+      "Um azul de marca fixo, sem seletor de cor por conta.",
+      "Claro por padrão; a família `--noite` é reservada para faixas escuras da landing e para a TV.",
+      "Contraste medido em cada par, alvo de toque de 44px e corpo de 16px no celular.",
+      "Estado com cor semântica e par sólido de fundo e tinta; verde é sucesso e \"no ar\", nunca botão de compra."
+    ],
+    "rules": [
+      {
+        "name": "A Regra da Marca Única",
+        "body": "Existe um azul de marca, fixo. Não há seletor de cor por conta nem segundo matiz; os antigos `--th-accent*` e `violet` do painel apontam para `--marca`.",
+        "section": "colors"
+      },
+      {
+        "name": "A Regra do Hex na Marca",
+        "body": "Nenhum app escreve hex solto. Faltou um tom, ele entra em `packages/marca/tokens.css` primeiro, com o contraste medido no comentário. O conteúdo exibido na TV (fundos animados de widget) é o conteúdo do cliente, não o chrome, e fica fora desta regra.",
+        "section": "colors"
+      },
+      {
+        "name": "A Regra do Verde que Não Vende",
+        "body": "Verde é sucesso e tela no ar. O botão de compra é sempre a marca.",
+        "section": "colors"
+      },
+      {
+        "name": "A Regra dos 16 no Celular",
+        "body": "Texto de leitura tem 16px ou mais abaixo de 640px. Em Tailwind o padrão é `text-base sm:text-xs` ou `text-base sm:text-sm`; campo de formulário tem 16px no celular para o iOS não dar zoom.",
+        "section": "typography"
+      },
+      {
+        "name": "A Regra da Caixa Normal",
+        "body": "Rótulo fica em caixa normal e nunca vai acima de título. Não há eyebrow (rótulo em caixa alta espaçada acima do título): a seção se apresenta pelo próprio título.",
+        "section": "typography"
+      },
+      {
+        "name": "A Regra da Fonte da Parede",
+        "body": "Na superfície da TV (`html[data-superficie=\"tv\"]` e `.superficie-tv`) a fonte é a do conteúdo exibido (Exo 2 e JetBrains Mono), não a do chrome. A cena do cliente não muda quando o painel muda.",
+        "section": "typography"
+      },
+      {
+        "name": "A Regra dos 44",
+        "body": "Todo alvo de toque tem 44px ou mais no celular. Botão `default` e `lg` do painel ganham `max-md:min-h-11`; botão de ícone é `size-11` no celular e `size-9` a partir de `lg`.",
+        "section": "layout"
+      },
+      {
+        "name": "A Regra da Primitiva sem Display",
+        "body": "Primitiva compartilhada (classe de botão, pílula, ícone) não declara `display`. Quem usa decide: um `flex` na base vence o `hidden lg:flex` da tela e faz o elemento aparecer duas vezes no celular.",
+        "section": "layout"
+      },
+      {
+        "name": "A Regra Sem Brilho",
+        "body": "Nada de glow, halo radial colorido ou anel de deslocamento zero como decoração. Sombra é deslocada, curta e neutra; o anel `--anel-marca` existe só para foco de campo.",
+        "section": "elevation"
+      },
+      {
+        "name": "A Regra do Cartão Plano",
+        "body": "Não há cartão dentro de cartão. Dentro de um cartão, aviso é faixa tingida sem borda nem raio, e o campo leva borda e fundo no próprio `<input>`, sem caixa em volta.",
+        "section": "shapes"
+      },
+      {
+        "name": "A Regra da Borda Fina",
+        "body": "Borda lateral colorida maior que 1px não existe como acento de cartão, aviso ou item de lista.",
+        "section": "shapes"
+      }
+    ],
+    "dos": [
+      "Do importar `packages/marca/tokens.css` (e `tailwind-theme.css` no painel e no checkout) e usar só os tokens dele.",
+      "Do medir o contraste de qualquer tom novo e anotá-lo no cabeçalho de `tokens.css` antes de usar.",
+      "Do dar 16px ao texto de leitura no celular (`text-base sm:text-xs` ou `text-base sm:text-sm`) e 44px a todo alvo de toque.",
+      "Do desabilitar botão com o par sólido papel-3, borda e tinta-3.",
+      "Do usar a família `--noite` e a luz na TV e nas faixas escuras da landing.",
+      "Do restringir hover com movimento a `(hover: hover) and (pointer: fine)` e respeitar `prefers-reduced-motion`."
+    ],
+    "donts": [
+      "Don't criar seletor de cor por conta nem um segundo matiz de destaque.",
+      "Don't colocar eyebrow (rótulo em caixa alta acima do título).",
+      "Don't usar gradiente em texto.",
+      "Don't usar glow, halo radial colorido ou sombra azul difusa como decoração.",
+      "Don't usar borda lateral colorida maior que 1px.",
+      "Don't aninhar cartão dentro de cartão.",
+      "Don't escrever hex solto fora de `packages/marca`.",
+      "Don't desabilitar botão com `opacity`.",
+      "Don't declarar `display` numa primitiva compartilhada.",
+      "Don't usar luz como texto sobre papel.",
+      "Don't usar verde em botão de compra."
+    ],
+    "debt": [
+      "O editor do painel (`Scheduler`, `SceneEditor`, `WidgetLibrary`, e também `PropertiesPanel` e `LayersModal`) ainda tem microtipografia `text-[8px]` e `text-[9px]` com caixa alta espaçada e alguns hex soltos. É dívida a pagar, não modelo para tela nova."
+    ]
+  }
+}

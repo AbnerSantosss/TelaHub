@@ -31,16 +31,16 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   children
 }) => {
   return (
-    <header className="h-auto md:h-16 bg-[#1f2937] border-b border-[#9CA3AF]/10 px-4 md:px-6 py-3 md:py-0 flex flex-col md:flex-row items-center justify-between z-30 shadow-md gap-3 md:gap-0">
+    <header className="h-auto md:h-16 bg-papel border-b border-borda px-4 md:px-6 py-3 md:py-0 flex flex-col md:flex-row items-center justify-between z-30 shadow-card gap-3 md:gap-0">
       <div className="flex items-center gap-4 w-full md:w-auto justify-start">
-        <button onClick={onGoHome} className="p-2 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-[var(--th-accent)] transition-colors">
+        <button onClick={onGoHome} className="p-2 min-h-[44px] min-w-[44px] md:min-h-0 md:min-w-0 flex items-center justify-center hover:bg-papel-3 rounded-lg text-tinta-3 hover:text-marca transition-colors">
           <Home size={20} />
         </button>
-        <div className="w-px h-6 bg-slate-800"></div>
+        <div className="w-px h-6 bg-papel-3"></div>
         <div className="flex items-center gap-2">
-          <LogoHub size={28} className="drop-shadow-[0_0_8px_rgba(124,58,237,0.35)]" />
-          <h1 className="font-bold text-slate-100 tracking-tight uppercase text-sm">
-            Tela<span className="text-[var(--th-accent)]">Hub</span> <span className="text-slate-600 mx-2">/</span> {display.name}
+          <LogoHub size={28} className="" />
+          <h1 className="font-bold text-tinta tracking-tight uppercase text-sm">
+            Tela<span className="text-marca">Hub</span> <span className="text-tinta-3 mx-2">/</span> {display.name}
           </h1>
         </div>
       </div>
@@ -52,14 +52,14 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         <div className="flex items-center gap-2 md:hidden">
           <button 
             onClick={() => setShowLeftSidebar(!showLeftSidebar)}
-            className={`px-3 py-2 rounded-lg transition-all border ${showLeftSidebar ? 'bg-[var(--th-accent)]/20 text-[var(--th-accent)] border-[var(--th-accent)]/50' : 'bg-slate-900 border-slate-800 text-slate-500 hover:text-[var(--th-accent)]'}`}
+            className={`px-3 py-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg transition-all border ${showLeftSidebar ? 'bg-marca-fundo text-marca border-marca/50' : 'bg-papel border-borda text-tinta-3 hover:text-marca'}`}
             title="Widgets"
           >
             <Layers size={16} />
           </button>
           <button 
             onClick={() => setShowRightSidebar(!showRightSidebar)}
-            className={`px-3 py-2 rounded-lg transition-all border ${showRightSidebar ? 'bg-[var(--th-accent)]/20 text-[var(--th-accent)] border-[var(--th-accent)]/50' : 'bg-slate-900 border-slate-800 text-slate-500 hover:text-[var(--th-accent)]'}`}
+            className={`px-3 py-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg transition-all border ${showRightSidebar ? 'bg-marca-fundo text-marca border-marca/50' : 'bg-papel border-borda text-tinta-3 hover:text-marca'}`}
             title="Configurações"
           >
             <Settings size={16} />
@@ -69,16 +69,16 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         <div className="flex items-center gap-2">
           <button 
             onClick={() => setShowLayersModal(true)}
-            className="bg-[#1f2937] hover:bg-[#111827] text-slate-300 hover:text-white border border-[#9CA3AF]/20 hover:border-sky-500/50 px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-all shadow-md"
+            className="bg-papel hover:bg-papel-3 text-tinta-2 hover:text-tinta border border-borda-3 hover:border-marca px-4 py-2 min-h-[44px] md:min-h-0 rounded-lg font-bold text-sm flex items-center gap-2 transition-all shadow-card"
             title="Visualizar Camadas"
           >
-            <Layers size={16} className="text-sky-400" />
+            <Layers size={16} className="text-marca" />
             <span className="hidden sm:inline">Camadas ({activePage.layout.length})</span>
           </button>
 
           <button 
-            onClick={() => window.open(`/#/player/${display.slug || display.id}`, '_blank')}
-            className="bg-[#1f2937] hover:bg-[#111827] text-[#F3F4F6] border border-[#9CA3AF] hover:border-white px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-all"
+            onClick={() => window.open(`${import.meta.env.BASE_URL}#/player/${display.slug || display.id}`, '_blank')}
+            className="bg-papel hover:bg-papel-3 text-tinta border border-borda-3 hover:border-marca px-4 py-2 min-h-[44px] md:min-h-0 rounded-lg font-bold text-sm flex items-center gap-2 transition-all"
             title="Abrir Player em nova aba"
           >
             <Maximize2 size={16} />
@@ -88,7 +88,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           <button 
             onClick={handleSave} 
             disabled={isSaving} 
-            className="bg-[var(--th-accent)] hover:bg-[var(--th-accent-strong)] text-white px-6 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-all shadow-[0_0_15px_rgba(124,58,237,0.3)] border border-white/10 active:scale-95 whitespace-nowrap disabled:opacity-50"
+            className="bg-marca hover:bg-marca-hover text-white px-6 py-2 min-h-[44px] md:min-h-0 rounded-lg font-bold text-sm flex items-center gap-2 transition-all active:scale-95 whitespace-nowrap disabled:opacity-50"
           >
             {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />} 
             {isSaving ? 'SALVANDO...' : 'SALVAR'}

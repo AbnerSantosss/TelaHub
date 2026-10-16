@@ -28,9 +28,9 @@ export const PublishConfirmModal: React.FC<PublishConfirmModalProps> = ({
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent showCloseButton={false} className="sm:max-w-md max-w-md">
-        <div className="flex items-center justify-between p-5 border-b border-white/10">
-          <DialogTitle className="font-bold text-lg flex items-center gap-2 text-[#f59e0b]">
-            <AlertTriangle className="text-[#f59e0b]" size={20} /> Publicar alterações?
+        <div className="flex items-center justify-between p-5 border-b border-borda">
+          <DialogTitle className="font-bold text-lg flex items-center gap-2 text-warn">
+            <AlertTriangle className="text-warn" size={20} /> Publicar alterações?
           </DialogTitle>
           <DialogClose asChild>
             <Button variant="ghost" size="icon" className="size-8 rounded-lg" style={{ color: 'var(--color-text-muted)' }}>
@@ -46,7 +46,7 @@ export const PublishConfirmModal: React.FC<PublishConfirmModalProps> = ({
             Salvar agora vai sobrescrever o conteúdo exibido imediatamente.
           </p>
 
-          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-500 text-xs font-medium">
+          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-warn-fundo border border-warn/30 text-warn text-xs font-medium">
             <MonitorPlay size={14} className="flex-shrink-0" />
             <span>As telas vinculadas vão atualizar em tempo real assim que você confirmar.</span>
           </div>
@@ -57,7 +57,7 @@ export const PublishConfirmModal: React.FC<PublishConfirmModalProps> = ({
               variant="ghost"
               onClick={onClose}
               disabled={loading}
-              className="px-5 py-2.5 rounded-xl text-text-muted font-bold hover:bg-gray-950/40 hover:text-text disabled:opacity-50"
+              className="px-5 py-2.5 rounded-xl text-text-muted font-bold hover:bg-papel-2 hover:text-text disabled:opacity-50"
             >
               Cancelar
             </Button>

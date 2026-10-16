@@ -71,12 +71,12 @@ const EmailAvulsoModal = ({ detail, onClose, onSent }: Props) => {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-0 sm:items-center sm:p-6"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-[var(--veu)] p-0 sm:items-center sm:p-6"
       role="dialog"
       aria-modal="true"
       aria-labelledby="email-avulso-titulo"
     >
-      <div className="max-h-full w-full max-w-xl overflow-y-auto rounded-t-2xl bg-white p-5 shadow-xl sm:rounded-2xl">
+      <div className="max-h-full w-full max-w-xl overflow-y-auto rounded-t-2xl bg-surface p-5 shadow-modal sm:rounded-2xl">
         <div className="mb-4 flex items-start justify-between gap-3">
           <div>
             <h2 id="email-avulso-titulo" className="flex items-center gap-2 text-lg font-bold text-ink">
@@ -106,7 +106,7 @@ const EmailAvulsoModal = ({ detail, onClose, onSent }: Props) => {
               onChange={(e) => setSubject(e.target.value)}
               maxLength={160}
               placeholder="Ex.: Sobre a sua fatura de setembro"
-              className="rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink outline-none focus-visible:border-ink-subtle focus-visible:ring-2 focus-visible:ring-ink/10"
+              className="rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink outline-none focus-visible:border-ink-subtle focus-visible:ring-2 focus-visible:ring-ink/10"
             />
           </label>
 
@@ -117,7 +117,7 @@ const EmailAvulsoModal = ({ detail, onClose, onSent }: Props) => {
               onChange={(e) => setHtmlBody(e.target.value)}
               rows={8}
               placeholder="<p>Olá! Passando para avisar que…</p>"
-              className="rounded-lg border border-line bg-white px-3 py-2 font-mono text-[13px] leading-relaxed text-ink outline-none focus-visible:border-ink-subtle focus-visible:ring-2 focus-visible:ring-ink/10"
+              className="rounded-lg border border-line bg-surface px-3 py-2 font-mono text-[13px] leading-relaxed text-ink outline-none focus-visible:border-ink-subtle focus-visible:ring-2 focus-visible:ring-ink/10"
             />
             <span className={cx('text-[12px]', corpoCurto ? 'text-danger' : 'text-ink-subtle')}>
               {corpoCurto
@@ -134,7 +134,7 @@ const EmailAvulsoModal = ({ detail, onClose, onSent }: Props) => {
               onChange={(e) => setReason(e.target.value)}
               maxLength={500}
               placeholder="Ex.: cliente pediu segunda via por telefone"
-              className="rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink outline-none focus-visible:border-ink-subtle focus-visible:ring-2 focus-visible:ring-ink/10"
+              className="rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink outline-none focus-visible:border-ink-subtle focus-visible:ring-2 focus-visible:ring-ink/10"
             />
             <span className="text-[12px] text-ink-subtle">
               Entra na trilha de auditoria desta organização, junto com quem enviou.

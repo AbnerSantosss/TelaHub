@@ -262,7 +262,7 @@ const OrgCell = ({ row }: { row: AdminOrganizationRow }) => (
     <p className="truncate text-[12px] text-ink-subtle">
       Cliente desde {formatDate(row.organization.createdAt)}
       {row.hasActiveOverride && (
-        <span className="ml-1.5 inline-flex items-center gap-1 rounded border border-info/25 bg-info/10 px-1.5 py-px text-[11px] font-semibold text-info-ink">
+        <span className="ml-1.5 inline-flex items-center gap-1 rounded border border-info/25 bg-info/10 px-1.5 py-px text-xs font-semibold text-info-ink">
           <Sparkles aria-hidden="true" className="h-3 w-3" />
           concessão manual
         </span>
@@ -345,7 +345,7 @@ const DueCell = ({ row }: { row: AdminOrganizationRow }) => {
       {grace && (
         <p
           className={cx(
-            'mt-1 inline-flex items-center gap-1 rounded border px-1.5 py-px text-[11px] font-semibold',
+            'mt-1 inline-flex items-center gap-1 rounded border px-1.5 py-px text-xs font-semibold',
             grace.urgent
               ? 'border-danger/30 bg-danger/10 text-danger-ink'
               : 'border-warning/30 bg-warning/10 text-warning-ink'
@@ -356,12 +356,12 @@ const DueCell = ({ row }: { row: AdminOrganizationRow }) => {
         </p>
       )}
       {subscription.cancelAtPeriodEnd && (
-        <p className="mt-1 text-[11px] font-semibold text-warning-ink">Sai no fim deste ciclo</p>
+        <p className="mt-1 text-xs font-semibold text-warning-ink">Sai no fim deste ciclo</p>
       )}
       {subscription.status === 'canceled' && reason && (
         <p
           className={cx(
-            'mt-1 text-[11px] font-semibold',
+            'mt-1 text-xs font-semibold',
             isUnpaidCancel(subscription.cancelReason) ? 'text-danger-ink' : 'text-ink-muted'
           )}
         >
@@ -435,7 +435,7 @@ const EMPTY_MESSAGE: Record<ClienteView, string> = {
 const EMPTY_WITH_SEARCH =
   'A busca cobre o nome da organização e o e-mail dos usuários dela. Confira a grafia, tente só um pedaço do nome, ou limpe a busca para ver a visão inteira.';
 
-const th = 'px-4 py-2.5 text-left text-[11px] font-bold tracking-[0.1em] text-ink-subtle uppercase';
+const th = 'px-4 py-2.5 text-left text-xs font-semibold text-ink-subtle';
 
 const ClientesPage = () => {
   const [params, setParams] = useSearchParams();
@@ -496,7 +496,6 @@ const ClientesPage = () => {
   return (
     <div className="space-y-5">
       <PageHeader
-        eyebrow="Backoffice"
         title="Clientes"
         subtitle={
           <span aria-live="polite">
@@ -525,14 +524,14 @@ const ClientesPage = () => {
                 aria-current={active ? 'page' : undefined}
                 className={cx(
                   'inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[13px] font-semibold transition-colors',
-                  active ? 'border-nav bg-nav text-white' : 'border-line bg-surface text-ink-muted hover:bg-app'
+                  active ? 'border-marca bg-marca text-white' : 'border-line bg-surface text-ink-muted hover:bg-app'
                 )}
               >
                 {item.label}
                 {count !== undefined && (
                   <span
                     className={cx(
-                      'money rounded-full px-1.5 text-[11px] font-bold',
+                      'money rounded-full px-1.5 text-xs font-bold',
                       active ? 'bg-white/20 text-white' : 'bg-app text-ink-subtle'
                     )}
                   >

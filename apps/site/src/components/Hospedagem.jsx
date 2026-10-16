@@ -64,7 +64,6 @@ export default function Hospedagem() {
     >
       <div className="split">
         <div className="secao__cabeca reveal">
-          <span className="chip">Onde o sistema roda</span>
           <h2 id="hospedagem-titulo" className="h2">
             Temos servidor próprio. Por isso o preço é em real e o mensal cancela sem multa.
           </h2>

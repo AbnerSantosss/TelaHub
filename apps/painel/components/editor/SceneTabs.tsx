@@ -20,23 +20,23 @@ export const SceneTabs: React.FC<SceneTabsProps> = ({
   removePage
 }) => {
   return (
-    <div className="flex items-center gap-2 bg-slate-950 p-1.5 rounded-xl border border-slate-800 overflow-x-auto w-full md:max-w-[40%] scrollbar-hide flex-nowrap">
+    <div className="flex items-center gap-2 bg-papel-2 p-1.5 rounded-xl border border-borda overflow-x-auto w-full md:max-w-[40%] scrollbar-hide flex-nowrap">
       {display.pages.map((p, idx) => (
         <div 
           key={p.id} 
           className={`flex items-center rounded-lg border transition-all flex-shrink-0 min-w-max ${
             activePageIdx === idx 
-            ? 'bg-[var(--th-accent)] border-[var(--th-accent)] shadow-[0_0_10px_rgba(124,58,237,0.4)]' 
-            : 'border-slate-800 hover:border-slate-700 bg-slate-900'
+            ? 'bg-marca border-marca' 
+            : 'border-borda hover:border-borda-3 bg-papel'
           }`}
         >
           <button
             onClick={() => { setActivePageIdx(idx); setSelectedWidget(null); }}
             className={`px-3 py-1.5 text-xs font-bold whitespace-nowrap transition-colors flex items-center gap-1.5 ${
-              activePageIdx === idx ? 'text-white' : 'text-slate-500 hover:text-slate-300'
+              activePageIdx === idx ? 'text-tinta' : 'text-tinta-3 hover:text-tinta'
             }`}
           >
-            {p.broadcast_id && <CalendarDays size={12} className="text-[var(--th-accent)]" />}
+            {p.broadcast_id && <CalendarDays size={12} className="text-marca" />}
             CENA {idx + 1}
           </button>
           
@@ -49,8 +49,8 @@ export const SceneTabs: React.FC<SceneTabsProps> = ({
               }}
               className={`flex-shrink-0 w-8 h-8 flex items-center justify-center transition-colors border-l ${
                 activePageIdx === idx 
-                ? 'border-[var(--th-accent-strong)] text-purple-200 hover:bg-[var(--th-accent-strong)] hover:text-white' 
-                : 'border-slate-800 text-slate-600 hover:bg-rose-500/10 hover:text-rose-500'
+                ? 'border-marca-hover text-marca hover:bg-marca-hover hover:text-tinta' 
+                : 'border-borda text-tinta-3 hover:bg-danger-fundo hover:text-danger'
               }`}
               title="Excluir Cena"
             >
@@ -63,7 +63,7 @@ export const SceneTabs: React.FC<SceneTabsProps> = ({
         const newP: Page = { id: 'p'+Date.now(), order: display.pages.length+1, duration: 15, layout: [] };
         setDisplay({...display, pages: [...display.pages, newP]});
         setActivePageIdx(display.pages.length);
-      }} className="p-1.5 text-[var(--th-accent)] hover:bg-[var(--th-accent)]/10 rounded-lg transition-colors mx-1">
+      }} className="p-1.5 text-marca hover:bg-marca-fundo rounded-lg transition-colors mx-1">
         <Plus size={16} />
       </button>
     </div>

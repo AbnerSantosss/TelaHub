@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { APP_URL } from '../lib/funnel';
+import { loginUrl } from '../lib/funnel';
 import { EVENT, track } from '../lib/tracking';
 import './Navbar.css';
 
@@ -237,7 +237,7 @@ const Navbar = ({ scrollToSection, goToPlans }) => {
         </ul>
 
         <div className="navbar__acoes">
-          <a className="btn btn--texto navbar__entrar" href={`${APP_URL}/`}>
+          <a className="btn btn--texto navbar__entrar" href={loginUrl()}>
             <span className="btn__rotulo">Entrar</span>
           </a>
           <button type="button" className="btn navbar__btn" onClick={irParaPlanos}>
@@ -313,7 +313,7 @@ const Navbar = ({ scrollToSection, goToPlans }) => {
           <button type="button" className="btn btn--largo" onClick={irParaPlanos}>
             Começar grátis
           </button>
-          <a className="btn btn--fantasma btn--largo" href={`${APP_URL}/`}>
+          <a className="btn btn--fantasma btn--largo" href={loginUrl()}>
             Entrar
           </a>
         </div>

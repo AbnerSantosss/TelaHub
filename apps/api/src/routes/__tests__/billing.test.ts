@@ -10,6 +10,11 @@ const app = express();
 app.use(express.json());
 app.use('/api/billing', billingRoutes);
 
+// A URL do checkout é relativa por padrão (`/checkout/c`, domínio único) e
+// absoluta quando `CHECKOUT_URL` vem do ambiente. A base só existe para o
+// `new URL` aceitar as duas formas; o que o teste confere é a query.
+const CHECKOUT_BASE = 'http://checkout.invalid';
+
 const SUFFIX = `billing-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 const createdOrgIds: string[] = [];
 const createdPlanIds: string[] = [];
@@ -328,7 +333,7 @@ describe('POST /api/billing/checkout', () => {
       .send({ planCode: plan.code, screens: 3, interval: 'yearly' });
 
     expect(res.status).toBe(200);
-    const url = new URL(res.body.checkoutUrl);
+    const url = new URL(res.body.checkoutUrl, CHECKOUT_BASE);
     expect(url.searchParams.get('plan')).toBe(plan.code);
     expect(url.searchParams.get('screens')).toBe('3');
     expect(url.searchParams.get('interval')).toBe('yearly');
@@ -344,7 +349,7 @@ describe('POST /api/billing/checkout', () => {
       .send({ planCode: plan.code, screens: 2 });
 
     expect(res.status).toBe(200);
-    expect(new URL(res.body.checkoutUrl).searchParams.get('interval')).toBe('monthly');
+    expect(new URL(res.body.checkoutUrl, CHECKOUT_BASE).searchParams.get('interval')).toBe('monthly');
   });
 
   it('esta rota NÃO cobra: ela só monta o link', async () => {

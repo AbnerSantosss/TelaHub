@@ -28,10 +28,10 @@
 // Por isso o texto aqui é **"em breve você vai receber"**, com prazo honesto e
 // uma saída concreta se não chegar. Ao mexer nesta tela, mantenha o futuro.
 import { useEffect } from 'react';
-import { CheckCircle2, FlaskConical, Mail, ShieldCheck } from 'lucide-react';
+import { CheckCircle2, FlaskConical, LayoutDashboard, Mail, ShieldCheck } from 'lucide-react';
 
 import { formatBRL, pluralScreens } from './format';
-import { Notice } from './primitives';
+import { ctaClass, Notice } from './primitives';
 import { billedScreens } from '../lib/plans';
 import type { CheckoutController } from './useCheckout';
 
@@ -44,6 +44,20 @@ import type { CheckoutController } from './useCheckout';
 // Vem de `VITE_CONTACT_EMAIL`, como no passo 3. Sem a variável, o texto some.
 const SUPPORT_EMAIL = ((import.meta as ImportMeta & { env?: { VITE_CONTACT_EMAIL?: string } }).env?.VITE_CONTACT_EMAIL ?? '').trim();
 
+/**
+ * Endereço do painel. Com domínio único o padrão é o caminho relativo `/app`;
+ * `VITE_APP_URL` continua valendo como override (dev local em portas
+ * separadas, ou painel servido em outro host).
+ */
+const APP_URL = (
+  (import.meta as ImportMeta & { env?: { VITE_APP_URL?: string } }).env?.VITE_APP_URL ?? ''
+)
+  .trim()
+  .replace(/\/+$/, '');
+const PANEL_HOME_URL = `${APP_URL || '/app'}/#/`;
+// Sem override, `/entrar` é o atalho do gateway para a tela de login do painel.
+const LOGIN_URL = APP_URL ? `${APP_URL}/#/login` : '/entrar';
+
 export const ThankYouScreen = ({ checkout }: { checkout: CheckoutController }) => {
   const {
     payment,
@@ -55,6 +69,7 @@ export const ThankYouScreen = ({ checkout }: { checkout: CheckoutController }) =
     billingInterval,
     simulatedPayment,
     trackPurchaseNow,
+    loggedUser,
   } = checkout;
 
   // `purchase` / `Purchase` — a conversão que paga a mídia.
@@ -109,6 +124,31 @@ export const ThankYouScreen = ({ checkout }: { checkout: CheckoutController }) =
       </div>
 
       {/* O bloco mais importante da tela: o que acontece a seguir. */}
+      {loggedUser ? (
+        // Logado: a compra foi para a conta que já existe (`paid.handler.ts`
+        // reaproveita a organização pelo e-mail) e nenhum e-mail com senha vai
+        // sair. Prometer "acesso por e-mail" aqui seria mandar a pessoa esperar
+        // uma mensagem que não existe. O verbo segue no futuro: o evento `paid`
+        // é processado pela fila, então o plano pode levar alguns instantes
+        // para aparecer no painel.
+        <div className="mt-8 rounded-xl border border-accent/35 bg-accent/8 p-5">
+          <p className="text-sm font-extrabold text-ink">O plano vai ser ativado na sua conta</p>
+          <p className="mt-1.5 text-sm leading-relaxed text-ink-muted">
+            A contratação foi registrada em{' '}
+            <strong className="font-bold text-ink break-all">{loggedUser.email}</strong>. Em
+            instantes o plano aparece no painel, sem precisar de outro login.
+          </p>
+          <a
+            href={PANEL_HOME_URL}
+            className={`${ctaClass} mt-4 w-full min-h-12 px-4 py-3 text-base sm:text-sm`}
+          >
+            <span className="relative flex items-center justify-center gap-2">
+              <LayoutDashboard aria-hidden="true" size={16} />
+              Ir para o painel
+            </span>
+          </a>
+        </div>
+      ) : (
       <div className="mt-8 rounded-xl border border-accent/35 bg-accent/8 p-5">
         <div className="flex items-start gap-3">
           <span aria-hidden="true" className="mt-0.5 shrink-0 text-accent">
@@ -146,9 +186,19 @@ export const ThankYouScreen = ({ checkout }: { checkout: CheckoutController }) =
               ) : null}
               .
             </p>
+            <p className="mt-2.5 text-xs leading-relaxed text-ink-muted">
+              Já recebeu a senha?{' '}
+              <a
+                href={LOGIN_URL}
+                className="inline-flex min-h-11 items-center font-bold text-accent-ink underline underline-offset-2 sm:min-h-0"
+              >
+                Entrar
+              </a>
+            </p>
           </div>
         </div>
       </div>
+      )}
 
       {simulatedPayment ? (
         <div className="mt-4">
@@ -164,7 +214,7 @@ export const ThankYouScreen = ({ checkout }: { checkout: CheckoutController }) =
           agora": é informação de conferência, não a resposta que a pessoa
           procura ao chegar aqui. */}
       <div className="mt-6 rounded-xl border border-line bg-surface p-5">
-        <p className="eyebrow mb-3">O que você contratou</p>
+        <p className="rotulo mb-3">O que você contratou</p>
         <dl className="flex flex-col gap-2.5 text-sm">
           <div className="flex items-baseline justify-between gap-3">
             <dt className="text-ink-muted">Plano</dt>

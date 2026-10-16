@@ -46,8 +46,10 @@ const PORTAS = [
   { port: 5432, name: 'PostgreSQL', tcp: true },
   { port: 3001, name: 'API', path: '/api/health', espera: '"status":"ok"' },
   { port: 4100, name: 'Site (vendas)', espera: '<title>TelaHub' },
-  { port: 4110, name: 'Painel', espera: '<title>Painel TelaHub' },
-  { port: 4130, name: 'Checkout', espera: '<title>Contratar TelaHub' },
+  // Painel e checkout servem em /app/ e /checkout/ (base do vite), como no
+  // domínio único; em "/" o vite responde outra coisa.
+  { port: 4110, name: 'Painel', path: '/app/', espera: '<title>Painel TelaHub' },
+  { port: 4130, name: 'Checkout', path: '/checkout/', espera: '<title>Contratar TelaHub' },
 ];
 
 function portaEscutando(port) {

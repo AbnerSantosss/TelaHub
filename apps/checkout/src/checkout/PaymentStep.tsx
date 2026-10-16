@@ -115,8 +115,8 @@ const TotalRow = ({
   monthlyCents: number;
   yearCents: number;
 }) => (
-  <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 rounded-lg bg-app px-3.5 py-3">
-    <span className="eyebrow">Total a contratar</span>
+  <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-line pb-4">
+    <span className="rotulo">Total a contratar</span>
     <span className="money text-xl font-extrabold text-cta">
       {quoteOnly ? 'Sob consulta' : formatBRL(yearly ? yearCents : monthlyCents)}
       {!quoteOnly ? (
@@ -124,7 +124,7 @@ const TotalRow = ({
       ) : null}
     </span>
     {yearly && !quoteOnly ? (
-      <span className="w-full text-[11px] leading-relaxed text-ink-muted">
+      <span className="w-full text-base sm:text-xs leading-relaxed text-ink-muted">
         Assinatura de 12 meses, equivalente a {formatBRL(monthlyCents)} por mês.
       </span>
     ) : null}
@@ -208,15 +208,17 @@ export const PaymentStep = ({ checkout }: { checkout: CheckoutController }) => {
           yearCents={yearCents}
         />
 
-        <div className="flex flex-col items-center gap-3 rounded-xl border border-line bg-surface p-4">
+        {/* Sem caixa em volta: o QR já tem a própria moldura e a caixa viraria um
+            cartão dentro do cartão do passo. */}
+        <div className="flex flex-col items-center gap-3">
           {payment.pix.qrCodeDataUri ? (
             <img
               src={payment.pix.qrCodeDataUri}
               alt="QR Code do Pix para pagamento"
-              className="size-44 rounded-lg border border-line bg-white p-2"
+              className="size-44 rounded-lg border border-line bg-surface p-2"
             />
           ) : null}
-          <p className="text-center text-xs leading-relaxed text-ink-muted">
+          <p className="mx-auto max-w-[56ch] text-center text-base sm:text-xs leading-relaxed text-ink-muted">
             Abra o app do seu banco, escolha <strong className="font-bold">Pix</strong> e escaneie o
             código. Se preferir, use o copia e cola abaixo.
             {expiry ? ` Este código vale até as ${expiry}.` : ''}
@@ -224,8 +226,8 @@ export const PaymentStep = ({ checkout }: { checkout: CheckoutController }) => {
         </div>
 
         <div className="min-w-0">
-          <p className="eyebrow mb-1.5">Pix copia e cola</p>
-          <p className="money break-all rounded-lg border border-line bg-app px-3 py-2.5 text-[11px] leading-relaxed text-ink">
+          <p className="rotulo mb-1.5">Pix copia e cola</p>
+          <p className="money break-all bg-app px-3 py-2.5 text-xs leading-relaxed text-ink">
             {payment.pix.copyPaste}
           </p>
           <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -236,7 +238,7 @@ export const PaymentStep = ({ checkout }: { checkout: CheckoutController }) => {
               </span>
             </SecondaryButton>
             {copyFailed ? (
-              <span role="status" className="text-xs text-ink-muted">
+              <span role="status" className="text-base sm:text-xs text-ink-muted">
                 Seu navegador bloqueou a cópia automática. Selecione o código acima e copie.
               </span>
             ) : null}
@@ -258,7 +260,7 @@ export const PaymentStep = ({ checkout }: { checkout: CheckoutController }) => {
             >
               Simular pagamento aprovado
             </PrimaryButton>
-            <p className="text-xs leading-relaxed text-ink-subtle">
+            <p className="max-w-[56ch] text-base sm:text-xs leading-relaxed text-ink-subtle">
               Este botão existe apenas na demonstração: ele confirma o Pix sem que nenhum valor
               tenha sido pago. Com um provedor real, a confirmação chega sozinha pelo banco.
             </p>
@@ -284,7 +286,7 @@ export const PaymentStep = ({ checkout }: { checkout: CheckoutController }) => {
   if (result) {
     return (
       <div className="flex flex-col gap-4">
-        <div className="flex items-start gap-3 rounded-xl border border-success/45 bg-success/8 p-4">
+        <div className="flex items-start gap-3 bg-success/8 p-4">
           <span
             aria-hidden="true"
             className="flex size-8 shrink-0 items-center justify-center rounded-full bg-success text-white"
@@ -293,11 +295,11 @@ export const PaymentStep = ({ checkout }: { checkout: CheckoutController }) => {
           </span>
           <div className="min-w-0">
             <p className="text-sm font-extrabold text-ink">Solicitação enviada</p>
-            <p className="mt-1.5 text-xs leading-relaxed text-ink-muted">{result.message}</p>
+            <p className="mt-1.5 max-w-[56ch] text-base sm:text-xs leading-relaxed text-ink-muted">{result.message}</p>
           </div>
         </div>
 
-        <dl className="flex flex-col gap-2 rounded-lg bg-app px-3.5 py-3 text-xs">
+        <dl className="flex flex-col gap-2 border-t border-line pt-4 text-base sm:text-xs">
           <div className="flex items-baseline justify-between gap-3">
             <dt className="text-ink-muted">Plano solicitado</dt>
             <dd className="font-bold text-ink">
@@ -368,9 +370,11 @@ export const PaymentStep = ({ checkout }: { checkout: CheckoutController }) => {
         />
 
       <fieldset className="min-w-0" aria-describedby="checkout-methods-reason">
-        <legend className="eyebrow mb-2">Forma de pagamento</legend>
+        <legend className="rotulo mb-2">Forma de pagamento</legend>
 
-        <div className="flex flex-col gap-2.5">
+        {/* Lista dividida por borda fina: cada forma de pagamento é uma linha, não
+            um cartão dentro do cartão do passo. */}
+        <div className="flex flex-col divide-y divide-line border-y border-line">
           {METHODS.map(({ id, label, icon: Icon, detail }) => {
             // Só fica ativo o que o provedor de verdade listar. Um método que
             // aparece apagado ainda é uma promessa: por isso a lista tem apenas
@@ -382,12 +386,10 @@ export const PaymentStep = ({ checkout }: { checkout: CheckoutController }) => {
               <div key={id} className="min-w-0">
                 <label
                   aria-disabled={enabled ? undefined : 'true'}
-                  className={`flex gap-3 rounded-xl border p-3.5 transition-colors ${
+                  className={`flex gap-3 px-3.5 py-3.5 transition-colors ${
                     enabled
-                      ? `cursor-pointer bg-surface ${
-                          selected ? 'border-accent ring-1 ring-accent/30' : 'border-line hover-fine:border-ink-subtle'
-                        }`
-                      : 'cursor-not-allowed border-line bg-app/60'
+                      ? `cursor-pointer ${selected ? 'bg-accent/6' : 'hover-fine:bg-app'}`
+                      : 'cursor-not-allowed bg-app/60'
                   }`}
                 >
                   <input
@@ -411,13 +413,13 @@ export const PaymentStep = ({ checkout }: { checkout: CheckoutController }) => {
                         {label}
                       </span>
                       {enabled ? null : (
-                        <span className="rounded-md bg-line px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.08em] text-ink-muted">
+                        <span className="rounded-md bg-line px-1.5 py-0.5 text-xs font-semibold text-ink-muted">
                           Indisponível
                         </span>
                       )}
                     </span>
                     <span
-                      className={`mt-1 block text-xs leading-relaxed ${
+                      className={`mt-1 block text-base sm:text-xs leading-relaxed ${
                         enabled ? 'text-ink-muted' : 'text-ink-subtle'
                       }`}
                     >
@@ -429,7 +431,7 @@ export const PaymentStep = ({ checkout }: { checkout: CheckoutController }) => {
                 {/* Formulário embutido no card escolhido, como nas referências:
                     os dados aparecem colados ao método, não num bloco solto. */}
                 {selected && id === 'credit_card' ? (
-                  <div className="mt-2.5 flex flex-col gap-3 rounded-xl border border-line bg-app/50 p-3.5">
+                  <div className="flex flex-col gap-3 border-t border-line px-3.5 py-4">
                     <TextField
                       id="checkout-card-number"
                       label="Número do cartão"
@@ -489,14 +491,14 @@ export const PaymentStep = ({ checkout }: { checkout: CheckoutController }) => {
                         <button
                           type="button"
                           onClick={() => fillTestCard('approved')}
-                          className="inline-flex min-h-11 items-center text-xs font-bold text-accent-ink underline underline-offset-2 transition-colors hover-fine:text-ink"
+                          className="inline-flex min-h-11 items-center text-base sm:text-xs font-bold text-accent-ink underline underline-offset-2 transition-colors hover-fine:text-ink"
                         >
                           Preencher com dados de teste
                         </button>
                         <button
                           type="button"
                           onClick={() => fillTestCard('declined')}
-                          className="inline-flex min-h-11 items-center text-[11px] font-semibold text-ink-subtle underline underline-offset-2 transition-colors hover-fine:text-ink-muted"
+                          className="inline-flex min-h-11 items-center text-base sm:text-xs font-semibold text-ink-subtle underline underline-offset-2 transition-colors hover-fine:text-ink-muted"
                         >
                           usar cartão recusado
                         </button>
@@ -509,7 +511,7 @@ export const PaymentStep = ({ checkout }: { checkout: CheckoutController }) => {
           })}
         </div>
 
-        <p id="checkout-methods-reason" className="mt-2.5 text-xs leading-relaxed text-ink-muted">
+        <p id="checkout-methods-reason" className="mt-2.5 max-w-[56ch] text-base sm:text-xs leading-relaxed text-ink-muted">
           {canPayOnline
             ? 'Estas são as formas de pagamento que o nosso provedor aceita hoje. Não emitimos boleto.'
             : paymentConfigError

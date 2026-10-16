@@ -1,16 +1,18 @@
 /* ============================================================================
-   TEMA CLARO — fonte única dos tokens das telas claras do painel.
+   TEMA CLARO: os nomes `--claro-*` das telas claras do painel.
 
    Antes, Auth.css (`--auth-*`), Assinatura.css (`--asn-*`), ConecteSuaTV.css
    (`--ctv-*`) e PaywallModal.css (`--pwl-*`) carregavam, cada um, uma cópia à
-   mão do mesmo sistema visual da landing (papel/tinta/linha/marca, Geist).
-   Quatro cópias = quatro lugares para o azul divergir. Agora os valores moram
-   AQUI, como `--claro-*`, e os nomes antigos viraram ALIASES — o CSS de cada
-   tela continua lendo `var(--asn-marca)` etc. sem precisar ser reescrito.
+   mão do mesmo sistema visual da landing. Os valores passaram a morar aqui como
+   `--claro-*`, e os nomes antigos viraram ALIASES: o CSS de cada tela continua
+   lendo `var(--asn-marca)` etc. sem precisar ser reescrito.
 
-   ESCOPO: tudo preso às classes-raiz das telas claras (e a `.tema-claro`, para
-   uma tela nova que queira o mesmo tema). Nada vai para `:root`: o resto do
-   painel é escuro e não pode herdar papel branco.
+   Desde 15/10/2026 os `--claro-*` não guardam valor nenhum: apontam para os
+   tokens da marca (packages/marca/tokens.css, importado pelo index.css). A
+   fonte única da cor é a marca; este arquivo só traduz nomes.
+
+   ESCOPO: preso às classes-raiz das telas claras (e a `.tema-claro`). O painel
+   inteiro já é claro e lê os tokens direto no `:root`.
 
    Cada tela importa este arquivo ANTES do seu próprio CSS.
    ============================================================================ */
@@ -21,40 +23,40 @@
 .ctv,
 .pwl {
   /* Papel */
-  --claro-papel: #ffffff;
-  --claro-papel-2: #f4f7fb;
-  --claro-papel-3: #e9eff7;
+  --claro-papel: var(--papel);
+  --claro-papel-2: var(--papel-2);
+  --claro-papel-3: var(--papel-3);
   /* Tinta */
-  --claro-tinta: #0a1223;
-  --claro-tinta-2: #33415c;
-  --claro-tinta-3: #55637d;
+  --claro-tinta: var(--tinta);
+  --claro-tinta-2: var(--tinta-2);
+  --claro-tinta-3: var(--tinta-3);
   /* Linha */
-  --claro-linha: #d5deea;
-  /* Marca — branco sobre #0369a1 = 5,9:1 (AA) */
-  --claro-marca: #0369a1;
-  --claro-marca-forte: #025584;
-  --claro-marca-fundo: #e6f2fa;
-  --claro-marca-rgb: 3, 105, 161;
+  --claro-linha: var(--borda);
+  /* Marca: branco sobre --marca = 5,4:1 (AA) */
+  --claro-marca: var(--marca);
+  --claro-marca-forte: var(--marca-hover);
+  --claro-marca-fundo: var(--marca-fundo);
+  /* Triplet de --marca (3,105,161) para rgba(var(--claro-marca-rgb), alfa) */
+  --claro-marca-rgb: var(--marca-rgb);
   /* Sinais */
-  --claro-ok: #0f7a5a;
-  --claro-atencao: #a35a06;
-  --claro-erro: #b3261e;
+  --claro-ok: var(--ok);
+  --claro-atencao: var(--warn);
+  --claro-erro: var(--danger);
   /* Raios */
-  --claro-r-sm: 8px;
-  --claro-r-md: 12px;
-  --claro-r-lg: 16px;
-  --claro-r-xl: 24px;
+  --claro-r-sm: var(--raio-8);
+  --claro-r-md: var(--raio-12);
+  --claro-r-lg: var(--raio-16);
+  --claro-r-xl: var(--raio-24);
   /* Tipografia */
-  --claro-fonte: 'Geist', 'Geist Variable', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --claro-fonte: var(--fonte);
 
-  /* Versão clara da grade com brilho do painel escuro (index.css
-     `.th-grid-bg`). Estática de propósito: telas de formulário e de cobrança
-     não precisam de movimento de fundo. Use como PRIMEIRAS camadas de um
-     `background`: `background: var(--claro-grade), <cor ou gradiente>;` */
+  /* A mesma grade calma do fundo do painel (index.css `.th-grid-bg`), em
+     camadas de `background`. Estática de propósito. Use como PRIMEIRAS
+     camadas: `background: var(--claro-grade), <cor ou gradiente>;` */
   --claro-grade:
-    radial-gradient(ellipse 75% 45% at 50% -10%, rgba(var(--claro-marca-rgb), 0.09), transparent 70%),
-    linear-gradient(rgba(10, 18, 35, 0.045) 1px, transparent 1px) 0 0 / 40px 40px,
-    linear-gradient(90deg, rgba(10, 18, 35, 0.045) 1px, transparent 1px) 0 0 / 40px 40px;
+    radial-gradient(ellipse 75% 45% at 50% -10%, var(--brilho-marca), transparent 70%),
+    linear-gradient(var(--grade-linha) 1px, transparent 1px) 0 0 / 40px 40px,
+    linear-gradient(90deg, var(--grade-linha) 1px, transparent 1px) 0 0 / 40px 40px;
 }
 
 /* ─── Aliases dos nomes antigos (reduz risco: nenhum seletor precisou mudar) ── */

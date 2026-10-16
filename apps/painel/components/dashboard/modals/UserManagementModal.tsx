@@ -66,12 +66,12 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent showCloseButton={false} className="sm:max-w-2xl max-w-2xl flex flex-col max-h-[90vh]">
-        <div className="flex items-center justify-between p-5 border-b border-white/10">
-          <DialogTitle className="font-bold text-lg flex items-center gap-2" style={{ color: 'var(--color-text)' }}>
-            <UsersIcon className="text-emerald-400" size={20} /> Gestão de Usuários
+        <div className="flex items-center justify-between p-5 border-b border-borda">
+          <DialogTitle className="font-bold text-lg flex items-center gap-2 text-tinta">
+            <UsersIcon className="text-marca" size={20} /> Gestão de Usuários
           </DialogTitle>
           <DialogClose asChild>
-            <Button variant="ghost" size="icon" className="size-8 rounded-lg" style={{ color: 'var(--color-text-muted)' }}>
+            <Button variant="ghost" size="icon" className="size-11 md:size-8 rounded-lg text-tinta-3 hover:text-tinta" aria-label="Fechar">
               <X size={18} />
             </Button>
           </DialogClose>
@@ -80,11 +80,11 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
         <div className="p-6 flex-1 min-h-0 overflow-y-auto overflow-x-hidden space-y-6">
           {/* SMTP Not Configured Warning */}
           {!smtpConfigured && (
-            <div className="bg-warning/10 border border-warning/20 rounded-xl p-4 flex items-start gap-3">
-              <AlertTriangle className="text-warning shrink-0 mt-0.5" size={18} />
+            <div className="bg-warn-fundo border border-borda rounded-xl p-4 flex items-start gap-3">
+              <AlertTriangle className="text-warn shrink-0 mt-0.5" size={18} aria-hidden="true" />
               <div>
-                <h4 className="text-xs font-black text-warning uppercase tracking-wider">Aviso de SMTP</h4>
-                <p className="text-xs text-text-muted mt-1 leading-relaxed">
+                <h4 className="text-sm font-bold text-tinta">Aviso de SMTP</h4>
+                <p className="text-sm text-tinta-2 mt-1 leading-relaxed">
                   O e-mail (SMTP) ainda não foi configurado, então convites e redefinições de senha não serão enviados. Configure o SMTP na guia administrativa.
                 </p>
               </div>
@@ -92,9 +92,9 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
           )}
 
           {/* Invite User Form */}
-          <form onSubmit={onSubmitInvite} className="bg-gray-950/40 p-5 border border-border rounded-xl space-y-4">
-            <h4 className="text-xs font-black text-text uppercase tracking-wider flex items-center gap-1.5 pl-0.5">
-              <Mail size={14} className="text-accent" /> Convidar Novo Integrante
+          <form onSubmit={onSubmitInvite} className="bg-papel p-5 border border-borda rounded-xl space-y-4">
+            <h4 className="text-sm font-bold text-text flex items-center gap-1.5 pl-0.5">
+              <Mail size={15} className="text-marca" /> Convidar Novo Integrante
             </h4>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -104,18 +104,18 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
                   value={inviteEmail}
                   onChange={(e) => setInviteEmail(e.target.value)}
                   placeholder="E-mail do novo usuário"
-                  className="w-full bg-gray-950/50 border border-border text-text placeholder:text-text-muted/40 focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/40 h-11 rounded-xl"
+                  className="w-full bg-papel border border-borda-3 text-tinta text-base md:text-sm placeholder:text-tinta-3 focus-visible:border-marca focus-visible:ring-3 focus-visible:ring-ring/30 h-11 rounded-xl"
                   required
                 />
               </div>
               <div>
                 <Select value={inviteRole} onValueChange={(v: 'user' | 'admin') => setInviteRole(v)}>
-                  <SelectTrigger className="w-full bg-gray-950/50 border border-border text-text h-11 rounded-xl focus:ring-accent/40">
+                  <SelectTrigger className="w-full h-11 rounded-xl text-tinta">
                     <SelectValue placeholder="Nível..." />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#151926] border-border text-text">
-                    <SelectItem value="user" className="focus:bg-accent/15 focus:text-accent">Operador</SelectItem>
-                    <SelectItem value="admin" className="focus:bg-accent/15 focus:text-accent">Administrador</SelectItem>
+                  <SelectContent>
+                    <SelectItem value="user">Operador</SelectItem>
+                    <SelectItem value="admin">Administrador</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -126,7 +126,7 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
                 type="submit"
                 variant="brand"
                 disabled={loading || !inviteEmail}
-                className="px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all flex items-center gap-2 disabled:opacity-50"
+                className="h-11 md:h-10 px-5 rounded-lg font-semibold text-sm flex items-center gap-2 disabled:opacity-50"
               >
                 {loading ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
                 <span>Enviar Convite</span>
@@ -136,10 +136,10 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
 
           {/* User List */}
           <div className="space-y-3">
-            <h4 className="text-xs font-black text-text-muted uppercase tracking-wider pl-0.5">
+            <h4 className="text-sm font-semibold text-tinta-2 pl-0.5">
               Usuários Cadastrados ({usersList.length})
             </h4>
-            <ScrollArea className="h-64 border border-border rounded-xl bg-gray-950/20 p-4">
+            <ScrollArea className="h-64 border border-borda rounded-xl bg-papel-2 p-4">
               <div className="space-y-2.5">
                 {usersList.map((user) => {
                   const isSelf = currentUser?.id === user.id;
@@ -148,29 +148,29 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
                   return (
                     <div
                       key={user.id}
-                      className="bg-surface/30 border border-border/60 hover:border-border rounded-xl p-3.5 flex items-center justify-between gap-4 transition-all"
+                      className="bg-papel border border-borda hover:border-borda-2 rounded-xl p-3.5 flex items-center justify-between gap-4 transition-all"
                     >
                       <div className="min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="font-bold text-text text-sm truncate">{user.username}</span>
                           {user.name && (
-                            <span className="text-xs text-text-muted truncate">({user.name})</span>
+                            <span className="text-sm text-text-muted truncate">({user.name})</span>
                           )}
                           {user.role === 'master' ? (
-                            <span className="bg-amber-500/10 border border-amber-500/30 text-amber-400 text-[9px] font-black px-2 py-0.5 rounded-full flex items-center gap-1 uppercase tracking-wider">
-                              <Shield size={10} /> Owner
+                            <span className="bg-papel-3 border border-borda-2 text-tinta text-[13px] font-semibold px-2 py-0.5 rounded-full flex items-center gap-1">
+                              <Shield size={12} aria-hidden="true" /> Owner
                             </span>
                           ) : user.role === 'admin' ? (
-                            <span className="bg-accent/10 border border-accent/30 text-accent text-[9px] font-black px-2 py-0.5 rounded-full flex items-center gap-1 uppercase tracking-wider">
-                              <Shield size={10} /> Admin
+                            <span className="bg-marca-fundo border border-borda text-marca text-[13px] font-semibold px-2 py-0.5 rounded-full flex items-center gap-1">
+                              <Shield size={12} aria-hidden="true" /> Admin
                             </span>
                           ) : (
-                            <span className="bg-border text-text-muted text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
+                            <span className="bg-papel-3 text-tinta-2 text-[13px] font-semibold px-2 py-0.5 rounded-full">
                               Operador
                             </span>
                           )}
                         </div>
-                        <p className="text-xs text-text-muted mt-0.5 truncate">{user.email || 'Sem e-mail cadastrado'}</p>
+                        <p className="text-sm text-text-muted mt-0.5 truncate">{user.email || 'Sem e-mail cadastrado'}</p>
                       </div>
 
                       {/* User Actions */}
@@ -179,10 +179,10 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
                           <Button
                             variant="outline"
                             onClick={() => onResendInvite(user.email)}
-                            className="bg-gray-950/40 text-accent border border-accent/20 hover:bg-accent/10 px-2.5 py-1.5 h-auto text-[10px] font-black uppercase tracking-wider rounded-lg transition-all"
+                            className="bg-papel text-marca border border-borda-2 hover:border-marca hover:bg-marca-fundo px-2.5 py-1.5 h-auto min-h-11 md:min-h-9 text-[13px] font-semibold rounded-lg transition-colors"
                             title="Reenviar código de convite por e-mail"
                           >
-                            <RotateCcw size={10} className="mr-1" /> Reenviar Convite
+                            <RotateCcw size={12} className="mr-1" aria-hidden="true" /> Reenviar Convite
                           </Button>
                         )}
                         {!isSelf && canManage && (
@@ -191,19 +191,20 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
                               <Button
                                 variant="outline"
                                 onClick={() => onSendResetPassword(user.email)}
-                                className="bg-gray-950/40 text-text-muted border border-border hover:border-accent-2/30 hover:text-text px-2.5 py-1.5 h-auto text-[10px] font-black uppercase tracking-wider rounded-lg transition-all"
+                                className="bg-papel text-tinta-2 border border-borda-2 hover:border-borda-3 hover:text-tinta px-2.5 py-1.5 h-auto min-h-11 md:min-h-9 text-[13px] font-semibold rounded-lg transition-colors"
                                 title="Enviar e-mail para redefinir senha"
                               >
-                                <KeyRound size={10} className="mr-1" /> Reset Senha
+                                <KeyRound size={12} className="mr-1" aria-hidden="true" /> Reset Senha
                               </Button>
                             )}
                             <Button
                               variant="outline"
                               onClick={() => onDeleteUser(user)}
-                              className="bg-gray-950/40 text-danger border border-danger/20 hover:bg-danger/10 px-2.5 py-1.5 h-auto text-[10px] font-black uppercase tracking-wider rounded-lg transition-all"
+                              className="bg-papel text-danger border border-borda-2 hover:border-danger hover:bg-danger-fundo px-2.5 py-1.5 h-auto min-h-11 min-w-11 md:min-h-9 md:min-w-9 text-[13px] font-semibold rounded-lg transition-colors"
                               title="Remover Usuário"
+                              aria-label={`Remover ${user.username}`}
                             >
-                              <Trash2 size={10} />
+                              <Trash2 size={14} />
                             </Button>
                           </>
                         )}

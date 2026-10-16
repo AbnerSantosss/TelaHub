@@ -1,21 +1,17 @@
 /**
- * Estilo das telas de Entrar e Criar conta ("Vitrine Acesa").
+ * Estilo das telas de conta: Entrar, Criar conta, Esqueci a senha e Nova
+ * senha ("Vitrine Acesa").
  *
  * POR QUE UM CSS PRÓPRIO, AO LADO DO COMPONENTE
- * O painel inteiro herda `index.css` — tema escuro, dez famílias de fonte e
- * utilitários do Tailwind/shadcn que outra parte do time mexe ao mesmo tempo.
- * Estas duas telas são a PRIMEIRA coisa que o visitante vê depois de clicar no
- * anúncio, e precisam parecer a mesma empresa da landing (fundo claro, Geist,
- * azul #0369a1). Deixar isso no CSS global significaria: (a) brigar com quem
- * está redesenhando o dashboard no mesmo arquivo, e (b) empurrar o tema claro
- * para dentro do app, que é escuro de propósito. Por isso tudo aqui está
- * prefixado com `auth-` e nada vaza para fora de `.auth-page`.
+ * São a primeira coisa que o visitante vê depois da landing e têm layout
+ * próprio (casca centrada, campo com olho de 44px, medidor de força). Tudo
+ * aqui é prefixado com `auth-` e nada vaza para fora de `.auth-page`.
  *
- * ARMADILHA: os valores (hoje em `claro.css`, compartilhado com as outras
- * telas claras) são uma CÓPIA do sistema visual da landing, não um import. Se o azul da marca mudar lá, alguém precisa mudar aqui também —
- * importar o CSS do site (outro app, outro build, outro domínio) traria junto
- * o reset e o layout dele e quebraria o painel. A cópia é a escolha barata;
- * a divergência é o preço, e ele é pago em uma linha.
+ * DE ONDE VÊM AS CORES
+ * Desde 2026-10-15 o painel inteiro é claro e usa os mesmos tokens da landing,
+ * importados de `packages/marca/tokens.css` (via `index.css` e `claro.css`).
+ * Não há mais cópia: mudar a marca lá muda estas telas. Não escreva hex aqui;
+ * os `--auth-*` são apelidos dos tokens, definidos em `claro.css`.
  */
 
 .auth-page {
@@ -25,11 +21,11 @@
   /* O logo (`LogoHub`, compartilhado com o Toolbar do editor, que é escuro)
      pinta os traços com `var(--brand-accent)`. Redefinir a variável AQUI deixa
      o mesmo SVG legível no fundo claro sem tocar em quem o usa lá fora. */
-  --brand-accent: #0369a1;
+  --brand-accent: var(--marca);
 
   /* Geist já vem do `index.html`. A reserva é declarada de propósito: se o
      Google Fonts cair, a tela troca o desenho da letra e não o layout. */
-  font-family: 'Geist', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--fonte);
   color: var(--auth-tinta);
   background: var(--auth-papel-2);
 
@@ -69,8 +65,10 @@
   justify-content: center;
   gap: 32px;
   padding: 56px 56px 56px 64px;
-  /* grade clara sutil (claro.css) sobre o degradê da marca */
-  background: var(--claro-grade), linear-gradient(180deg, var(--auth-marca-fundo) 0%, var(--auth-papel-2) 100%);
+  /* Papel liso. A `--claro-grade` traz um brilho radial da marca por cima
+     (o "spotlight" que o detector aponta) e a tela de entrada não precisa de
+     enfeite para segurar o olhar: a promessa e o formulário fazem isso. */
+  background: var(--auth-papel-2);
   border-right: 1px solid var(--auth-linha);
 }
 
@@ -169,8 +167,8 @@
   align-items: center;
   justify-content: center;
   padding: 32px 20px 48px;
-  /* no celular a coluna do formulário é a tela inteira: leva a grade */
-  background: var(--claro-grade), var(--auth-papel-2);
+  /* no celular a coluna do formulário é a tela inteira: papel liso, sem brilho */
+  background: var(--auth-papel-2);
 }
 
 @media (min-width: 1000px) {
@@ -228,11 +226,11 @@
   gap: 10px;
   padding: 12px 14px;
   border-radius: var(--auth-r-12);
-  border: 1px solid #bfe0f2;
+  border: 1px solid var(--marca-borda);
   background: var(--auth-marca-fundo);
   font-size: 14px;
   line-height: 1.5;
-  color: #0b3a55;
+  color: var(--tinta);
 }
 
 .auth-promessa svg {
@@ -305,30 +303,31 @@
   font-size: 15px;
   color: var(--auth-tinta);
   background: var(--auth-papel);
-  border: 1px solid var(--auth-linha);
+  /* Borda de campo: --borda-3 dá 3,4:1 no papel (WCAG 1.4.11). */
+  border: 1px solid var(--borda-3);
   border-radius: var(--auth-r-8);
   transition: border-color 120ms ease, box-shadow 120ms ease;
   appearance: none;
 }
 
-/* 4,78:1 no branco. Placeholder É texto: o cinza claro de costume (#8a97ab e
+/* 5,7:1 no branco (--tinta-3). Placeholder É texto: o cinza claro de costume (#8a97ab e
    parecidos) fica em ~2,9:1 e reprova em AA. Aqui o placeholder carrega o
    EXEMPLO do que digitar ("Ex.: Condomínio Jardins") — se ele não for legível,
    o exemplo não existe e o campo vira adivinhação. */
 .auth-input::placeholder {
-  color: #667487;
+  color: var(--tinta-3);
   opacity: 1; /* Firefox aplica opacity .54 por padrão e derruba o contraste */
 }
 
 .auth-input:hover:not(:disabled) {
-  border-color: #b9c6d8;
+  border-color: var(--tinta-3);
 }
 
 .auth-input:focus-visible,
 .auth-input:focus {
   outline: none;
   border-color: var(--auth-marca);
-  box-shadow: 0 0 0 3px rgba(3, 105, 161, 0.18);
+  box-shadow: var(--anel-marca);
 }
 
 .auth-input[aria-invalid='true'] {
@@ -346,7 +345,7 @@
 }
 
 .auth-campo-senha .auth-input {
-  padding-right: 46px;
+  padding-right: 52px;
 }
 
 .auth-olho {
@@ -354,8 +353,8 @@
   right: 4px;
   top: 50%;
   transform: translateY(-50%);
-  width: 38px;
-  height: 38px;
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -405,10 +404,10 @@
   flex-direction: column;
   gap: 6px;
   padding: 12px 14px;
-  border: 1px solid #f0c4c1;
+  border: 1px solid color-mix(in srgb, var(--danger) 30%, var(--papel));
   border-radius: var(--auth-r-12);
-  background: #fdf2f1;
-  color: #7a1a15; /* 8,3:1 no fundo rosado */
+  background: var(--danger-fundo-solido);
+  color: var(--danger-tinta); /* 7,9:1 no fundo do estado */
   font-size: 14px;
   line-height: 1.5;
 }
@@ -440,7 +439,9 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 0 18px;
+  /* Padding vertical real: o texto não depende só do `min-height` para
+     respirar quando a fonte do sistema cresce. */
+  padding: 12px 18px;
   font: inherit;
   font-size: 15px;
   font-weight: 600;
@@ -456,7 +457,7 @@
    legível da tela. */
 .auth-botao-primario {
   background: var(--auth-marca);
-  color: #ffffff;
+  color: var(--papel);
 }
 
 .auth-botao-primario:hover:not(:disabled) {
@@ -471,7 +472,7 @@
 
 .auth-botao-secundario:hover:not(:disabled) {
   background: var(--auth-papel-2);
-  border-color: #b9c6d8;
+  border-color: var(--borda-3);
 }
 
 .auth-botao:focus-visible {
@@ -482,6 +483,19 @@
 .auth-botao:disabled {
   cursor: not-allowed;
   opacity: 0.55;
+}
+
+/* Botão principal travado (ex.: termos ainda não aceitos): cores sólidas em vez
+   de `opacity`, que deixava o rótulo branco em ~1,3:1 sobre o azul claro. O
+   motivo está em texto logo acima. Durante o envio (`.auth-girando` presente)
+   o botão segue azul: ali o travamento é de poucos segundos e o spinner
+   precisa continuar sobre a cor da marca. */
+.auth-botao-primario:disabled:not(:has(.auth-girando)) {
+  opacity: 1;
+  background: var(--auth-papel-3);
+  border-color: var(--auth-linha);
+  color: var(--auth-tinta-3); /* 5,2:1 sobre --papel-3 */
+  box-shadow: none;
 }
 
 .auth-botao .auth-girando {
@@ -571,6 +585,19 @@
   color: var(--auth-marca-hover);
 }
 
+/* Link que age como botão ("Esqueci a senha", "Criar conta grátis", "Entrar"):
+   é alvo de toque, então ganha 44 px de altura e respiro lateral. Os links
+   dentro de frase corrida (termos de uso) ficam de fora de propósito: o
+   rótulo inteiro do checkbox já é o alvo grande. */
+.auth-linha-opcoes .auth-link,
+.auth-rodape-caixa .auth-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 10px 6px;
+}
+
 .auth-link:focus-visible {
   outline: 2px solid var(--auth-marca);
   outline-offset: 2px;
@@ -613,9 +640,9 @@
 .auth-dev {
   margin-top: 18px;
   padding: 12px 14px;
-  border: 1px dashed #d8b26a;
+  border: 1px dashed color-mix(in srgb, var(--warn) 45%, var(--papel));
   border-radius: var(--auth-r-12);
-  background: #fdf6e7;
+  background: var(--warn-fundo-solido);
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -625,5 +652,111 @@
   margin: 0;
   font-size: 12px;
   line-height: 1.45;
-  color: #6b4506;
+  color: var(--warn-tinta);
+}
+
+/* ------------------------------------------- recuperar e redefinir a senha */
+
+/* Telas sem a coluna da vitrine (esqueci a senha, nova senha): uma coluna só,
+   em qualquer largura, com o cartão centrado sobre o papel-2. */
+.auth-shell-unica {
+  grid-template-columns: 1fr;
+}
+
+.auth-shell-unica .auth-coluna {
+  background: var(--auth-papel-2);
+}
+
+/* O cabeçalho com logo e título que nas outras telas só existe no celular. */
+.auth-shell-unica .auth-topo-mobile {
+  display: flex;
+}
+
+/* Corpo do estado de sucesso, dentro de .auth-caixa. */
+.auth-sucesso {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  text-align: center;
+}
+
+.auth-sucesso-icone {
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--ok-fundo-solido);
+  color: var(--ok);
+}
+
+.auth-sucesso-titulo {
+  margin: 0;
+  font-size: 20px;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  font-weight: 700;
+  color: var(--auth-tinta);
+}
+
+.auth-sucesso-texto {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--auth-tinta-2);
+}
+
+.auth-sucesso-texto strong {
+  color: var(--auth-tinta);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+/* Medidor de tamanho da senha. A cor acompanha um texto (.auth-dica logo abaixo):
+   cor sozinha não comunica nada (WCAG 1.4.1). */
+.auth-forca {
+  display: flex;
+  gap: 4px;
+}
+
+.auth-forca span {
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--auth-papel-3);
+  transition: background-color 120ms ease;
+}
+
+.auth-forca[data-nivel='fraca'] span[data-ligado] {
+  background: var(--danger);
+}
+
+.auth-forca[data-nivel='media'] span[data-ligado] {
+  background: var(--warn);
+}
+
+.auth-forca[data-nivel='boa'] span[data-ligado] {
+  background: var(--ok);
+}
+
+/* ------------------------------------------------------- piso do celular */
+
+/* Abaixo de 640 px: campo com 16 px (menos que isso o iOS dá zoom ao focar) e
+   o texto corrido de 14 a 15 px sobe para 16 px. */
+@media (max-width: 639px) {
+  .auth-input {
+    font-size: 16px;
+  }
+
+  .auth-subtitulo,
+  .auth-promessa,
+  .auth-erro-geral,
+  .auth-checkbox,
+  .auth-rodape-caixa,
+  .auth-sucesso-texto,
+  .auth-botao {
+    font-size: 16px;
+  }
 }

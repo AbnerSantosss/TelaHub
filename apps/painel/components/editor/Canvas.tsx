@@ -287,25 +287,25 @@ export const Canvas: React.FC<CanvasProps> = ({
   const GRID_COLS = 48;
 
   return (
-    <main className={`flex-1 bg-[#111827] relative flex justify-center p-4 ${
+    <main className={`flex-1 bg-papel-3 relative flex justify-center p-4 ${
       display.orientation === 'vertical'
         ? 'overflow-y-auto overflow-x-hidden items-start'
         : 'overflow-hidden items-center'
     }`}>
       <div className="absolute inset-0 z-0 opacity-10 pointer-events-none" 
            style={{ 
-             backgroundImage: 'radial-gradient(#4f46e5 1px, transparent 1px)', 
+             backgroundImage: 'radial-gradient(var(--borda-3) 1px, transparent 1px)', 
              backgroundSize: '20px 20px' 
            }}>
       </div>
 
       {/* Orientation label */}
-      <div className={`absolute top-3 left-3 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest bg-slate-900/80 px-3 py-1.5 rounded-full border backdrop-blur-sm z-20 ${
+      <div className={`absolute top-3 left-3 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest bg-papel-2 px-3 py-1.5 rounded-full border backdrop-blur-sm z-20 ${
         display.orientation === 'vertical'
-          ? 'text-purple-400 border-purple-800'
-          : 'text-slate-600 border-slate-800'
+          ? 'text-marca border-borda'
+          : 'text-tinta-3 border-borda'
       }`}>
-        <Maximize2 size={12} className={display.orientation === 'vertical' ? 'text-purple-500' : 'text-[#F97316]'} />
+        <Maximize2 size={12} className={display.orientation === 'vertical' ? 'text-marca' : 'text-warn'} />
         {display.orientation === 'vertical' ? 'Tela 9:16 (vertical)' : 'Tela 16:9 (horizontal)'}
       </div>
       
@@ -324,7 +324,7 @@ export const Canvas: React.FC<CanvasProps> = ({
 
       {/* ── Caixa externa: tamanho visual no editor ── */}
       <div
-        className="border border-[var(--th-accent)] rounded-md shadow-[0_0_40px_rgba(0,0,0,0.8)] shrink-0 overflow-hidden relative bg-black"
+        className="border border-marca rounded-md shadow-flutuante shrink-0 overflow-hidden relative bg-black"
         style={
           display.orientation === 'vertical'
             ? { width: 405, height: 720 }
@@ -409,7 +409,7 @@ export const Canvas: React.FC<CanvasProps> = ({
               <div 
                 key={w.i} 
                 onClick={(e) => { e.stopPropagation(); setSelectedWidget(w.i); }}
-                className={`group transition-all ${selectedWidget === w.i ? 'border border-[var(--th-accent)] shadow-[0_0_15px_rgba(124,58,237,0.35)]' : 'border border-transparent hover:border-white/20 hover:bg-white/5'} ${w.data.backgroundAnimation ? getBackgroundAnimationClass(w.data.backgroundAnimation) : (selectedWidget === w.i ? 'bg-slate-900/50 backdrop-blur-sm' : '')} !z-[var(--widget-z)]`}
+                className={`group transition-all ${selectedWidget === w.i ? 'border-2 border-marca' : 'border border-transparent hover:border-marca/50'} ${w.data.backgroundAnimation ? getBackgroundAnimationClass(w.data.backgroundAnimation) : (selectedWidget === w.i ? 'bg-black/30' : '')} !z-[var(--widget-z)]`}
                 style={{ '--widget-z': widgetZIndex, zIndex: widgetZIndex } as React.CSSProperties}
               >
                 <div 
@@ -420,7 +420,7 @@ export const Canvas: React.FC<CanvasProps> = ({
                   }}
                 >
                   {w.data.fullScreenMode && (
-                    <div className="absolute top-2 right-2 z-30 bg-indigo-950/80 border border-[var(--th-accent)]/50 backdrop-blur-sm text-[var(--th-accent)] text-[9px] font-black uppercase px-2 py-0.5 rounded-full shadow-[0_0_10px_rgba(124,58,237,0.3)] pointer-events-none animate-pulse flex items-center gap-1">
+                    <div className="absolute top-2 right-2 z-30 bg-papel border border-marca text-marca text-[9px] font-black uppercase px-2 py-0.5 rounded-full shadow-card pointer-events-none flex items-center gap-1">
                       <span>Tela cheia (100% da TV)</span>
                     </div>
                   )}
@@ -436,13 +436,13 @@ export const Canvas: React.FC<CanvasProps> = ({
                     />
                   )}
 
-                  <div className={`drag-handle absolute cursor-move z-20 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-b from-cyan-500/10 to-transparent ${w.type === WidgetType.IFRAME && w.data.iframeConfig?.interactive ? 'top-0 left-0 right-0 h-8 bg-cyan-500/80 backdrop-blur-sm border-b border-cyan-400 flex items-center justify-center text-[10px] font-bold text-white shadow-lg' : 'inset-0'}`}>
+                  <div className={`drag-handle absolute cursor-move z-20 opacity-0 group-hover:opacity-100 transition-opacity ${w.type === WidgetType.IFRAME && w.data.iframeConfig?.interactive ? 'top-0 left-0 right-0 h-8 bg-marca border-b border-marca-hover flex items-center justify-center text-[10px] font-bold text-white shadow-card' : 'inset-0'}`}>
                     {w.type === WidgetType.IFRAME && w.data.iframeConfig?.interactive && 'Arraste ou Clique aqui para selecionar'}
                   </div>
                   
                   <Suspense fallback={
-                    <div className="flex items-center justify-center w-full h-full bg-slate-950/20 backdrop-blur-sm">
-                      <Loader2 className="animate-spin text-cyan-500" size={24} />
+                    <div className="flex items-center justify-center w-full h-full bg-papel/60">
+                      <Loader2 className="animate-spin text-marca" size={24} />
                     </div>
                   }>
                     {renderWidgetPreview(w)}
@@ -451,7 +451,7 @@ export const Canvas: React.FC<CanvasProps> = ({
                   {selectedWidget === w.i && (
                     <button
                       onClick={(e) => { e.stopPropagation(); removeWidget(w.i); }}
-                      className="absolute -top-2 -right-2 p-1.5 bg-rose-600 text-white rounded-full shadow-lg hover:bg-rose-500 transition-all z-30"
+                      className="absolute -top-2 -right-2 p-1.5 bg-danger text-white rounded-full shadow-card hover:bg-danger/90 transition-all z-30"
                     >
                       <Trash2 size={12} />
                     </button>

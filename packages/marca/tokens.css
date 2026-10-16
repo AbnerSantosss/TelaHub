@@ -1,0 +1,119 @@
+/* ============================================================================
+   TelaHub, marca "Vitrine Acesa": a fonte única de cor, fonte, raio e sombra.
+   ----------------------------------------------------------------------------
+   Antes de 15/10/2026 cada app tinha a sua paleta: site claro e azul, checkout
+   bege com CTA verde e Exo 2, login copiando os tokens do site à mão (e já
+   divergindo em `--claro-linha`), painel escuro com seis cores de destaque à
+   escolha do usuário. Quem ia da landing ao painel passava por quatro produtos.
+
+   Agora site, login e cadastro, checkout e painel importam ESTE arquivo. Os
+   valores nasceram no `:root` do site, que é a referência; os tons de fundo de
+   estado (`--ok-fundo-solido` e irmãos) e `--marca-fundo` foram acrescentados
+   para as telas de operação e medidos como os outros.
+
+   Regra: app nenhum escreve hex solto. Faltou um tom, ele entra aqui primeiro,
+   com o contraste medido no comentário.
+
+   Contraste (WCAG, medido):
+     --tinta   sobre --papel = 16,9:1     --tinta-2 sobre --papel   = 8,6:1
+     --tinta-3 sobre --papel = 5,7:1      --tinta-3 sobre --papel-3 = 5,2:1
+     --marca   sobre --papel = 5,4:1      branco    sobre --marca   = 5,4:1
+     --marca   sobre --marca-fundo = 5,1:1
+     --ok      sobre --ok-fundo-solido     = 4,6:1
+     --warn    sobre --warn-fundo-solido   = 4,7:1
+     --danger  sobre --danger-fundo-solido = 5,7:1
+     --ok-tinta / --warn-tinta / --danger-tinta sobre o fundo do estado = 7,2 · 7,1 · 7,9:1
+     --borda-3 sobre --papel = 3,4:1 (borda de campo, nunca texto)
+     --luz     sobre --noite = 9,8:1 (sobre papel dá 1,8:1: nunca texto em fundo claro)
+   ========================================================================== */
+
+:root {
+  /* Papel: os fundos, do mais claro ao mais fechado. */
+  --papel: #ffffff;
+  --papel-2: #f4f7fb;
+  --papel-3: #e9eff7;
+
+  /* Tinta: texto sobre papel, do mais forte ao mais discreto. */
+  --tinta: #0a1223;
+  --tinta-2: #33415c;
+  --tinta-3: #55637d;
+
+  /* Marca: o azul que carrega ação, link e item selecionado. Fixo; não existe
+     seletor de cor do usuário. */
+  --marca: #0369a1;
+  --marca-hover: #025584;
+  --marca-fundo: #e6f0f7;
+  /* Borda de caixa informativa em tom da marca (decorativa, 1,4:1: nunca texto). */
+  --marca-borda: #bfe0f2;
+  /* A mesma marca em canais, para rgba(var(--marca-rgb), a). Mudou --marca, muda aqui. */
+  --marca-rgb: 3, 105, 161;
+
+  /* Noite: faixas escuras do site e a moldura das TVs ilustradas. */
+  --noite: #071426;
+  --noite-2: #0c1e36;
+  --noite-texto: #c5d3e6;
+  --noite-titulo: #e9f0fa;
+  --luz: #38bdf8;
+  --luz-2: #7dd3fc;
+  --luz-fundo: rgba(56, 189, 248, 0.1);
+  --noite-borda: rgba(168, 188, 214, 0.18);
+  --noite-borda-2: rgba(168, 188, 214, 0.28);
+
+  /* Bordas, da mais discreta à de campo de formulário. */
+  --borda: #dbe4ef;
+  --borda-2: #c9d5e3;
+  --borda-3: #7d8ca0;
+
+  /* Estado. Verde é sucesso e "no ar", nunca botão de compra. */
+  --ok: #0f7a5a;
+  --warn: #a35a06;
+  --danger: #b3261e;
+  --ok-fundo: rgba(15, 122, 90, 0.12);
+  --ok-fundo-solido: #e7f2ee;
+  --warn-fundo-solido: #fbf1e4;
+  --danger-fundo-solido: #fbeceb;
+  /* Tinta escura de estado: texto longo dentro da caixa do estado. */
+  --ok-tinta: #0b5a43;
+  --warn-tinta: #7a4305;
+  --danger-tinta: #8c1e18;
+
+  --raio-4: 4px;
+  --raio-6: 6px;
+  --raio-8: 8px;
+  --raio-12: 12px;
+  --raio-16: 16px;
+  --raio-24: 24px;
+
+  --sombra-card: 0 10px 30px rgba(0, 0, 0, 0.08);
+  --sombra-shot: 0 6px 12px rgba(0, 0, 0, 0.14);
+  --sombra-btn: 0 8px 24px rgba(3, 105, 161, 0.22);
+  --sombra-btn-press: 0 3px 10px rgba(3, 105, 161, 0.26);
+  --sombra-tv: 0 12px 24px rgba(0, 0, 0, 0.22);
+  --sombra-navbar: 0 6px 20px rgba(0, 0, 0, 0.07);
+  --sombra-flutuante: 0 6px 12px rgba(0, 0, 0, 0.18);
+  --sombra-modal: 0 30px 70px rgba(0, 0, 0, 0.3);
+  /* Destaque de card: sombra curta e neutra. Era um halo azul de 48px de blur
+     mais um anel de --marca com deslocamento zero (o "glow" que o detector
+     marca); o sinal do destaque é a borda de 2px, a sombra só acompanha. */
+  --sombra-destaque: 0 6px 12px rgba(0, 0, 0, 0.1);
+  --sombra-destaque-forte: 0 8px 12px rgba(0, 0, 0, 0.14);
+
+  --brilho-marca: rgba(3, 105, 161, 0.09);
+  --brilho-luz: rgba(56, 189, 248, 0.14);
+  --brilho-branco: rgba(255, 255, 255, 0.28);
+  --aurora-1: rgba(56, 189, 248, 0.16);
+  --aurora-2: rgba(3, 105, 161, 0.32);
+  --grade-linha: rgba(10, 18, 35, 0.055);
+
+  --veu: rgba(7, 20, 38, 0.55);
+  --anel-marca: 0 0 0 3px rgba(3, 105, 161, 0.18);
+
+  --ease-saida: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Uma família em tudo. Geist Mono só para código de pareamento e
+     identificador; número comum usa Geist com tabular-nums. */
+  --fonte: 'Geist', 'Geist Variable', 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --fonte-mono: 'Geist Mono', 'Geist Mono Variable', ui-monospace, 'SFMono-Regular', Consolas, monospace;
+
+  color-scheme: light;
+}

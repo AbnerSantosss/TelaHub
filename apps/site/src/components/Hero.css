@@ -176,8 +176,8 @@
 
 .tv__quadro {
   border-radius: var(--raio-6);
-  background: #0a1223;
-  color: #ffffff;
+  background: var(--tinta);
+  color: var(--papel);
   overflow: hidden;
 }
 

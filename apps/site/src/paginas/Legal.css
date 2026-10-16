@@ -164,10 +164,9 @@
 .legal__limites {
   margin-top: 8px;
   padding: 22px 24px;
-  border: 1px solid var(--borda-2);
-  border-left: 4px solid var(--warn);
-  border-radius: var(--raio-12);
-  background: var(--papel-2);
+  border: 1px solid var(--warn);
+  border-radius: var(--raio-8);
+  background: var(--warn-fundo-solido);
 }
 
 .legal__limites h3 {

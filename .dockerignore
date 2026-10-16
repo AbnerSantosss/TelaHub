@@ -1,0 +1,33 @@
+# Contexto de build na RAIZ do monorepo (gateway e Dockerfiles dos apps).
+# Com contexto na raiz, os .dockerignore de dentro de apps/* NÃO valem: o
+# Docker só lê o desta pasta. Por isso as regras deles foram trazidas para cá.
+#
+# A api continua com contexto próprio (./apps/api) e usa o .dockerignore dela.
+
+# Dependências e saídas de build: cada estágio roda `npm ci` e `npm run build`.
+**/node_modules
+**/dist
+**/dist-ssr
+**/*.log
+
+# Segredos e configuração local. `.env` do painel aponta para localhost e
+# entraria no bundle se fosse copiado.
+**/.env
+**/.env.*
+!**/.env.example
+
+# Conteúdo que não é código de app.
+.git
+.github
+.claude
+.obsidian
+.impeccable
+.playwright-mcp
+wiki
+raw
+registro
+infra
+apps/api
+
+# Cópia antiga de imagens do site. O que o site serve está em apps/site/public.
+apps/site/assets

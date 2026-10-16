@@ -62,30 +62,30 @@ const Reports: React.FC = () => {
   }, [selectedOrgId, startDate, endDate]);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 pb-12 font-sans">
+    <div className="min-h-screen bg-papel-2 text-tinta pb-12 font-sans">
       {/* HEADER SUPERIOR */}
-      <div className="bg-slate-900/80 border-b border-white/5 sticky top-0 z-50 backdrop-blur-xl">
+      <div className="bg-papel-2 border-b border-borda sticky top-0 z-50 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <button
               onClick={() => navigate('/')}
-              className="p-2 rounded-lg hover:bg-white/5 transition-colors text-slate-400 hover:text-white"
+              className="p-2 rounded-lg hover:bg-papel-3 transition-colors text-tinta-3 hover:text-tinta"
               title="Ir para o início"
             >
               <Home size={20} />
             </button>
             <div>
-              <h1 className="text-2xl font-black tracking-tight text-white">Dashboard Gerencial</h1>
-              <p className="text-sm text-slate-500 font-medium">Resumo de todas as suas telas</p>
+              <h1 className="text-2xl font-black tracking-tight text-tinta">Dashboard Gerencial</h1>
+              <p className="text-sm text-tinta-3 font-medium">Resumo de todas as suas telas</p>
             </div>
           </div>
           
           <div className="flex items-center gap-3">
-            <Button variant="outline" className="border-white/10 text-slate-300 hover:text-white bg-slate-900" onClick={fetchReport}>
+            <Button variant="outline" className="border-borda text-tinta-2 hover:text-tinta bg-papel" onClick={fetchReport}>
               <RefreshCcw size={16} className={`mr-2 ${loading ? 'animate-spin' : ''}`} />
               Atualizar
             </Button>
-            <Button className="bg-[var(--th-accent)] hover:bg-[var(--th-accent-strong)] text-white font-bold border border-[var(--th-accent)]/50 shadow-[0_0_15px_rgba(var(--th-accent-rgb),0.3)]">
+            <Button className="bg-marca hover:bg-marca-hover text-tinta font-bold border border-marca/50">
               <Download size={16} className="mr-2" />
               Exportar PDF
             </Button>
@@ -100,15 +100,15 @@ const Reports: React.FC = () => {
           que o produto quebrou. Aqui ele lê o motivo e o plano que libera.
         */}
         {planBlock && (
-          <div className="bg-slate-900/60 border border-amber-500/25 rounded-xl p-8 mb-8 text-center">
-            <div className="w-12 h-12 rounded-full bg-amber-500/10 border border-amber-500/25 flex items-center justify-center mx-auto mb-4">
-              <Lock size={20} className="text-amber-400" />
+          <div className="bg-papel-2 border border-warn/30 rounded-xl p-8 mb-8 text-center">
+            <div className="w-12 h-12 rounded-full bg-warn-fundo border border-warn/30 flex items-center justify-center mx-auto mb-4">
+              <Lock size={20} className="text-warn" />
             </div>
-            <h2 className="text-lg font-black text-white mb-2">
+            <h2 className="text-lg font-black text-tinta mb-2">
               Relatórios {planBlock.requiredPlan ? `são do plano ${planBlock.requiredPlan}` : 'não estão no seu plano'}
             </h2>
-            <p className="text-sm text-slate-400 max-w-xl mx-auto leading-relaxed">{planBlock.message}</p>
-            <p className="text-xs text-slate-500 mt-4">
+            <p className="text-sm text-tinta-3 max-w-xl mx-auto leading-relaxed">{planBlock.message}</p>
+            <p className="text-xs text-tinta-3 mt-4">
               O alerta por e-mail quando uma tela cai continua ativo no seu plano. O que fica de fora é o histórico consolidado.
             </p>
           </div>
@@ -118,14 +118,14 @@ const Reports: React.FC = () => {
         <motion.div 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-slate-900/60 border border-white/10 rounded-xl p-5 mb-8 flex flex-wrap gap-4 items-end shadow-2xl backdrop-blur-md"
+          className="bg-papel-2 border border-borda rounded-xl p-5 mb-8 flex flex-wrap gap-4 items-end shadow-modal backdrop-blur-md"
         >
           <div className="flex-1 min-w-[200px]">
-            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Organização / Loja</label>
+            <label className="text-[10px] font-black text-tinta-3 uppercase tracking-widest mb-2 block">Organização / Loja</label>
             <select
               value={selectedOrgId}
               onChange={(e) => setSelectedOrgId(e.target.value)}
-              className="w-full bg-slate-950 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-white focus:border-[var(--th-accent)] focus:ring-1 focus:ring-[var(--th-accent)] outline-none transition-all font-medium"
+              className="w-full bg-papel-2 border border-borda rounded-lg px-4 py-2.5 text-base md:text-sm text-tinta focus:border-marca focus:ring-1 focus:ring-marca outline-none transition-all font-medium"
             >
               {organizations.map((org) => (
                 <option key={org.id} value={org.id}>{org.name}</option>
@@ -133,34 +133,34 @@ const Reports: React.FC = () => {
             </select>
           </div>
           <div className="flex-1 min-w-[160px]">
-            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Data Inicial</label>
+            <label className="text-[10px] font-black text-tinta-3 uppercase tracking-widest mb-2 block">Data Inicial</label>
             <div className="relative">
-              <Calendar size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <Calendar size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-tinta-3" />
               <input
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="w-full bg-slate-950 border border-white/10 rounded-lg pl-10 pr-4 py-2.5 text-sm text-white focus:border-[var(--th-accent)] outline-none font-medium"
+                className="w-full bg-papel-2 border border-borda rounded-lg pl-10 pr-4 py-2.5 text-base md:text-sm text-tinta focus:border-marca outline-none font-medium"
               />
             </div>
           </div>
           <div className="flex-1 min-w-[160px]">
-            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Data Final</label>
+            <label className="text-[10px] font-black text-tinta-3 uppercase tracking-widest mb-2 block">Data Final</label>
             <div className="relative">
-              <Calendar size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <Calendar size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-tinta-3" />
               <input
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="w-full bg-slate-950 border border-white/10 rounded-lg pl-10 pr-4 py-2.5 text-sm text-white focus:border-[var(--th-accent)] outline-none font-medium"
+                className="w-full bg-papel-2 border border-borda rounded-lg pl-10 pr-4 py-2.5 text-base md:text-sm text-tinta focus:border-marca outline-none font-medium"
               />
             </div>
           </div>
         </motion.div>
 
         {loading ? (
-          <div className="h-[400px] flex flex-col items-center justify-center text-slate-500">
-            <Loader2 size={32} className="animate-spin mb-4 text-[var(--th-accent)]" />
+          <div className="h-[400px] flex flex-col items-center justify-center text-tinta-3">
+            <Loader2 size={32} className="animate-spin mb-4 text-marca" />
             <p className="font-medium">Sincronizando dados...</p>
           </div>
         ) : report ? (
@@ -170,7 +170,7 @@ const Reports: React.FC = () => {
               <KpiCard 
                 title="Telas Ativas" 
                 value={report.displaysCount} 
-                icon={<Monitor size={20} className="text-[var(--th-accent)]" />} 
+                icon={<Monitor size={20} className="text-marca" />} 
                 trend="+12%" 
                 trendPositive={true}
                 delay={0}
@@ -178,7 +178,7 @@ const Reports: React.FC = () => {
               <KpiCard 
                 title="Dispositivos Online" 
                 value={report.devicesOnline} 
-                icon={<Wifi size={20} className="text-[#22c55e]" />} 
+                icon={<Wifi size={20} className="text-ok" />} 
                 trend="98.5% Uptime" 
                 trendPositive={true}
                 delay={0.1}
@@ -186,7 +186,7 @@ const Reports: React.FC = () => {
               <KpiCard 
                 title="Dispositivos Offline" 
                 value={report.devicesOffline} 
-                icon={<WifiOff size={20} className="text-[#ef4444]" />} 
+                icon={<WifiOff size={20} className="text-danger" />} 
                 trend="-2 nesta semana" 
                 trendPositive={true}
                 delay={0.2}
@@ -194,7 +194,7 @@ const Reports: React.FC = () => {
               <KpiCard 
                 title="Broadcasts Enviados" 
                 value={report.broadcastsCount} 
-                icon={<Megaphone size={20} className="text-[#a855f7]" />} 
+                icon={<Megaphone size={20} className="text-marca" />} 
                 trend="+45%" 
                 trendPositive={true}
                 delay={0.3}
@@ -204,29 +204,29 @@ const Reports: React.FC = () => {
             {/* CHARTS */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <motion.div initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.4 }}>
-                <Card className="bg-slate-900/40 border-white/10 backdrop-blur-sm">
+                <Card className="bg-papel-2 border-borda backdrop-blur-sm">
                   <CardHeader>
-                    <CardTitle className="text-white font-black">Estabilidade da Rede</CardTitle>
-                    <CardDescription className="text-slate-400 font-medium">Dispositivos online x offline nos últimos 7 dias</CardDescription>
+                    <CardTitle className="text-tinta font-black">Estabilidade da Rede</CardTitle>
+                    <CardDescription className="text-tinta-3 font-medium">Dispositivos online x offline nos últimos 7 dias</CardDescription>
                   </CardHeader>
                   <CardContent className="h-[320px]">
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={timelineData}>
                         <defs>
                           <linearGradient id="colorOnline" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#22c55e" stopOpacity={0.3}/>
-                            <stop offset="95%" stopColor="#22c55e" stopOpacity={0}/>
+                            <stop offset="5%" stopColor="var(--ok)" stopOpacity={0.3}/>
+                            <stop offset="95%" stopColor="var(--ok)" stopOpacity={0}/>
                           </linearGradient>
                         </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
-                        <XAxis dataKey="date" stroke="#8B93A4" fontSize={12} tickLine={false} axisLine={false} />
-                        <YAxis stroke="#8B93A4" fontSize={12} tickLine={false} axisLine={false} />
+                        <CartesianGrid strokeDasharray="3 3" stroke="var(--borda)" vertical={false} />
+                        <XAxis dataKey="date" stroke="var(--borda-2)" tick={{ fill: 'var(--tinta-3)' }} fontSize={12} tickLine={false} axisLine={false} />
+                        <YAxis stroke="var(--borda-2)" tick={{ fill: 'var(--tinta-3)' }} fontSize={12} tickLine={false} axisLine={false} />
                         <RechartsTooltip 
-                          contentStyle={{ backgroundColor: '#0f172a', borderColor: '#ffffff15', borderRadius: '12px', color: '#fff', boxShadow: '0 10px 30px rgba(0,0,0,0.5)' }}
+                          contentStyle={{ backgroundColor: 'var(--papel)', borderColor: 'var(--borda)', borderRadius: '12px', color: 'var(--tinta)', boxShadow: 'var(--sombra-card)' }}
                           itemStyle={{ fontWeight: 600 }}
                         />
-                        <Area type="monotone" dataKey="online" stroke="#22c55e" strokeWidth={3} fillOpacity={1} fill="url(#colorOnline)" name="Online" />
-                        <Area type="monotone" dataKey="offline" stroke="#ef4444" strokeWidth={2} fillOpacity={0.1} fill="#ef4444" name="Offline" />
+                        <Area type="monotone" dataKey="online" stroke="var(--ok)" strokeWidth={3} fillOpacity={1} fill="url(#colorOnline)" name="Online" />
+                        <Area type="monotone" dataKey="offline" stroke="var(--danger)" strokeWidth={2} fillOpacity={0.1} fill="var(--danger)" name="Offline" />
                       </AreaChart>
                     </ResponsiveContainer>
                   </CardContent>
@@ -234,23 +234,23 @@ const Reports: React.FC = () => {
               </motion.div>
 
               <motion.div initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.5 }}>
-                <Card className="bg-slate-900/40 border-white/10 backdrop-blur-sm">
+                <Card className="bg-papel-2 border-borda backdrop-blur-sm">
                   <CardHeader>
-                    <CardTitle className="text-white font-black">Engajamento (Broadcasts)</CardTitle>
-                    <CardDescription className="text-slate-400 font-medium">Comunicações enviadas por dia</CardDescription>
+                    <CardTitle className="text-tinta font-black">Engajamento (Broadcasts)</CardTitle>
+                    <CardDescription className="text-tinta-3 font-medium">Comunicações enviadas por dia</CardDescription>
                   </CardHeader>
                   <CardContent className="h-[320px]">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={timelineData}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
-                        <XAxis dataKey="date" stroke="#8B93A4" fontSize={12} tickLine={false} axisLine={false} />
-                        <YAxis stroke="#8B93A4" fontSize={12} tickLine={false} axisLine={false} />
+                        <CartesianGrid strokeDasharray="3 3" stroke="var(--borda)" vertical={false} />
+                        <XAxis dataKey="date" stroke="var(--borda-2)" tick={{ fill: 'var(--tinta-3)' }} fontSize={12} tickLine={false} axisLine={false} />
+                        <YAxis stroke="var(--borda-2)" tick={{ fill: 'var(--tinta-3)' }} fontSize={12} tickLine={false} axisLine={false} />
                         <RechartsTooltip 
-                          contentStyle={{ backgroundColor: '#0f172a', borderColor: '#ffffff15', borderRadius: '12px', color: '#fff', boxShadow: '0 10px 30px rgba(0,0,0,0.5)' }}
-                          cursor={{ fill: '#ffffff05' }}
-                          itemStyle={{ fontWeight: 600, color: '#a855f7' }}
+                          contentStyle={{ backgroundColor: 'var(--papel)', borderColor: 'var(--borda)', borderRadius: '12px', color: 'var(--tinta)', boxShadow: 'var(--sombra-card)' }}
+                          cursor={{ fill: 'var(--papel-3)' }}
+                          itemStyle={{ fontWeight: 600, color: 'var(--marca)' }}
                         />
-                        <Bar dataKey="broadcasts" fill="#a855f7" radius={[6, 6, 0, 0]} name="Broadcasts" maxBarSize={50} />
+                        <Bar dataKey="broadcasts" fill="var(--marca)" radius={[6, 6, 0, 0]} name="Broadcasts" maxBarSize={50} />
                       </BarChart>
                     </ResponsiveContainer>
                   </CardContent>
@@ -259,7 +259,7 @@ const Reports: React.FC = () => {
             </div>
           </div>
         ) : (
-          <div className="text-center py-20 text-slate-500">
+          <div className="text-center py-20 text-tinta-3">
             Selecione uma organização para visualizar os relatórios consolidados.
           </div>
         )}
@@ -273,21 +273,21 @@ const KpiCard = ({ title, value, icon, trend, trendPositive, delay }: { title: s
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ delay, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-    className="bg-slate-900/50 border border-white/10 rounded-2xl p-6 relative overflow-hidden group hover:border-white/25 transition-all shadow-lg hover:shadow-xl hover:shadow-black/50 backdrop-blur-sm"
+    className="bg-papel-2 border border-borda rounded-2xl p-6 relative overflow-hidden group hover:border-borda-3 transition-all shadow-card hover:shadow-flutuante backdrop-blur-sm"
   >
-    <div className="absolute -right-6 -top-6 w-32 h-32 bg-white/5 rounded-full blur-3xl group-hover:bg-white/10 transition-colors pointer-events-none" />
+    <div className="absolute -right-6 -top-6 w-32 h-32 bg-papel-3 rounded-full blur-3xl group-hover:bg-papel-3 transition-colors pointer-events-none" />
     <div className="flex justify-between items-start mb-5 relative z-10">
-      <div className="w-12 h-12 rounded-xl bg-slate-950 flex items-center justify-center border border-white/10 shadow-inner">
+      <div className="w-12 h-12 rounded-xl bg-papel-2 flex items-center justify-center border border-borda shadow-inner">
         {icon}
       </div>
-      <div className={`flex items-center gap-1.5 text-[11px] font-black px-2.5 py-1.5 rounded-full uppercase tracking-wider ${trendPositive ? 'text-emerald-400 bg-emerald-400/10' : 'text-rose-400 bg-rose-400/10'}`}>
+      <div className={`flex items-center gap-1.5 text-[11px] font-black px-2.5 py-1.5 rounded-full uppercase tracking-wider ${trendPositive ? 'text-ok bg-ok-fundo' : 'text-danger bg-danger-fundo'}`}>
         {trendPositive ? <TrendingUp size={14} /> : <TrendingUp size={14} className="rotate-180" />}
         {trend}
       </div>
     </div>
     <div className="relative z-10">
-      <h3 className="text-4xl font-black text-white mb-1 tabular-nums tracking-tight">{value}</h3>
-      <p className="text-sm font-bold text-slate-500 uppercase tracking-wider">{title}</p>
+      <h3 className="text-4xl font-black text-tinta mb-1 tabular-nums tracking-tight">{value}</h3>
+      <p className="text-sm font-bold text-tinta-3 uppercase tracking-wider">{title}</p>
     </div>
   </motion.div>
 );

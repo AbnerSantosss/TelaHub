@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import { AlertTriangle, Info, CheckCircle, Flame, ShieldAlert, X } from 'lucide-react';
 import { cn } from '../libs/utils';
 
@@ -10,6 +10,11 @@ export const WordPullUp: React.FC<{
   delayOffset?: number;
 }> = ({ text, className, delayOffset = 0 }) => {
   const words = text.split(" ");
+  // Com movimento reduzido o texto aparece inteiro, sem subir palavra por palavra.
+  const reduzir = useReducedMotion();
+  if (reduzir) {
+    return <div className={cn("flex flex-wrap justify-center gap-x-2 gap-y-1", className)}>{text}</div>;
+  }
   
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -75,161 +80,110 @@ export const RealtimeBroadcastBanner: React.FC<RealtimeBroadcastBannerProps> = (
   message,
   type = 'rh',
 }) => {
-  
+  const reduzir = useReducedMotion();
+
+  // Cor por tipo: só o ícone e a faixa do topo levam cor. O cartão é papel claro
+  // da marca, igual aos outros modais do painel. Verde (ok) é o comunicado
+  // geral porque é o único tipo que confirma algo, não alerta.
   const config = {
     emergency: {
-      icon: <ShieldAlert className="text-rose-500 w-12 h-12" />,
-      themeColor: 'rgba(239, 68, 68, 0.95)',
-      borderColor: 'border-rose-500/50',
-      shadowColor: 'rgba(239, 68, 68, 0.4)',
-      bgGradient: 'from-rose-950/90 via-slate-950/95 to-rose-950/80',
-      glowClass: 'bg-rose-500/20'
+      icon: <ShieldAlert className="text-danger size-10" aria-hidden="true" />,
+      fundo: 'bg-danger-fundo',
+      faixa: 'bg-danger',
+      rotulo: 'Alerta de segurança',
     },
     rh: {
-      icon: <Info className="text-purple-400 w-12 h-12" />,
-      themeColor: 'rgba(124, 58, 237, 0.95)',
-      borderColor: 'border-[var(--th-accent)]/50',
-      shadowColor: 'rgba(124, 58, 237, 0.4)',
-      bgGradient: 'from-[var(--th-accent)]/15 via-slate-950/95 to-[var(--th-accent)]/5',
-      glowClass: 'bg-[var(--th-accent)]/20'
+      icon: <Info className="text-marca size-10" aria-hidden="true" />,
+      fundo: 'bg-marca-fundo',
+      faixa: 'bg-marca',
+      rotulo: 'Comunicado do RH',
     },
     alert: {
-      icon: <AlertTriangle className="text-amber-500 w-12 h-12" />,
-      themeColor: 'rgba(245, 158, 11, 0.95)',
-      borderColor: 'border-amber-500/50',
-      shadowColor: 'rgba(245, 158, 11, 0.4)',
-      bgGradient: 'from-amber-950/20 via-slate-950/95 to-amber-950/5',
-      glowClass: 'bg-amber-500/20'
+      icon: <AlertTriangle className="text-warn size-10" aria-hidden="true" />,
+      fundo: 'bg-warn-fundo',
+      faixa: 'bg-warn',
+      rotulo: 'Notificação crítica',
     },
     general: {
-      icon: <CheckCircle className="text-[#00D8F6] w-12 h-12" />,
-      themeColor: 'rgba(0, 216, 246, 0.95)',
-      borderColor: 'border-[#00D8F6]/50',
-      shadowColor: 'rgba(0, 216, 246, 0.4)',
-      bgGradient: 'from-[#00D8F6]/10 via-slate-950/95 to-slate-950',
-      glowClass: 'bg-[#00D8F6]/10'
-    }
+      icon: <CheckCircle className="text-ok size-10" aria-hidden="true" />,
+      fundo: 'bg-ok-fundo',
+      faixa: 'bg-ok',
+      rotulo: 'Comunicado interno',
+    },
   }[type];
 
   return (
     <AnimatePresence>
       {isOpen && (
-        <motion.div 
-          className="fixed inset-0 z-[9999] flex items-center justify-center p-6 md:p-12 overflow-hidden bg-black/70 backdrop-blur-md"
+        <motion.div
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 md:p-12 overflow-y-auto bg-[var(--veu)]"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
         >
-          {/* Neon Ambient Pulse Glow */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full filter blur-[150px] opacity-40 mix-blend-screen pointer-events-none animate-pulse">
-            <div className={cn("w-full h-full rounded-full transition-colors duration-1000", config.glowClass)} />
-          </div>
-
-          {/* Grid background on overlay */}
-          <div className="absolute inset-0 bg-[radial-gradient(#ffffff04_1px,transparent_1px)]" style={{ backgroundSize: '16px 16px' }} />
-
-          {/* Modal Container */}
           <motion.div
-            className={cn(
-              "relative w-full max-w-4xl rounded-3xl border bg-gradient-to-br p-8 md:p-16 shadow-[0_0_80px_-10px] text-center overflow-hidden",
-              config.borderColor,
-              config.bgGradient
-            )}
-            style={{ 
-              boxShadow: `0 0 80px -15px ${config.shadowColor}, inset 0 0 20px rgba(255, 255, 255, 0.02)` 
-            }}
-            initial={{ scale: 0.92, y: 30, opacity: 0 }}
-            animate={{ 
-              scale: 1, 
-              y: 0, 
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="comunicado-titulo"
+            aria-describedby="comunicado-mensagem"
+            className="relative w-full max-w-3xl rounded-2xl border border-borda bg-papel p-6 pt-10 md:p-14 shadow-modal text-center overflow-hidden"
+            initial={reduzir ? false : { scale: 0.96, y: 16, opacity: 0 }}
+            animate={{
+              scale: 1,
+              y: 0,
               opacity: 1,
-              transition: {
-                type: "spring",
-                damping: 20,
-                stiffness: 100
-              }
+              transition: { type: "spring", damping: 24, stiffness: 140 },
             }}
-            exit={{ 
-              scale: 0.95, 
-              y: 20, 
-              opacity: 0,
-              transition: { duration: 0.25, ease: "easeInOut" }
-            }}
+            exit={reduzir ? { opacity: 0 } : { scale: 0.98, y: 8, opacity: 0, transition: { duration: 0.2, ease: "easeInOut" } }}
           >
-            {/* Header / Accent Bar */}
-            <div className="absolute top-0 left-0 right-0 h-1.5 overflow-hidden">
-              <div 
-                className="h-full w-full animate-pulse"
-                style={{ backgroundColor: config.themeColor }}
-              />
-            </div>
+            {/* Faixa do topo: a cor do tipo, parada. */}
+            <div className={cn("absolute top-0 left-0 right-0 h-1.5", config.faixa)} aria-hidden="true" />
 
-            {/* Close Button */}
             {onClose && (
               <button
+                type="button"
                 onClick={onClose}
-                className="absolute top-6 right-6 p-2 rounded-full border border-white/5 bg-white/5 text-slate-400 hover:text-white hover:bg-white/10 hover:border-white/15 transition-all outline-none"
+                aria-label="Fechar comunicado"
+                className="absolute top-3 right-3 md:top-5 md:right-5 inline-flex size-11 items-center justify-center rounded-lg text-tinta-3 hover:text-tinta hover:bg-papel-3 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-marca"
               >
-                <X size={18} />
+                <X size={18} aria-hidden="true" />
               </button>
             )}
 
-            {/* Animated Icon Circle */}
-            <motion.div 
-              className="mx-auto w-24 h-24 rounded-full flex items-center justify-center border border-white/5 bg-slate-900/60 shadow-[inset_0_1px_5px_rgba(255,255,255,0.05)] relative mb-8"
-              initial={{ scale: 0.7, opacity: 0 }}
-              animate={{ 
-                scale: 1, 
-                opacity: 1,
-                transition: { delay: 0.2, type: "spring", damping: 12 }
-              }}
-            >
-              <div className="absolute inset-0 rounded-full bg-current opacity-5 animate-ping duration-1000" />
+            <div className={cn("mx-auto size-20 rounded-full flex items-center justify-center mb-6", config.fundo)}>
               {config.icon}
-            </motion.div>
+            </div>
 
-            {/* Broadcast Category Badge */}
-            <motion.div 
-              className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-white/10 bg-white/5 text-xs font-black uppercase tracking-[0.2em] mb-6 select-none"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0, transition: { delay: 0.3 } }}
-            >
-              <span className="w-2 h-2 rounded-full bg-current animate-pulse" style={{ color: config.themeColor }} />
-              {type === 'emergency' ? 'ALERTA DE SEGURANÇA' : type === 'rh' ? 'COMUNICADO DO RH' : type === 'alert' ? 'NOTIFICAÇÃO CRÍTICA' : 'COMUNICADO INTERNO'}
-            </motion.div>
+            <p className="inline-flex items-center rounded-full border border-borda bg-papel-2 px-3 py-1 text-sm font-semibold text-tinta-2 mb-5 select-none">
+              {config.rotulo}
+            </p>
 
-            {/* Word Pull Up Text: Title */}
-            <div className="mb-6">
-              <WordPullUp 
-                text={title} 
-                className="text-3xl md:text-5xl font-black text-white tracking-tight uppercase leading-none drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)] font-sans"
+            <h2 id="comunicado-titulo" className="mb-5">
+              <WordPullUp
+                text={title}
+                className="text-3xl md:text-5xl font-extrabold text-tinta tracking-tight leading-tight font-sans"
+                delayOffset={0.2}
+              />
+            </h2>
+
+            <div id="comunicado-mensagem" className="max-w-2xl mx-auto">
+              <WordPullUp
+                text={message}
+                className="text-lg md:text-2xl text-tinta-2 font-medium leading-relaxed font-sans"
                 delayOffset={0.4}
               />
             </div>
 
-            {/* Word Pull Up Text: Message Content */}
-            <div className="max-w-2xl mx-auto">
-              <WordPullUp 
-                text={message} 
-                className="text-lg md:text-2xl text-slate-300 font-medium leading-relaxed drop-shadow-[0_1px_5px_rgba(0,0,0,0.3)] font-sans"
-                delayOffset={0.7}
-              />
-            </div>
-
-            {/* Premium Button Action */}
             {onClose && (
-              <motion.div
-                className="mt-12"
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0, transition: { delay: 1.5 } }}
-              >
+              <div className="mt-10">
                 <button
+                  type="button"
                   onClick={onClose}
-                  className="px-8 py-3 rounded-xl font-black text-sm tracking-widest text-white border border-white/10 hover:border-white/20 bg-white/5 hover:bg-white/10 active:scale-95 transition-all shadow-lg"
+                  className="inline-flex min-h-11 items-center justify-center px-8 rounded-lg bg-marca text-[var(--papel)] font-semibold text-base shadow-btn hover:bg-marca-hover active:scale-[0.98] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-marca"
                 >
-                  CIENTE / CONFIRMAR
+                  Ciente, confirmar
                 </button>
-              </motion.div>
+              </div>
             )}
           </motion.div>
         </motion.div>

@@ -474,7 +474,6 @@ const CampanhaEditorPage = () => {
   return (
     <div className="space-y-5">
       <PageHeader
-        eyebrow="Backoffice · E-mail"
         title={isNew ? 'Nova campanha' : name || 'Campanha'}
         subtitle={
           campaign
@@ -638,7 +637,7 @@ const CampanhaEditorPage = () => {
                 title="Prévia da campanha"
                 srcDoc={previewHtml}
                 sandbox=""
-                className="h-72 w-full bg-white"
+                className="h-72 w-full bg-surface"
               />
               <p className="border-t border-line bg-app px-3 py-2 text-xs text-ink-subtle">
                 Sem o layout do sistema: no envio, o servidor embrulha este corpo no cabeçalho e no

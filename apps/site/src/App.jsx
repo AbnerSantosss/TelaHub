@@ -267,7 +267,7 @@ function App({ url }) {
       cta_location: ctaLocation,
       cta_label: ctaLabel,
       billing_interval: intervalo || 'mensal',
-      destination: planCode === 'gratis' ? 'signup' : 'checkout',
+      destination: 'signup',
       page_path: rota.caminho,
     });
 

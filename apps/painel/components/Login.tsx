@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
   AlertCircle,
   Check,
@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { demoLogin, getDemoAccounts, login } from '../services/storage';
 import { isApiError } from '../libs/api';
+import { checkoutUrlForIntent, isPaidIntent, readPlanIntent } from '../libs/external-urls';
 // tokens e efeitos do tema claro, antes do CSS da tela
 import './claro.css';
 import './Auth.css';
@@ -144,6 +145,7 @@ const Login: React.FC = () => {
   const [demoAccounts, setDemoAccounts] = useState<DemoAccount[]>([]);
 
   const navigate = useNavigate();
+  const location = useLocation();
 
   // No `npm run dev` o bloco de desenvolvimento já cobre isso; não mostrar os dois.
   useEffect(() => {
@@ -170,6 +172,15 @@ const Login: React.FC = () => {
       localStorage.setItem('officecom_saved_user', usedEmail);
     } else {
       localStorage.removeItem('officecom_saved_user');
+    }
+    // Quem escolheu plano pago no site e já tinha conta entra por aqui (o link
+    // "Entrar" do cadastro leva a query junto). Depois do login segue para o
+    // checkout em vez do painel; o checkout lê o token deste domínio e ativa o
+    // plano nesta organização. `location.href`: o checkout é outro app.
+    const intent = readPlanIntent();
+    if (isPaidIntent(intent)) {
+      window.location.href = checkoutUrlForIntent(intent);
+      return;
     }
     navigate('/');
   };
@@ -227,6 +238,9 @@ const Login: React.FC = () => {
 
     try {
       const user = await demoLogin(account.plan);
+      // Conta de demonstração vai sempre para o painel, mesmo com plano pago na
+      // URL: a organização demo é compartilhada, e uma compra feita nela
+      // ativaria o plano na conta de todo mundo que testa.
       if (user) navigate('/');
       else setError('Entramos, mas não encontramos essa conta.');
     } catch (e: any) {
@@ -453,7 +467,13 @@ const Login: React.FC = () => {
 
               <p className="auth-rodape-caixa">
                 Ainda não tem conta?{' '}
-                <button type="button" className="auth-link" onClick={() => navigate('/signup')}>
+                {/* A query do hash vai junto, para o cadastro continuar sabendo
+                    qual plano a pessoa escolheu no site. */}
+                <button
+                  type="button"
+                  className="auth-link"
+                  onClick={() => navigate({ pathname: '/signup', search: location.search })}
+                >
                   Criar conta grátis
                 </button>
               </p>

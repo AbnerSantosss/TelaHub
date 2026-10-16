@@ -68,12 +68,12 @@
   }
 }
 
+/* O setor da cena em caixa normal, mesmo desenho de `.chip`: em caixa alta com
+   espaçamento largo ele era o "sobretítulo" repetido que o detector marca. */
 .cena__setor {
   margin: 0;
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-size: 0.8125rem;
+  font-weight: 600;
   color: var(--luz);
 }
 
@@ -110,10 +110,6 @@
     gap: 8px;
     padding: 16px;
     border-radius: var(--raio-12);
-  }
-
-  .cena__setor {
-    font-size: 12px;
   }
 
   .cena__hoje,
