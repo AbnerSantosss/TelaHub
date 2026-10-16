@@ -10,7 +10,10 @@
 #    então publicar porta é obrigatório. Usar as mesmas 3025/3027 da stack
 #    antiga faria o container novo nem subir ("port is already allocated"),
 #    por isso a faixa 40xx.
-#      4025 → gateway  (rota: devtelahub.proxserverabner.site). Domínio único
+#      4026 → gateway  (rota: devtelahub.proxserverabner.site; variável
+#                       GATEWAY_PORT. Desde 16/10/2026 este compose sobe como
+#                       stack NOVA, repositório vitrine-acesa, ao lado da 117
+#                       que segue na 4025). Domínio único
 #                       desde 15/10/2026: site em /, painel em /app/, checkout
 #                       em /checkout/, api em /api/ e /uploads/. Ver
 #                       `apps/gateway/nginx.conf`. Os nomes antigos
@@ -80,8 +83,12 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:?defina POSTGRES_DB na stack}
     volumes:
       - pgdata:/var/lib/postgresql/data
+    # Só na rede própria da stack. Até 16/10/2026 o banco ficava na
+    # `telahub_net`, compartilhada com outras stacks: com duas stacks deste
+    # compose no mesmo host, o nome `db` ficava ambíguo e o backend de uma
+    # podia conectar no banco da outra.
     networks:
-      - telahub_net
+      - default
     healthcheck:
       # Substitui o `sleep 5` do compose antigo, que era um chute: o backend
       # espera o banco aceitar conexão de verdade.
@@ -220,12 +227,11 @@ services:
       start_period: 120s
     volumes:
       - uploads_data:/app/uploads
+    # Só a rede própria da stack: é onde o gateway o encontra e onde está o
+    # banco. O checkout separado da stack 119 não existe neste projeto (o
+    # gateway serve /checkout/), então a `telahub_net` saiu.
     networks:
-      # `default`: onde o gateway o encontra.
-      # `telahub_net`: onde o banco está e onde o checkout da stack 119 ainda
-      # o procura. Sai daqui quando a 119 for removida.
       - default
-      - telahub_net
     # Sequência de boot. A ORDEM IMPORTA:
     #   1. migrate-deploy  — aplica as MIGRAÇÕES versionadas (com baseline
     #                        automático em banco que veio da era do `db push`).
@@ -255,10 +261,11 @@ services:
   # 118 (site) e 119 (checkout). Ver apps/gateway/nginx.conf.
   gateway:
     ports:
-      # devtelahub.proxserverabner.site -> localhost:4025 (rota no túnel do host).
-      # Mesma porta do antigo `frontend`: a rota de devtelahubpainel já aponta
-      # para cá, e o gateway responde nela com 301 para o domínio novo.
-      - "4025:80"
+      # devtelahub.proxserverabner.site -> localhost:PORTA (rota no túnel do
+      # host). Padrão 4026 porque a 4025 é da stack 117 (telahub-prod), que
+      # continua no ar ao lado desta. Duas stacks na mesma porta = a segunda
+      # nem sobe ("port is already allocated").
+      - "${GATEWAY_PORT:-4026}:80"
     build:
       # Contexto na RAIZ: os apps importam arquivos de packages/.
       context: .
@@ -301,12 +308,9 @@ services:
 
 networks:
   # Rede própria da stack (o compose cria `<stack>_default`). É por ela que o
-  # gateway chega ao backend.
+  # gateway chega ao backend e o backend chega ao banco. Nenhuma rede externa:
+  # a stack sobe sozinha, sem `docker network create` antes.
   default:
-  # Compartilhada com as stacks do site, do checkout e do túnel.
-  # Criada uma única vez:  docker network create telahub_net
-  telahub_net:
-    external: true
 
 volumes:
   pgdata:
