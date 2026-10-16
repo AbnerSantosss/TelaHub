@@ -2,8 +2,8 @@
 //
 // Três estados, como nas referências:
 //   • `active`  — card branco aberto, com borda e sombra que o destacam dos
-//                 outros; badge quadrado escuro com o número;
-//   • `done`    — colapsa em card VERDE com ✓, resumo dos dados e lápis para
+//                 outros; badge quadrado na cor da marca com o número;
+//   • `done`    — colapsa em card de sucesso (verde) com ✓, resumo dos dados e lápis para
 //                 editar. É o detalhe que mantém o contexto sem ocupar a tela;
 //   • `pending` — esmaecido, badge em cinza, cabeçalho não clicável.
 //
@@ -44,12 +44,12 @@ const StepBadge = ({ index, state }: { index: number; state: StepState }) => {
   return (
     <span
       aria-hidden="true"
-      className={`money relative flex size-8 shrink-0 items-center justify-center rounded-lg text-xs font-bold transition-[background-color,color,box-shadow] duration-300 ${
+      className={`money relative flex size-8 shrink-0 items-center justify-center rounded-lg text-xs font-bold transition-[background-color,color] duration-300 ${
         isDone
-          ? 'bg-cta text-white shadow-cta'
+          ? 'bg-ok text-white'
           : isActive
-            ? 'bg-nav text-white shadow-[0_0_0_4px_rgb(23_24_27/0.08)]'
-            : 'border border-line bg-app text-ink-subtle'
+            ? 'bg-marca text-white'
+            : 'bg-papel-3 text-ink-subtle'
       }`}
     >
       <span
@@ -94,7 +94,7 @@ export const StepCard = ({
         isDone
           ? 'border-success/40 bg-success/8'
           : isActive
-            ? 'border-ink/15 bg-surface shadow-raised'
+            ? 'border-borda-2 bg-surface shadow-raised'
             : 'border-line/70 bg-surface/60'
       }`}
     >
@@ -113,24 +113,26 @@ export const StepCard = ({
 
           <span className="min-w-0 flex-1">
             <span
-              className={`block text-[13px] font-extrabold uppercase tracking-[0.12em] ${
+              className={`block text-sm font-bold ${
                 isDone ? 'text-success-ink' : isActive ? 'text-ink' : 'text-ink-subtle'
               }`}
             >
               {title}
             </span>
             {isDone && summary ? (
-              <span className="mt-1 block break-words text-xs leading-relaxed text-ink-muted">
+              <span className="mt-1 block max-w-[56ch] break-words text-base sm:text-xs leading-relaxed text-ink-muted">
                 {summary}
               </span>
             ) : null}
             {isActive && caption ? (
-              <span className="mt-1 block text-xs leading-relaxed text-ink-muted">{caption}</span>
+              <span className="mt-1 block max-w-[56ch] text-base sm:text-xs leading-relaxed text-ink-muted">
+                {caption}
+              </span>
             ) : null}
           </span>
 
           {canEdit ? (
-            <span className="flex shrink-0 items-center gap-1.5 text-xs font-bold uppercase tracking-[0.08em] text-success-ink">
+            <span className="flex shrink-0 items-center gap-1.5 text-xs font-bold text-success-ink">
               <Pencil aria-hidden="true" size={14} />
               <span className="hidden sm:inline">Editar</span>
               <span className="sr-only">Editar {title}</span>

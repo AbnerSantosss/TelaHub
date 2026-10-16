@@ -10,29 +10,37 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/80",
+        // Botão primário do site: marca sólida, texto branco (5,4:1), sombra
+        // com deslocamento. Sem gradiente e sem halo.
+        default: "bg-primary text-primary-foreground shadow-btn hover:bg-marca-hover",
         outline:
-          "border-border bg-background hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50",
+          "border-borda-2 bg-papel text-tinta hover:border-borda-3 hover:bg-papel-2 hover:text-tinta aria-expanded:bg-papel-2 aria-expanded:text-tinta",
         secondary:
           "bg-secondary text-secondary-foreground hover:bg-[color-mix(in_oklch,var(--color-secondary),var(--color-foreground)_5%)] aria-expanded:bg-secondary aria-expanded:text-secondary-foreground",
         ghost:
-          "hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted/50",
+          "text-tinta-2 hover:bg-papel-3 hover:text-tinta aria-expanded:bg-papel-3 aria-expanded:text-tinta",
         destructive:
-          "bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:hover:bg-destructive/30 dark:focus-visible:ring-destructive/40",
-        link: "text-primary underline-offset-4 hover:underline",
-        brand: "bg-gradient-to-br from-accent to-accent-2 text-white hover:opacity-90 shadow-glow border-none transition-all",
+          "bg-danger-fundo text-danger hover:border-danger focus-visible:border-danger focus-visible:ring-danger/20",
+        link: "text-marca underline-offset-4 hover:underline",
+        // Nome mantido por compatibilidade: era o gradiente do tema escuro e
+        // agora é o mesmo botão primário da `default`.
+        brand: "bg-primary text-primary-foreground shadow-btn hover:bg-marca-hover",
         // Efeitos adaptados do 21st.dev (Glow Button / Shimmer Button). O
         // visual mora em index.css (.btn-fx-*) porque usa pseudo-elementos,
-        // @media (pointer: fine) e prefers-reduced-motion.
+        // @media (pointer: fine) e prefers-reduced-motion. glow = primário do
+        // site com reflexo; shimmer = secundário em papel com faixa de luz.
         glow: "btn-fx-glow",
         shimmer: "btn-fx-shimmer",
       },
       size: {
+        // default e lg ganham altura mínima de 44px abaixo de md (alvo de
+        // toque no celular). É min-h, e não h, para não brigar com o `h-*` que
+        // a tela passa por className: tailwind-merge manteria o md:h-* da base.
         default:
-          "h-8 gap-1.5 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2",
+          "h-8 gap-1.5 px-2.5 max-md:min-h-11 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2",
         xs: "h-6 gap-1 rounded-[min(var(--radius-md),10px)] px-2 text-xs in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3",
         sm: "h-7 gap-1 rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3.5",
-        lg: "h-9 gap-1.5 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2",
+        lg: "h-9 gap-1.5 px-2.5 max-md:min-h-11 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2",
         icon: "size-8",
         "icon-xs":
           "size-6 rounded-[min(var(--radius-md),10px)] in-data-[slot=button-group]:rounded-lg [&_svg:not([class*='size-'])]:size-3",
@@ -48,21 +56,27 @@ const buttonVariants = cva(
   }
 )
 
-function Button({
-  className,
-  variant = "default",
-  size = "default",
-  asChild = false,
-  onPointerMove,
-  ...props
-}: React.ComponentProps<"button"> &
+type ButtonProps = React.ComponentPropsWithoutRef<"button"> &
   VariantProps<typeof buttonVariants> & {
     asChild?: boolean
-  }) {
+  }
+
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(function Button(
+  {
+    className,
+    variant = "default",
+    size = "default",
+    asChild = false,
+    onPointerMove,
+    ...props
+  }: ButtonProps,
+  ref
+) {
   const Comp = asChild ? Slot.Root : "button"
 
   return (
     <Comp
+      ref={ref}
       data-slot="button"
       data-variant={variant}
       data-size={size}
@@ -78,6 +92,6 @@ function Button({
       {...props}
     />
   )
-}
+})
 
 export { Button, buttonVariants }

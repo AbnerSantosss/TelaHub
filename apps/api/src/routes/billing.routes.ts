@@ -35,8 +35,14 @@ router.use(authMiddleware);
  * Base do app de checkout. Configurável porque desenvolvimento, homologação e
  * produção rodam em hosts diferentes — com a URL fixa no código, o botão
  * "Assinar" do painel de dev mandaria o cliente para a produção.
+ *
+ * O padrão é RELATIVO (`/checkout/c`): site, painel e checkout moram no mesmo
+ * domínio, e quem abre este link é o próprio painel (`window.location`), então
+ * o caminho basta e funciona em qualquer host. Um padrão absoluto aqui foi o
+ * que já mandou o painel de um ambiente para o checkout de outro. Quem precisar
+ * de URL absoluta (e-mail, por exemplo) define `CHECKOUT_URL`.
  */
-const CHECKOUT_URL = (process.env.CHECKOUT_URL || 'https://devtelahubcheckout.proxserverabner.site/c').replace(
+const CHECKOUT_URL = (process.env.CHECKOUT_URL || '/checkout/c').replace(
   /\/+$/,
   ''
 );

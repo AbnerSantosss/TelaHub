@@ -121,6 +121,10 @@ const Precos = ({ startConversion, abrirContato }) => {
    * (offsetLeft/Top/Width/Height), porque as abas têm larguras diferentes e,
    * no celular, empilham — não dá para deduzir do índice.
    *
+   * A pílula cobre o grupo inteiro e um `clip-path: inset()` deixa visível só o
+   * retângulo da aba ativa. Animar o clip-path não força layout; animar
+   * width/height (como era) força a cada quadro.
+   *
    * SSR: no HTML pré-renderizado não há medida; a aba ativa pinta o próprio
    * fundo (.precos__aba--ativa). Só depois de medir, o contêiner ganha
    * `--deslizante`, que passa o fundo para o indicador. Sem JavaScript, o
@@ -134,10 +138,19 @@ const Precos = ({ startConversion, abrirContato }) => {
     const posicionar = () => {
       const ativa = grupo.querySelector('.precos__aba--ativa');
       if (!ativa) return;
-      pilula.style.width = `${ativa.offsetWidth}px`;
-      pilula.style.height = `${ativa.offsetHeight}px`;
-      pilula.style.transform = `translate3d(${ativa.offsetLeft}px, ${ativa.offsetTop}px, 0)`;
+      const primeira = !grupo.classList.contains('precos__intervalo--deslizante');
+      const topo = ativa.offsetTop;
+      const esquerda = ativa.offsetLeft;
+      const direita = grupo.clientWidth - (esquerda + ativa.offsetWidth);
+      const base = grupo.clientHeight - (topo + ativa.offsetHeight);
+      // A primeira medida não anima: a pílula não "chega" de lugar nenhum.
+      if (primeira) pilula.style.transition = 'none';
+      pilula.style.clipPath = `inset(${topo}px ${direita}px ${base}px ${esquerda}px round 99px)`;
       grupo.classList.add('precos__intervalo--deslizante');
+      if (primeira) {
+        void pilula.offsetWidth; // força o estilo sem transição antes de religá-la
+        pilula.style.transition = '';
+      }
     };
 
     posicionar();
@@ -189,7 +202,6 @@ const Precos = ({ startConversion, abrirContato }) => {
   return (
     <section id="precos" className="secao secao--papel precos" aria-labelledby="precos-titulo">
       <div className="secao__cabeca precos__cabeca">
-        <span className="chip">Preços</span>
         <h2 className="h2" id="precos-titulo">
           A TV e a internet você já tem. A primeira tela é grátis, e cada tela a mais custa por mês
           menos que um cartaz de gráfica.

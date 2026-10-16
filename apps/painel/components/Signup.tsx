@@ -1,9 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { AlertCircle, Check, Eye, EyeOff, Info, Loader2, UserPlus } from 'lucide-react';
 import { api, setAuthToken, isApiError, getApiErrorMessage } from '../libs/api';
 import { EVENT, META_EVENT, newEventId, readFbCookies, track } from '../libs/tracking';
-import { SITE_URL } from '../libs/external-urls';
+import {
+  SITE_URL,
+  checkoutUrlForIntent,
+  isPaidIntent,
+  readPlanIntent,
+  type PlanIntent,
+} from '../libs/external-urls';
+import { getPlansCatalog } from '../services/billing';
 import type { SignupResponse } from '../types';
 import { LogoHub } from './Login';
 // tokens e efeitos do tema claro, antes do CSS da tela
@@ -27,7 +34,7 @@ const MIN_PASSWORD_LENGTH = 8;
 const TERMS_VERSION = '2026-09-05';
 const PRIVACY_VERSION = '2026-09-05';
 
-// Um subdomínio só para o site (ver `libs/external-urls.ts`); as páginas moram lá.
+// O site mora na raiz do mesmo domínio (ver `libs/external-urls.ts`).
 const TERMS_URL = `${SITE_URL}/termos`;
 const PRIVACY_URL = `${SITE_URL}/privacidade`;
 
@@ -90,8 +97,50 @@ function readAttribution(): SignupAttribution {
   }
 }
 
+/** "loja" → "Loja": rótulo provisório enquanto o catálogo não responde. */
+const planLabelFromCode = (code: string): string =>
+  code ? code.charAt(0).toUpperCase() + code.slice(1) : code;
+
 const Signup: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Plano escolhido no site. Lido UMA vez, como a atribuição: é ele que decide
+  // se a pessoa vai para o painel ou para o checkout depois de criar a conta.
+  const [planIntent] = useState<PlanIntent | null>(() => readPlanIntent());
+  const paidIntent = isPaidIntent(planIntent) ? planIntent : null;
+
+  // Quem já tem sessão e clicou num plano pago na landing não precisa de outra
+  // conta: vai direto pagar. Token vencido não trava nada, o checkout cai no
+  // modo visitante quando o `/auth/me` falha.
+  useEffect(() => {
+    if (!paidIntent) return;
+    let hasToken = false;
+    try {
+      hasToken = Boolean(localStorage.getItem('authToken'));
+    } catch {
+      hasToken = false;
+    }
+    if (hasToken) window.location.replace(checkoutUrlForIntent(paidIntent));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Nome do plano para o topo do formulário. Só o NOME, do catálogo público:
+  // valor quem mostra é o checkout, que calcula com o servidor. Sem resposta do
+  // catálogo, fica o código com inicial maiúscula.
+  const [planName, setPlanName] = useState<string | null>(null);
+  // `planIntent` é estado que nunca muda: o efeito roda uma vez.
+  useEffect(() => {
+    if (!isPaidIntent(planIntent)) return;
+    let cancelled = false;
+    void getPlansCatalog().then((catalog) => {
+      const plan = catalog?.plans?.find((p) => p.code === planIntent.plano);
+      if (!cancelled && plan?.name) setPlanName(plan.name);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [planIntent]);
 
   const [companyName, setCompanyName] = useState('');
   const [name, setName] = useState('');
@@ -240,12 +289,25 @@ const Signup: React.FC = () => {
         event: EVENT.SIGN_UP,
         params: {
           method: 'email',
-          plan: 'gratis',
+          // O plano que a pessoa ESCOLHEU no site. A conta nasce no grátis de
+          // qualquer jeito; medir `gratis` fixo esconderia quantos cadastros
+          // vieram de quem queria pagar, que é o número que separa campanha
+          // de topo de campanha de venda.
+          plan: planIntent?.plano ?? 'gratis',
           org_id: result.user?.organizationId ?? undefined,
         },
         metaEvent: META_EVENT.COMPLETE_REGISTRATION,
         eventId: metaEventId,
       });
+
+      // Escolheu plano pago no site: segue para o checkout, já logado. No mesmo
+      // domínio o checkout lê o `authToken` recém-gravado, preenche nome e
+      // e-mail e a compra cai nesta organização (`paid.handler.ts` acha a conta
+      // pelo e-mail). `location.href` e não `navigate`: o checkout é outro app.
+      if (paidIntent) {
+        window.location.href = checkoutUrlForIntent(paidIntent);
+        return;
+      }
 
       navigate('/', { replace: true });
     } catch (err) {
@@ -345,14 +407,34 @@ const Signup: React.FC = () => {
               </div>
             </div>
 
-            {/* A promessa da landing, repetida. Não é teste com prazo. */}
-            <p className="auth-promessa">
-              <Check size={18} aria-hidden="true" />
-              <span>
-                <strong>A primeira tela é grátis para sempre e não pede cartão.</strong> Ao ligar a 2ª
-                tela, a cobrança começa dela em diante e proporcional ao período.
-              </span>
-            </p>
+            {/* Plano pago escolhido no site: dizer qual é e o que vem depois.
+                Sem preço aqui, de propósito: o valor é do checkout, calculado
+                pelo servidor. Plano grátis (ou nenhum): a promessa da landing,
+                repetida. Não é teste com prazo. */}
+            {paidIntent ? (
+              <p className="auth-promessa">
+                <Check size={18} aria-hidden="true" />
+                <span>
+                  <strong>
+                    Plano escolhido: {planName ?? planLabelFromCode(paidIntent.plano)}
+                    {paidIntent.telas
+                      ? `, ${paidIntent.telas} ${paidIntent.telas === 1 ? 'tela' : 'telas'}`
+                      : ''}
+                    {paidIntent.intervalo === 'anual' ? ', cobrança anual' : ', cobrança mensal'}.
+                  </strong>{' '}
+                  Primeiro você cria a conta, sem cartão. Na etapa seguinte confere o valor e faz o
+                  pagamento.
+                </span>
+              </p>
+            ) : (
+              <p className="auth-promessa">
+                <Check size={18} aria-hidden="true" />
+                <span>
+                  <strong>A primeira tela é grátis para sempre e não pede cartão.</strong> Ao ligar a 2ª
+                  tela, a cobrança começa dela em diante e proporcional ao período.
+                </span>
+              </p>
+            )}
 
             <div className="auth-caixa">
               <form onSubmit={handleSubmit} noValidate>
@@ -580,7 +662,7 @@ const Signup: React.FC = () => {
                       {emailAlreadyUsed && (
                         <span className="auth-erro-geral-extra">
                           Já é você?{' '}
-                          <Link className="auth-link" to="/login">
+                          <Link className="auth-link" to={{ pathname: '/login', search: location.search }}>
                             Entrar agora
                           </Link>
                           .
@@ -599,14 +681,21 @@ const Signup: React.FC = () => {
                     ) : (
                       <UserPlus size={18} aria-hidden="true" />
                     )}
-                    {loading ? 'Criando sua conta…' : 'Criar conta grátis'}
+                    {loading
+                      ? 'Criando sua conta…'
+                      : paidIntent
+                        ? 'Criar conta e ir para o pagamento'
+                        : 'Criar conta grátis'}
                   </button>
                 </fieldset>
               </form>
 
               <p className="auth-rodape-caixa">
                 Já tem conta?{' '}
-                <Link className="auth-link" to="/login">
+                {/* A query do hash vai junto: quem chegou com `#/signup?plano=`
+                    e prefere entrar continua indo para o checkout depois. A
+                    query antes do `#` o `HashRouter` já preserva sozinho. */}
+                <Link className="auth-link" to={{ pathname: '/login', search: location.search }}>
                   Entrar
                 </Link>
               </p>

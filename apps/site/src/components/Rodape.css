@@ -27,6 +27,9 @@
 
 .rodape__linha {
   margin: 0;
+  /* `ch` vale pelo corpo de quem o declara: em `.rodape__identidade` (16px) os
+     62ch davam linhas de 13px com mais de 80 caracteres. */
+  max-width: 54ch;
   line-height: 1.5;
 }
 

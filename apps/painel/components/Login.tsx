@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
   AlertCircle,
   Check,
@@ -9,8 +9,9 @@ import {
   LogIn,
   ShieldCheck,
 } from 'lucide-react';
-import { login } from '../services/storage';
+import { demoLogin, getDemoAccounts, login } from '../services/storage';
 import { isApiError } from '../libs/api';
+import { checkoutUrlForIntent, isPaidIntent, readPlanIntent } from '../libs/external-urls';
 // tokens e efeitos do tema claro, antes do CSS da tela
 import './claro.css';
 import './Auth.css';
@@ -101,6 +102,16 @@ const DEV_ACCOUNTS: DevAccount[] = import.meta.env.DEV
   : [];
 const SHOW_DEV_LOGIN = import.meta.env.DEV && DEV_ACCOUNTS.length > 0;
 
+// Atalho de DEMONSTRAÇÃO, um botão por plano, para o painel de teste online
+// (stack 117, devtelahubpainel). Decisão do dono em 15/10/2026: botão aberto na
+// tela de login, sem Cloudflare Access e SEM SENHA em lugar nenhum.
+//
+// O painel não sabe e-mail nem senha de conta demo: pergunta à API quais planos
+// estão ligados (`GET /auth/demo-accounts`) e entra por `POST /auth/demo-login`.
+// Quem liga é a API, com `DEMO_LOGIN=true` (só o compose da 117 passa). Na stack
+// principal a lista vem vazia e o bloco nem aparece. Ver `api/src/lib/demo-login.ts`.
+type DemoAccount = { plan: string; label: string };
+
 /**
  * Erro de login em português, para a pessoa e não para o console.
  *
@@ -131,7 +142,22 @@ const Login: React.FC = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const [demoAccounts, setDemoAccounts] = useState<DemoAccount[]>([]);
+
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // No `npm run dev` o bloco de desenvolvimento já cobre isso; não mostrar os dois.
+  useEffect(() => {
+    if (SHOW_DEV_LOGIN) return;
+    let ativo = true;
+    getDemoAccounts().then((accounts) => {
+      if (ativo) setDemoAccounts(accounts);
+    });
+    return () => {
+      ativo = false;
+    };
+  }, []);
 
   useEffect(() => {
     const savedUser = localStorage.getItem('officecom_saved_user');
@@ -146,6 +172,15 @@ const Login: React.FC = () => {
       localStorage.setItem('officecom_saved_user', usedEmail);
     } else {
       localStorage.removeItem('officecom_saved_user');
+    }
+    // Quem escolheu plano pago no site e já tinha conta entra por aqui (o link
+    // "Entrar" do cadastro leva a query junto). Depois do login segue para o
+    // checkout em vez do painel; o checkout lê o token deste domínio e ativa o
+    // plano nesta organização. `location.href`: o checkout é outro app.
+    const intent = readPlanIntent();
+    if (isPaidIntent(intent)) {
+      window.location.href = checkoutUrlForIntent(intent);
+      return;
     }
     navigate('/');
   };
@@ -187,6 +222,26 @@ const Login: React.FC = () => {
     try {
       const user = await login(devEmail, devPassword);
       if (user) finishLogin(devEmail);
+      else setError('Entramos, mas não encontramos essa conta.');
+    } catch (e: any) {
+      console.error(e);
+      setError(mensagemDeErro(e));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDemoLogin = async (account: DemoAccount) => {
+    if (loading) return;
+    setLoading(true);
+    setError('');
+
+    try {
+      const user = await demoLogin(account.plan);
+      // Conta de demonstração vai sempre para o painel, mesmo com plano pago na
+      // URL: a organização demo é compartilhada, e uma compra feita nela
+      // ativaria o plano na conta de todo mundo que testa.
+      if (user) navigate('/');
       else setError('Entramos, mas não encontramos essa conta.');
     } catch (e: any) {
       console.error(e);
@@ -389,9 +444,36 @@ const Login: React.FC = () => {
                 </div>
               )}
 
+              {/* Demonstração por plano: só aparece quando a API tem DEMO_LOGIN=true
+                  (stack de teste). Ver o comentário em DemoAccount. */}
+              {demoAccounts.length > 0 && (
+                <div className="auth-dev">
+                  <p className="auth-dev-aviso">
+                    Ambiente de teste. Entre como cliente de um plano para ver o que ele libera.
+                  </p>
+                  {demoAccounts.map((account) => (
+                    <button
+                      key={account.plan}
+                      type="button"
+                      className="auth-botao auth-botao-secundario"
+                      onClick={() => handleDemoLogin(account)}
+                      disabled={loading}
+                    >
+                      Entrar como plano {account.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+
               <p className="auth-rodape-caixa">
                 Ainda não tem conta?{' '}
-                <button type="button" className="auth-link" onClick={() => navigate('/signup')}>
+                {/* A query do hash vai junto, para o cadastro continuar sabendo
+                    qual plano a pessoa escolheu no site. */}
+                <button
+                  type="button"
+                  className="auth-link"
+                  onClick={() => navigate({ pathname: '/signup', search: location.search })}
+                >
                   Criar conta grátis
                 </button>
               </p>

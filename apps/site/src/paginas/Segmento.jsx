@@ -86,7 +86,7 @@ export default function Segmento({ dados, startConversion, abrirContato, irParaS
       },
     });
 
-    const destino = conversionDestination('gratis');
+    const destino = conversionDestination('gratis', 1);
     if (destino) window.location.href = destino;
   };
 

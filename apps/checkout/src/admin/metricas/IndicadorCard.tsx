@@ -41,8 +41,6 @@ import { Button, cx } from '../ui';
 interface ToneStyle {
   /** Rótulo textual — o sinal que sobrevive sem a cor. */
   label: string;
-  /** Faixa lateral do cartão. */
-  edge: string;
   /** Texto do selo, em contraste AA sobre fundo claro. */
   chip: string;
   /** Preenchimento do segmento ativo na trilha. */
@@ -59,21 +57,18 @@ interface ToneStyle {
 export const INDICATOR_TONE: Record<Semaforo, ToneStyle> = {
   verde: {
     label: 'Verde',
-    edge: 'border-l-success',
     chip: 'border-success/25 bg-success/10 text-success-ink',
     fill: 'bg-success',
     dot: 'bg-success',
   },
   amarelo: {
     label: 'Atenção',
-    edge: 'border-l-warning',
     chip: 'border-warning/25 bg-warning/10 text-warning-ink',
     fill: 'bg-warning',
     dot: 'bg-warning',
   },
   vermelho: {
     label: 'Crítico',
-    edge: 'border-l-danger',
     chip: 'border-danger/25 bg-danger/10 text-danger-ink',
     fill: 'bg-danger',
     dot: 'bg-danger',
@@ -90,7 +85,6 @@ export const INDICATOR_TONE: Record<Semaforo, ToneStyle> = {
  */
 const SEM_DADO: ToneStyle = {
   label: 'Sem dado',
-  edge: 'border-l-line',
   chip: 'border-line bg-app text-ink-muted',
   fill: 'bg-ink-subtle',
   dot: 'bg-ink-subtle',
@@ -189,16 +183,16 @@ const IndicadorCard = ({
   const missing = indicator.value === null;
 
   return (
-    <div className={cx('rounded-xl border border-l-4 border-line bg-surface p-4', tone.edge)}>
+    <div className="rounded-xl border border-line bg-surface p-4">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           {/* O rótulo vem do servidor: é o mesmo texto da régua da estratégia. */}
           <p className="text-[13px] font-semibold text-ink">{indicator.label}</p>
-          <p className="mt-0.5 text-[11px] text-ink-subtle">Semana de {weekLabel}</p>
+          <p className="mt-0.5 text-xs text-ink-subtle">Semana de {weekLabel}</p>
         </div>
         <span
           className={cx(
-            'inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2 py-0.5 text-[11px] font-bold whitespace-nowrap',
+            'inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs font-bold whitespace-nowrap',
             tone.chip
           )}
         >
@@ -235,7 +229,7 @@ const IndicadorCard = ({
       )}
 
       {/* A meta fica NO cartão: número sem meta ao lado não decide nada. */}
-      <p className="mt-2.5 text-[11px] leading-snug text-ink-subtle">
+      <p className="mt-2.5 text-xs leading-snug text-ink-subtle">
         Meta: {metaDoIndicador(indicator)}
       </p>
     </div>

@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { Plus, RefreshCw, LogOut, Tv, Monitor } from 'lucide-react';
 import { User, Display, Device } from '../../types';
 import { Button } from '../ui/button';
-import { AccentPicker } from './AccentPicker';
 
 interface TopBarProps {
   currentUser: User | null;
@@ -38,104 +37,113 @@ export const TopBar: React.FC<TopBarProps> = ({
   const offlineDisplays = totalDisplays - onlineDisplays;
   const totalDevices = devices.filter(d => d.status === 'linked').length;
 
+  // Pílula de contagem. Rótulo em tinta-2 e número em Geist Mono: os quatro
+  // números lado a lado se leem como uma régua, sem cor de destaque em cada um.
+  const pilula =
+    'inline-flex items-center gap-2 rounded-md border border-borda bg-papel-2 px-2.5 py-1.5 text-[13px]';
+  const rotulo = 'font-medium text-tinta-2';
+  const numero = 'font-mono text-sm font-semibold tabular-nums';
+  // Botões de ícone: 44px no celular (alvo de toque), 36px a partir de lg. Sem
+  // `flex` aqui: quem usa decide o display. Com ele, o `hidden lg:flex` do
+  // "Atualizar" perdia para o `flex` e o botão aparecia duas vezes no celular,
+  // espremendo o "Conectar TV" até cortar o texto em 360px.
+  const botaoIcone =
+    'items-center justify-center size-11 lg:size-9 rounded-lg border-borda-2 bg-papel text-tinta-2 hover:bg-papel-2 hover:text-tinta';
+
   return (
-    <div
-      className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 rounded-2xl relative z-10 w-full"
-      style={{
-        background: 'var(--color-surface, rgba(255,255,255,0.025))',
-        border: '1px solid var(--color-border, rgba(255,255,255,0.07))',
-        padding: '12px 20px',
-        marginBottom: '12px'
-      }}
-    >
-      {/* 1. Logo */}
-      <div className="flex items-center gap-3 flex-shrink-0 w-full lg:w-auto justify-between lg:justify-start">
+    // Mesma barra da landing (apps/site Navbar.css): papel, borda fina e a
+    // sombra da navbar. Aqui fica dentro do container, por isso tem raio.
+    <div className="relative z-10 mb-3 flex w-full flex-col items-start justify-between gap-4 rounded-xl border border-borda bg-papel px-4 py-3 shadow-navbar sm:px-5 lg:flex-row lg:items-center">
+      {/* 1. Marca */}
+      <div className="flex w-full flex-shrink-0 items-center justify-between gap-3 lg:w-auto lg:justify-start">
         <button
           type="button"
           onClick={() => navigate('/')}
-          className="flex items-center gap-3 bg-transparent border-0 p-0 cursor-pointer text-left"
+          className="flex min-h-11 cursor-pointer items-center gap-2.5 rounded-lg border-0 bg-transparent p-0 text-left"
           title="Ir para o início"
           aria-label="Ir para o início"
         >
-          <div className="grid grid-cols-2 gap-[3px] w-[32px] h-[32px] flex-shrink-0">
-            <div className="bg-[var(--th-accent)] rounded-[2px]"></div>
-            <div className="bg-[var(--th-accent)]/35 rounded-[2px]"></div>
-            <div className="bg-[var(--th-accent)]/35 rounded-[2px]"></div>
-            <div className="bg-[#2563eb] rounded-[2px]"></div>
-          </div>
-          <div className="flex-shrink-0">
-            <h1 className="text-xl font-normal text-[#eaf2ff] tracking-tight uppercase leading-none">
-              TELA<span className="font-extrabold text-[var(--th-accent)]">HUB</span>
-            </h1>
-            <p
-              className="mt-0.5 font-medium whitespace-nowrap"
-              style={{
-                color: 'var(--txt3)',
-                fontSize: '10px',
-                letterSpacing: '0.06em'
-              }}
+          {/* O mesmo quadrado da navbar do site: marca com a TV em traço claro. */}
+          <span className="inline-flex size-8 flex-none items-center justify-center rounded-md bg-marca" aria-hidden="true">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="var(--papel)"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             >
-              Bem-vindo, {currentUser?.username || 'admin'}
-            </p>
-          </div>
+              <rect x="2" y="5" width="20" height="13" rx="2" />
+              <path d="M8 22h8M12 18v4" />
+            </svg>
+          </span>
+          <span className="flex-shrink-0">
+            <span className="block text-lg font-extrabold leading-none tracking-[-0.01em] text-tinta">
+              TelaHub
+            </span>
+            <span className="mt-1 block whitespace-nowrap text-[13px] font-medium text-tinta-3">
+              Bem-vindo, {currentUser?.name?.trim().split(/\s+/)[0] || currentUser?.username || 'admin'}
+            </span>
+          </span>
         </button>
 
-        {/* Refresh Action for Mobile Only - keeps top bar balanced */}
-        <div className="lg:hidden flex items-center gap-2">
-          <AccentPicker />
+        {/* Atualizar no celular: mantém a barra equilibrada */}
+        <div className="flex items-center gap-2 lg:hidden">
           <Button
             variant="outline"
             size="icon"
             onClick={onRefresh}
-            className="flex items-center justify-center size-11 lg:size-8 rounded-xl border-white/10 hover:bg-white/5 text-slate-400 hover:text-slate-200"
+            className={`flex ${botaoIcone}`}
+            title="Atualizar lista"
+            aria-label="Atualizar lista"
           >
-            <RefreshCw size={13} className={loading ? 'animate-spin text-[var(--th-accent)]' : ''} />
+            <RefreshCw size={16} className={loading ? 'animate-spin text-marca' : ''} />
           </Button>
         </div>
       </div>
 
-      {/* 2. STATS (Minimalist & Responsive) */}
-      <div className="flex items-center gap-2.5 flex-wrap flex-1 lg:justify-center w-full lg:w-auto">
-        {/* Telas */}
-        <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-lg px-2.5 py-1">
-          <Monitor size={12} className="text-[var(--th-accent)]" />
-          <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Telas:</span>
-          <span className="text-[11px] font-bold text-white">{totalDisplays}</span>
+      {/* 2. Contagens */}
+      <div className="flex w-full flex-1 flex-wrap items-center gap-2 lg:w-auto lg:justify-center">
+        <div className={pilula}>
+          <Monitor size={14} className="text-marca" aria-hidden="true" />
+          <span className={rotulo}>Telas</span>
+          <span className={`${numero} text-tinta`}>{totalDisplays}</span>
         </div>
 
-        {/* TVs Vinculadas */}
-        <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-lg px-2.5 py-1">
-          <Tv size={12} className="text-[#a855f7]" />
-          <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">TVs:</span>
-          <span className="text-[11px] font-bold text-white">{totalDevices}</span>
+        <div className={pilula}>
+          <Tv size={14} className="text-marca" aria-hidden="true" />
+          <span className={rotulo}>TVs</span>
+          <span className={`${numero} text-tinta`}>{totalDevices}</span>
         </div>
 
-        {/* Online */}
-        <div className="flex items-center gap-1.5 bg-[#22c55e]/10 border border-[#22c55e]/20 rounded-lg px-2.5 py-1">
-          <div className="w-1.5 h-1.5 rounded-full bg-[#22c55e] shadow-[0_0_8px_rgba(34,197,94,0.4)]" />
-          <span className="text-[10px] font-semibold text-slate-300 uppercase tracking-wider">Online:</span>
-          <span className="text-[11px] font-bold text-[#22c55e]">{onlineDisplays}</span>
+        {/* Verde só para o que está no ar. Fora do ar fica neutro: não é erro,
+            é a TV desligada. */}
+        <div className={pilula}>
+          <span className="size-2 rounded-full bg-ok" aria-hidden="true" />
+          <span className={rotulo}>Online</span>
+          <span className={`${numero} text-ok`}>{onlineDisplays}</span>
         </div>
 
-        {/* Offline */}
-        <div className="flex items-center gap-1.5 bg-[#ef4444]/10 border border-[#ef4444]/20 rounded-lg px-2.5 py-1">
-          <div className="w-1.5 h-1.5 rounded-full bg-[#ef4444] shadow-[0_0_8px_rgba(239,68,68,0.4)]" />
-          <span className="text-[10px] font-semibold text-slate-300 uppercase tracking-wider">Offline:</span>
-          <span className="text-[11px] font-bold text-[#ef4444]">{offlineDisplays}</span>
+        <div className={pilula}>
+          <span className="size-2 rounded-full border border-borda-3 bg-papel" aria-hidden="true" />
+          <span className={rotulo}>Offline</span>
+          <span className={`${numero} text-tinta-3`}>{offlineDisplays}</span>
         </div>
       </div>
 
-      {/* 3. Actions */}
-      <div className="flex items-center gap-2 flex-shrink-0 w-full lg:w-auto justify-end border-t border-white/5 lg:border-t-0 pt-3 lg:pt-0">
+      {/* 3. Ações */}
+      <div className="flex w-full flex-shrink-0 items-center justify-end gap-2 border-t border-borda pt-3 lg:w-auto lg:border-t-0 lg:pt-0">
         {/* "Vincular" era jargão nosso: quem administra um condomínio ou uma
             clínica chama isso de conectar a TV. O botão agora leva à tela
             inteira de ativação, não a um modal. */}
         <Button
           variant="shimmer"
           onClick={onLinkTv}
-          className="flex-1 lg:flex-none h-11 lg:h-9 gap-1.5 px-3 rounded-xl font-bold text-xs uppercase tracking-wider"
+          className="h-11 flex-1 gap-1.5 rounded-lg px-3 text-sm font-semibold lg:h-9 lg:flex-none"
         >
-          <Tv size={13} />
+          <Tv size={15} />
           <span>Conectar TV</span>
         </Button>
 
@@ -143,36 +151,34 @@ export const TopBar: React.FC<TopBarProps> = ({
           variant="glow"
           onClick={onCreateDisplay}
           disabled={loading}
-          className="flex-1 lg:flex-none h-11 lg:h-9 gap-1.5 px-4 rounded-xl text-xs"
+          className="h-11 flex-1 gap-1.5 rounded-lg px-4 text-sm font-semibold lg:h-9 lg:flex-none"
         >
-          <Plus size={14} strokeWidth={3} />
+          <Plus size={15} strokeWidth={2.5} />
           <span>Nova Tela</span>
         </Button>
 
-        <div className="hidden lg:block h-5 w-px bg-white/10 mx-0.5" />
-
-        <div className="hidden lg:block">
-          <AccentPicker />
-        </div>
+        <div className="mx-0.5 hidden h-5 w-px bg-borda lg:block" />
 
         <Button
           variant="outline"
           size="icon"
           onClick={onRefresh}
-          className="hidden lg:flex items-center justify-center size-11 lg:size-8 rounded-xl border-white/10 hover:bg-white/5 text-slate-400 hover:text-slate-200"
+          className={`hidden lg:flex ${botaoIcone}`}
           title="Atualizar lista"
+          aria-label="Atualizar lista"
         >
-          <RefreshCw size={13} className={loading ? 'animate-spin text-[var(--th-accent)]' : ''} />
+          <RefreshCw size={15} className={loading ? 'animate-spin text-marca' : ''} />
         </Button>
 
         <Button
           variant="outline"
           size="icon"
           onClick={onLogout}
-          className="flex items-center justify-center size-11 lg:size-8 rounded-xl border-white/10 hover:bg-rose-500/10 text-slate-400 hover:text-rose-500 flex-shrink-0"
+          className={`flex flex-shrink-0 ${botaoIcone} hover:border-danger hover:text-danger`}
           title="Sair"
+          aria-label="Sair"
         >
-          <LogOut size={13} />
+          <LogOut size={15} />
         </Button>
       </div>
     </div>

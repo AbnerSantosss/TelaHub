@@ -1,18 +1,26 @@
 # ==============================
 # Stage 1: Build the React app
 # ==============================
+#
+# CONTEXTO DE BUILD = RAIZ DO MONOREPO (`docker build -f apps/site/Dockerfile .`).
+# O site importa arquivos de `packages/`, fora da pasta dele. O gateway
+# (apps/gateway/Dockerfile) compila este mesmo app; esta imagem avulsa só serve
+# a stack 118 durante a transição para o domínio único.
 FROM node:22-alpine AS build
 
-WORKDIR /app
+WORKDIR /repo/apps/site
 
 # Copy package files first for better Docker cache
-COPY package.json package-lock.json ./
+COPY apps/site/package.json apps/site/package-lock.json ./
 
 # Install dependencies
 RUN npm ci --production=false
 
+# Wildcard de propósito: se `packages/` não existir no commit, o COPY não
+# falha (nenhum arquivo casa e o passo segue).
+COPY packag[e]s/ /repo/packages/
 # Copy source code
-COPY . .
+COPY apps/site/ ./
 
 # Destinos do funil (checkout e painel). O Vite resolve `VITE_*` em tempo de
 # BUILD e embute o valor no bundle — trocar o domínio exige rebuild da imagem,
@@ -44,10 +52,10 @@ FROM nginx:alpine
 RUN rm -rf /usr/share/nginx/html/*
 
 # Copy custom nginx config
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY apps/site/nginx.conf /etc/nginx/conf.d/default.conf
 
 # Copy built assets from build stage
-COPY --from=build /app/dist /usr/share/nginx/html
+COPY --from=build /repo/apps/site/dist /usr/share/nginx/html
 
 # Expose port 80
 EXPOSE 80

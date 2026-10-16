@@ -21,6 +21,21 @@ export class UserService {
       return null;
     }
 
+    return this.openSession(user);
+  }
+
+  /**
+   * Entrada SEM senha numa conta de demonstração (ver `demo-login.ts`).
+   * Só aceita e-mails da lista fixa de demos; a rota que chama já conferiu a
+   * flag `DEMO_LOGIN`. Devolve null se a conta ainda não foi criada pelo seed.
+   */
+  async loginDemo(email: string) {
+    const user = await userRepository.findByEmail(email);
+    if (!user) return null;
+    return this.openSession(user);
+  }
+
+  private async openSession(user: NonNullable<Awaited<ReturnType<typeof userRepository.findByEmail>>>) {
     // Registra último login
     await prisma.user.update({
       where: { id: user.id },

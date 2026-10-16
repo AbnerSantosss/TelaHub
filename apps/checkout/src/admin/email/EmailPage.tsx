@@ -144,7 +144,7 @@ export const Pill = ({ label, className }: { label: string; className: string })
   </span>
 );
 
-const th = 'px-4 py-2.5 text-left text-[11px] font-bold tracking-[0.1em] text-ink-subtle uppercase';
+const th = 'px-4 py-2.5 text-left text-xs font-semibold text-ink-subtle';
 
 /**
  * "Nova campanha" navega, então é `<Link>` e não `<button>`: âncora dentro de
@@ -152,7 +152,7 @@ const th = 'px-4 py-2.5 text-left text-[11px] font-bold tracking-[0.1em] text-in
  * primário sem importar o componente para dentro de uma âncora.
  */
 const linkButtonClass =
-  'inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-accent-strong px-3.5 py-2 ' +
+  'inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-transparent bg-accent-strong px-3.5 py-2 sm:min-h-0 ' +
   'text-sm font-semibold text-white transition-colors hover:bg-accent-strong-hover';
 
 /** Mínimo do `reasonSchema` é 3; a tela pede 5 — motivo de uma letra não explica nada. */
@@ -918,7 +918,7 @@ const HistoricoTab = ({
                 title="Corpo do e-mail enviado"
                 srcDoc={openMessage.htmlBody}
                 sandbox=""
-                className="h-72 w-full bg-white"
+                className="h-72 w-full bg-surface"
               />
             </div>
           </div>
@@ -970,7 +970,6 @@ const EmailPage = () => {
   return (
     <div className="space-y-5">
       <PageHeader
-        eyebrow="Backoffice"
         title="E-mail"
         subtitle="Gatilhos automáticos, campanhas e o registro de tudo que a plataforma tentou enviar."
       />
@@ -990,7 +989,7 @@ const EmailPage = () => {
               className={cx(
                 'rounded-full border px-4 py-1.5 text-[13px] font-semibold transition-colors',
                 active
-                  ? 'border-nav bg-nav text-white'
+                  ? 'border-marca bg-marca text-white'
                   : 'border-line bg-surface text-ink-muted hover:bg-app'
               )}
             >

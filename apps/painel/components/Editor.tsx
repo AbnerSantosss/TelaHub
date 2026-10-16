@@ -129,8 +129,8 @@ const Editor: React.FC = () => {
   }, [display]);
 
   if (!display) return (
-    <div className="h-screen w-screen flex flex-col items-center justify-center bg-slate-950 text-slate-500 gap-4">
-      <Loader2 className="animate-spin text-cyan-500" size={32} /> 
+    <div className="h-screen w-screen flex flex-col items-center justify-center bg-papel-2 text-tinta-3 gap-4">
+      <Loader2 className="animate-spin text-marca" size={32} /> 
       <p className="text-xs uppercase tracking-widest font-bold">Carregando estúdio...</p>
     </div>
   );
@@ -419,17 +419,17 @@ const Editor: React.FC = () => {
   const currentWidget = activePage.layout.find(w => w.i === selectedWidget);
 
   return (
-    <div className="h-screen flex flex-col bg-[#111827] overflow-hidden relative text-slate-200 font-sans">
+    <div className="h-screen flex flex-col bg-papel-3 overflow-hidden relative text-tinta font-sans">
       
       {/* Background Animation Selection Modal */}
       {showBgAnimModal && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-          <div ref={bgAnimModalRef} role="dialog" aria-modal="true" className="bg-slate-900 border border-slate-700 p-6 rounded-xl shadow-2xl max-w-2xl w-full mx-4 animate-in zoom-in-95 duration-200 max-h-[80vh] overflow-y-auto">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-tinta/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div ref={bgAnimModalRef} role="dialog" aria-modal="true" className="bg-papel border border-borda-2 p-6 rounded-xl shadow-modal max-w-2xl w-full mx-4 animate-in zoom-in-95 duration-200 max-h-[80vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                <MonitorPlay className="text-cyan-500" /> Escolher Fundo Animado
+              <h3 className="text-lg font-bold text-tinta flex items-center gap-2">
+                <MonitorPlay className="text-marca" /> Escolher Fundo Animado
               </h3>
-              <button onClick={() => setShowBgAnimModal(false)} className="text-slate-500 hover:text-white transition-colors">
+              <button onClick={() => setShowBgAnimModal(false)} className="text-tinta-3 hover:text-tinta transition-colors">
                 <X size={24} />
               </button>
             </div>
@@ -465,19 +465,19 @@ const Editor: React.FC = () => {
                   }}
                   className={`group relative overflow-hidden rounded-xl border-2 transition-all h-32 flex flex-col items-center justify-center p-4 ${
                     ((selectedWidget ? currentWidget?.data.backgroundAnimation : activePage.backgroundAnimation) || '') === option.id 
-                    ? 'border-cyan-500 ring-2 ring-cyan-500/20' 
-                    : 'border-slate-800 hover:border-slate-600 hover:scale-[1.02]'
+                    ? 'border-marca ring-2 ring-marca/30' 
+                    : 'border-borda hover:border-borda-3 hover:scale-[1.02]'
                   }`}
                 >
-                  <div className={`absolute inset-0 z-0 opacity-50 group-hover:opacity-80 transition-opacity ${getBackgroundAnimationClass(option.id)}`}></div>
+                  <div className={`absolute inset-0 z-0 opacity-30 group-hover:opacity-50 transition-opacity ${getBackgroundAnimationClass(option.id)}`}></div>
                   
                   <div className="relative z-10 text-center">
-                    <span className="block font-bold text-white text-sm drop-shadow-md mb-1">{option.label}</span>
-                    <span className="block text-[10px] text-slate-300 drop-shadow-md">{option.desc}</span>
+                    <span className="block font-bold text-tinta text-sm mb-1">{option.label}</span>
+                    <span className="block text-[10px] text-tinta-2">{option.desc}</span>
                   </div>
                   
                   {((selectedWidget ? currentWidget?.data.backgroundAnimation : activePage.backgroundAnimation) || '') === option.id && (
-                    <div className="absolute top-2 right-2 z-20 bg-cyan-500 text-black rounded-full p-1 shadow-lg">
+                    <div className="absolute top-2 right-2 z-20 bg-marca text-white rounded-full p-1 shadow-card">
                       <CheckCircle2 size={12} strokeWidth={3} />
                     </div>
                   )}
@@ -490,20 +490,20 @@ const Editor: React.FC = () => {
 
       {/* Delete Confirmation Modal */}
       {isClearingScene && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-          <div ref={clearSceneModalRef} role="dialog" aria-modal="true" className="bg-slate-900 border border-slate-700 p-6 rounded-xl shadow-2xl max-w-sm w-full mx-4 animate-in zoom-in-95 duration-200">
-            <h3 className="text-lg font-bold text-white mb-2">Limpar Todos os Widgets?</h3>
-            <p className="text-slate-400 text-sm mb-6">Todos os widgets desta cena serão removidos permanentemente. Esta ação não pode ser desfeita.</p>
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-tinta/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div ref={clearSceneModalRef} role="dialog" aria-modal="true" className="bg-papel border border-borda-2 p-6 rounded-xl shadow-modal max-w-sm w-full mx-4 animate-in zoom-in-95 duration-200">
+            <h3 className="text-lg font-bold text-tinta mb-2">Limpar Todos os Widgets?</h3>
+            <p className="text-tinta-3 text-sm mb-6">Todos os widgets desta cena serão removidos permanentemente. Esta ação não pode ser desfeita.</p>
             <div className="flex justify-end gap-3">
               <button 
                 onClick={() => setIsClearingScene(false)}
-                className="px-4 py-2 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors text-sm font-medium"
+                className="px-4 py-2 rounded-lg text-tinta-2 hover:bg-papel-3 hover:text-tinta transition-colors text-sm font-medium"
               >
                 Cancelar
               </button>
               <button 
                 onClick={clearAllWidgets}
-                className="px-4 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-white transition-colors text-sm font-bold shadow-lg shadow-rose-900/20"
+                className="px-4 py-2 rounded-lg bg-danger hover:bg-danger/90 text-white transition-colors text-sm font-bold shadow-card"
               >
                 Sim, Limpar Tudo
               </button>
@@ -537,20 +537,20 @@ const Editor: React.FC = () => {
 
       {/* Scene Delete Modal */}
       {pageToDelete !== null && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-          <div ref={sceneDeleteModalRef} role="dialog" aria-modal="true" className="bg-slate-900 border border-slate-700 p-6 rounded-xl shadow-2xl max-w-sm w-full mx-4 animate-in zoom-in-95 duration-200">
-            <h3 className="text-lg font-bold text-white mb-2">Excluir Cena {pageToDelete + 1}?</h3>
-            <p className="text-slate-400 text-sm mb-6">Esta ação não pode ser desfeita. Todos os widgets desta cena serão perdidos.</p>
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-tinta/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div ref={sceneDeleteModalRef} role="dialog" aria-modal="true" className="bg-papel border border-borda-2 p-6 rounded-xl shadow-modal max-w-sm w-full mx-4 animate-in zoom-in-95 duration-200">
+            <h3 className="text-lg font-bold text-tinta mb-2">Excluir Cena {pageToDelete + 1}?</h3>
+            <p className="text-tinta-3 text-sm mb-6">Esta ação não pode ser desfeita. Todos os widgets desta cena serão perdidos.</p>
             <div className="flex justify-end gap-3">
               <button 
                 onClick={() => setPageToDelete(null)}
-                className="px-4 py-2 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors text-sm font-medium"
+                className="px-4 py-2 rounded-lg text-tinta-2 hover:bg-papel-3 hover:text-tinta transition-colors text-sm font-medium"
               >
                 Cancelar
               </button>
               <button 
                 onClick={confirmRemovePage}
-                className="px-4 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-white transition-colors text-sm font-bold shadow-lg shadow-rose-900/20"
+                className="px-4 py-2 rounded-lg bg-danger hover:bg-danger/90 text-white transition-colors text-sm font-bold shadow-card"
               >
                 Sim, Excluir
               </button>
@@ -562,8 +562,8 @@ const Editor: React.FC = () => {
       {/* Toast Notification */}
       {showToast && (
         <div className="fixed top-8 left-1/2 -translate-x-1/2 z-[100] animate-in slide-in-from-top-4 duration-300">
-          <div className="bg-emerald-500/10 backdrop-blur-md text-emerald-400 px-6 py-3 rounded-full shadow-[0_0_20px_rgba(16,185,129,0.3)] flex items-center gap-3 border border-emerald-500/50">
-            <CheckCircle2 size={18} className="fill-emerald-500/20" />
+          <div className="bg-ok-fundo backdrop-blur-md text-ok px-6 py-3 rounded-full flex items-center gap-3 border border-ok">
+            <CheckCircle2 size={18} className="fill-ok/20" />
             <span className="font-bold text-sm tracking-wide">SALVO NA NUVEM</span>
           </div>
         </div>
@@ -596,7 +596,7 @@ const Editor: React.FC = () => {
         {/* Backdrop overlay for mobile sidebars */}
         {(showLeftSidebar || showRightSidebar) && (
           <div 
-            className="fixed inset-0 bg-black/60 z-50 md:hidden animate-in fade-in duration-200" 
+            className="fixed inset-0 bg-tinta/50 z-50 md:hidden animate-in fade-in duration-200" 
             onClick={() => { setShowLeftSidebar(false); setShowRightSidebar(false); }}
           />
         )}

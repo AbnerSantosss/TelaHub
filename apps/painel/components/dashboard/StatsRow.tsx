@@ -24,26 +24,27 @@ export const StatsRow: React.FC<StatsRowProps> = ({ displays, devices }) => {
     {
       label: 'Total',
       value: totalDisplays,
-      color: 'var(--th-accent)',
-      icon: <Monitor size={11} className="text-[var(--th-accent)]" />,
+      color: 'var(--tinta)',
+      icon: <Monitor size={13} className="text-marca" />,
     },
     {
       label: 'Online',
       value: onlineDisplays,
-      color: '#22c55e',
-      icon: <Wifi size={11} className="text-[#22c55e]" />,
+      color: 'var(--ok)',
+      icon: <Wifi size={13} className="text-ok" />,
     },
     {
       label: 'Offline',
       value: offlineDisplays,
-      color: '#ef4444',
-      icon: <WifiOff size={11} className="text-[#ef4444]" />,
+      // Fora do ar é TV desligada, não erro: tinta-3, sem vermelho.
+      color: 'var(--tinta-3)',
+      icon: <WifiOff size={13} className="text-tinta-3" />,
     },
     {
       label: 'TVs',
       value: totalDevices,
-      color: 'var(--th-accent)',
-      icon: <Tv size={11} className="text-[var(--th-accent)]" />,
+      color: 'var(--tinta)',
+      icon: <Tv size={13} className="text-marca" />,
     },
   ];
 
@@ -54,17 +55,15 @@ export const StatsRow: React.FC<StatsRowProps> = ({ displays, devices }) => {
           key={i}
           // fx-spotlight: mesmo brilho que segue o mouse dos cards de tela,
           // com raio menor porque o cartão de número é pequeno.
-          className="fx-spotlight flex items-center gap-1 px-2 py-0.5 rounded-md"
+          className="fx-spotlight flex items-center gap-1.5 rounded-md border border-borda bg-papel px-2.5 py-1"
           onPointerMove={moverSpotlight}
           style={{
-            background: 'rgba(255,255,255,0.04)',
-            border: '1px solid rgba(255,255,255,0.06)',
             ['--spot-size' as string]: '90px',
           } as React.CSSProperties}
         >
           {stat.icon}
-          <span className="text-[10px] font-medium text-slate-500 leading-none">{stat.label}</span>
-          <span className="text-[11px] font-bold leading-none" style={{ color: stat.color }}>{stat.value}</span>
+          <span className="text-[13px] font-medium text-tinta-2 leading-none">{stat.label}</span>
+          <span className="font-mono text-sm font-semibold tabular-nums leading-none" style={{ color: stat.color }}>{stat.value}</span>
         </div>
       ))}
     </div>

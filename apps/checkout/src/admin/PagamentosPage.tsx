@@ -157,7 +157,7 @@ const WEBHOOK_STATE_LABEL: Record<string, string> = {
   failed: 'Falhou',
 };
 
-const th = 'px-4 py-2.5 text-left text-[11px] font-bold tracking-[0.1em] text-ink-subtle uppercase';
+const th = 'px-4 py-2.5 text-left text-xs font-semibold text-ink-subtle';
 
 /** Os dois enums fechados do servidor, um por aba. Não se misturam. */
 type PaymentStatus = 'pending' | 'confirmed' | 'refunded' | 'failed' | 'canceled';
@@ -585,7 +585,6 @@ const PagamentosPage = () => {
   return (
     <div className="space-y-5">
       <PageHeader
-        eyebrow="Backoffice"
         title="Pagamentos"
         subtitle={
           <span aria-live="polite">
@@ -611,7 +610,7 @@ const PagamentosPage = () => {
               aria-current={active ? 'page' : undefined}
               className={cx(
                 'rounded-full border px-3 py-1.5 text-[13px] font-semibold transition-colors',
-                active ? 'border-nav bg-nav text-white' : 'border-line bg-surface text-ink-muted hover:bg-app'
+                active ? 'border-marca bg-marca text-white' : 'border-line bg-surface text-ink-muted hover:bg-app'
               )}
             >
               {item.label}

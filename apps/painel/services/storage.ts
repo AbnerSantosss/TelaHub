@@ -40,6 +40,23 @@ export const login = async (loginInput: string, password: string): Promise<User 
   return user;
 };
 
+/** Botões de demonstração por plano. Lista vazia = desligado nesta API. */
+export const getDemoAccounts = async (): Promise<{ plan: string; label: string }[]> => {
+  try {
+    const { accounts } = await api.get<{ accounts: { plan: string; label: string }[] }>('/auth/demo-accounts');
+    return accounts ?? [];
+  } catch {
+    return [];
+  }
+};
+
+/** Entra sem senha na conta demo do plano (rota só existe com DEMO_LOGIN=true). */
+export const demoLogin = async (plan: string): Promise<User | null> => {
+  const { token, user } = await api.post<{ token: string; user: User }>('/auth/demo-login', { plan });
+  setAuthToken(token);
+  return user;
+};
+
 /**
  * Cadastro self-service (rota pública `POST /api/signup`).
  * Cria organização + usuário admin + assinatura em trial e devolve

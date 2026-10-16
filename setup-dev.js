@@ -161,11 +161,16 @@ JWT_SECRET=${jwtSecret}
 # Servidor
 PORT=3001
 
-# URL do frontend (dev local)
-APP_URL=http://localhost:3000
+# Portas de dev do TelaHub: 4100 site, 4110 painel, 4130 checkout.
+# URL do painel (links dos e-mails)
+APP_URL=http://localhost:4110
+
+# Checkout (upgrade de plano pelo painel). Sem esta linha a API manda para o
+# checkout de PRODUÇÃO.
+CHECKOUT_URL=http://localhost:4130/c
 
 # CORS
-CORS_ORIGINS=http://localhost:5173,http://localhost:3000
+CORS_ORIGINS=http://localhost:4100,http://localhost:4110,http://localhost:4130
 
 # Admin padrão
 ADMIN_EMAIL=${adminEmail}
@@ -205,6 +210,18 @@ VITE_API_URL=http://localhost:3001/api
 # Só tem efeito em \`npm run dev\`; o botão não existe no build de produção.
 VITE_DEV_MASTER_EMAIL=${devMasterEmail}
 VITE_DEV_MASTER_PASSWORD=${devMasterPassword}
+
+# Destinos externos em desenvolvimento (ver libs/external-urls.ts). Sem eles o
+# painel local manda "ver planos"/upgrade para os domínios de PRODUÇÃO.
+VITE_SITE_URL=http://localhost:4100
+VITE_CHECKOUT_URL=http://localhost:4130
+
+# Atalhos "Entrar como plano X" da tela de login (só em \`npm run dev\`).
+# Contas criadas por \`npm run db:seed-demo-users\` na API (senha padrão Demo@123).
+VITE_DEV_PLAN_PASSWORD=Demo@123
+VITE_DEV_GRATIS_EMAIL=demo.gratis@telahub.local
+VITE_DEV_LOJA_EMAIL=demo.loja@telahub.local
+VITE_DEV_REDE_EMAIL=demo.rede@telahub.local
 `;
 
   if (fs.existsSync(frontendEnvPath)) {
@@ -217,7 +234,9 @@ VITE_DEV_MASTER_PASSWORD=${devMasterPassword}
   console.log(`\n${colors.bold}${colors.cyan}📋 Resumo${colors.reset}`);
   console.log(`   PostgreSQL Docker: localhost:${dbPort}`);
   console.log(`   Backend API:       http://localhost:3001`);
-  console.log(`   Frontend Vite:     http://localhost:3000`);
+  console.log(`   Site (vendas):     http://localhost:4100`);
+  console.log(`   Painel:            http://localhost:4110`);
+  console.log(`   Checkout:          http://localhost:4130`);
 
   console.log(`\n${colors.bold}${colors.cyan}🚀 Para rodar o projeto:${colors.reset}`);
   console.log(`   1. docker compose up db -d`);

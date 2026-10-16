@@ -332,7 +332,7 @@
 }
 
 .ctv-estado-erro {
-  background: #fdecea;
+  background: var(--danger-fundo-solido);
   color: var(--ctv-erro);
 }
 

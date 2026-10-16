@@ -90,22 +90,22 @@ const ForcePasswordChange: React.FC<ForcePasswordChangeProps> = ({ user, onSucce
     navigate('/login', { replace: true });
   };
 
+  // Sem fundo próprio: o body já é --papel-2 e a grade da marca vem do
+  // GridGlowBackground do App, o mesmo do painel.
   return (
-    <div className="min-h-screen w-full flex items-center justify-center p-6 bg-slate-950">
-      {/* Mesma malha de pontos da tela de login, para não parecer outra aplicação. */}
-      <div className="absolute inset-0 bg-[radial-gradient(rgba(14,165,233,0.03)_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none" />
+    <div className="relative min-h-screen w-full flex items-center justify-center p-4 md:p-6">
 
-      <Card className="w-full max-w-lg relative z-10 border border-white/10 bg-slate-900/70 backdrop-blur-md">
+      <Card className="w-full max-w-lg relative z-10 border border-borda bg-papel shadow-modal">
         <CardHeader className="gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[var(--th-accent)]/10 border border-[var(--th-accent)]/25 text-[var(--th-accent)] shrink-0">
-              <ShieldCheck size={20} />
+            <div className="size-10 rounded-lg flex items-center justify-center bg-marca-fundo text-marca shrink-0">
+              <ShieldCheck size={20} aria-hidden="true" />
             </div>
             <div>
-              <CardTitle className="text-base font-black uppercase tracking-tight text-slate-100">
+              <CardTitle className="text-lg font-bold text-tinta">
                 Defina sua senha
               </CardTitle>
-              <CardDescription className="text-xs text-slate-400">
+              <CardDescription className="text-sm text-tinta-3">
                 {user?.name || user?.email || 'Sua conta'}
               </CardDescription>
             </div>
@@ -114,8 +114,8 @@ const ForcePasswordChange: React.FC<ForcePasswordChangeProps> = ({ user, onSucce
           {/* O "porquê" precisa estar na tela: sem explicação, uma exigência de
               troca no primeiro acesso parece burocracia e o usuário reutiliza a
               senha do e-mail. */}
-          <p className="text-xs leading-relaxed text-slate-400 border-l-2 border-[var(--th-accent)]/40 pl-3">
-            A senha que você recebeu por e-mail é <strong className="text-slate-200">provisória</strong>: ela
+          <p className="text-sm leading-relaxed text-tinta-2 bg-marca-fundo rounded-lg p-3.5">
+            A senha que você recebeu por e-mail é <strong className="text-tinta">provisória</strong>: ela
             trafegou em texto claro, então qualquer pessoa com acesso à sua caixa de entrada poderia
             usá-la para entrar na sua conta. Escolha uma senha sua agora. Leva dez segundos, e a
             provisória deixa de valer.
@@ -125,7 +125,7 @@ const ForcePasswordChange: React.FC<ForcePasswordChangeProps> = ({ user, onSucce
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
-              <label htmlFor="fpc-current" className="text-[11px] font-black text-slate-400 uppercase tracking-wider">
+              <label htmlFor="fpc-current" className="block text-sm font-semibold text-tinta-2">
                 Senha provisória (a do e-mail)
               </label>
               <div className="relative group">
@@ -134,17 +134,17 @@ const ForcePasswordChange: React.FC<ForcePasswordChangeProps> = ({ user, onSucce
                   type={showPasswords ? 'text' : 'password'}
                   value={currentPassword}
                   onChange={(e) => setCurrentPassword(e.target.value)}
-                  className="pl-10 h-11 rounded-xl bg-slate-950/40 border-white/10 text-slate-100"
+                  className="pl-10 h-11 rounded-xl text-base md:text-sm"
                   placeholder="Cole aqui a senha recebida"
                   autoComplete="current-password"
                   autoFocus
                 />
-                <Lock size={15} className="absolute left-3.5 top-3.5 text-slate-500" />
+                <Lock size={15} className="absolute left-3.5 top-3.5 text-tinta-3 pointer-events-none" aria-hidden="true" />
               </div>
             </div>
 
             <div className="space-y-1.5">
-              <label htmlFor="fpc-new" className="text-[11px] font-black text-slate-400 uppercase tracking-wider">
+              <label htmlFor="fpc-new" className="block text-sm font-semibold text-tinta-2">
                 Nova senha
               </label>
               <div className="relative group">
@@ -153,15 +153,15 @@ const ForcePasswordChange: React.FC<ForcePasswordChangeProps> = ({ user, onSucce
                   type={showPasswords ? 'text' : 'password'}
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  className="pl-10 pr-10 h-11 rounded-xl bg-slate-950/40 border-white/10 text-slate-100"
+                  className="pl-10 pr-10 h-11 rounded-xl text-base md:text-sm"
                   placeholder={`Mínimo de ${MIN_PASSWORD_LENGTH} caracteres`}
                   autoComplete="new-password"
                 />
-                <KeyRound size={15} className="absolute left-3.5 top-3.5 text-slate-500" />
+                <KeyRound size={15} className="absolute left-3.5 top-3.5 text-tinta-3 pointer-events-none" aria-hidden="true" />
                 <button
                   type="button"
                   onClick={() => setShowPasswords((v) => !v)}
-                  className="absolute right-3.5 top-3.5 text-slate-500 hover:text-[var(--th-accent)] transition-colors"
+                  className="absolute right-0 top-0 size-11 inline-flex items-center justify-center rounded-lg text-tinta-3 hover:text-marca transition-colors"
                   aria-label={showPasswords ? 'Ocultar senhas' : 'Mostrar senhas'}
                 >
                   {showPasswords ? <EyeOff size={15} /> : <Eye size={15} />}
@@ -170,7 +170,7 @@ const ForcePasswordChange: React.FC<ForcePasswordChangeProps> = ({ user, onSucce
             </div>
 
             <div className="space-y-1.5">
-              <label htmlFor="fpc-confirm" className="text-[11px] font-black text-slate-400 uppercase tracking-wider">
+              <label htmlFor="fpc-confirm" className="block text-sm font-semibold text-tinta-2">
                 Confirme a nova senha
               </label>
               <div className="relative group">
@@ -179,11 +179,11 @@ const ForcePasswordChange: React.FC<ForcePasswordChangeProps> = ({ user, onSucce
                   type={showPasswords ? 'text' : 'password'}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="pl-10 h-11 rounded-xl bg-slate-950/40 border-white/10 text-slate-100"
+                  className="pl-10 h-11 rounded-xl text-base md:text-sm"
                   placeholder="Repita a nova senha"
                   autoComplete="new-password"
                 />
-                <KeyRound size={15} className="absolute left-3.5 top-3.5 text-slate-500" />
+                <KeyRound size={15} className="absolute left-3.5 top-3.5 text-tinta-3 pointer-events-none" aria-hidden="true" />
               </div>
             </div>
 
@@ -191,7 +191,7 @@ const ForcePasswordChange: React.FC<ForcePasswordChangeProps> = ({ user, onSucce
               type="submit"
               variant="brand"
               disabled={loading}
-              className="w-full py-6 rounded-xl uppercase text-xs tracking-wider font-bold"
+              className="w-full h-12 rounded-lg text-base md:text-sm font-semibold"
             >
               {loading ? <Loader2 size={16} className="animate-spin" /> : <ShieldCheck size={16} />}
               {loading ? 'Salvando...' : 'Salvar e continuar'}
@@ -202,7 +202,7 @@ const ForcePasswordChange: React.FC<ForcePasswordChangeProps> = ({ user, onSucce
               variant="ghost"
               onClick={handleLogout}
               disabled={loading}
-              className="w-full text-xs text-slate-500 hover:text-slate-300"
+              className="w-full min-h-11 text-sm text-tinta-2 hover:text-tinta"
             >
               <LogOut size={14} />
               Sair e trocar depois

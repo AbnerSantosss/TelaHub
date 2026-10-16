@@ -66,8 +66,6 @@ const Hero = ({ startConversion, scrollToSection }) => (
     <HeroFundo />
 
     <div className="hero__texto">
-      <span className="chip">Avisos, ofertas, agenda e informação na TV que você já tem</span>
-
       <h1 className="h1">
         A TV da portaria está ligada.{' '}
         <span className="hero__grito">O aviso da assembleia ainda está no papel.</span>
@@ -147,7 +145,7 @@ const Hero = ({ startConversion, scrollToSection }) => (
       <div className="hero__telas">
         {/* Deitada 16:9 — recepção de empresa */}
         <figure className="hero__figura">
-          <div className="tv">
+          <div className="tv" aria-hidden="true">
             <div className="tv__quadro tv__quadro--deitada">
               <div className="tv__coluna">
                 <span className="tv__titulo">Bem-vindo à Contábil Prisma</span>
@@ -175,7 +173,7 @@ const Hero = ({ startConversion, scrollToSection }) => (
 
         {/* Em pé 9:16 — portaria de condomínio */}
         <figure className="hero__figura hero__figura--pe">
-          <div className="tv tv--pe">
+          <div className="tv tv--pe" aria-hidden="true">
             <div className="tv__quadro tv__quadro--pe">
               <span className="tv__titulo">Condomínio Jardins</span>
               <span className="tv__linha">Assembleia: quinta, 19h30, salão de festas.</span>

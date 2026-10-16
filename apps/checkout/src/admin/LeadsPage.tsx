@@ -81,7 +81,7 @@ const statusMeta = (status: LeadStatus) => LEAD_STATUSES.find((item) => item.val
 const isLeadStatus = (value: string | null): value is LeadStatus =>
   !!value && LEAD_STATUSES.some((item) => item.value === value);
 
-const th = 'px-4 py-2.5 text-left text-[11px] font-bold tracking-[0.1em] text-ink-subtle uppercase';
+const th = 'px-4 py-2.5 text-left text-xs font-semibold text-ink-subtle';
 
 /**
  * Seletor de status da linha.
@@ -201,7 +201,6 @@ const LeadsPage = () => {
   return (
     <div className="space-y-5">
       <PageHeader
-        eyebrow="Backoffice"
         title="Leads"
         subtitle={
           <span aria-live="polite">
@@ -220,7 +219,7 @@ const LeadsPage = () => {
           onClick={() => updateParams({ status: undefined })}
           className={cx(
             'rounded-full border px-3 py-1.5 text-[13px] font-semibold transition-colors',
-            !status ? 'border-nav bg-nav text-white' : 'border-line bg-surface text-ink-muted hover:bg-app'
+            !status ? 'border-marca bg-marca text-white' : 'border-line bg-surface text-ink-muted hover:bg-app'
           )}
         >
           Todos
@@ -364,7 +363,7 @@ const LeadsPage = () => {
                             que ninguém quis atender.
                           */}
                           {!lead.notifiedAt && (
-                            <p className="mt-1 inline-flex items-center rounded border border-warning/30 bg-warning/10 px-1.5 py-px text-[11px] font-semibold whitespace-nowrap text-warning-ink">
+                            <p className="mt-1 inline-flex items-center rounded border border-warning/30 bg-warning/10 px-1.5 py-px text-xs font-semibold whitespace-nowrap text-warning-ink">
                               aviso por e-mail não saiu
                             </p>
                           )}

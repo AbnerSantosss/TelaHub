@@ -15,11 +15,13 @@
     "dev:painel": "npm --prefix apps/painel run dev",
     "dev:checkout": "npm --prefix apps/checkout run dev",
     "dev:site": "npm --prefix apps/site run dev",
+    "dev:unificado": "node scripts/dev-unificado.mjs",
 
     "build:api": "npm --prefix apps/api run build",
     "build:painel": "npm --prefix apps/painel run build",
     "build:checkout": "npm --prefix apps/checkout run build",
     "build:site": "npm --prefix apps/site run build",
+    "build:gateway": "docker build -f apps/gateway/Dockerfile -t telahub-gateway .",
     "build:all": "npm run build:api && npm run build:painel && npm run build:checkout && npm run build:site",
 
     "test:api": "npm --prefix apps/api test",

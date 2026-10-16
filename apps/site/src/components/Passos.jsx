@@ -34,7 +34,7 @@ import './Passos.css';
  *
  * A `prop` é OPCIONAL de propósito: hoje `App.jsx` renderiza `<Passos />` sem
  * nenhuma, e um botão que depende de prop inexistente seria um clique morto no
- * ar. Sem a prop, a seção usa `signupUrl()` — o MESMO destino que
+ * ar. Sem a prop, a seção usa `signupUrl('gratis', 1)`, o MESMO destino que
  * `conversionDestination('gratis')` escolhe, inclusive com a atribuição de
  * campanha na URL. Quando a prop chegar, ela ganha, porque o caminho único de
  * conversão do `App.jsx` também dispara o `begin_checkout`.
@@ -67,7 +67,7 @@ export default function Passos({ startConversion }) {
     }
 
     // Plano B: o mesmo destino do funil, com a atribuição de campanha junto.
-    window.location.href = signupUrl();
+    window.location.href = signupUrl('gratis', 1);
   };
 
   return (
@@ -78,8 +78,6 @@ export default function Passos({ startConversion }) {
     >
       <div className="split split--midia">
         <div className="passos__texto reveal">
-          <p className="chip passos__chip">Como funciona</p>
-
           <h2 id="passos-titulo" className="h2">
             Leva menos tempo que fazer um cartaz.
           </h2>

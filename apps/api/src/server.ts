@@ -77,13 +77,13 @@ if (TRUST_PROXY && TRUST_PROXY !== 'false') {
 }
 
 // CORS configurado para produção + desenvolvimento
-// Padrões de desenvolvimento: 3000 = painel, 5173 = site de vendas,
-// 3030 = app de checkout. Em produção, `CORS_ORIGINS` precisa listar as origens
+// Padrões de desenvolvimento (bloco do TelaHub): 4100 = site de vendas,
+// 4110 = painel, 4130 = app de checkout. Em produção, `CORS_ORIGINS` precisa listar as origens
 // EXATAS de cada um desses três — a comparação abaixo é por igualdade, então
 // esquecer uma delas faz aquele app parar de falar com a API.
 const ALLOWED_ORIGINS = process.env.CORS_ORIGINS
   ? process.env.CORS_ORIGINS.split(',').map(o => o.trim())
-  : ['http://localhost:3010', 'http://localhost:5173', 'http://localhost:3030'];
+  : ['http://localhost:4100', 'http://localhost:4110', 'http://localhost:4130'];
 
 if (process.env.NODE_ENV === 'production' && ALLOWED_ORIGINS.includes('*')) {
   console.warn(

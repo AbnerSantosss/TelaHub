@@ -39,7 +39,7 @@ function DialogOverlay({
     <DialogPrimitive.Overlay
       data-slot="dialog-overlay"
       className={cn(
-        "fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
+        "fixed inset-0 z-50 bg-[var(--veu)] backdrop-blur-sm flex items-center justify-center data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
         className
       )}
       {...props}
@@ -61,7 +61,7 @@ function DialogContent({
         <DialogPrimitive.Content
           data-slot="dialog-content"
           className={cn(
-            "z-50 w-[95vw] max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl bg-[#0e121c] border border-white/10 p-0 text-sm text-popover-foreground shadow-[0_24px_56px_rgba(0,0,0,0.55)] outline-none data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
+            "z-50 w-[95vw] max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl bg-papel border border-borda p-0 text-sm text-tinta shadow-modal outline-none data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
             className
           )}
           {...props}
@@ -107,7 +107,7 @@ function DialogFooter({
     <div
       data-slot="dialog-footer"
       className={cn(
-        "flex flex-col-reverse gap-2 border-t border-white/10 p-4 sm:flex-row sm:justify-end",
+        "flex flex-col-reverse gap-2 border-t border-borda p-4 sm:flex-row sm:justify-end",
         className
       )}
       {...props}

@@ -1,6 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { Toaster } from 'sonner';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 
 /**
@@ -30,6 +29,20 @@ const EmailPage = lazy(() => import('./admin/email/EmailPage'));
 const CampanhaEditorPage = lazy(() => import('./admin/email/CampanhaEditorPage'));
 const PagamentosPage = lazy(() => import('./admin/PagamentosPage'));
 const LeadsPage = lazy(() => import('./admin/LeadsPage'));
+const ToasterAdmin = lazy(() => import('./lib/ToasterAdmin'));
+
+// O sonner injeta uma folha de estilo no <head> assim que carrega. Só o
+// backoffice usa toast; o checkout tem os próprios avisos (`lib/Avisos.tsx`).
+// Montar o Toaster só em `/admin` mantém essa folha longe de quem compra.
+const ToasterDoAdmin = () => {
+  const { pathname } = useLocation();
+  if (!pathname.startsWith('/admin')) return null;
+  return (
+    <Suspense fallback={null}>
+      <ToasterAdmin />
+    </Suspense>
+  );
+};
 
 const Loading = () => (
   <div className="flex min-h-screen items-center justify-center" role="status" aria-live="polite">
@@ -38,9 +51,21 @@ const Loading = () => (
   </div>
 );
 
+// Vai para /c levando a query junto. Um link para /checkout?plano=x (ou
+// qualquer rota desconhecida com utm_*) chegaria em /c sem o plano.
+const IrParaCheckout = () => {
+  const { search } = useLocation();
+  return <Navigate to={{ pathname: '/c', search }} replace />;
+};
+
+// basename = `base` do vite.config.ts sem a barra final (/checkout). As rotas
+// abaixo seguem escritas como /c e /admin; o roteador põe o prefixo. O cast
+// segue o resto do app: o tsconfig não carrega os tipos de `vite/client`.
+const ROUTER_BASENAME = (import.meta as ImportMeta & { env: { BASE_URL: string } }).env.BASE_URL.replace(/\/$/, '');
+
 const App = () => (
-  <BrowserRouter>
-    <Toaster position="top-center" richColors />
+  <BrowserRouter basename={ROUTER_BASENAME}>
+    <ToasterDoAdmin />
     <Suspense fallback={<Loading />}>
       <Routes>
         <Route path="/c" element={<CheckoutPage />} />
@@ -68,8 +93,8 @@ const App = () => (
 
         {/* A raiz vai para o checkout: é o que um visitante espera ao acessar o
             domínio do checkout. O painel é destino de operador, não de visitante. */}
-        <Route path="/" element={<Navigate to="/c" replace />} />
-        <Route path="*" element={<Navigate to="/c" replace />} />
+        <Route path="/" element={<IrParaCheckout />} />
+        <Route path="*" element={<IrParaCheckout />} />
       </Routes>
     </Suspense>
   </BrowserRouter>

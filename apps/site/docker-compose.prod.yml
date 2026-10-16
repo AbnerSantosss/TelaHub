@@ -1,5 +1,10 @@
 # Stack NOVA do site de vendas, em paralelo à antiga.
 #
+# TRANSIÇÃO (15/10/2026): o site passou a ser servido pelo gateway do domínio
+# único (docker-compose.prod.yml da raiz, porta 4025). Esta stack só continua
+# útil enquanto a rota devtelahublandingpage do túnel apontar para a 4038.
+# Depois de repontar a rota para a 4025, ela pode ser parada.
+#
 # Arquivo separado do `docker-compose.yml`, que é o usado pela stack antiga.
 # Porta própria (4038), diferente da 42938 da stack antiga: o túnel desta VPS
 # roda no HOST e roteia para `localhost:PORTA`, então publicar é obrigatório, e
@@ -8,17 +13,21 @@
 services:
   site:
     build:
-      context: .
-      dockerfile: Dockerfile
+      # Contexto na RAIZ do monorepo: o site importa arquivos de packages/.
+      # O caminho é relativo a este arquivo (apps/site/).
+      context: ../..
+      dockerfile: apps/site/Dockerfile
       args:
         # Lidos em tempo de BUILD pelo Vite. Uma variável da stack com o mesmo
         # nome passa por cima do default e entra no bundle, mas só com rebuild.
-        - VITE_CHECKOUT_URL=${VITE_CHECKOUT_URL:-https://devtelahubcheckout.proxserverabner.site}
-        - VITE_APP_URL=${VITE_APP_URL:-https://devtelahubpainel.proxserverabner.site}
-        - VITE_API_URL=${VITE_API_URL:-https://devtelahubpainel.proxserverabner.site/api}
+        # Absolutos de propósito: esta stack responde num host próprio, e os
+        # links têm de levar ao domínio único, onde estão painel e checkout.
+        - VITE_CHECKOUT_URL=${VITE_CHECKOUT_URL:-https://devtelahub.proxserverabner.site/checkout}
+        - VITE_APP_URL=${VITE_APP_URL:-https://devtelahub.proxserverabner.site/app}
+        - VITE_API_URL=${VITE_API_URL:-https://devtelahub.proxserverabner.site/api}
         # Preços do build (scripts/fetch-plans.mjs). Se a API não responder, o
         # build segue com o snapshot de src/data/planos.json.
-        - PLANS_API_URL=${PLANS_API_URL:-https://devtelahubpainel.proxserverabner.site/api}
+        - PLANS_API_URL=${PLANS_API_URL:-https://devtelahub.proxserverabner.site/api}
     container_name: telahub-site-prod
     restart: unless-stopped
     ports:

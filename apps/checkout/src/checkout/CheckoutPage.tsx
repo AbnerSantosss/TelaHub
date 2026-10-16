@@ -12,27 +12,27 @@ import { formatBRL, pluralScreens } from './format';
 import { IdentificationStep } from './IdentificationStep';
 import { MobileSummaryBar, OrderSummary } from './OrderSummary';
 import { PaymentStep } from './PaymentStep';
-import { PrimaryButton, SecondaryButton } from './primitives';
+import { LogoHub, PrimaryButton, SecondaryButton } from './primitives';
 import { StepCard } from './StepCard';
 import { SubscriptionStep } from './SubscriptionStep';
 import { ThankYouScreen } from './ThankYouScreen';
 import { TrustBar } from './TrustBar';
 import { useCheckout, type StepId } from './useCheckout';
+import { Avisos } from '../lib/Avisos';
 import { billedScreens } from '../lib/plans';
 
 const Shell = ({ children }: { children: ReactNode }) => (
   <div className="checkout-backdrop flex min-h-screen flex-col">
-    <TrustBar />
-    <header className="border-b border-line bg-surface/80 backdrop-blur-sm">
-      <div className="mx-auto flex max-w-6xl items-center gap-2.5 px-4 py-3.5 sm:px-6">
-        <MonitorPlay aria-hidden="true" size={20} className="text-accent" />
-        <p className="text-sm font-extrabold tracking-tight text-ink">TelaHub</p>
-        <p className="ml-auto text-[11px] font-semibold uppercase tracking-[0.12em] text-ink-subtle">
-          Contratação
-        </p>
+    <header className="border-b border-borda bg-papel">
+      <div className="mx-auto flex max-w-6xl items-center gap-2.5 px-4 py-3 sm:px-6">
+        <LogoHub className="size-8 text-marca" />
+        <p className="text-lg font-extrabold tracking-tight text-tinta">TelaHub</p>
+        <p className="ml-auto text-sm font-medium text-tinta-3">Contratação</p>
       </div>
     </header>
+    <TrustBar />
     {children}
+    <Avisos />
   </div>
 );
 
@@ -277,7 +277,7 @@ const CheckoutPage = () => {
           alcançam — e é a mesma armadilha que já custou retrabalho na landing.
           Derivar do `canPayOnline` mantém os dois em acordo por construção.
         */}
-        <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-ink-muted">
+        <p className="mt-1.5 max-w-[56ch] text-base leading-relaxed text-ink-muted sm:text-sm">
           {checkout.canPayOnline
             ? 'Três passos: identificação, plano e pagamento. O acesso ao painel é liberado assim que o pagamento é confirmado.'
             : 'Três passos. A cobrança automática ainda não está integrada, então nada é debitado nesta tela. Ao concluir, nosso time comercial fecha a contratação com você.'}
@@ -358,21 +358,25 @@ const CheckoutPage = () => {
            não acontece é tão errado quanto esconder um que acontece.
       */}
       <footer className="border-t border-line bg-surface px-4 py-5 sm:px-6 lg:pb-5">
-        <p className="mx-auto max-w-6xl text-[11px] leading-relaxed text-ink-subtle">
-          {yearly
-            ? 'Contratação anual por tela ativa, com os 12 meses numa cobrança só.'
-            : 'Assinatura mensal por tela ativa, sem fidelidade.'}{' '}
-          O cancelamento é feito pelo próprio painel e vale a partir do ciclo seguinte; o art. 49 do
-          CDC garante 7 dias para desistir de uma contratação feita pela internet.{' '}
-          <span className="flex items-center gap-1.5 pt-1">
-            <RefreshCw aria-hidden="true" size={11} />
-            {checkout.simulatedPayment
-              ? 'Ambiente de demonstração. Nenhum valor é cobrado.'
-              : checkout.canPayOnline
-                ? 'Esta cobrança é do período contratado. A renovação é combinada com você antes de qualquer nova cobrança.'
-                : 'Nenhuma cobrança automática é feita nesta tela.'}
-          </span>
-        </p>
+        {/* O parágrafo fica limitado a ~65 caracteres por linha; o contêiner de
+            fora só alinha com a largura do resto da página. */}
+        <div className="mx-auto max-w-6xl">
+          <p className="max-w-[56ch] text-base sm:text-xs leading-relaxed text-ink-subtle">
+            {yearly
+              ? 'Contratação anual por tela ativa, com os 12 meses numa cobrança só.'
+              : 'Assinatura mensal por tela ativa, sem fidelidade.'}{' '}
+            O cancelamento é feito pelo próprio painel e vale a partir do ciclo seguinte; o art. 49 do
+            CDC garante 7 dias para desistir de uma contratação feita pela internet.{' '}
+            <span className="flex items-center gap-1.5 pt-1">
+              <RefreshCw aria-hidden="true" size={11} />
+              {checkout.simulatedPayment
+                ? 'Ambiente de demonstração. Nenhum valor é cobrado.'
+                : checkout.canPayOnline
+                  ? 'Esta cobrança é do período contratado. A renovação é combinada com você antes de qualquer nova cobrança.'
+                  : 'Nenhuma cobrança automática é feita nesta tela.'}
+            </span>
+          </p>
+        </div>
       </footer>
     </Shell>
   );

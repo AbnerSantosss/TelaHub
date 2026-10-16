@@ -210,10 +210,10 @@
 }
 
 .navbar__gaveta-titulo {
-  font-size: 0.8125rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: normal;
+  text-transform: none;
   color: var(--tinta-3);
 }
 
@@ -232,7 +232,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 0 12px;
+  padding: 12px;
   border: none;
   border-radius: var(--raio-8);
   background: none;
@@ -266,7 +266,7 @@
 
 .navbar__btn {
   min-height: 44px;
-  padding: 0 20px;
+  padding: 10px 20px;
   font-size: 0.9375rem;
 }
 
@@ -306,7 +306,7 @@
      de toque continua com 44px de altura. */
   .navbar__entrar {
     font-size: 0.9375rem;
-    padding: 0 2px;
+    padding: 10px 2px;
   }
 
   .navbar__acoes {
@@ -326,7 +326,7 @@
   /* 44px de altura: o alvo mínimo de toque (estava em 40px). */
   .navbar__btn {
     min-height: 44px;
-    padding: 0 14px;
+    padding: 10px 14px;
     font-size: 0.9375rem;
   }
 }
@@ -343,6 +343,6 @@
   }
 
   .navbar__btn {
-    padding: 0 12px;
+    padding: 10px 12px;
   }
 }

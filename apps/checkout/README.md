@@ -127,11 +127,11 @@ O histórico dos dois repositórios importados foi preservado via `git subtree`
 
 ```bash
 npm install
-npm run dev     # http://localhost:3030
+npm run dev     # http://localhost:4130
 ```
 
 O Vite faz proxy de `/api` para o backend do App, que **precisa estar rodando**.
-O alvo padrão é `http://localhost:3002`, que é a `PORT` do `.env` do backend.
+O alvo padrão é `http://localhost:3001`, que é a `PORT` do `.env` do backend.
 Se o seu backend estiver em outra porta:
 
 ```bash
@@ -144,7 +144,7 @@ BACKEND_PORT=3001 npm run dev      # ou BACKEND_URL=http://localhost:3001
 > existe mais"*, mensagem que não tem relação com a causa. Se vir esse erro,
 > confira a porta antes de procurar bug no código.
 
-A origem `http://localhost:3030` precisa estar em `CORS_ORIGINS` no `.env` do
+A origem `http://localhost:4130` precisa estar em `CORS_ORIGINS` no `.env` do
 backend — a validação de origem é por igualdade, não por prefixo.
 
 ```bash

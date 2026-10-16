@@ -131,7 +131,7 @@ const TimelineItem = ({ event, last }: { event: CheckoutEventRow; last: boolean 
           <dl className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1">
             {entries.map(([key, value]) => (
               <div key={key} className="flex items-baseline gap-1.5">
-                <dt className="text-[11px] font-semibold tracking-wide text-ink-subtle uppercase">
+                <dt className="text-xs font-semibold text-ink-subtle">
                   {metadataLabel(key)}
                 </dt>
                 <dd className="text-[12px] font-medium text-ink-muted">{metadataValue(key, value)}</dd>
@@ -252,7 +252,6 @@ const SessionDetailPage = () => {
       {back}
 
       <PageHeader
-        eyebrow="Checkout"
         title={leadName}
         subtitle={
           <>

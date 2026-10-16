@@ -29,6 +29,7 @@ import {
 
 import { getAdminToken } from '../lib/api';
 import { clearAdminSession, getStoredUser } from './api';
+import { LogoHub } from '../checkout/primitives';
 import { cx } from './ui';
 
 interface NavEntry {
@@ -149,8 +150,8 @@ const NavLinkItem = ({
     onClick={onNavigate}
     aria-current={active ? 'page' : undefined}
     className={cx(
-      'flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-semibold transition-colors',
-      active ? 'bg-nav text-white' : 'text-ink-muted hover:bg-app hover:text-ink'
+      'flex min-h-11 items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-semibold transition-colors lg:min-h-0',
+      active ? 'bg-marca-fundo text-marca' : 'text-ink-muted hover:bg-app hover:text-ink'
     )}
   >
     {entry.icon}
@@ -177,7 +178,7 @@ const NavTree = ({
       />
     ))}
 
-    <p className="eyebrow mt-5 mb-1 px-3">Assinaturas</p>
+    <p className="rotulo mt-5 mb-1 px-3">Assinaturas</p>
     {ASSINATURAS.map((entry) => (
       <NavLinkItem
         key={entry.to}
@@ -187,7 +188,7 @@ const NavTree = ({
       />
     ))}
 
-    <p className="eyebrow mt-5 mb-1 px-3">Recuperação</p>
+    <p className="rotulo mt-5 mb-1 px-3">Recuperação</p>
     {SECONDARY.map((entry) => (
       <NavLinkItem
         key={entry.to}
@@ -197,7 +198,7 @@ const NavTree = ({
       />
     ))}
 
-    <p className="eyebrow mt-5 mb-1 px-3">Plataforma</p>
+    <p className="rotulo mt-5 mb-1 px-3">Plataforma</p>
     {PLATAFORMA.map((entry) => (
       <NavLinkItem
         key={entry.to}
@@ -218,7 +219,7 @@ const NavTree = ({
 const ScopeBadge = () => (
   <div className="mx-3 mb-4 rounded-lg border border-line bg-app px-3 py-2.5">
     <p className="text-[13px] font-bold text-ink">TelaHub</p>
-    <p className="text-[11px] font-medium text-ink-subtle">Backoffice da plataforma</p>
+    <p className="text-xs font-medium text-ink-subtle">Backoffice da plataforma</p>
   </div>
 );
 
@@ -229,13 +230,13 @@ const UserFooter = ({ onLogout }: { onLogout: () => void }) => {
       <div className="mb-2 flex items-center gap-2.5 px-1">
         <span
           aria-hidden="true"
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-nav text-[13px] font-bold text-white"
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-marca-fundo text-[13px] font-bold text-marca"
         >
           {(user?.name ?? user?.username ?? '?').slice(0, 1).toUpperCase()}
         </span>
         <div className="min-w-0">
           <p className="truncate text-[13px] font-semibold text-ink">{user?.name ?? user?.username ?? 'Operador'}</p>
-          <p className="truncate text-[11px] text-ink-subtle">{user?.email ?? ''}</p>
+          <p className="truncate text-xs text-ink-subtle">{user?.email ?? ''}</p>
         </div>
       </div>
       <button
@@ -293,20 +294,21 @@ const AdminLayout = ({ children }: { children?: ReactNode }) => {
 
   return (
     <div className="min-h-screen bg-app">
-      <header className="sticky top-0 z-40 flex h-14 items-center gap-2 bg-nav px-3 sm:gap-4 sm:px-4">
+      <header className="sticky top-0 z-40 flex h-14 items-center gap-2 border-b border-borda bg-papel px-3 sm:gap-4 sm:px-4">
         <button
           type="button"
           onClick={() => setDrawerOpen(true)}
           aria-label="Abrir navegação"
           aria-expanded={drawerOpen}
-          className="rounded-lg p-2 text-white/70 transition-colors hover:bg-white/10 hover:text-white lg:hidden"
+          className="flex size-11 items-center justify-center rounded-lg text-ink-muted transition-colors hover:bg-app hover:text-ink lg:hidden"
         >
           <Menu aria-hidden="true" className="h-5 w-5" />
         </button>
 
-        <Link to="/admin" className="flex shrink-0 items-center gap-2">
-          <span className="text-[15px] font-extrabold tracking-tight text-white">TelaHub</span>
-          <span className="hidden rounded bg-white/10 px-1.5 py-0.5 text-[10px] font-bold tracking-[0.14em] text-white/70 uppercase sm:inline">
+        <Link to="/admin" className="flex shrink-0 items-center gap-2" aria-label="TelaHub, início do backoffice">
+          <LogoHub className="size-7 text-marca" />
+          <span className="text-base font-extrabold tracking-tight text-tinta">TelaHub</span>
+          <span className="hidden rounded-sm bg-papel-3 px-1.5 py-0.5 text-xs font-semibold text-tinta-2 sm:inline">
             Checkout
           </span>
         </Link>
@@ -318,7 +320,7 @@ const AdminLayout = ({ children }: { children?: ReactNode }) => {
           <div className="relative">
             <Search
               aria-hidden="true"
-              className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-white/40"
+              className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-ink-subtle"
             />
             <input
               id="admin-topbar-search"
@@ -327,15 +329,15 @@ const AdminLayout = ({ children }: { children?: ReactNode }) => {
               value={term}
               onChange={(event) => setTerm(event.target.value)}
               placeholder="Buscar pelo e-mail do lead"
-              className="w-full rounded-lg border border-white/10 bg-white/10 py-2 pr-14 pl-9 text-sm text-white placeholder:text-white/40 focus:border-accent focus:bg-white/15 focus:outline-none"
+              className="w-full rounded-lg border border-borda-3 bg-surface py-2 pr-14 pl-9 text-sm text-ink placeholder:text-ink-subtle focus:border-marca focus:shadow-[var(--anel-marca)] focus:outline-none"
             />
-            <kbd className="pointer-events-none absolute top-1/2 right-2 hidden -translate-y-1/2 rounded border border-white/15 px-1.5 py-0.5 text-[10px] font-semibold text-white/50 sm:block">
+            <kbd className="pointer-events-none absolute top-1/2 right-2 hidden -translate-y-1/2 rounded-sm border border-borda-2 px-1.5 py-0.5 text-xs font-medium text-ink-subtle sm:block">
               Ctrl+K
             </kbd>
           </div>
         </form>
 
-        <span className="hidden shrink-0 text-[11px] font-bold tracking-[0.12em] text-white/40 uppercase sm:block">
+        <span className="hidden shrink-0 text-xs font-semibold text-ink-subtle sm:block">
           {getStoredUser()?.role === 'master' ? 'Master' : (getStoredUser()?.role ?? '')}
         </span>
       </header>
@@ -358,7 +360,7 @@ const AdminLayout = ({ children }: { children?: ReactNode }) => {
             type="button"
             aria-label="Fechar navegação"
             onClick={() => setDrawerOpen(false)}
-            className="absolute inset-0 h-full w-full cursor-default bg-nav/50"
+            className="absolute inset-0 h-full w-full cursor-default bg-[var(--veu)]"
           />
           <div className="relative flex h-full w-72 max-w-[85vw] flex-col bg-surface pt-4">
             <div className="mb-3 flex items-center justify-between px-4">
@@ -367,7 +369,7 @@ const AdminLayout = ({ children }: { children?: ReactNode }) => {
                 type="button"
                 onClick={() => setDrawerOpen(false)}
                 aria-label="Fechar navegação"
-                className="rounded-lg p-1.5 text-ink-subtle hover:bg-app hover:text-ink"
+                className="flex size-11 items-center justify-center rounded-lg text-ink-subtle hover:bg-app hover:text-ink"
               >
                 <X aria-hidden="true" className="h-4 w-4" />
               </button>

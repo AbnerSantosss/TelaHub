@@ -1,0 +1,29 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "api",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev:api"],
+      "port": 3001
+    },
+    {
+      "name": "painel",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev:painel"],
+      "port": 4110
+    },
+    {
+      "name": "checkout",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev:checkout"],
+      "port": 4130
+    },
+    {
+      "name": "site",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev:site"],
+      "port": 4100
+    }
+  ]
+}

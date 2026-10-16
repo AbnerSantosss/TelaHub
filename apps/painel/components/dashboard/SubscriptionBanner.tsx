@@ -77,22 +77,22 @@ export const SubscriptionBanner: React.FC<SubscriptionBannerProps> = ({
     return (
       <div
         role="alert"
-        className="mb-4 flex flex-col sm:flex-row sm:items-center gap-3 rounded-xl border border-[#f59e0b]/30 bg-[#f59e0b]/10 px-4 py-3"
+        className="mb-4 flex flex-col sm:flex-row sm:items-center gap-3 rounded-xl border border-borda bg-warn-fundo px-4 py-3 shadow-card"
       >
-        <AlertTriangle size={16} className="text-[#f59e0b] flex-shrink-0" aria-hidden="true" />
+        <AlertTriangle size={18} className="text-warn flex-shrink-0" aria-hidden="true" />
         <div className="flex-1 min-w-0">
-          <p className="text-[12px] font-bold text-[#fbbf24] leading-snug">
+          <p className="text-base md:text-[15px] font-semibold text-tinta leading-snug">
             {invalidSubscriptionMessage(view.invalidReason)}
           </p>
-          <p className="text-[11px] text-slate-400 mt-0.5">
-            Plano: <span className="font-semibold text-slate-300">{view.planName}</span>
-            {usageLabel ? <span className="text-slate-400"> · {usageLabel}</span> : null}
+          <p className="text-sm text-tinta-2 mt-0.5">
+            Plano: <span className="font-semibold text-tinta">{view.planName}</span>
+            {usageLabel ? <span className="text-tinta-2"> · {usageLabel}</span> : null}
           </p>
         </div>
         <Button
           variant="brand"
           onClick={onChoosePlan}
-          className="flex-shrink-0 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider"
+          className="flex-shrink-0 h-11 md:h-9 px-4 rounded-lg text-sm font-semibold"
         >
           Escolher plano
         </Button>
@@ -108,23 +108,23 @@ export const SubscriptionBanner: React.FC<SubscriptionBannerProps> = ({
       <div className="flex items-center gap-2 flex-wrap">
         <span
           className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 ${
-            isFreePlan
-              ? 'border-[#22c55e]/25 bg-[#22c55e]/10'
-              : view.isTrial
-                ? 'border-[var(--th-accent)]/25 bg-[var(--th-accent)]/10'
-                : 'border-white/10 bg-white/5'
+            // Verde fica para "no ar" e sucesso. Plano é informação: marca
+            // para grátis e teste, papel neutro para o plano pago.
+            isFreePlan || view.isTrial
+              ? 'border-borda bg-marca-fundo'
+              : 'border-borda bg-papel'
           }`}
         >
           {isFreePlan ? (
-            <Gift size={12} className="text-[#4ade80]" aria-hidden="true" />
+            <Gift size={14} className="text-marca" aria-hidden="true" />
           ) : view.isTrial ? (
-            <Sparkles size={12} className="text-[var(--th-accent)]" aria-hidden="true" />
+            <Sparkles size={14} className="text-marca" aria-hidden="true" />
           ) : (
-            <BadgeCheck size={12} className="text-[#22c55e]" aria-hidden="true" />
+            <BadgeCheck size={14} className="text-marca" aria-hidden="true" />
           )}
           <span
-            className={`text-[11px] font-bold tracking-wide ${
-              isFreePlan ? 'text-[#86efac]' : view.isTrial ? 'text-[#7dd3fc]' : 'text-slate-300'
+            className={`text-[13px] font-semibold ${
+              isFreePlan || view.isTrial ? 'text-marca' : 'text-tinta'
             }`}
           >
             {badgeLabel(view.planName, view.isTrial, view.trialDaysRemaining)}
@@ -132,7 +132,7 @@ export const SubscriptionBanner: React.FC<SubscriptionBannerProps> = ({
         </span>
 
         {isFreePlan && (
-          <span className="text-[11px] text-slate-400">
+          <span className="text-sm text-tinta-2">
             {typeof displaysLimit === 'number' && displaysLimit === 1
               ? '1 tela grátis para sempre'
               : 'Grátis para sempre'}
@@ -140,18 +140,18 @@ export const SubscriptionBanner: React.FC<SubscriptionBannerProps> = ({
         )}
 
         {view.isTrial && (
-          <span className="text-[11px] text-slate-400">
-            Plano <span className="font-semibold text-slate-300">{view.planName}</span>
+          <span className="text-sm text-tinta-2">
+            Plano <span className="font-semibold text-tinta">{view.planName}</span>
           </span>
         )}
 
-        {usageLabel && <span className="text-[11px] text-slate-400">· {usageLabel}</span>}
+        {usageLabel && <span className="text-sm text-tinta-2">· {usageLabel}</span>}
 
         {mostrarVerPlanos && (
           <button
             type="button"
             onClick={onChoosePlan}
-            className="text-[11px] font-semibold text-[var(--th-accent-soft)] hover:text-[#7dd3fc] underline underline-offset-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--th-accent)]/50 rounded"
+            className="inline-flex min-h-11 md:min-h-0 items-center text-sm font-semibold text-marca hover:text-marca-hover underline underline-offset-4 transition-colors rounded"
           >
             Ver planos
           </button>
@@ -160,7 +160,7 @@ export const SubscriptionBanner: React.FC<SubscriptionBannerProps> = ({
 
       {/* Convite para escalar — só quando a tela grátis já está em uso. */}
       {freeLimitReached && (
-        <p className="text-[11px] text-slate-400 leading-snug">
+        <p className="text-base md:text-sm text-tinta-2 leading-snug">
           Precisa de outra tela? A cobrança começa na tela nova e é proporcional aos dias que faltam no período.
           Nada é cobrado de forma retroativa.
         </p>
@@ -168,7 +168,7 @@ export const SubscriptionBanner: React.FC<SubscriptionBannerProps> = ({
 
       {/* Trial promocional encerrado: informativo, não bloqueio. */}
       {view.invalidReason === 'trial_expired' && (
-        <p className="text-[11px] text-slate-400 leading-snug">
+        <p className="text-base md:text-sm text-tinta-2 leading-snug">
           Seu teste promocional terminou. Sua conta continua no plano grátis. Escolha um plano quando quiser ativar mais telas.
         </p>
       )}

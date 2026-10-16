@@ -86,17 +86,17 @@
 }
 
 .asn-selo-ok {
-  background: #e6f5ef;
+  background: var(--ok-fundo-solido);
   color: var(--asn-ok);
 }
 
 .asn-selo-atencao {
-  background: #fdf1e3;
+  background: var(--warn-fundo-solido);
   color: var(--asn-atencao);
 }
 
 .asn-selo-erro {
-  background: #fdecea;
+  background: var(--danger-fundo-solido);
   color: var(--asn-erro);
 }
 
@@ -151,13 +151,13 @@
 }
 
 .asn-aviso-atencao {
-  background: #fdf1e3;
-  color: #7a4305;
+  background: var(--warn-fundo-solido);
+  color: var(--warn-tinta);
 }
 
 .asn-aviso-erro {
-  background: #fdecea;
-  color: #8c1e18;
+  background: var(--danger-fundo-solido);
+  color: var(--danger-tinta);
 }
 
 .asn-aviso-neutro {
@@ -297,8 +297,8 @@
 }
 
 .asn-btn-cancelar:hover:not(:disabled) {
-  background: #fdecea;
-  border-color: #f2c4c0;
+  background: var(--danger-fundo-solido);
+  border-color: color-mix(in srgb, var(--danger) 30%, var(--papel));
 }
 
 /* ─── Confirmação de cancelamento ─────────────────────────────────────────── */

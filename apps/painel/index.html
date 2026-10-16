@@ -11,9 +11,11 @@
   <!-- Título por app: os três (site, painel, checkout) ficam abertos em abas
        vizinhas na mesma jornada. "TelaHub" em todas as três é indistinguível. -->
   <title>Painel TelaHub</title>
-  <link rel="icon" type="image/png" href="/logo.png">
-  <link rel="apple-touch-icon" href="/logo.png">
-  <meta name="theme-color" content="#0a0d16">
+  <link rel="icon" type="image/png" href="%BASE_URL%logo.png">
+  <link rel="apple-touch-icon" href="%BASE_URL%logo.png">
+  <!-- theme-color = --papel-2 da marca (packages/marca/tokens.css). Meta tag
+       não lê variável CSS, por isso o valor vai escrito. -->
+  <meta name="theme-color" content="#f4f7fb">
 
   <!-- Uma família só. Este arquivo pedia Inter, o `index.css` importava outras
        nove, e a folha do Google Fonts está no caminho crítico da PRIMEIRA tela
@@ -84,8 +86,11 @@
       font-family: 'Geist', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
       margin: 0;
       padding: 0;
-      background-color: #1C1D22; /* Cinza Corporativo */
-      color: #f8fafc;
+      /* Pintura antes do CSS do app carregar. Espelha --papel-2 e --tinta de
+         packages/marca/tokens.css (aqui ainda não há variável); o index.css
+         assume em seguida com os tokens de verdade. */
+      background-color: #f4f7fb;
+      color: #0a1223;
       overflow-x: hidden;
     }
     /* Hide scrollbars for player mode */
@@ -102,14 +107,14 @@
       height: 8px;
     }
     ::-webkit-scrollbar-track {
-      background: #0f172a; 
+      background: var(--papel-2);
     }
     ::-webkit-scrollbar-thumb {
-      background: #334155; 
+      background: var(--borda-2);
       border-radius: 4px;
     }
     ::-webkit-scrollbar-thumb:hover {
-      background: #475569; 
+      background: var(--borda-3);
     }
 
     /* React Grid Layout Essential Styles */
@@ -132,8 +137,8 @@
       will-change: left, top;
     }
     .react-grid-item.react-grid-placeholder {
-      background: rgba(34, 211, 238, 0.1) !important; /* Cyan glow */
-      border: 1px dashed rgba(34, 211, 238, 0.5) !important;
+      background: var(--marca-fundo) !important;
+      border: 1px dashed var(--marca) !important;
       border-radius: 8px !important;
       opacity: 0.8 !important;
       transition-duration: 100ms !important;
@@ -152,7 +157,7 @@
     .react-grid-item > .react-resizable-handle::after {
       content: "";
       position: absolute;
-      border-color: #22d3ee; /* Neon Cyan */
+      border-color: var(--marca);
       opacity: 0.6;
       transition: opacity 0.2s;
     }
@@ -174,10 +179,9 @@
       right: 4px;
       width: 12px;
       height: 12px;
-      border-right: 3px solid #22d3ee;
-      border-bottom: 3px solid #22d3ee;
+      border-right: 3px solid var(--marca);
+      border-bottom: 3px solid var(--marca);
       border-radius: 2px;
-      box-shadow: 0 0 10px #22d3ee;
     }
 
     /* SW Handle */
@@ -193,8 +197,8 @@
       left: 4px;
       width: 12px;
       height: 12px;
-      border-left: 3px solid #22d3ee;
-      border-bottom: 3px solid #22d3ee;
+      border-left: 3px solid var(--marca);
+      border-bottom: 3px solid var(--marca);
       border-radius: 2px;
     }
 
@@ -211,8 +215,8 @@
       right: 4px;
       width: 12px;
       height: 12px;
-      border-right: 3px solid #22d3ee;
-      border-top: 3px solid #22d3ee;
+      border-right: 3px solid var(--marca);
+      border-top: 3px solid var(--marca);
       border-radius: 2px;
     }
 
@@ -229,8 +233,8 @@
       left: 4px;
       width: 12px;
       height: 12px;
-      border-left: 3px solid #22d3ee;
-      border-top: 3px solid #22d3ee;
+      border-left: 3px solid var(--marca);
+      border-top: 3px solid var(--marca);
       border-radius: 2px;
     }
 
@@ -249,7 +253,7 @@
       transform: translateX(-50%);
       width: 20px;
       height: 4px;
-      border-top: 3px solid #22d3ee;
+      border-top: 3px solid var(--marca);
       border-radius: 2px;
     }
 
@@ -268,7 +272,7 @@
       transform: translateX(-50%);
       width: 20px;
       height: 4px;
-      border-bottom: 3px solid #22d3ee;
+      border-bottom: 3px solid var(--marca);
       border-radius: 2px;
     }
 
@@ -287,7 +291,7 @@
       transform: translateY(-50%);
       width: 4px;
       height: 20px;
-      border-right: 3px solid #22d3ee;
+      border-right: 3px solid var(--marca);
       border-radius: 2px;
     }
 
@@ -306,7 +310,7 @@
       transform: translateY(-50%);
       width: 4px;
       height: 20px;
-      border-left: 3px solid #22d3ee;
+      border-left: 3px solid var(--marca);
       border-radius: 2px;
     }
   </style>

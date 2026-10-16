@@ -20,7 +20,7 @@
    uma linha larguíssima no desktop e o olho não acha o começo da seguinte.
    Mais estreito que o título de propósito: texto corrido cansa antes. */
 .ctafinal__sub {
-  max-width: 720px;
+  max-width: 54ch;
   color: var(--noite-texto);
 }
 

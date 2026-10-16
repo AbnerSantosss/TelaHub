@@ -1,5 +1,11 @@
 # Stack NOVA do checkout.
 #
+# TRANSIÇÃO (15/10/2026): o checkout passou a ser servido pelo gateway do
+# domínio único (docker-compose.prod.yml da raiz, porta 4025), em /checkout/.
+# Esta imagem também serve em /checkout/ e manda /c/... e /admin/... para lá.
+# Depois de repontar a rota devtelahubcheckout do túnel para a 4025, esta
+# stack pode ser parada.
+#
 # Porta própria (4039): o túnel desta VPS roda no HOST e roteia para
 # `localhost:PORTA`, então publicar é obrigatório.
 #
@@ -14,8 +20,10 @@
 services:
   checkout:
     build:
-      context: .
-      dockerfile: Dockerfile
+      # Contexto na RAIZ do monorepo: o checkout importa arquivos de packages/.
+      # O caminho é relativo a este arquivo (apps/checkout/).
+      context: ../..
+      dockerfile: apps/checkout/Dockerfile
       args:
         # Defina CONTACT_EMAIL nas variáveis da stack no Portainer.
         VITE_CONTACT_EMAIL: ${CONTACT_EMAIL:-}

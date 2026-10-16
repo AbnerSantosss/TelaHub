@@ -88,7 +88,7 @@ export const OrderSummary = ({ checkout }: { checkout: CheckoutController }) => 
       className="overflow-hidden rounded-2xl border border-line bg-surface shadow-raised"
     >
       <div className="flex items-center justify-between gap-3 border-b border-line bg-app/60 px-4 py-3 sm:px-5">
-        <h2 id="checkout-summary-title" className="eyebrow">
+        <h2 id="checkout-summary-title" className="text-sm font-bold text-ink">
           Resumo
         </h2>
         <ShieldCheck aria-hidden="true" size={15} className="text-ink-subtle" />
@@ -115,7 +115,7 @@ export const OrderSummary = ({ checkout }: { checkout: CheckoutController }) => 
               </p>
             </div>
 
-            <dl className="flex flex-col gap-2.5 border-b border-dashed border-line py-3.5 text-xs">
+            <dl className="flex flex-col gap-2.5 border-b border-dashed border-line py-3.5 text-base sm:text-xs">
               {!quoteOnly && !free ? (
                 <div className="flex items-baseline justify-between gap-3">
                   <dt className="text-ink-muted">Periodicidade</dt>
@@ -147,19 +147,20 @@ export const OrderSummary = ({ checkout }: { checkout: CheckoutController }) => 
             </dl>
           </>
         ) : (
-          <p className="border-b border-dashed border-line pb-3.5 text-xs leading-relaxed text-ink-muted">
+          <p className="border-b border-dashed border-line pb-3.5 text-base sm:text-xs leading-relaxed text-ink-muted">
             Escolha o plano e o número de telas no passo <strong className="font-bold">2</strong> para
             o valor aparecer aqui.
           </p>
         )}
 
-        {/* Placa do total: rebaixada (fundo `--app` + borda interna) para o número
-            que sai da conta ser o ponto mais estável do resumo. */}
-        <div className="mt-3.5 flex flex-wrap items-end justify-between gap-x-3 gap-y-1 rounded-xl border border-line bg-app/70 px-3.5 py-3 shadow-[inset_0_1px_2px_rgb(22_24_29/0.04)]">
+        {/* Total: seção própria, separada pela borda tracejada da seção de cima.
+            Antes era uma placa com borda e fundo dentro do cartão do resumo, ou
+            seja, um cartão dentro do cartão. */}
+        <div className="flex flex-wrap items-end justify-between gap-x-3 gap-y-1 pt-3.5">
           <div>
-            <p className="eyebrow">{totalCaption}</p>
+            <p className="rotulo">{totalCaption}</p>
             {free && plan ? (
-              <p className="mt-0.5 text-[11px] font-semibold text-cta">Sem cartão de crédito</p>
+              <p className="mt-0.5 text-xs font-semibold text-ok">Sem cartão de crédito</p>
             ) : null}
           </div>
           <p
@@ -177,7 +178,7 @@ export const OrderSummary = ({ checkout }: { checkout: CheckoutController }) => 
             unitário anunciado, as telas cobradas, o equivalente mensal e o valor
             do ano, nessa ordem, ANTES do botão de pagar. */}
         {yearly && plan && !quoteOnly ? (
-          <p className="mt-3 rounded-lg border border-accent/35 bg-accent/8 px-3 py-2.5 text-[11px] leading-relaxed text-ink">
+          <p className="mt-3 max-w-[56ch] bg-accent/8 px-3 py-2.5 text-base sm:text-xs leading-relaxed text-ink">
             Assinatura de <strong className="font-bold">12 meses</strong>: {formatBRL(unitCents)} por
             tela/mês × {pluralScreens(billed)} {billed === 1 ? 'cobrada' : 'cobradas'} ={' '}
             {formatBRL(monthlyCents)} por mês, o que dá{' '}
@@ -187,7 +188,7 @@ export const OrderSummary = ({ checkout }: { checkout: CheckoutController }) => 
         ) : null}
 
         {amountSyncing ? (
-          <p className="mt-2 flex items-center justify-end gap-1.5 text-[11px] font-semibold text-ink-subtle">
+          <p className="mt-2 flex items-center justify-end gap-1.5 text-xs font-semibold text-ink-subtle">
             <Loader2 aria-hidden="true" size={12} className="animate-spin" />
             Confirmando valor…
           </p>
@@ -196,7 +197,7 @@ export const OrderSummary = ({ checkout }: { checkout: CheckoutController }) => 
         {syncFailed ? (
           <div
             role="alert"
-            className="mt-3 flex flex-col gap-2 rounded-lg border border-danger/40 bg-danger/8 px-3 py-2.5 text-xs text-ink"
+            className="mt-3 flex flex-col gap-2 bg-danger/8 px-3 py-2.5 text-base sm:text-xs text-ink"
           >
             <p className="flex items-start gap-1.5 font-semibold">
               <AlertTriangle aria-hidden="true" size={14} className="mt-px shrink-0 text-danger" />
@@ -215,13 +216,13 @@ export const OrderSummary = ({ checkout }: { checkout: CheckoutController }) => 
 
         <ul className="mt-4 flex flex-col gap-2 border-t border-dashed border-line pt-3.5">
           {guaranteesFor(yearly).map((item) => (
-            <li key={item} className="flex items-start gap-2 text-[11px] leading-relaxed text-ink-muted">
+            <li key={item} className="flex items-start gap-2 text-base sm:text-xs leading-relaxed text-ink-muted">
               <ShieldCheck aria-hidden="true" size={13} className="mt-px shrink-0 text-success" />
               <span>{item}</span>
             </li>
           ))}
           {noRetroactive ? (
-            <li className="flex items-start gap-2 text-[11px] leading-relaxed text-ink-muted">
+            <li className="flex items-start gap-2 text-base sm:text-xs leading-relaxed text-ink-muted">
               <ShieldCheck aria-hidden="true" size={13} className="mt-px shrink-0 text-success" />
               <span>Não cobramos retroativo. O período já usado não vira fatura depois.</span>
             </li>
@@ -253,10 +254,12 @@ export const MobileSummaryBar = ({
   const { quoteOnly, totalLabel, totalCaption, yearly, billed, plan } = summaryData(checkout);
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-surface/95 px-4 py-3 shadow-[0_-8px_24px_-16px_rgb(22_24_29/0.25)] backdrop-blur lg:hidden">
+    // Fundo sólido (`--papel`) e borda fina em cima: sem transparência nem
+    // desfoque, para o texto da barra não depender do que passa por trás dela.
+    <div className="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-surface px-4 py-3 lg:hidden">
       <div className="mx-auto flex max-w-2xl items-center gap-3">
         <div className="min-w-0 flex-1">
-          <p className="eyebrow text-[10px]">{totalCaption}</p>
+          <p className="rotulo text-xs">{totalCaption}</p>
           <p
             aria-live="polite"
             className={`money truncate text-lg font-extrabold leading-tight ${
@@ -265,7 +268,7 @@ export const MobileSummaryBar = ({
           >
             {totalLabel}
           </p>
-          <p className="truncate text-[11px] text-ink-subtle">
+          <p className="truncate text-xs text-ink-subtle">
             {plan
               ? `${plan.name} · ${pluralScreens(billed)}${yearly ? ' · 12 meses' : ''}`
               : 'Nenhum plano escolhido'}
@@ -277,9 +280,8 @@ export const MobileSummaryBar = ({
           onClick={onAction}
           disabled={busy}
           aria-busy={busy || undefined}
-          className={`${ctaClass} min-h-12 shrink-0 px-4 py-3 text-xs tracking-[0.06em]`}
+          className={`${ctaClass} min-h-12 shrink-0 px-4 py-3 text-sm`}
         >
-          <span aria-hidden="true" className="cta-sheen motion-effect" />
           <span className="relative flex items-center gap-2">
             {busy ? <Loader2 aria-hidden="true" size={14} className="animate-spin" /> : null}
             {actionLabel}

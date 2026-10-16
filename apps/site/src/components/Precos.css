@@ -53,7 +53,7 @@
 
 .precos__aba--ativa {
   background: var(--marca);
-  color: #ffffff;
+  color: var(--papel);
   font-weight: 700;
 }
 
@@ -62,18 +62,17 @@
    ativa, e a aba fica transparente por cima. */
 .precos__indicador {
   position: absolute;
-  top: 0;
-  left: 0;
+  inset: 0;
   z-index: 0;
   border-radius: 99px;
   background: var(--marca);
-  box-shadow: var(--sombra-btn);
+  /* Cobre o grupo todo; o recorte visível (a aba ativa) é escrito por
+     Precos.jsx em clip-path. Sem sombra: era um halo de 24px de blur sob uma
+     pílula de 44px. */
+  clip-path: inset(0 round 99px);
   opacity: 0;
   pointer-events: none;
-  transition:
-    transform 0.35s var(--ease-saida),
-    width 0.35s var(--ease-saida),
-    height 0.35s var(--ease-saida);
+  transition: clip-path 0.35s var(--ease-saida);
 }
 
 .precos__intervalo--deslizante .precos__indicador {
@@ -97,55 +96,28 @@
   padding: 28px;
 }
 
-/* Destaque: a borda sólida de 2px em --marca continua sendo o sinal (contraste
-   de 3:1 contra o papel, sem depender de efeito). Por cima dela, um halo de
-   --marca na sombra e, com mouse, uma borda de luz que acompanha o cursor
-   (::after mascarado para pintar só o anel de 2px). Os DOIS cards com
-   destaque (Grátis e Loja) ganham o mesmo tratamento, de propósito. */
+/* Destaque: a borda sólida de 2px em --marca é o sinal (contraste de 3:1
+   contra o papel, sem depender de efeito). Por cima dela, um anel de --marca
+   translúcida e uma sombra curta e neutra. Os DOIS cards com destaque (Grátis
+   e Loja) ganham o mesmo tratamento, de propósito. A borda de luz que seguia o
+   cursor (::after com radial-gradient) saiu: era o halo azul que o detector
+   marca, e o destaque já se lê sem ela. */
 .precos__card--destaque {
   border: 2px solid var(--marca);
-  box-shadow: var(--sombra-glow);
+  box-shadow: var(--sombra-destaque);
   transition:
     border-color 0.2s ease,
     box-shadow 0.3s ease;
 }
 
-.precos__card--destaque::after {
-  content: '';
-  position: absolute;
-  inset: -2px;
-  z-index: 1;
-  padding: 2px;
-  border-radius: inherit;
-  pointer-events: none;
-  background: radial-gradient(260px circle at var(--mx) var(--my), var(--luz-2), transparent 70%);
-  -webkit-mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask:
-    linear-gradient(#000 0 0) content-box exclude,
-    linear-gradient(#000 0 0);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
 @media (hover: hover) and (pointer: fine) {
   .precos__card--destaque:hover {
     border-color: var(--marca);
-    box-shadow: var(--sombra-glow-forte);
-  }
-
-  .precos__card--destaque:hover::after {
-    opacity: 1;
+    box-shadow: var(--sombra-destaque-forte);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .precos__card--destaque::after {
-    display: none;
-  }
-
   .precos__indicador {
     transition: none;
   }
@@ -287,7 +259,7 @@
   font-size: 1rem;
   font-weight: 600;
   color: var(--tinta);
-  max-width: 820px;
+  max-width: 54ch;
 }
 
 /* ── Larguras ────────────────────────────────────────────────────────────── */

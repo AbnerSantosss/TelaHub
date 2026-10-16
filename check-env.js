@@ -34,44 +34,73 @@ try {
   console.log(`${colors.red}✗ Docker:${colors.reset} Docker Desktop is not running or not installed.`);
 }
 
-// 3. Probe Ports
-const portsToCheck = [
-  { port: 5432, name: 'PostgreSQL Database' },
-  { port: 3001, name: 'Backend API' },
-  { port: 5173, name: 'Frontend Dev Server (Vite)' }
+// 3. Portas: quem responde em cada uma
+//
+// POR QUE NÃO BASTA VER SE A PORTA ESTÁ ABERTA: no Windows dois processos
+// bindam a mesma porta sem erro, e quem responde é o que subiu primeiro. Já
+// aconteceu três vezes (3000, 5173 e 3010): o "Entrar" da landing page abria
+// outro produto desta máquina, com a porta "aberta" e tudo parecendo certo.
+// Por isso cada porta é testada pelo conteúdo: o HTML precisa ter o <title>
+// do TelaHub e a API precisa responder o JSON do /api/health.
+const PORTAS = [
+  { port: 5432, name: 'PostgreSQL', tcp: true },
+  { port: 3001, name: 'API', path: '/api/health', espera: '"status":"ok"' },
+  { port: 4100, name: 'Site (vendas)', espera: '<title>TelaHub' },
+  // Painel e checkout servem em /app/ e /checkout/ (base do vite), como no
+  // domínio único; em "/" o vite responde outra coisa.
+  { port: 4110, name: 'Painel', path: '/app/', espera: '<title>Painel TelaHub' },
+  { port: 4130, name: 'Checkout', path: '/checkout/', espera: '<title>Contratar TelaHub' },
 ];
 
-function checkPort(port) {
+function portaEscutando(port) {
   return new Promise((resolve) => {
-    const server = net.createServer();
-    server.once('error', (err) => {
-      if (err.code === 'EADDRINUSE') {
-        resolve(true); // port is in use
-      } else {
-        resolve(false);
-      }
-    });
-    server.once('listening', () => {
-      server.close();
-      resolve(false); // port is free
-    });
-    server.listen(port, '127.0.0.1');
+    const socket = net.connect({ port, host: 'localhost' });
+    const fim = (escutando) => { socket.destroy(); resolve(escutando); };
+    socket.setTimeout(1500, () => fim(false));
+    socket.once('connect', () => fim(true));
+    socket.once('error', () => fim(false));
   });
 }
 
+async function quemResponde(item) {
+  try {
+    const res = await fetch(`http://localhost:${item.port}${item.path || '/'}`, {
+      signal: AbortSignal.timeout(3000),
+    });
+    const corpo = await res.text();
+    if (corpo.includes(item.espera)) return { telahub: true };
+    const titulo = /<title>([^<]*)<\/title>/i.exec(corpo);
+    return { telahub: false, quem: titulo ? titulo[1].trim() : `HTTP ${res.status}, sem <title>` };
+  } catch (e) {
+    return { telahub: false, quem: `não respondeu HTTP (${e.cause?.code || e.name})` };
+  }
+}
+
 async function runPortDiagnostics() {
-  console.log(`\n${colors.bold}${colors.cyan}--- Port Diagnostics ---${colors.reset}`);
+  console.log(`
+${colors.bold}${colors.cyan}--- Portas do TelaHub ---${colors.reset}`);
   let portConflicts = 0;
-  for (const item of portsToCheck) {
-    const inUse = await checkPort(item.port);
-    if (inUse) {
-      console.log(`${colors.yellow}⚠ Port ${item.port} (${item.name}):${colors.reset} Already in use (occupied).`);
-      portConflicts++;
+  for (const item of PORTAS) {
+    const rotulo = `Porta ${item.port} (${item.name})`;
+    if (!(await portaEscutando(item.port))) {
+      console.log(`${colors.yellow}○ ${rotulo}:${colors.reset} livre, o serviço não está rodando.`);
+      continue;
+    }
+    if (item.tcp) {
+      console.log(`${colors.green}✓ ${rotulo}:${colors.reset} escutando.`);
+      continue;
+    }
+    const r = await quemResponde(item);
+    if (r.telahub) {
+      console.log(`${colors.green}✓ ${rotulo}:${colors.reset} TelaHub respondendo.`);
     } else {
-      console.log(`${colors.green}✓ Port ${item.port} (${item.name}):${colors.reset} Free.`);
+      console.log(`${colors.red}✗ ${rotulo}:${colors.reset} OCUPADA POR OUTRO APP. Responde: "${r.quem}".`);
+      console.log(`  Os links entre site, painel e checkout vão abrir esse outro app. Feche o processo dono da porta`);
+      console.log(`  (netstat -ano | findstr :${item.port}) ou suba o TelaHub antes dele.`);
+      portConflicts++;
     }
   }
-  
+
   // 4. Check Environment Variables in Backend
   console.log(`\n${colors.bold}${colors.cyan}--- Backend Configuration ---${colors.reset}`);
   const envPath = path.join(__dirname, 'apps', 'api', '.env');
@@ -122,7 +151,7 @@ async function runPortDiagnostics() {
   } else if (!dockerRunning) {
     console.log(`1. Start Docker Desktop so the database can be initialized.`);
   } else if (portConflicts > 0) {
-    console.log(`1. One or more ports are already in use. Please shut down conflicting processes.`);
+    console.log(`1. Uma ou mais portas do TelaHub estão com outro app respondendo. Veja acima.`);
   } else {
     console.log(`${colors.green}Environment is ready! You can run the project.${colors.reset}`);
   }

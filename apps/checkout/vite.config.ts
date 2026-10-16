@@ -4,10 +4,16 @@ import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
+  // O checkout vive em /checkout/ no domínio único (gateway em produção,
+  // proxy do site em dev). O BrowserRouter usa este valor como basename
+  // (src/App.tsx): as rotas continuam escritas como /c e /admin.
+  base: '/checkout/',
   server: {
-    // 3010 é o painel e 5173 é o site de vendas — o checkout usa 3030 para os
-    // três rodarem juntos em desenvolvimento.
-    port: 3030,
+    // Bloco de portas do TelaHub em dev: 4100 site, 4110 painel, 4130 checkout.
+    // Era 3030, que outro projeto desta máquina também fixa. `strictPort` faz o
+    // Vite falhar em vez de pular de porta e deixar os planos do site no vazio.
+    port: 4130,
+    strictPort: true,
     host: '0.0.0.0',
     proxy: {
       // Em produção o Nginx faz o proxy de /api e o cliente sempre chama
@@ -36,6 +42,10 @@ export default defineConfig({
           process.env.BACKEND_URL ?? `http://localhost:${process.env.BACKEND_PORT ?? '3001'}`,
         changeOrigin: true,
       },
+    },
+    fs: {
+      // packages/marca (tokens da marca) fica fora da pasta do app.
+      allow: [__dirname, path.resolve(__dirname, '../..')],
     },
   },
   plugins: [react(), tailwindcss()],

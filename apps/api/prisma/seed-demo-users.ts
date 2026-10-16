@@ -3,6 +3,7 @@ dotenv.config();
 
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
+import { randomBytes } from 'crypto';
 
 import { PLAN_CATALOG } from './seed-plans';
 
@@ -96,6 +97,13 @@ const DEMO_ACCOUNTS: DemoAccount[] = [
 function resolvePassword(): string {
   const fromEnv = process.env.DEMO_USER_PASSWORD?.trim();
   if (fromEnv) return fromEnv;
+
+  // Painel de teste público (DEMO_LOGIN=true): a entrada é pelo botão, que não
+  // usa senha (ver `src/lib/demo-login.ts`). A senha vira um valor aleatório que
+  // ninguém conhece e muda a cada boot, então não há senha para vazar.
+  if (process.env.DEMO_LOGIN?.trim().toLowerCase() === 'true') {
+    return randomBytes(24).toString('base64url');
+  }
 
   if (process.env.NODE_ENV === 'production') {
     throw new Error(
@@ -197,7 +205,9 @@ export async function seedDemoUsers(): Promise<void> {
   console.log(
     process.env.DEMO_USER_PASSWORD
       ? '    (a definida em DEMO_USER_PASSWORD)'
-      : `    ${DEV_DEFAULT_PASSWORD}   ← padrão de desenvolvimento`
+      : process.env.DEMO_LOGIN?.trim().toLowerCase() === 'true'
+        ? '    (aleatória; a entrada é pelos botões da tela de login)'
+        : `    ${DEV_DEFAULT_PASSWORD}   ← padrão de desenvolvimento`
   );
 }
 

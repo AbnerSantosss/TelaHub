@@ -1,5 +1,21 @@
 # Wiki TelaHub / Display de Vendas — Esquema
 
+## LEMBRAR O DONO NO INÍCIO DE TODA SESSÃO (atualizado em 2026-09-26)
+
+A primeira mensagem da sessão, antes de qualquer outra coisa, tem de:
+
+1. **Colar na íntegra** o último bloco "### Resposta final desta sessão" de `wiki/log.md`. Esse bloco já traz o que foi feito e a lista numerada do que falta, dizendo quem faz cada item.
+2. **Perguntar** quais itens o dono já fez desde a última sessão, em especial:
+   - o redeploy das stacks 117, 118 e 119 da versão nova;
+   - o conserto do P1010 da produção antiga (`telahub-novo`, com os clientes reais).
+
+   Se ele disser que fez, rodar `bash scripts/verificar-deploy-dev.sh` e conferir `https://telahub.proxserverabner.site/api/health` antes de seguir.
+3. Retomar pelo "### Para continuar" da mesma entrada do log, que tem os passos detalhados.
+
+**Push, redeploy no Portainer e leitura do banco de produção ficam com o dono.** A permissão automática do Claude Code barra essas ações mesmo com autorização escrita. Preparar o comando ou os cliques e não retentar (`wiki/tecnico/deploy-e-infraestrutura.md` §3.6).
+
+Quando a produção antiga voltar ou for desligada por decisão do dono, e a versão nova estiver verificada nos nomes `devtelahub*`, trocar esta seção por uma versão mais curta, que só peça o último bloco do log, e registrar no `wiki/log.md`.
+
 Esta é uma base de conhecimento pessoal (padrão LLM Wiki) sobre o projeto **Display de Vendas (TelaHub)**, cobrindo tanto o lado **técnico** (arquitetura, decisões de desenvolvimento, bugs, aprendizados do app em `backend/` e `frontend/`) quanto o lado de **negócio/produto** (mercado, concorrentes, estratégia de vendas, conteúdo do site).
 
 ## Camadas

@@ -1,0 +1,53 @@
+/* Ponte dos tokens da marca para o Tailwind v4 (painel e checkout).
+   Importe DEPOIS de `tailwindcss` e de `tokens.css`:
+     @import "tailwindcss";
+     @import "<caminho>/packages/marca/tokens.css";
+     @import "<caminho>/packages/marca/tailwind-theme.css";
+   `inline` faz a classe usar a variável em tempo de execução, então mudar o
+   token muda a tela sem mexer no tema. Classes que nascem daqui: bg-papel,
+   text-tinta-2, border-borda, bg-marca, hover:bg-marca-hover, text-ok,
+   bg-danger-fundo, font-mono, rounded-lg, shadow-card. */
+@theme inline {
+  --font-sans: var(--fonte);
+  --font-mono: var(--fonte-mono);
+
+  --color-papel: var(--papel);
+  --color-papel-2: var(--papel-2);
+  --color-papel-3: var(--papel-3);
+  --color-tinta: var(--tinta);
+  --color-tinta-2: var(--tinta-2);
+  --color-tinta-3: var(--tinta-3);
+  --color-marca: var(--marca);
+  --color-marca-hover: var(--marca-hover);
+  --color-marca-fundo: var(--marca-fundo);
+  --color-noite: var(--noite);
+  --color-noite-2: var(--noite-2);
+  --color-noite-texto: var(--noite-texto);
+  --color-noite-titulo: var(--noite-titulo);
+  --color-luz: var(--luz);
+  --color-borda: var(--borda);
+  --color-borda-2: var(--borda-2);
+  --color-borda-3: var(--borda-3);
+  --color-ok: var(--ok);
+  --color-ok-fundo: var(--ok-fundo-solido);
+  --color-warn: var(--warn);
+  --color-warn-fundo: var(--warn-fundo-solido);
+  --color-danger: var(--danger);
+  --color-danger-fundo: var(--danger-fundo-solido);
+  --color-ok-tinta: var(--ok-tinta);
+  --color-warn-tinta: var(--warn-tinta);
+  --color-danger-tinta: var(--danger-tinta);
+  --color-marca-borda: var(--marca-borda);
+
+  --radius-sm: var(--raio-6);
+  --radius-md: var(--raio-8);
+  --radius-lg: var(--raio-12);
+  --radius-xl: var(--raio-16);
+  --radius-2xl: var(--raio-24);
+
+  --shadow-card: var(--sombra-card);
+  --shadow-flutuante: var(--sombra-flutuante);
+  --shadow-modal: var(--sombra-modal);
+  --shadow-btn: var(--sombra-btn);
+  --shadow-navbar: var(--sombra-navbar);
+}

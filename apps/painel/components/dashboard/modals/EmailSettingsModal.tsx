@@ -52,7 +52,7 @@ interface EmailSettingsModalProps {
 }
 
 const inputClass =
-  'w-full bg-gray-950/40 border border-border text-text placeholder:text-text-muted/40 focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/40 h-11 rounded-xl';
+  'w-full bg-papel border border-borda-3 text-tinta text-base md:text-sm placeholder:text-tinta-3 focus-visible:border-marca focus-visible:ring-3 focus-visible:ring-ring/30 h-11 rounded-xl';
 
 export const EmailSettingsModal: React.FC<EmailSettingsModalProps> = ({
   open,
@@ -94,12 +94,12 @@ export const EmailSettingsModal: React.FC<EmailSettingsModalProps> = ({
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent showCloseButton={false} className="sm:max-w-lg max-w-lg max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between p-5 border-b border-white/10">
-          <DialogTitle className="font-bold text-lg flex items-center gap-2" style={{ color: 'var(--color-text)' }}>
-            <Settings className="text-[#38bdf8]" size={20} /> Configurações de E-mail
+        <div className="flex items-center justify-between p-5 border-b border-borda">
+          <DialogTitle className="font-bold text-lg flex items-center gap-2 text-tinta">
+            <Settings className="text-marca" size={20} /> Configurações de E-mail
           </DialogTitle>
           <DialogClose asChild>
-            <Button variant="ghost" size="icon" className="size-8 rounded-lg" style={{ color: 'var(--color-text-muted)' }}>
+            <Button variant="ghost" size="icon" className="size-11 md:size-8 rounded-lg text-tinta-3 hover:text-tinta" aria-label="Fechar">
               <X size={18} />
             </Button>
           </DialogClose>
@@ -108,11 +108,11 @@ export const EmailSettingsModal: React.FC<EmailSettingsModalProps> = ({
         <form onSubmit={onSaveSmtp} className="p-6 space-y-4">
           {/* Origem da configuração em uso */}
           {smtpSource === 'ambiente' && (
-            <div className="bg-accent/5 border border-accent/20 rounded-xl p-3.5 flex items-start gap-3">
+            <div className="bg-marca-fundo border border-borda rounded-xl p-3.5 flex items-start gap-3">
               <Server className="text-accent shrink-0 mt-0.5" size={16} />
               <div>
-                <p className="text-accent text-xs font-black uppercase tracking-wider">Usando o provedor padrão do sistema</p>
-                <p className="text-text-muted text-[11px] mt-1 leading-relaxed">
+                <p className="text-accent text-sm font-bold">Usando o provedor padrão do sistema</p>
+                <p className="text-text-muted text-[13px] mt-1 leading-relaxed">
                   Os envios já funcionam com a conta configurada na instalação. Salvar aqui substitui esse padrão
                   pela sua própria conta.
                 </p>
@@ -122,7 +122,7 @@ export const EmailSettingsModal: React.FC<EmailSettingsModalProps> = ({
 
           {/* Seletor de provedor */}
           <div className="space-y-1.5">
-            <label className="block text-xs font-black text-text-muted uppercase tracking-wider pl-0.5">Provedor de E-mail</label>
+            <label className="block text-sm font-semibold text-tinta-2 pl-0.5">Provedor de E-mail</label>
             <select
               value={provider}
               onChange={(e) => onSelectProvider(e.target.value)}
@@ -145,7 +145,7 @@ export const EmailSettingsModal: React.FC<EmailSettingsModalProps> = ({
               </optgroup>
             </select>
             {preset && !isManual && (
-              <p className="text-[10px] text-text-muted/70 pl-0.5 font-mono">
+              <p className="text-[13px] text-text-muted pl-0.5 font-mono">
                 {preset.host}:{preset.port} · {preset.secure ? 'SSL/TLS' : 'STARTTLS'}
               </p>
             )}
@@ -153,23 +153,23 @@ export const EmailSettingsModal: React.FC<EmailSettingsModalProps> = ({
 
           {/* Ressalva do provedor — o que muda a decisão */}
           {preset?.warning && (
-            <div className="bg-warning/5 border border-warning/20 rounded-xl p-3.5 flex items-start gap-3">
+            <div className="bg-warn-fundo border border-borda rounded-xl p-3.5 flex items-start gap-3">
               <AlertTriangle className="text-warning shrink-0 mt-0.5" size={16} />
-              <p className="text-text-muted text-[11px] leading-relaxed">{preset.warning}</p>
+              <p className="text-text-muted text-[13px] leading-relaxed">{preset.warning}</p>
             </div>
           )}
 
           {/* Onde obter a credencial */}
           {preset?.credentialsUrl && (
-            <div className="bg-gray-950/40 border border-border rounded-xl p-4 space-y-2">
-              <p className="text-[10px] text-accent font-black uppercase tracking-widest flex items-center gap-1.5 pl-0.5">
+            <div className="bg-papel border border-border rounded-xl p-4 space-y-2">
+              <p className="text-[13px] text-accent font-bold flex items-center gap-1.5 pl-0.5">
                 <Mail size={12} className="text-accent" /> Onde obter a credencial
               </p>
               <a
                 href={preset.credentialsUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-accent hover:underline font-semibold inline-flex items-center gap-1 text-[11px] break-all"
+                className="text-accent hover:underline font-semibold inline-flex items-center gap-1 text-[13px] break-all"
               >
                 {preset.credentialsUrl} <ExternalLink size={10} />
               </a>
@@ -180,7 +180,7 @@ export const EmailSettingsModal: React.FC<EmailSettingsModalProps> = ({
           {isManual && (
             <div className="grid grid-cols-3 gap-3">
               <div className="col-span-2 space-y-1.5">
-                <label className="block text-xs font-black text-text-muted uppercase tracking-wider pl-0.5">Servidor (host)</label>
+                <label className="block text-sm font-semibold text-tinta-2 pl-0.5">Servidor (host)</label>
                 <Input
                   value={smtpHost}
                   onChange={(e) => setSmtpHost(e.target.value)}
@@ -190,7 +190,7 @@ export const EmailSettingsModal: React.FC<EmailSettingsModalProps> = ({
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="block text-xs font-black text-text-muted uppercase tracking-wider pl-0.5">Porta</label>
+                <label className="block text-sm font-semibold text-tinta-2 pl-0.5">Porta</label>
                 <Input
                   type="number"
                   value={smtpPort}
@@ -203,19 +203,19 @@ export const EmailSettingsModal: React.FC<EmailSettingsModalProps> = ({
           )}
 
           {isManual && (
-            <label className="flex items-center gap-2 text-[11px] text-text-muted pl-0.5 cursor-pointer">
+            <label className="flex items-center gap-2 text-[13px] text-text-muted pl-0.5 cursor-pointer">
               <input
                 type="checkbox"
                 checked={smtpSecure}
                 onChange={(e) => setSmtpSecure(e.target.checked)}
-                className="accent-[#38bdf8] size-3.5"
+                className="accent-[var(--marca)] size-4"
               />
               Conexão SSL/TLS direta (porta 465). Deixe desmarcado para STARTTLS (587/2525).
             </label>
           )}
 
           <div className="space-y-1.5">
-            <label className="block text-xs font-black text-text-muted uppercase tracking-wider pl-0.5">Usuário de Autenticação</label>
+            <label className="block text-sm font-semibold text-tinta-2 pl-0.5">Usuário de Autenticação</label>
             <Input
               value={smtpUser}
               onChange={(e) => setSmtpUser(e.target.value)}
@@ -224,27 +224,27 @@ export const EmailSettingsModal: React.FC<EmailSettingsModalProps> = ({
               required
             />
             {preset?.userHint && (
-              <p className="text-[10px] text-text-muted/70 pl-0.5 leading-relaxed">{preset.userHint}</p>
+              <p className="text-[13px] text-text-muted pl-0.5 leading-relaxed">{preset.userHint}</p>
             )}
           </div>
 
           <div className="space-y-1.5">
-            <label className="block text-xs font-black text-text-muted uppercase tracking-wider pl-0.5">Senha / Chave de API</label>
+            <label className="block text-sm font-semibold text-tinta-2 pl-0.5">Senha / Chave de API</label>
             <Input
               type="password"
               value={smtpPass}
               onChange={(e) => setSmtpPass(e.target.value)}
               placeholder={smtpHasSavedPass ? '(senha salva, deixe vazio para manter)' : '••••••••••••'}
-              className={`${inputClass} font-mono tracking-wider`}
+              className={`${inputClass} font-mono`}
             />
             {preset?.passHint && (
-              <p className="text-[10px] text-text-muted/70 pl-0.5 leading-relaxed">{preset.passHint}</p>
+              <p className="text-[13px] text-text-muted pl-0.5 leading-relaxed">{preset.passHint}</p>
             )}
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <label className="block text-xs font-black text-text-muted uppercase tracking-wider pl-0.5">
+              <label className="block text-sm font-semibold text-tinta-2 pl-0.5">
                 E-mail Remetente {needsFromEmail && <span className="text-danger">*</span>}
               </label>
               <Input
@@ -257,7 +257,7 @@ export const EmailSettingsModal: React.FC<EmailSettingsModalProps> = ({
               />
             </div>
             <div className="space-y-1.5">
-              <label className="block text-xs font-black text-text-muted uppercase tracking-wider pl-0.5">Nome Exibido</label>
+              <label className="block text-sm font-semibold text-tinta-2 pl-0.5">Nome Exibido</label>
               <Input
                 value={smtpFromName}
                 onChange={(e) => setSmtpFromName(e.target.value)}
@@ -268,18 +268,18 @@ export const EmailSettingsModal: React.FC<EmailSettingsModalProps> = ({
           </div>
 
           {needsFromEmail && (
-            <p className="text-[10px] text-text-muted/70 pl-0.5 leading-relaxed">
-              Este provedor autentica com o usuário fixo <code className="text-text bg-black/40 px-1 py-0.5 rounded font-mono">{preset?.fixedUser}</code>,
+            <p className="text-[13px] text-text-muted pl-0.5 leading-relaxed">
+              Este provedor autentica com o usuário fixo <code className="text-tinta bg-papel-3 px-1 py-0.5 rounded font-mono">{preset?.fixedUser}</code>,
               então o remetente precisa ser um endereço verificado na conta.
             </p>
           )}
 
           {/* Test connection result */}
           {smtpTestResult && (
-            <div className={`flex items-center gap-2 p-3.5 rounded-xl border text-xs font-bold ${
+            <div className={`flex items-center gap-2 p-3.5 rounded-xl border text-sm font-bold ${
               smtpTestResult.ok
-                ? 'bg-success/10 border-success/30 text-success'
-                : 'bg-danger/10 border-danger/30 text-danger'
+                ? 'bg-ok-fundo border-borda text-ok'
+                : 'bg-danger-fundo border-borda text-danger'
             }`}>
               {smtpTestResult.ok ? <CheckCircle size={15} /> : <XCircle size={15} />}
               <span>{smtpTestResult.message}</span>
@@ -292,7 +292,7 @@ export const EmailSettingsModal: React.FC<EmailSettingsModalProps> = ({
               variant="outline"
               onClick={onTestSmtp}
               disabled={smtpLoading || !smtpUser || (!smtpPass && !smtpHasSavedPass)}
-              className="px-4 py-2.5 rounded-xl bg-gray-950/40 text-text border border-border hover:border-accent/40 font-bold text-xs uppercase tracking-wider transition-all flex items-center gap-2 disabled:opacity-50"
+              className="h-11 md:h-10 px-4 rounded-lg bg-papel text-tinta border border-borda-2 hover:border-marca hover:text-marca font-semibold text-sm transition-all flex items-center gap-2 disabled:opacity-50"
             >
               {smtpLoading ? <Loader2 size={14} className="animate-spin" /> : <Zap size={14} />} Testar Conexão
             </Button>
@@ -300,13 +300,13 @@ export const EmailSettingsModal: React.FC<EmailSettingsModalProps> = ({
               type="submit"
               variant="brand"
               disabled={smtpLoading || !smtpUser || (!smtpPass && !smtpHasSavedPass)}
-              className="px-6 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all flex items-center gap-2 disabled:opacity-50"
+              className="h-11 md:h-10 px-6 rounded-lg font-semibold text-sm transition-all flex items-center gap-2 disabled:opacity-50"
             >
               <Check size={14} /> Salvar
             </Button>
           </div>
 
-          <p className="text-[10px] text-text-muted/60 leading-relaxed pl-0.5">
+          <p className="text-[13px] text-text-muted leading-relaxed pl-0.5">
             O teste verifica a conexão com a configuração <strong>já salva</strong>. Ao trocar de provedor,
             salve antes de testar.
           </p>

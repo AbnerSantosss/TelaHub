@@ -1,4 +1,4 @@
-/* Estilo da seção PASSOS. `.secao`, `.split`, `.split--midia`, `.chip`, `.h2`,
+/* Estilo da seção PASSOS. `.secao`, `.split`, `.split--midia`, `.h2`,
    `.lead`, `.shot` e `.cap` vêm de src/index.css — aqui só o que é da seção. */
 
 /* O mockup centraliza o texto em relação à captura; sem isto a coluna da
@@ -11,13 +11,6 @@
   display: flex;
   flex-direction: column;
   gap: 28px;
-}
-
-/* `.chip` é inline-flex, mas como filho de um flex column ele é blocado e
-   esticaria de ponta a ponta. `align-self` devolve a pílula ao tamanho dela. */
-.passos__chip {
-  align-self: flex-start;
-  margin: 0;
 }
 
 .passos__lista {
@@ -73,7 +66,7 @@
   color: var(--tinta-3);
 }
 
-/* Mesma razão do `.passos__chip`: filho de um flex column, o botão esticaria de
+/* Filho de um flex column, o botão esticaria de
    ponta a ponta e viraria uma barra. `align-self` devolve a ele a largura do
    próprio rótulo. No celular ele ocupa a linha inteira, que é o alvo de toque
    que se espera ali. */

@@ -219,7 +219,7 @@ const FunnelChart = ({ metrics }: { metrics: CheckoutMetrics }) => {
               />
             </div>
             {previous !== null && dropped > 0 && (
-              <p className="mt-1 text-[11px] font-medium text-ink-subtle">
+              <p className="mt-1 text-xs font-medium text-ink-subtle">
                 {formatNumber(dropped)} não chegaram até aqui
               </p>
             )}
@@ -272,7 +272,6 @@ const DashboardPage = () => {
 
   const header = (
     <PageHeader
-      eyebrow="Visão da plataforma"
       title={`${greeting()}, ${firstName(user?.name ?? user?.username)}.`}
       subtitle={
         data
@@ -293,7 +292,7 @@ const DashboardPage = () => {
               onClick={() => setDays(period.days)}
               className={cx(
                 'rounded-md px-3 py-1.5 text-[13px] font-semibold transition-colors',
-                days === period.days ? 'bg-nav text-white' : 'text-ink-muted hover:text-ink'
+                days === period.days ? 'bg-marca text-white' : 'text-ink-muted hover:text-ink'
               )}
             >
               {period.label}
@@ -432,13 +431,13 @@ const DashboardPage = () => {
                       className={cx(
                         'rounded-lg border px-2.5 py-1.5 text-[12px] font-semibold transition-colors',
                         ativa
-                          ? 'border-nav bg-nav text-white'
+                          ? 'border-marca bg-marca text-white'
                           : 'border-line bg-surface text-ink-muted hover:bg-app hover:text-ink'
                       )}
                     >
                       {rotuloSemana(coorte.weekStart)}
                       {index === 0 && (
-                        <span className={cx('ml-1.5 font-normal', ativa ? 'text-white/70' : 'text-ink-subtle')}>
+                        <span className={cx('ml-1.5 font-normal', ativa ? 'text-white/90' : 'text-ink-subtle')}>
                           atual
                         </span>
                       )}
@@ -478,7 +477,7 @@ const DashboardPage = () => {
                         {formatMoney(coorteAtiva.adSpendCents)}
                       </dd>
                       {coorteAtiva.adSpendByChannel.length > 0 && (
-                        <p className="mt-1.5 text-[11px] leading-snug text-ink-subtle">
+                        <p className="mt-1.5 text-xs leading-snug text-ink-subtle">
                           {coorteAtiva.adSpendByChannel
                             .map((canal) => `${canal.channel}: ${formatMoney(canal.amountCents)}`)
                             .join(' · ')}
@@ -492,7 +491,7 @@ const DashboardPage = () => {
                   <dd className="money mt-1 text-xl leading-none font-extrabold text-ink">
                     {formatNumber(coorteAtiva.conversations)}
                   </dd>
-                  <p className="mt-1.5 text-[11px] leading-snug text-ink-subtle">
+                  <p className="mt-1.5 text-xs leading-snug text-ink-subtle">
                     Proxy declarado: leads da semana. Não há integração de WhatsApp neste produto.
                   </p>
                 </div>
@@ -501,7 +500,7 @@ const DashboardPage = () => {
                   <dd className="money mt-1 text-xl leading-none font-extrabold text-ink">
                     {formatNumber(coorteAtiva.sales)}
                   </dd>
-                  <p className="mt-1.5 text-[11px] leading-snug text-ink-subtle">
+                  <p className="mt-1.5 text-xs leading-snug text-ink-subtle">
                     {formatNumber(coorteAtiva.yearlySales)} no anual
                   </p>
                 </div>
@@ -510,7 +509,7 @@ const DashboardPage = () => {
                   <dd className="money mt-1 text-xl leading-none font-extrabold text-ink">
                     <Money cents={coorteAtiva.salesCashCents} />
                   </dd>
-                  <p className="mt-1.5 text-[11px] leading-snug text-ink-subtle">
+                  <p className="mt-1.5 text-xs leading-snug text-ink-subtle">
                     Valor cheio do ciclo (no anual, os 12 meses). Não é mensal equivalente.
                   </p>
                 </div>
@@ -544,14 +543,14 @@ const DashboardPage = () => {
                     <caption className="sr-only">Indicadores por semana</caption>
                     <thead>
                       <tr className="border-b border-line text-left">
-                        <th scope="col" className="py-2.5 pr-3 text-[11px] font-bold tracking-[0.1em] text-ink-subtle uppercase">
+                        <th scope="col" className="py-2.5 pr-3 text-xs font-semibold text-ink-subtle">
                           Semana
                         </th>
                         {coorteAtiva.indicators.map((indicator) => (
                           <th
                             key={indicator.key}
                             scope="col"
-                            className="px-2 py-2.5 text-right text-[11px] font-bold tracking-[0.1em] text-ink-subtle uppercase"
+                            className="px-2 py-2.5 text-right text-xs font-semibold text-ink-subtle"
                           >
                             {indicator.label}
                           </th>
@@ -575,7 +574,7 @@ const DashboardPage = () => {
                                   <span className="money text-[13px] font-semibold text-ink">
                                     {formatIndicatorValue(indicator)}
                                   </span>
-                                  <span className="text-[11px] text-ink-subtle">{tone.label}</span>
+                                  <span className="text-xs text-ink-subtle">{tone.label}</span>
                                 </span>
                               </td>
                             );
@@ -786,7 +785,7 @@ const DashboardPage = () => {
               onClick={() => setOrigemPorCampanha(false)}
               className={cx(
                 'rounded-md px-3 py-1.5 text-[13px] font-semibold transition-colors',
-                origemPorCampanha ? 'text-ink-muted hover:text-ink' : 'bg-nav text-white'
+                origemPorCampanha ? 'text-ink-muted hover:text-ink' : 'bg-marca text-white'
               )}
             >
               Por origem
@@ -797,7 +796,7 @@ const DashboardPage = () => {
               onClick={() => setOrigemPorCampanha(true)}
               className={cx(
                 'rounded-md px-3 py-1.5 text-[13px] font-semibold transition-colors',
-                origemPorCampanha ? 'bg-nav text-white' : 'text-ink-muted hover:text-ink'
+                origemPorCampanha ? 'bg-marca text-white' : 'text-ink-muted hover:text-ink'
               )}
             >
               Por campanha
@@ -823,7 +822,7 @@ const DashboardPage = () => {
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[860px] text-sm">
-                <caption className="px-4 pt-3 pb-1 text-left text-[11px] leading-snug text-ink-subtle sm:px-5">
+                <caption className="px-4 pt-3 pb-1 text-left text-xs leading-snug text-ink-subtle sm:px-5">
                   {/*
                     Caixa e mensal equivalente são as MESMAS vendas em duas
                     leituras — somar as duas colunas conta cada venda duas vezes,
@@ -835,30 +834,30 @@ const DashboardPage = () => {
                 </caption>
                 <thead>
                   <tr className="border-b border-line text-left">
-                    <th scope="col" className="px-4 py-2.5 text-[11px] font-bold tracking-[0.1em] text-ink-subtle uppercase sm:px-5">
+                    <th scope="col" className="px-4 py-2.5 text-xs font-semibold text-ink-subtle sm:px-5">
                       Origem
                     </th>
                     {origemPorCampanha && (
-                      <th scope="col" className="px-4 py-2.5 text-[11px] font-bold tracking-[0.1em] text-ink-subtle uppercase">
+                      <th scope="col" className="px-4 py-2.5 text-xs font-semibold text-ink-subtle">
                         Campanha
                       </th>
                     )}
-                    <th scope="col" className="px-4 py-2.5 text-right text-[11px] font-bold tracking-[0.1em] text-ink-subtle uppercase">
+                    <th scope="col" className="px-4 py-2.5 text-right text-xs font-semibold text-ink-subtle">
                       Visitas únicas
                     </th>
-                    <th scope="col" className="px-4 py-2.5 text-right text-[11px] font-bold tracking-[0.1em] text-ink-subtle uppercase">
+                    <th scope="col" className="px-4 py-2.5 text-right text-xs font-semibold text-ink-subtle">
                       Leads
                     </th>
-                    <th scope="col" className="px-4 py-2.5 text-right text-[11px] font-bold tracking-[0.1em] text-ink-subtle uppercase">
+                    <th scope="col" className="px-4 py-2.5 text-right text-xs font-semibold text-ink-subtle">
                       Pagantes
                     </th>
-                    <th scope="col" className="px-4 py-2.5 text-right text-[11px] font-bold tracking-[0.1em] text-ink-subtle uppercase">
+                    <th scope="col" className="px-4 py-2.5 text-right text-xs font-semibold text-ink-subtle">
                       Caixa
                     </th>
-                    <th scope="col" className="px-4 py-2.5 text-right text-[11px] font-bold tracking-[0.1em] text-ink-subtle uppercase">
+                    <th scope="col" className="px-4 py-2.5 text-right text-xs font-semibold text-ink-subtle">
                       Mensal equiv.
                     </th>
-                    <th scope="col" className="px-4 py-2.5 text-right text-[11px] font-bold tracking-[0.1em] text-ink-subtle uppercase sm:px-5">
+                    <th scope="col" className="px-4 py-2.5 text-right text-xs font-semibold text-ink-subtle sm:px-5">
                       Visita → pagante
                     </th>
                   </tr>
@@ -879,7 +878,7 @@ const DashboardPage = () => {
                         {/* A página vista fica ao lado, menor: o denominador da
                             taxa é a visita ÚNICA — quem abre quatro páginas não
                             é quatro oportunidades. */}
-                        <span className="ml-1.5 text-[11px] text-ink-subtle">
+                        <span className="ml-1.5 text-xs text-ink-subtle">
                           {formatNumber(row.visits)} views
                         </span>
                       </td>
@@ -928,19 +927,19 @@ const DashboardPage = () => {
             <table className="w-full min-w-[520px] text-sm">
               <thead>
                 <tr className="border-b border-line text-left">
-                  <th scope="col" className="px-4 py-2.5 text-[11px] font-bold tracking-[0.1em] text-ink-subtle uppercase sm:px-5">
+                  <th scope="col" className="px-4 py-2.5 text-xs font-semibold text-ink-subtle sm:px-5">
                     Origem
                   </th>
-                  <th scope="col" className="px-4 py-2.5 text-right text-[11px] font-bold tracking-[0.1em] text-ink-subtle uppercase">
+                  <th scope="col" className="px-4 py-2.5 text-right text-xs font-semibold text-ink-subtle">
                     Iniciados
                   </th>
-                  <th scope="col" className="px-4 py-2.5 text-right text-[11px] font-bold tracking-[0.1em] text-ink-subtle uppercase">
+                  <th scope="col" className="px-4 py-2.5 text-right text-xs font-semibold text-ink-subtle">
                     Abandonados
                   </th>
-                  <th scope="col" className="px-4 py-2.5 text-right text-[11px] font-bold tracking-[0.1em] text-ink-subtle uppercase">
+                  <th scope="col" className="px-4 py-2.5 text-right text-xs font-semibold text-ink-subtle">
                     Contratações
                   </th>
-                  <th scope="col" className="px-4 py-2.5 text-right text-[11px] font-bold tracking-[0.1em] text-ink-subtle uppercase sm:px-5">
+                  <th scope="col" className="px-4 py-2.5 text-right text-xs font-semibold text-ink-subtle sm:px-5">
                     Contratado (mensal equiv.)
                   </th>
                 </tr>
