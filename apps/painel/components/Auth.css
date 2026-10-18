@@ -760,3 +760,43 @@
     font-size: 16px;
   }
 }
+
+/* Logo e marca levam à landing. Sem sublinhado e sem trocar de cor: continuam
+   parecendo logo, só que clicáveis. */
+.auth-marca,
+.auth-logo-link {
+  text-decoration: none;
+  color: inherit;
+  border-radius: 6px;
+}
+
+.auth-logo-link {
+  display: inline-flex;
+}
+
+.auth-marca:focus-visible,
+.auth-logo-link:focus-visible,
+.auth-voltar:focus-visible {
+  outline: 2px solid var(--auth-marca);
+  outline-offset: 3px;
+}
+
+/* "Voltar ao site" no topo do cartão: alvo de toque de 44 px. */
+.auth-voltar {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 4px;
+  margin-bottom: -8px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--auth-tinta-2);
+  text-decoration: none;
+  border-radius: 6px;
+}
+
+.auth-voltar:hover {
+  color: var(--auth-marca);
+}

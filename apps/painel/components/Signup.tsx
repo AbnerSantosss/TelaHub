@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { AlertCircle, Check, Eye, EyeOff, Info, Loader2, UserPlus } from 'lucide-react';
+import { AlertCircle, ArrowLeft, Check, Eye, EyeOff, Info, Loader2, UserPlus } from 'lucide-react';
 import { api, setAuthToken, isApiError, getApiErrorMessage } from '../libs/api';
 import { EVENT, META_EVENT, newEventId, readFbCookies, track } from '../libs/tracking';
 import {
@@ -355,12 +355,12 @@ const Signup: React.FC = () => {
     <div className="auth-page">
       <div className="auth-shell">
         <aside className="auth-vitrine">
-          <div className="auth-marca">
+          <a className="auth-marca" href={`${SITE_URL}/`} aria-label="TelaHub: ir para a página inicial">
             <LogoHub size={34} />
             <span className="auth-marca-nome">
               Tela<em>Hub</em>
             </span>
-          </div>
+          </a>
 
           <div>
             <h2 className="auth-vitrine-titulo">Use a TV que você já tem para mostrar avisos e ofertas.</h2>
@@ -399,8 +399,15 @@ const Signup: React.FC = () => {
 
         <main className="auth-coluna">
           <div className="auth-cartao">
+            <a className="auth-voltar" href={`${SITE_URL}/`}>
+              <ArrowLeft size={16} aria-hidden="true" />
+              Voltar ao site
+            </a>
+
             <div className="auth-topo-mobile">
-              <LogoHub size={44} />
+              <a className="auth-logo-link" href={`${SITE_URL}/`} aria-label="TelaHub: ir para a página inicial">
+                <LogoHub size={44} />
+              </a>
               <div>
                 <h1 className="auth-titulo">Criar sua conta</h1>
                 <p className="auth-subtitulo">Leva um minuto e não pede cartão.</p>

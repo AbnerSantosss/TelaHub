@@ -7,7 +7,6 @@
   "scripts": {
     "setup": "node setup-dev.js",
     "check-env": "node check-env.js",
-    "clean-telahub": "node delete-telahub.js",
 
     "install:all": "npm --prefix apps/api ci && npm --prefix apps/painel ci && npm --prefix apps/checkout ci && npm --prefix apps/site ci",
 

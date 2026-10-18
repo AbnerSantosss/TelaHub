@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   AlertCircle,
+  ArrowLeft,
   Check,
   Eye,
   EyeOff,
@@ -11,7 +12,7 @@ import {
 } from 'lucide-react';
 import { demoLogin, getDemoAccounts, login } from '../services/storage';
 import { isApiError } from '../libs/api';
-import { checkoutUrlForIntent, isPaidIntent, readPlanIntent } from '../libs/external-urls';
+import { SITE_URL, checkoutUrlForIntent, isPaidIntent, readPlanIntent } from '../libs/external-urls';
 // tokens e efeitos do tema claro, antes do CSS da tela
 import './claro.css';
 import './Auth.css';
@@ -256,12 +257,12 @@ const Login: React.FC = () => {
       <div className="auth-shell">
         {/* Coluna de continuidade com a landing — só no desktop. */}
         <aside className="auth-vitrine">
-          <div className="auth-marca">
+          <a className="auth-marca" href={`${SITE_URL}/`} aria-label="TelaHub: ir para a página inicial">
             <LogoHub size={34} />
             <span className="auth-marca-nome">
               Tela<em>Hub</em>
             </span>
-          </div>
+          </a>
 
           <div>
             <h2 className="auth-vitrine-titulo">Troque o que aparece na sua TV em um minuto.</h2>
@@ -300,8 +301,15 @@ const Login: React.FC = () => {
         {/* Coluna do formulário */}
         <main className="auth-coluna">
           <div className="auth-cartao">
+            <a className="auth-voltar" href={`${SITE_URL}/`}>
+              <ArrowLeft size={16} aria-hidden="true" />
+              Voltar ao site
+            </a>
+
             <div className="auth-topo-mobile">
-              <LogoHub size={44} />
+              <a className="auth-logo-link" href={`${SITE_URL}/`} aria-label="TelaHub: ir para a página inicial">
+                <LogoHub size={44} />
+              </a>
               <div>
                 <h1 className="auth-titulo">Entrar no TelaHub</h1>
                 <p className="auth-subtitulo">Publique o aviso do dia na TV do seu lugar.</p>
