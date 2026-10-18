@@ -319,7 +319,7 @@ const Login: React.FC = () => {
             {/* Mesma promessa da landing, palavra por palavra. Quem clicou no
                 anúncio acabou de ler essa frase; repeti-la aqui é o que diz
                 "você chegou no lugar certo". */}
-            <p className="auth-promessa">
+            <p className="auth-promessa auth-promessa-repetida">
               <ShieldCheck size={18} aria-hidden="true" />
               <span>
                 <strong>A primeira tela é grátis para sempre e não pede cartão.</strong>

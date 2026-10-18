@@ -353,7 +353,7 @@ const Signup: React.FC = () => {
 
   return (
     <div className="auth-page">
-      <div className="auth-shell">
+      <div className="auth-shell auth-shell-larga">
         <aside className="auth-vitrine">
           <a className="auth-marca" href={`${SITE_URL}/`} aria-label="TelaHub: ir para a página inicial">
             <LogoHub size={34} />
@@ -398,7 +398,7 @@ const Signup: React.FC = () => {
         </aside>
 
         <main className="auth-coluna">
-          <div className="auth-cartao">
+          <div className="auth-cartao auth-cartao-larga">
             <a className="auth-voltar" href={`${SITE_URL}/`}>
               <ArrowLeft size={16} aria-hidden="true" />
               Voltar ao site
@@ -434,7 +434,7 @@ const Signup: React.FC = () => {
                 </span>
               </p>
             ) : (
-              <p className="auth-promessa">
+              <p className="auth-promessa auth-promessa-repetida">
                 <Check size={18} aria-hidden="true" />
                 <span>
                   <strong>A primeira tela é grátis para sempre e não pede cartão.</strong> Ao ligar a 2ª
@@ -475,7 +475,9 @@ const Signup: React.FC = () => {
                     {renderFieldError('companyName')}
                   </div>
 
-                  {/* Nome da pessoa */}
+                  {/* Nome da pessoa e e-mail: campos curtos, lado a lado quando
+                      a caixa tem largura (`.auth-par` em Auth.css). */}
+                  <div className="auth-par">
                   <div className="auth-campo">
                     <label className="auth-rotulo" htmlFor="signup-name">
                       Seu nome
@@ -525,8 +527,10 @@ const Signup: React.FC = () => {
                     </p>
                     {renderFieldError('email')}
                   </div>
+                  </div>
 
-                  {/* Senha */}
+                  {/* Senha e confirmação, também em par */}
+                  <div className="auth-par">
                   <div className="auth-campo">
                     <label className="auth-rotulo" htmlFor="signup-password">
                       Senha
@@ -588,6 +592,7 @@ const Signup: React.FC = () => {
                       aria-describedby={describedBy('confirmPassword')}
                     />
                     {renderFieldError('confirmPassword')}
+                  </div>
                   </div>
 
                   {/* Aceite obrigatório: checkbox nativo, nunca pré-marcado.

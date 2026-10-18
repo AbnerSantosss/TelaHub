@@ -7,6 +7,8 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { User } from '../types';
+// `.auth-tela-cheia`: a altura da tela visível (100vh/100dvh) das telas de conta
+import './Auth.css';
 
 /**
  * Tela de troca OBRIGATÓRIA de senha.
@@ -92,10 +94,14 @@ const ForcePasswordChange: React.FC<ForcePasswordChangeProps> = ({ user, onSucce
 
   // Sem fundo próprio: o body já é --papel-2 e a grade da marca vem do
   // GridGlowBackground do App, o mesmo do painel.
+  // `auth-tela-cheia` (Auth.css) no lugar de `min-h-screen`: a casca tem a altura
+  // da tela visível (`100vh` com `100dvh` por cima, que no Chrome do Android
+  // não conta a barra de endereço) e o cartão se centra com `m-auto`. Sobrando
+  // altura fica no meio; faltando, a própria casca rola em vez de cortar o topo.
   return (
-    <div className="relative min-h-screen w-full flex items-center justify-center p-4 md:p-6">
+    <div className="auth-tela-cheia relative w-full flex p-4 md:p-6">
 
-      <Card className="w-full max-w-lg relative z-10 border border-borda bg-papel shadow-modal">
+      <Card className="w-full max-w-lg m-auto relative z-10 border border-borda bg-papel shadow-modal">
         <CardHeader className="gap-3">
           <div className="flex items-center gap-3">
             <div className="size-10 rounded-lg flex items-center justify-center bg-marca-fundo text-marca shrink-0">

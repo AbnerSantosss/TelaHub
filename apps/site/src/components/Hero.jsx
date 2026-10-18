@@ -6,26 +6,26 @@ import './Hero.css';
  * Herói da landing v2.
  *
  * ── A headline é uma dor invisível, não um recurso ──────────────────────────
- * "A TV da portaria está ligada. O aviso da assembleia ainda está no papel."
+ * "A TV da sua loja está passando novela. Podia estar mostrando a sua oferta."
  * Ela funciona porque a pessoa não sabe que tem o problema: a TV está lá,
  * ligada na novela, e ninguém a contabiliza como custo. Headline de recurso
  * ("gerencie suas telas") só converte quem já procura a categoria — e quem já
  * procura é minoria neste mercado.
  *
- * ── Por que o produto é apresentado por PORTE, não por ramo ─────────────────
- * O subtítulo cita condomínio, escritório, clínica, loja, academia e lanchonete
- * nessa ordem, de propósito. A pesquisa de palavra-chave apontava para comida
- * ("cardápio digital", 10–20 mil buscas/mês), e o dono decidiu o contrário: o
- * termo de comida é dominado por QR/delivery, e abrir a página com cardápio faz
- * síndico, gerente de escritório e dono de clínica concluírem "não é pra mim"
- * em dois segundos. Comida é um caso entre vários e nunca abre nada.
+ * ── Para quem a dobra fala: o dono de comércio (decisão de 18/10) ───────────
+ * Em 18/10 o dono definiu que a dobra vende para o dono de comércio: padaria,
+ * loja e shopping são os três exemplos das TVs, e a padaria é só um deles. Rede
+ * e shopping chegam ao plano Enterprise pelo link discreto abaixo da confiança
+ * (cta_location 'hero_enterprise'). A apresentação por porte (condomínio,
+ * escritório, clínica) e a regra "comida nunca abre" saíram desta dobra.
  *
- * ── As duas TVs são ilustração declarada, não captura ───────────────────────
+ * ── As três TVs são ilustração declarada, não captura ───────────────────────
  * Elas são desenhadas em HTML com os mesmos blocos que existem hoje no editor
- * (texto, relógio, clima), e a legenda diz isso na cara: "Montadas só com os
- * blocos que existem hoje no editor". Mockup que se apresenta como foto de
- * produto é a mentira mais fácil de cometer numa landing — as capturas REAIS
- * aparecem logo abaixo, em "Como funciona" e "Dois formatos".
+ * (texto, foto, relógio, clima, contador), e a legenda diz isso na cara:
+ * "Montadas só com os blocos que existem hoje no editor". Mockup que se
+ * apresenta como foto de produto é a mentira mais fácil de cometer numa landing
+ * — as capturas REAIS aparecem logo abaixo, em "Como funciona" e "Dois
+ * formatos". A terceira TV (totem de shopping) só aparece a partir de 981px (duas colunas).
  *
  * ── UM prazo só na página inteira: 30 segundos ──────────────────────────────
  * A página dizia "5 minutos" no CTA final, "2 minutos" no FAQ e "30 segundos"
@@ -66,15 +66,17 @@ const Hero = ({ startConversion, scrollToSection }) => (
     <HeroFundo />
 
     <div className="hero__texto">
+      <p className="hero__pre">Para padaria, loja, mercado, farmácia e shopping</p>
+
       <h1 className="h1">
-        A TV da portaria está ligada.{' '}
-        <span className="hero__grito">O aviso da assembleia ainda está no papel.</span>
+        A TV da sua loja está passando novela.{' '}
+        <span className="hero__grito">Podia estar mostrando a sua oferta.</span>
       </h1>
 
       <p className="lead hero__lead">
-        Serve para condomínio, escritório, clínica, loja, academia ou lanchonete. A TV que já está na
-        parede passa a mostrar seus avisos, ofertas e agenda, e você troca o conteúdo pelo celular em
-        30 segundos. Não precisa de técnico nem de pen-drive, e não tem aparelho para comprar.
+        O pão que acabou de sair, o combo do café, a promoção da semana. Você monta pelo celular e
+        troca em 30 segundos, na TV que já está na parede. Serve para uma loja ou para uma rede
+        inteira.
       </p>
 
       <div className="hero__acoes">
@@ -137,24 +139,36 @@ const Hero = ({ startConversion, scrollToSection }) => (
         <span aria-hidden="true">·</span>
         <span>Mensal sem fidelidade</span>
         <span aria-hidden="true">·</span>
-        <span>Deitada ou em pé</span>
+        <span>Smart TV já serve</span>
       </p>
+
+      {/* Porta B2B: rede e shopping não cabem no CTA do plano grátis. Link de
+          texto, quieto de propósito, para não competir com o botão principal. */}
+      <button
+        type="button"
+        className="btn btn--texto hero__enterprise"
+        onClick={() => {
+          track({
+            event: EVENT.CTA_CLICK,
+            params: { cta_location: 'hero_enterprise', plan: 'enterprise' },
+          });
+          startConversion('enterprise', 'hero_enterprise', 'Falar com a gente');
+        }}
+      >
+        <span className="btn__rotulo">Tem rede ou shopping? Falar com a gente</span>
+      </button>
     </div>
 
     <div className="hero__vitrine">
       <div className="hero__telas">
-        {/* Deitada 16:9 — recepção de empresa */}
+        {/* Deitada 16:9 — balcão da padaria */}
         <figure className="hero__figura">
           <div className="tv" aria-hidden="true">
             <div className="tv__quadro tv__quadro--deitada">
               <div className="tv__coluna">
-                <span className="tv__titulo">Bem-vindo à Contábil Prisma</span>
-                <span className="tv__linha">
-                  Reunião com clientes: sala 2, 10h.
-                  <br />
-                  Entrega do IRPJ: até dia 31.
-                </span>
-                <span className="tv__destaque">Aniversariantes: Ana (seg) · Carlos (qui)</span>
+                <span className="tv__titulo">Padaria Bela Vista</span>
+                <span className="tv__linha">Saindo agora: pão francês</span>
+                <span className="tv__destaque">Café + pão na chapa: R$ 9,90 até as 10h</span>
               </div>
               <div className="tv__lado">
                 <div className="tv__bloco">
@@ -168,26 +182,38 @@ const Hero = ({ startConversion, scrollToSection }) => (
               </div>
             </div>
           </div>
-          <figcaption className="cap">TV deitada (16:9) na recepção da empresa</figcaption>
+          <figcaption className="cap">TV deitada (16:9) no balcão da padaria</figcaption>
         </figure>
 
-        {/* Em pé 9:16 — portaria de condomínio */}
+        {/* Em pé 9:16 — vitrine de loja */}
         <figure className="hero__figura hero__figura--pe">
           <div className="tv tv--pe" aria-hidden="true">
             <div className="tv__quadro tv__quadro--pe">
-              <span className="tv__titulo">Condomínio Jardins</span>
-              <span className="tv__linha">Assembleia: quinta, 19h30, salão de festas.</span>
-              <span className="tv__destaque">Elevador: sexta, das 8h às 12h.</span>
-              <span className="tv__ok">Coleta seletiva: ter e sex.</span>
+              <span className="tv__titulo">Liquida de inverno</span>
+              <span className="tv__linha">Jaquetas a partir de R$ 89</span>
+              <span className="tv__destaque">Faltam 3 dias</span>
               <span className="tv__rodape">09:41 · 26°</span>
             </div>
           </div>
-          <figcaption className="cap">TV em pé (9:16) na portaria</figcaption>
+          <figcaption className="cap">TV em pé (9:16) na vitrine da loja</figcaption>
+        </figure>
+
+        {/* Em pé 9:16 — totem de shopping. Só desktop (Hero.css). */}
+        <figure className="hero__figura hero__figura--pe hero__figura--totem">
+          <div className="tv tv--pe" aria-hidden="true">
+            <div className="tv__quadro tv__quadro--pe">
+              <span className="tv__titulo">Neste sábado</span>
+              <span className="tv__linha">Oficina infantil, 15h, piso 2</span>
+              <span className="tv__ok">Loja nova no piso 1</span>
+              <span className="tv__rodape">09:41</span>
+            </div>
+          </div>
+          <figcaption className="cap">Totem (9:16) no corredor do shopping</figcaption>
         </figure>
       </div>
 
       <ul className="hero__blocos" role="list">
-        {['Texto', 'Foto', 'Vídeo', 'Relógio', 'Clima', 'Notícias', 'Agenda', 'PDF'].map((bloco) => (
+        {['Foto', 'Vídeo', 'Texto', 'Relógio', 'Clima', 'Notícias', 'Agenda', 'PDF'].map((bloco) => (
           <li key={bloco} className="chip">
             {bloco}
           </li>

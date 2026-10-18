@@ -21,10 +21,13 @@
   color: var(--ctv-tinta);
   /* grade clara sutil (claro.css) sobre o papel */
   background: var(--claro-grade), var(--ctv-papel-2);
-  /* `vh` e não `%`: esta tela é montada tanto numa rota quanto dentro do
-     Dashboard, e num dos casos o pai não tem altura definida — com `100%` o
-     fundo claro terminava no meio da página. */
+  /* Unidade de viewport e não `%`: esta tela é montada tanto numa rota quanto
+     dentro do Dashboard, e num dos casos o pai não tem altura definida — com
+     `100%` o fundo claro terminava no meio da página. `100vh` fica de reserva
+     para navegador sem `dvh`; `100dvh` acompanha a barra de endereço do celular,
+     que com `vh` escondia o fim da tela. */
   min-height: 100vh;
+  min-height: 100dvh;
   padding: 28px 20px 56px;
 }
 
@@ -434,4 +437,69 @@
   color: var(--ctv-tinta-3);
   line-height: 1.5;
   margin: 0;
+}
+
+/* ─── Desktop: a tarefa inteira cabe na tela ──────────────────────────────────
+   Conectar uma TV é uma tarefa única: o dono abre o endereço na TV e digita o
+   código aqui. Empilhada, a tela passava de 1500 px e obrigava a rolar o
+   documento só para achar o botão. Em tela larga e com altura mínima de
+   600 px, a tela vira exatamente a janela (100dvh): passo 1 e guia à esquerda,
+   passo 2 à direita. O que não couber (o guia, a mensagem de erro) rola dentro
+   do próprio cartão, nunca o documento. Abaixo disso o fluxo empilhado de
+   antes continua valendo, com o documento rolando. */
+@media (min-width: 1024px) and (min-height: 600px) {
+  .ctv-tarefa {
+    height: 100vh;
+    height: 100dvh;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: clamp(12px, 3dvh, 28px) 28px;
+  }
+
+  .ctv-wrap-tarefa {
+    flex: 1 1 auto;
+    min-height: 0;
+    width: 100%;
+    max-width: 1180px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr);
+    grid-template-areas:
+      'topo topo'
+      'p1 p2'
+      'guia p2';
+    gap: clamp(10px, 2dvh, 20px) 20px;
+  }
+
+  .ctv-wrap-tarefa .ctv-topo { grid-area: topo; align-items: center; flex-wrap: nowrap; }
+  .ctv-wrap-tarefa .ctv-topo .ctv-btn { flex: 0 0 auto; }
+  .ctv-wrap-tarefa .ctv-titulo { font-size: clamp(24px, 3.6dvh, 30px); }
+  .ctv-wrap-tarefa .ctv-subtitulo { margin-top: 4px; max-width: 90ch; font-size: 14px; }
+
+  .ctv-wrap-tarefa .ctv-cartao {
+    padding: clamp(14px, 2.4dvh, 22px);
+    min-height: 0;
+  }
+  .ctv-wrap-tarefa .ctv-passo { margin-bottom: 8px; }
+  .ctv-wrap-tarefa .ctv-passo-apoio { margin-bottom: clamp(8px, 1.6dvh, 14px); }
+
+  .ctv-p1 { grid-area: p1; }
+  .ctv-p2 { grid-area: p2; overflow-y: auto; }
+  .ctv-guia-cartao { grid-area: guia; overflow-y: auto; }
+
+  /* Endereço e QR lado a lado só quando a coluna comporta; senão empilham. */
+  .ctv-wrap-tarefa .ctv-endereco-linha { gap: 14px; }
+  .ctv-wrap-tarefa .ctv-endereco-caixa { flex: 1 1 220px; padding: 14px; gap: 10px; }
+  .ctv-wrap-tarefa .ctv-endereco { font-size: clamp(17px, 2.4vw, 24px); }
+  .ctv-wrap-tarefa .ctv-qr-caixa { padding: 10px; }
+  .ctv-wrap-tarefa .ctv-qr-legenda { max-width: 148px; }
+
+  .ctv-wrap-tarefa .ctv-form { gap: clamp(10px, 2dvh, 16px); }
+  .ctv-wrap-tarefa .ctv-grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ctv-wrap-tarefa .ctv-input-codigo { padding: 10px 13px; }
+
+  .ctv-wrap-tarefa .ctv-guia { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .ctv-wrap-tarefa .ctv-guia-item { padding: 10px 12px; }
 }

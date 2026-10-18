@@ -47,10 +47,10 @@ const COLUNAS = [
 
 const LINHAS = [
   {
-    criterio: 'Trocar o aviso',
+    criterio: 'Trocar a oferta',
     valores: [
       'Imprimir de novo',
-      'Atravessar o prédio, achar o computador',
+      'Tirar o pen-drive, editar no computador, voltar na TV',
       'Pedir e esperar',
       'Do celular',
       'Do celular, em 30 s',

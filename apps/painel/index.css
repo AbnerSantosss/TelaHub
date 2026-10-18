@@ -396,6 +396,23 @@
   }
 }
 
+/* Altura da tela VISÍVEL. `h-screen`/`min-h-screen` usam `vh`, que no celular
+   conta a tela com a barra de endereço escondida: com ela aberta, o fim da
+   página fica por baixo dela. `dvh` acompanha a barra. As classes de `dvh` do
+   Tailwind (`h-dvh`) não servem sozinhas: navegador sem `dvh` ignoraria a
+   altura inteira, e `h-screen h-dvh` juntas não dão fallback porque o Tailwind
+   gera `h-screen` depois e ele vence. Aqui as duas declarações ficam na mesma
+   regra: `vh` de reserva, `dvh` por cima onde existir. Não vale para o Player
+   (a TV roda em WebView antigo, onde o `vh` é o correto). */
+@utility h-tela {
+  height: 100vh;
+  height: 100dvh;
+}
+@utility min-h-tela {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -413,6 +430,7 @@
     -webkit-font-smoothing: antialiased;
     position: relative;
     min-height: 100vh;
+    min-height: 100dvh;
   }
 }
 

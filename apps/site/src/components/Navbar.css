@@ -15,7 +15,8 @@
 }
 
 .navbar__inner {
-  height: 72px;
+  /* A altura sai de --nav-h (index.css), menos a borda de 1px da .navbar. */
+  height: calc(var(--nav-h) - 1px);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -293,7 +294,7 @@
 
 @media (max-width: 640px) {
   .navbar__inner {
-    height: 60px;
+    height: calc(var(--nav-h) - 1px);
     gap: 10px;
   }
 

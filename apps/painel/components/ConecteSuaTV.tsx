@@ -718,8 +718,8 @@ const ConecteSuaTV: React.FC<ConecteSuaTVProps> = ({
 
   // ── Passo a passo ────────────────────────────────────────────────────────
   return (
-    <div className="ctv">
-      <div className="ctv-wrap">
+    <div className="ctv ctv-tarefa">
+      <div className="ctv-wrap ctv-wrap-tarefa">
         <header className="ctv-topo">
           <div>
             <h1 className="ctv-titulo">Conecte sua TV</h1>
@@ -744,7 +744,7 @@ const ConecteSuaTV: React.FC<ConecteSuaTVProps> = ({
         </header>
 
         {/* Passo 1 — o endereço, em letras grandes, e o QR ao lado. */}
-        <section className="ctv-cartao">
+        <section className="ctv-cartao ctv-p1">
           <div className="ctv-passo">
             <span className="ctv-passo-num" aria-hidden="true">
               1
@@ -786,7 +786,7 @@ const ConecteSuaTV: React.FC<ConecteSuaTVProps> = ({
         </section>
 
         {/* Passo 2 — o código de 6 caracteres. */}
-        <section className="ctv-cartao">
+        <section className="ctv-cartao ctv-p2">
           <div className="ctv-passo">
             <span className="ctv-passo-num" aria-hidden="true">
               2
@@ -898,7 +898,7 @@ const ConecteSuaTV: React.FC<ConecteSuaTVProps> = ({
         </section>
 
         {/* Guia por aparelho. */}
-        <section className="ctv-cartao">
+        <section className="ctv-cartao ctv-guia-cartao">
           <div className="ctv-passo">
             <h2 className="ctv-passo-titulo">Onde abrir, por tipo de aparelho</h2>
           </div>

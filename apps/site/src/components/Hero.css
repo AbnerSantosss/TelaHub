@@ -4,11 +4,27 @@
    herói NÃO usa `.reveal`. */
 
 .hero {
+  /* Altura da primeira dobra = tela visível do visitante menos a navbar.
+     `--nav-h` vem de index.css (73px; 61px no celular). Tudo abaixo é fluido
+     pela ALTURA (`--vh`), não só pela largura: um notebook de 1280x720 e um
+     monitor de 1080p têm a mesma largura de coluna e alturas muito diferentes,
+     e o que cabe em um não cabe no outro. `--vh` vale 1vh e, onde o navegador
+     entende `svh`, passa a valer 1svh (ver @supports abaixo): no celular o vh
+     clássico conta a barra de endereço escondida e empurra o botão para fora. */
+  --vh: 1vh;
+  --hero-h: calc(100vh - var(--nav-h));
+  --pad-y: clamp(16px, calc(var(--vh) * 4.2), 72px);
+  --gap-texto: clamp(10px, calc(var(--vh) * 2.2), 24px);
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 64px;
+  gap: clamp(32px, 5vw, 64px);
   align-items: center;
-  padding: 88px var(--gutter) 80px;
+  align-content: center;
+  /* Duas linhas, nesta ordem: quem não entende `svh` fica com a primeira. O
+     herói cresce além disso só se o conteúdo não couber (celular em pé). */
+  min-height: calc(100vh - var(--nav-h));
+  min-height: calc(100svh - var(--nav-h));
+  padding: var(--pad-y) var(--gutter);
   background: var(--papel-2);
   border-bottom: 1px solid var(--borda-2);
   /* Contexto próprio: o fundo (.hero__fundo, z-index -1) fica acima do
@@ -18,6 +34,13 @@
   isolation: isolate;
   overflow: hidden;
   overflow: clip;
+}
+
+@supports (height: 100svh) {
+  .hero {
+    --vh: 1svh;
+    --hero-h: calc(100svh - var(--nav-h));
+  }
 }
 
 /* ── Fundo: grade + luz ──────────────────────────────────────────────────── */
@@ -67,7 +90,7 @@
 
 /* CSS puro, sem JavaScript: a animação roda sobre o HTML pré-renderizado e
    termina visível (fill-mode both). Atrasos curtos — o maior é 0,32s — para
-   não empurrar o LCP (a headline entra em 0,08s). Movimento reduzido desliga
+   não empurrar o LCP (a headline entra em 0,04s). Movimento reduzido desliga
    tudo (index.css). */
 .hero__texto > *,
 .hero__vitrine {
@@ -75,18 +98,22 @@
 }
 
 .hero__texto > :nth-child(2) {
-  animation-delay: 0.08s;
+  animation-delay: 0.04s;
 }
 
 .hero__texto > :nth-child(3) {
-  animation-delay: 0.16s;
+  animation-delay: 0.12s;
 }
 
 .hero__texto > :nth-child(4) {
-  animation-delay: 0.24s;
+  animation-delay: 0.2s;
 }
 
 .hero__texto > :nth-child(5) {
+  animation-delay: 0.28s;
+}
+
+.hero__texto > :nth-child(6) {
   animation-delay: 0.32s;
 }
 
@@ -109,25 +136,74 @@
 .hero__texto {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: var(--gap-texto);
+}
+
+/* A headline é limitada pela largura E pela altura: em 1280x720 a fórmula só
+   por largura dava 56px e o texto sozinho passava da tela. O piso de 1,75rem
+   deixa o celular baixo (360x640) caber o botão sem rolar. */
+.hero .h1 {
+  font-size: clamp(1.75rem, min(1.35rem + 2.6vw, 3.9vw, calc(var(--vh) * 6.5)), 3.625rem);
+}
+
+/* Pré-headline: letra pequena, acima do H1. O gap do contêiner abriria um vão
+   entre ela e a headline; a margem negativa (um terço do gap, que é fluido)
+   cola as duas. */
+.hero__pre {
+  margin: 0 0 calc(var(--gap-texto) * -0.34);
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1.4;
+  color: var(--tinta-3);
+  text-wrap: balance;
 }
 
 .hero__grito {
   color: var(--marca);
 }
 
+/* O corpo cai até 1rem quando a tela é baixa; no celular já é o piso de 16px. */
 .hero__lead {
-  font-size: clamp(1.0625rem, 1rem + 0.35vw, 1.25rem);
+  font-size: clamp(1rem, min(1rem + 0.35vw, calc(var(--vh) * 2.4)), 1.25rem);
 }
 
 .hero__acoes {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 20px;
+  gap: 8px 20px;
 }
 
 /* .hero__secundario: aparência e hover vêm de .btn--texto (index.css). */
+
+/* Link B2B logo abaixo da confiança. Quieto de propósito: cor neutra
+   (--tinta-3, 5,7:1 sobre o papel) em vez do --marca do CTA, rótulo sempre
+   sublinhado. Alvo de toque de 44px vem de .btn--texto. A margem negativa
+   compensa metade do gap do contêiner (fluido) para colar o link na linha de
+   confiança. O seletor duplo vence a ordem de carga entre index.css e este arquivo. */
+.btn--texto.hero__enterprise {
+  align-self: flex-start;
+  margin-top: calc(var(--gap-texto) * -0.5);
+  padding-inline: 0;
+  font-size: 1rem;
+  font-weight: 500;
+  text-align: left;
+  color: var(--tinta-3);
+}
+
+.btn--texto.hero__enterprise:hover {
+  color: var(--tinta);
+}
+
+.btn--texto.hero__enterprise .btn__rotulo::after {
+  transform: scaleX(1);
+  height: 1px;
+}
+
+.btn--texto.hero__enterprise:hover .btn__rotulo::after {
+  height: 2px;
+}
 
 .hero__vitrine {
   display: flex;
@@ -281,26 +357,170 @@
   margin-top: 0;
 }
 
+/* ── Terceira TV (totem de shopping): só no desktop ──────────────────────── */
+
+.hero__figura--totem {
+  display: none;
+}
+
+/* Com três TVs a deitada ganha a linha de cima inteira e as duas em pé dividem
+   a de baixo. Lado a lado a deitada ficaria com ~200px e o texto da padaria
+   seria cortado. O corte é o mesmo das duas colunas do herói (981px). */
+@media (min-width: 981px) {
+  /* A largura da vitrine sai da ALTURA que sobra: as três TVs somam ~1,06 da
+     largura em altura (16:9 + duas 9:16) e o resto (legendas, chips, nota,
+     gaps) é ~210px. A coluna dela nunca passa de 42% da linha, e o que ela
+     não usa vai para o texto, que é quem aperta em 1024px. Se a conta der
+     menos do que 240px, a vitrine para aí e o herói cresce em vez de esmagar
+     as TVs. Ela é um contêiner de tamanho: tudo dentro dela (fonte, respiro,
+     moldura) é em `cqw` e encolhe junto, na proporção do desenho de 528px. */
+  .hero {
+    --vit-w: max(240px, calc((var(--hero-h) - 2 * var(--pad-y) - 210px) / 1.06));
+    grid-template-columns: minmax(0, 1fr) minmax(0, min(var(--vit-w), 42%));
+  }
+
+  .hero__vitrine {
+    container-type: inline-size;
+    gap: clamp(8px, calc(var(--vh) * 1.6), 14px);
+  }
+
+  .hero__telas {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    row-gap: clamp(10px, calc(var(--vh) * 2.2), 20px);
+    align-items: start;
+  }
+
+  .hero__telas > :first-child {
+    grid-column: 1 / -1;
+  }
+
+  .hero__figura--totem {
+    display: flex;
+  }
+
+  .hero__figura--pe .tv--pe {
+    width: 150px;
+    width: 28.4cqw;
+    margin-inline: auto;
+  }
+
+  /* Escala em `cqw` do desenho original (528px de vitrine). Cada declaração
+     em px/rem vem antes, de base em Hero.css, e serve de fallback para quem
+     não entende container queries. */
+  .tv {
+    padding: 1.9cqw;
+  }
+
+  .tv--pe {
+    padding: 1.5cqw;
+  }
+
+  .tv__quadro--deitada {
+    padding: 3.4cqw;
+    grid-template-columns: minmax(0, 1fr) 18cqw;
+    gap: 2.3cqw;
+  }
+
+  .tv__quadro--pe {
+    padding: 2.3cqw;
+    gap: 1.5cqw;
+  }
+
+  .tv__coluna,
+  .tv__lado {
+    gap: 1.5cqw;
+  }
+
+  .tv__titulo {
+    font-size: max(0.5rem, 3.8cqw);
+  }
+
+  .tv__linha {
+    font-size: max(0.4375rem, 2.3cqw);
+  }
+
+  .tv__destaque,
+  .tv__rodape {
+    font-size: max(0.4375rem, 2.1cqw);
+  }
+
+  .tv__bloco {
+    padding: 1.5cqw;
+  }
+
+  .tv__bloco strong {
+    font-size: max(0.5rem, 3.4cqw);
+  }
+
+  .tv__bloco span {
+    font-size: max(0.375rem, 1.7cqw);
+  }
+
+  .tv__quadro--pe .tv__titulo {
+    font-size: max(0.4375rem, 2.3cqw);
+  }
+
+  .tv__quadro--pe .tv__linha {
+    font-size: max(0.375rem, 1.7cqw);
+  }
+
+  .tv__quadro--pe .tv__destaque,
+  .tv__quadro--pe .tv__ok {
+    font-size: max(0.375rem, 1.5cqw);
+  }
+}
+
 /* ── Larguras ────────────────────────────────────────────────────────────── */
 
+/* Uma coluna. Em celular em pé texto + vitrine não cabem juntos em 100svh, e
+   espremer as TVs até caberem as deixaria ilegíveis. A primeira tela é então o
+   BLOCO DE TEXTO inteiro (pré-título até o link Enterprise), com a altura exata
+   da tela visível menos a navbar e o conteúdo centralizado; a vitrine vem logo
+   abaixo, como continuação. O vão entre os dois é o próprio respiro vertical
+   do herói, para a vitrine começar onde a primeira tela acaba. Se o texto for
+   mais alto do que a tela (celular de 640px de altura), ele cresce — o botão
+   principal já está acima da dobra. */
 @media (max-width: 980px) {
   .hero {
+    --pad-y: clamp(20px, calc(var(--vh) * 4.5), 48px);
     grid-template-columns: minmax(0, 1fr);
-    gap: 36px;
-    padding-top: 48px;
-    padding-bottom: 48px;
+    gap: var(--pad-y);
+  }
+
+  .hero__texto {
+    min-height: calc(var(--hero-h) - 2 * var(--pad-y));
+    justify-content: center;
+  }
+}
+
+/* A linha de confiança tem quatro fatos. Em .trust (flex wrap) ela quebrava
+   onde coubesse: em 390px sobrava um item sozinho na terceira linha e o
+   separador "·" abria a linha seguinte, como se fosse marcador de lista.
+   Duas linhas passam a ser DESENHO, não sobra: grade 2×2, separadores
+   escondidos (são decorativos e já têm aria-hidden no JSX). Vale no celular e
+   também nas duas colunas estreitas do desktop (981 a 1399px), onde o texto de
+   "Smart TV já serve" também não cabe em uma linha. */
+@media (max-width: 640px), (min-width: 981px) and (max-width: 1399px) {
+  .hero__trust {
+    display: grid;
+    /* Colunas do tamanho do texto, e não 1fr/1fr: em 360px a metade da linha
+       (~145px) não comportava "Mensal sem fidelidade" e a grade virava três
+       linhas. Com `max-content` as duas cabem em ~285px e ela fica em duas. */
+    grid-template-columns: repeat(2, minmax(0, max-content));
+    gap: 6px 14px;
+  }
+
+  .hero__trust span[aria-hidden='true'] {
+    display: none;
   }
 }
 
 @media (max-width: 640px) {
+  /* Celular em pé: o respiro vertical encolhe junto com a altura, senão em
+     360x640 o link Enterprise cai fora da primeira tela. */
   .hero {
-    padding-top: 36px;
-    padding-bottom: 32px;
-    gap: 28px;
-  }
-
-  .hero__texto {
-    gap: 16px;
+    --pad-y: clamp(16px, calc(var(--vh) * 2.8), 36px);
+    --gap-texto: clamp(10px, calc(var(--vh) * 1.8), 20px);
   }
 
   .hero__telas {
@@ -308,23 +528,11 @@
     gap: 10px;
   }
 
+  /* Em 360px o rótulo do botão principal quebra em duas linhas; 12px de
+     respiro vertical (e não 16) poupa 8px sem tirar o alvo de 56px de altura. */
   .hero__acoes .btn {
     width: 100%;
-  }
-
-  /* A linha de confiança tem quatro fatos. Em .trust (flex wrap) ela quebrava
-     onde coubesse: em 390px sobrava um item sozinho na terceira linha e o
-     separador "·" abria a linha seguinte, como se fosse marcador de lista.
-     Duas linhas passam a ser DESENHO, não sobra: grade 2×2, separadores
-     escondidos (são decorativos e já têm aria-hidden no JSX). */
-  .hero__trust {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 6px 14px;
-  }
-
-  .hero__trust span[aria-hidden='true'] {
-    display: none;
+    padding-block: 12px;
   }
 
   .tv {

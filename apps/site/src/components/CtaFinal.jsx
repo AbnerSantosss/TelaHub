@@ -20,13 +20,11 @@ import './CtaFinal.css';
  * Ficou só o verificável — trocar um texto e salvar leva 30 segundos —, e ele
  * mora no herói e na comparação. NÃO reintroduza prazo aqui.
  *
- * ── O subtítulo é a lista de portes, não um slogan ──────────────────────────
- * Assembleia, oferta, grade de aulas, serviços da clínica, comunicado da
- * empresa e combo da lanchonete aparecem na mesma frase e no mesmo peso porque
- * o produto é horizontal por PORTE. Comida entra por último, como um caso entre
- * seis: abrir por cardápio faz síndico, gerente e dono de clínica concluírem
- * "não é pra mim" — a decisão está registrada na wiki e já foi tomada duas
- * vezes.
+ * ── O subtítulo é a lista de usos, não um slogan ────────────────────────────
+ * Oferta do dia, pão que saiu agora, promoção da semana, evento do shopping e
+ * aviso da assembleia aparecem na mesma frase porque o leitor primário é o dono
+ * de comércio (auditoria de 18/10/2026), e o síndico fecha a lista de propósito:
+ * o produto continua horizontal por PORTE, e a padaria é um caso entre vários.
  *
  * ── Fundo escuro é decisão de sistema, não enfeite ──────────────────────────
  * A seção usa .secao--noite, e sobre ela o botão é .btn--luz. Essa dupla não é
@@ -68,8 +66,8 @@ export default function CtaFinal({ startConversion }) {
       </h2>
 
       <p className="lead ctafinal__sub reveal">
-        Pode ser o aviso da assembleia, a oferta do dia, a grade das aulas, os serviços da clínica,
-        o comunicado da empresa ou o combo da lanchonete. Você escolhe e troca pelo celular.
+        Pode ser a oferta do dia, o pão que saiu agora, a promoção da semana, o evento do shopping
+        ou o aviso da assembleia. Você escolhe e troca pelo celular.
       </p>
 
       <button

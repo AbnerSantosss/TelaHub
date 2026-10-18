@@ -129,7 +129,7 @@ const Editor: React.FC = () => {
   }, [display]);
 
   if (!display) return (
-    <div className="h-screen w-screen flex flex-col items-center justify-center bg-papel-2 text-tinta-3 gap-4">
+    <div className="h-tela w-screen flex flex-col items-center justify-center bg-papel-2 text-tinta-3 gap-4">
       <Loader2 className="animate-spin text-marca" size={32} /> 
       <p className="text-xs uppercase tracking-widest font-bold">Carregando estúdio...</p>
     </div>
@@ -419,7 +419,9 @@ const Editor: React.FC = () => {
   const currentWidget = activePage.layout.find(w => w.i === selectedWidget);
 
   return (
-    <div className="h-screen flex flex-col bg-papel-3 overflow-hidden relative text-tinta font-sans">
+    // Editor é app de tela cheia: altura exata da tela visível (100dvh), sem
+    // rolar o documento; só os painéis internos rolam.
+    <div className="h-tela flex flex-col bg-papel-3 overflow-hidden relative text-tinta font-sans">
       
       {/* Background Animation Selection Modal */}
       {showBgAnimModal && (

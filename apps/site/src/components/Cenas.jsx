@@ -15,11 +15,11 @@ import './Cenas.css';
  * linha). Tirar a primeira transformaria a seção num folheto de recursos.
  *
  * ── A armadilha que ela evita ───────────────────────────────────────────────
- * O produto é horizontal por PORTE, não por ramo, e a ordem dos seis cartões é
- * decisão comercial: condomínio, escritório, clínica, loja, academia, rede.
- * Abrir por restaurante/cardápio — a tentação óbvia de quem escreve sobre TV
- * em parede — encolhe o produto para "cardápio digital" e queima os outros
- * cinco públicos. Comida não aparece aqui, e não deve ser acrescentada.
+ * A ordem dos oito cartões é decisão comercial (auditoria de 18/10/2026): o
+ * leitor primário é o dono de comércio, então abrem padaria, loja e shopping,
+ * seguidos de rede, clínica, escritório, academia e condomínio. A padaria é
+ * UMA cena entre oito, não o posicionamento: cardápio em primeiro plano
+ * encolheria o produto para "cardápio digital" e queimaria os outros públicos.
  *
  * ── O que ela não pode dizer ────────────────────────────────────────────────
  * Nada aqui é depoimento. São cenas escritas pela casa, no genérico, sem nome
@@ -30,19 +30,9 @@ import './Cenas.css';
 
 const CENAS = [
   {
-    setor: 'Condomínio',
-    hoje: '"O aviso da assembleia está no quadro de cortiça do elevador, embaixo do papel da dedetização do mês passado. Metade dos moradores não viu."',
-    vira: 'Com a TV na portaria: assembleia, manutenção do elevador e coleta seletiva em letras grandes, atualizados pelo síndico do celular.',
-  },
-  {
-    setor: 'Escritório · empresa',
-    hoje: '"Mandei o comunicado por e-mail. Ninguém leu. A meta do mês e os aniversariantes ficam num mural que ninguém olha."',
-    vira: 'Com a TV na recepção: aviso, agenda da sala de reunião, aniversariantes e o painel de resultados, sem imprimir papel.',
-  },
-  {
-    setor: 'Clínica · consultório',
-    hoje: '"Sala de espera no canal de notícias. O paciente sai sem saber que parcelo, que atendo aos sábados, que aceito o convênio novo."',
-    vira: 'Com a TV na sala de espera: seus serviços, horários e orientações passando em sequência, sem ninguém precisar apertar play.',
+    setor: 'Padaria · café',
+    hoje: '"O combo do café está num papel colado no vidro do balcão. Ninguém lê antes de chegar a vez."',
+    vira: 'Com a TV no balcão: o pão que saiu agora e o combo do dia, trocados pelo celular antes de abrir a porta.',
   },
   {
     setor: 'Loja · comércio de rua',
@@ -50,9 +40,9 @@ const CENAS = [
     vira: 'Com a TV no balcão ou na vitrine: a oferta de hoje com foto e preço de hoje, trocada em 30 segundos.',
   },
   {
-    setor: 'Academia · serviços',
-    hoje: '"A grade das aulas está numa folha A4 na recepção, desatualizada desde que a professora trocou de horário."',
-    vira: 'Com a TV na recepção: grade da semana, feriado e promoção de matrícula, atualizados pelo celular.',
+    setor: 'Shopping · corredor e totem',
+    hoje: '"A agenda do fim de semana vai para o Instagram e para um banner na entrada. Quem já está no corredor não vê."',
+    vira: 'Com totens no corredor: evento, loja nova e campanha publicados uma vez, em todas as telas juntas.',
   },
   {
     // "várias unidades" saiu do rótulo e "em cada unidade" saiu do texto: essa
@@ -64,6 +54,26 @@ const CENAS = [
     setor: 'Rede · várias telas',
     hoje: '"Mandei a campanha por WhatsApp pras sete lojas. Três imprimiram, duas imprimiram a versão antiga, duas não viram."',
     vira: 'Com uma tela em cada loja: você publica uma vez e as sete trocam juntas. Se uma cair, chega um e-mail antes de o gerente perceber.',
+  },
+  {
+    setor: 'Clínica · consultório',
+    hoje: '"Sala de espera no canal de notícias. O paciente sai sem saber que parcelo, que atendo aos sábados, que aceito o convênio novo."',
+    vira: 'Com a TV na sala de espera: seus serviços, horários e orientações passando em sequência, sem ninguém precisar apertar play.',
+  },
+  {
+    setor: 'Escritório · empresa',
+    hoje: '"Mandei o comunicado por e-mail. Ninguém leu. A meta do mês e os aniversariantes ficam num mural que ninguém olha."',
+    vira: 'Com a TV na recepção: aviso, agenda da sala de reunião, aniversariantes e o painel de resultados, sem imprimir papel.',
+  },
+  {
+    setor: 'Academia · serviços',
+    hoje: '"A grade das aulas está numa folha A4 na recepção, desatualizada desde que a professora trocou de horário."',
+    vira: 'Com a TV na recepção: grade da semana, feriado e promoção de matrícula, atualizados pelo celular.',
+  },
+  {
+    setor: 'Condomínio',
+    hoje: '"O aviso da assembleia está no quadro de cortiça do elevador, embaixo do papel da dedetização do mês passado. Metade dos moradores não viu."',
+    vira: 'Com a TV na portaria: assembleia, manutenção do elevador e coleta seletiva em letras grandes, atualizados pelo síndico do celular.',
   },
 ];
 
@@ -79,7 +89,7 @@ export default function Cenas() {
           Você conhece essa cena. Quem entra no seu espaço também.
         </h2>
         <p className="lead">
-          Acontece no condomínio, no shopping, no escritório e na loja da esquina.
+          Acontece na padaria, na loja da esquina, no shopping e no condomínio.
           A TV da parede pode dar esse recado sem virar mais uma tarefa no seu dia.
         </p>
       </div>

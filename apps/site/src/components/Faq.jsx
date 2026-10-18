@@ -2,12 +2,12 @@ import './Faq.css';
 import { precoPorTela } from '../data/catalogo';
 
 /**
- * FAQ — "Perguntas que todo síndico, gerente e dono fazem antes de assinar."
+ * FAQ — "Perguntas que todo dono, gerente e síndico fazem antes de assinar."
  *
  * ── Por que as respostas são estas ──────────────────────────────────────────
- * A lista não é uma coleção de dúvidas simpáticas: é a transcrição das oito
+ * A lista não é uma coleção de dúvidas simpáticas: é a transcrição das dez
  * objeções que aparecem em toda conversa de venda, na ordem em que aparecem.
- * O público é o síndico, o gerente e o dono — três pessoas que não são de
+ * O público é o dono, o gerente e o síndico — três pessoas que não são de
  * tecnologia e que já foram queimadas por contrato de fidelidade. Por isso a
  * resposta vem antes do argumento, sempre em uma ou duas frases.
  *
@@ -65,6 +65,16 @@ const PERGUNTAS = [
       'Sim. Cada tela tem seu formato: deitada 16:9 ou em pé 9:16. Você monta os dois no mesmo painel.',
   },
   {
+    pergunta: 'Dá para mostrar preço e cardápio?',
+    resposta:
+      'Sim. Foto com preço, texto e o cardápio em PDF entram como bloco na tela, e você troca pelo celular.',
+  },
+  {
+    pergunta: 'Tenho mais de uma loja. Troco tudo de uma vez?',
+    resposta:
+      'Sim. Você publica uma vez e todas as telas escolhidas trocam juntas. A partir de 5 telas, o plano Rede sai mais barato por tela.',
+  },
+  {
     pergunta: 'E se a internet cair?',
     resposta:
       'Se a tela já estava mostrando, continua. Se o aparelho for reiniciado sem internet, o conteúdo não carrega, porque ainda não guardamos tudo na memória da TV.',
@@ -96,7 +106,7 @@ export default function Faq() {
     <section id="duvidas" className="secao faq" aria-labelledby="faq-titulo">
       <div className="faq__grade">
         <h2 id="faq-titulo" className="h2 reveal">
-          Perguntas que todo síndico, gerente e dono fazem antes de assinar.
+          Perguntas que todo dono, gerente e síndico fazem antes de assinar.
         </h2>
 
         <div className="faq__lista reveal">

@@ -875,8 +875,11 @@ const Dashboard: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen relative z-10" style={{ color: 'var(--color-text)' }}>
-      <div className="th-container py-6 md:py-8 relative min-h-screen">
+    // A altura de tela (`min-h-tela`, 100dvh) fica só neste wrapper. Antes o
+    // `th-container` repetia a mesma altura por dentro, empilhando duas camadas
+    // que dependiam uma da outra para não estourar a tela.
+    <div className="min-h-tela relative z-10" style={{ color: 'var(--color-text)' }}>
+      <div className="th-container py-6 md:py-8 relative">
 
         {/* HEADER */}
         <motion.div

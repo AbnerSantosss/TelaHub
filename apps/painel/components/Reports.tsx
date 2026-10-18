@@ -62,7 +62,7 @@ const Reports: React.FC = () => {
   }, [selectedOrgId, startDate, endDate]);
 
   return (
-    <div className="min-h-screen bg-papel-2 text-tinta pb-12 font-sans">
+    <div className="min-h-tela bg-papel-2 text-tinta pb-12 font-sans">
       {/* HEADER SUPERIOR */}
       <div className="bg-papel-2 border-b border-borda sticky top-0 z-50 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">

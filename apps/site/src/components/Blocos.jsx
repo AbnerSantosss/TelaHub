@@ -25,12 +25,12 @@ import './Blocos.css';
 const BLOCOS = [
   {
     nome: 'Texto e aviso',
-    texto: 'Assembleia, promoção, horário, boas-vindas. Tamanho e cor à sua escolha.',
+    texto: 'Promoção, preço do dia, horário, boas-vindas. Tamanho e cor à sua escolha.',
     icone: <path d="M4 6h16M12 6v14" />,
   },
   {
     nome: 'Foto e GIF',
-    texto: 'Cartaz, produto, planta do imóvel, arte da campanha.',
+    texto: 'Cartaz, produto, foto da vitrine, arte da campanha.',
     icone: (
       <>
         <rect x="3" y="3" width="18" height="18" rx="2" />
@@ -70,7 +70,7 @@ const BLOCOS = [
   },
   {
     nome: 'Agenda e contador',
-    texto: 'Reuniões da sala, aulas da semana, "faltam 3 dias para a festa junina".',
+    texto: 'Reuniões da sala, aulas da semana, "faltam 3 dias para a liquidação".',
     icone: (
       <>
         <rect x="3" y="4" width="18" height="16" rx="2" />

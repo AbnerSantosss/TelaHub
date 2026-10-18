@@ -37,6 +37,10 @@
 :root {
   /* Respiro lateral da página. Cai junto com a largura da tela (ver .secao). */
   --gutter: 160px;
+  /* Altura total da navbar (barra de 72px + 1px de borda). O herói desconta
+     este valor para que navbar + herói somem exatamente a tela visível.
+     Navbar.css deriva a própria altura daqui: troque só neste lugar. */
+  --nav-h: 73px;
 }
 
 /* ── Reset curto ─────────────────────────────────────────────────────────── */
@@ -980,6 +984,7 @@ button {
 @media (max-width: 640px) {
   :root {
     --gutter: 20px;
+    --nav-h: 61px;
   }
 
   .secao {

@@ -203,8 +203,9 @@ const Precos = ({ startConversion, abrirContato }) => {
     <section id="precos" className="secao secao--papel precos" aria-labelledby="precos-titulo">
       <div className="secao__cabeca precos__cabeca">
         <h2 className="h2" id="precos-titulo">
-          A TV e a internet você já tem. A primeira tela é grátis, e cada tela a mais custa por mês
-          menos que um cartaz de gráfica.
+          A TV e a internet você já tem. A primeira tela é grátis para sempre. Quando você liga a
+          segunda, cada tela custa {reais(precoUnitario('loja', MENSAL))} por mês no plano Loja, ou{' '}
+          {reais(precoUnitario('loja', ANUAL))} no anual.
         </h2>
 
         <div

@@ -562,7 +562,7 @@ const Scheduler: React.FC = () => {
 
   if (loading && broadcasts.length === 0 && !isEditing) {
     return (
-      <div className="h-screen w-screen bg-papel-2 flex flex-col items-center justify-center gap-4">
+      <div className="h-tela w-screen bg-papel-2 flex flex-col items-center justify-center gap-4">
         <Loader2 className="animate-spin text-marca" size={32} />
         <p className="text-xs uppercase tracking-widest font-bold text-tinta-3">Carregando Central...</p>
       </div>
@@ -570,7 +570,7 @@ const Scheduler: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-transparent text-tinta p-4 md:p-8">
+    <div className="min-h-tela bg-transparent text-tinta p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
         
         {/* HEADER */}

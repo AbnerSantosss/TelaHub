@@ -1,7 +1,7 @@
 import './RiscoZero.css';
 
 /**
- * RISCO ZERO — "Se não ficar no ar, você não paga."
+ * RISCO ZERO — "Você só paga pela tela que está no ar."
  *
  * ── Por que a seção existe ──────────────────────────────────────────────────
  * Ela vem logo depois da tabela de preços porque é ali que o visitante para de
@@ -81,7 +81,7 @@ export default function RiscoZero({ abrirContato }) {
     >
       <div className="risco__grade split">
         <h2 id="risco-titulo" className="h2 reveal">
-          Se não ficar no ar, você não paga.
+          Você só paga pela tela que está no ar.
         </h2>
 
         <ul className="risco__lista reveal">

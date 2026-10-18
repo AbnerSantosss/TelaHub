@@ -12,7 +12,10 @@
   color: var(--asn-tinta);
   /* grade clara sutil (claro.css) sobre o papel */
   background: var(--claro-grade), var(--asn-papel-2);
+  /* `100vh` de reserva; `100dvh` acompanha a barra de endereço do celular, que
+     com `vh` escondia o fim da página. */
   min-height: 100vh;
+  min-height: 100dvh;
   padding: 28px 20px 56px;
 }
 
