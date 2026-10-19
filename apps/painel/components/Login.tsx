@@ -274,12 +274,12 @@ const Login: React.FC = () => {
 
           {/* Segmentos em pé de igualdade: o produto é o mesmo em todos. */}
           <ul className="auth-lugares">
-            <li>Portaria de condomínio</li>
-            <li>Recepção de empresa</li>
-            <li>Sala de espera de clínica</li>
             <li>Vitrine de loja</li>
-            <li>Grade da academia</li>
             <li>Balcão da padaria</li>
+            <li>Corredor do mercado</li>
+            <li>Balcão da farmácia</li>
+            <li>Corredor do shopping</li>
+            <li>Sala de espera de clínica</li>
           </ul>
 
           <ul className="auth-provas">

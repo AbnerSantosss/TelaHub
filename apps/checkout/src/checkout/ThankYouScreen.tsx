@@ -118,7 +118,9 @@ export const ThankYouScreen = ({ checkout }: { checkout: CheckoutController }) =
         <p className="mt-2 text-sm font-semibold text-success-ink">
           {simulatedPayment ? 'Pagamento simulado aprovado' : 'Pagamento confirmado'}
         </p>
-        {payment?.message ? (
+        {/* `payment.message` vem da API e fala de "credenciais por e-mail", o que só vale
+            para conta nova. Logado, o quadro abaixo já explica o que acontece. */}
+        {payment?.message && !loggedUser ? (
           <p className="mt-2 max-w-md text-sm leading-relaxed text-ink-muted">{payment.message}</p>
         ) : null}
       </div>

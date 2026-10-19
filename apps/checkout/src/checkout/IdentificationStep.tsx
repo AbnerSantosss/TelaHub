@@ -11,7 +11,7 @@
 // Anunciar documento fiscal que não sai é promessa que o produto não cumpre
 // (CDC, art. 30) e a primeira reclamação previsível de quem contrata por CNPJ.
 import { useEffect, useRef } from 'react';
-import { Building2, Lock, User, UserCheck, Wand2 } from 'lucide-react';
+import { Building2, LogIn, Lock, User, UserCheck, Wand2 } from 'lucide-react';
 
 import { randomIdentity } from '../lib/fake-data';
 import { Notice, PrimaryButton, TextField } from './primitives';
@@ -36,6 +36,29 @@ type DemoAwareController = CheckoutController & {
   paymentConfig?: { simulated?: boolean };
 };
 
+/**
+ * Painel (`/app`), com o mesmo override `VITE_APP_URL` da tela de obrigado.
+ * Copiado e não importado para não amarrar as duas telas.
+ */
+const APP_URL = (
+  (import.meta as ImportMeta & { env?: { VITE_APP_URL?: string } }).env?.VITE_APP_URL ?? ''
+)
+  .trim()
+  .replace(/\/+$/, '') || '/app';
+
+/**
+ * Login do painel que devolve ao checkout com o mesmo plano. O `Login.tsx` do
+ * painel lê `plano`, `telas` e `intervalo` antes do `#` e, depois de entrar,
+ * abre um checkout novo com essa escolha. Sem plano escolhido, o login só
+ * leva ao painel.
+ */
+function loginToBuyUrl(planCode: string | null, screens: number, interval: string): string {
+  if (!planCode) return `${APP_URL}/#/login`;
+  const params = new URLSearchParams({ plano: planCode, telas: String(screens) });
+  if (interval === 'yearly') params.set('intervalo', 'anual');
+  return `${APP_URL}/?${params.toString()}#/login`;
+}
+
 export const IdentificationStep = ({ checkout }: { checkout: CheckoutController }) => {
   const {
     identity,
@@ -49,6 +72,10 @@ export const IdentificationStep = ({ checkout }: { checkout: CheckoutController 
     savingIdentity,
     loggedUser,
     signOutLoggedUser,
+    accountConflict,
+    planCode,
+    screens,
+    billingInterval,
   } = checkout;
 
   const isCnpj = identity.documentKind === 'cnpj';
@@ -127,6 +154,29 @@ export const IdentificationStep = ({ checkout }: { checkout: CheckoutController 
           >
             Não é você? Sair
           </button>
+        </Notice>
+      ) : null}
+
+      {/*
+        O servidor recusou o e-mail: ele já tem conta e quem compra não entrou
+        nela. Só a própria conta logada pode contratar para si, senão qualquer
+        pessoa trocaria o plano de outra digitando o e-mail dela.
+      */}
+      {accountConflict?.code === 'email_has_account' ? (
+        <Notice tone="warning" role="alert" icon={<LogIn size={15} />}>
+          <span className="block">{accountConflict.message}</span>
+          <a
+            href={loginToBuyUrl(planCode, screens, billingInterval)}
+            className="mt-1 flex min-h-11 items-center font-bold text-accent-ink underline underline-offset-2 sm:min-h-6"
+          >
+            Entrar na minha conta
+          </a>
+          <span className="block">Ou use outro e-mail para criar uma conta nova.</span>
+        </Notice>
+      ) : null}
+      {accountConflict?.code === 'billing_permission_denied' ? (
+        <Notice tone="warning" role="alert" icon={<Lock size={15} />}>
+          {accountConflict.message}
         </Notice>
       ) : null}
 

@@ -7,6 +7,8 @@ import { userService } from '../services/user.service';
 import { requireTenant } from '../middlewares/tenant.middleware';
 import { requireActiveSubscription, enforceQuota } from '../middlewares/quota.middleware';
 import { auditService } from '../services/audit.service';
+import { requirePermission } from '../middlewares/permission.middleware';
+import { canAssignRole, normalizeRole } from '../lib/permissions';
 
 const router = Router();
 
@@ -22,9 +24,23 @@ router.get('/', authMiddleware, requireTenant, async (req: Request, res: Respons
 });
 
 // POST /api/users/invite — o convidado HERDA a organização de quem convidou
-router.post('/invite', authMiddleware, requireTenant, requireActiveSubscription, enforceQuota('user'), validateBody(inviteUserSchema), async (req: Request, res: Response): Promise<void> => {
+//
+// Só quem gerencia a equipe (`team:write`: Titular, Administrador e o master em
+// modo suporte) convida. Editor/Leitor recebem 403 antes de qualquer checagem
+// de assinatura ou quota. O papel do convite passa por duas barreiras: o schema
+// (só papéis de organização; `master` é 400) e `canAssignRole` (quem convida só
+// atribui o que pode atribuir).
+router.post('/invite', authMiddleware, requireTenant, requirePermission('team:write'), requireActiveSubscription, enforceQuota('user'), validateBody(inviteUserSchema), async (req: Request, res: Response): Promise<void> => {
   try {
-    const { email, role } = req.body;
+    const { email } = req.body;
+    // Sem papel no corpo = Operador (`user`), o mesmo padrão de antes e o
+    // padrão do formulário do painel.
+    const role: string = req.body.role ?? 'user';
+
+    if (!canAssignRole(normalizeRole(req.user!.role), normalizeRole(role))) {
+      res.status(403).json({ error: 'Você não pode atribuir esse papel.', code: 'permission_denied' });
+      return;
+    }
 
     const user = await userService.inviteUser(email.trim(), role, req.tenantId);
 

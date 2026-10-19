@@ -37,6 +37,11 @@ export const CHECKOUT_EVENT_TYPES = [
   'abandoned',
   'recovered',
   'recovery_notified',
+  // Prova de que a sessão foi identificada por quem ESTAVA LOGADO na conta do
+  // e-mail informado (token válido + permissão de cobrança). É só a partir
+  // deste evento que o `paid.handler` aceita aplicar o plano a uma organização
+  // que já existe. Ver `checkoutService.checkAccountOwnership`.
+  'account_linked',
 ] as const;
 
 export type CheckoutEventType = (typeof CHECKOUT_EVENT_TYPES)[number];

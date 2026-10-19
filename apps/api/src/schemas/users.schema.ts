@@ -1,8 +1,20 @@
 import { z } from 'zod';
 
+/**
+ * Papéis aceitos no convite: só papéis DE ORGANIZAÇÃO. `master` (dono da
+ * plataforma) e qualquer outro texto são recusados com 400 aqui mesmo.
+ *
+ * `user` é o papel antigo de "Operador", lido como Editor (`normalizeRole`).
+ * Continua aceito porque é o valor que a tela de equipe do painel envia hoje
+ * (`UserManagementModal`: Operador = `user`, Administrador = `admin`).
+ */
+export const INVITE_ROLES = ['admin', 'editor', 'viewer', 'user'] as const;
+
 export const inviteUserSchema = z.object({
   email: z.string().min(1, 'Informe um e-mail válido.').email('Informe um e-mail válido.'),
-  role: z.string().optional(),
+  role: z
+    .enum(INVITE_ROLES, { message: 'Papel inválido. Use Administrador, Editor ou Leitor.' })
+    .optional(),
 });
 
 export const forgotPasswordSchema = z.object({

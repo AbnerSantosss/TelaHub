@@ -91,7 +91,8 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
             </div>
           )}
 
-          {/* Invite User Form */}
+          {/* Convite só para quem tem team:write na API (admin e master). */}
+          {currentUser?.role === 'master' || currentUser?.role === 'admin' ? (
           <form onSubmit={onSubmitInvite} className="bg-papel p-5 border border-borda rounded-xl space-y-4">
             <h4 className="text-sm font-bold text-text flex items-center gap-1.5 pl-0.5">
               <Mail size={15} className="text-marca" /> Convidar Novo Integrante
@@ -133,6 +134,11 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({
               </Button>
             </div>
           </form>
+          ) : (
+            <p className="text-sm text-tinta-3 bg-papel p-4 border border-borda rounded-xl">
+              Só administradores convidam pessoas para a equipe.
+            </p>
+          )}
 
           {/* User List */}
           <div className="space-y-3">

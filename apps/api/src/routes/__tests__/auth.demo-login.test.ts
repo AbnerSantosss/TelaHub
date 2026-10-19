@@ -1,4 +1,4 @@
-import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import express from 'express';
 import request from 'supertest';
 import bcrypt from 'bcryptjs';
@@ -35,11 +35,22 @@ beforeAll(async () => {
   createdUserId = user.id;
 });
 
+// O .env local pode ter DEMO_LOGIN=true. Cada teste parte de "ausente" (o caso
+// desligado) e liga a variável por conta própria; o valor original volta no fim.
+const originalDemoLogin = process.env.DEMO_LOGIN;
+
+beforeEach(() => {
+  delete process.env.DEMO_LOGIN;
+});
+
 afterEach(() => {
   delete process.env.DEMO_LOGIN;
 });
 
 afterAll(async () => {
+  if (originalDemoLogin === undefined) delete process.env.DEMO_LOGIN;
+  else process.env.DEMO_LOGIN = originalDemoLogin;
+
   if (createdUserId) await prisma.user.delete({ where: { id: createdUserId } });
   if (createdOrgId) await prisma.organization.delete({ where: { id: createdOrgId } });
 });

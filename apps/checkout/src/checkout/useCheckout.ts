@@ -95,6 +95,16 @@ export interface CardDraft {
 
 export type CardField = keyof CardDraft;
 
+/**
+ * Recusa do servidor ao e-mail informado. `email_has_account`: o e-mail já tem
+ * conta e quem compra não está logado nela. `billing_permission_denied`: está
+ * logado, mas o papel na conta não permite contratar.
+ */
+export interface AccountConflict {
+  code: 'email_has_account' | 'billing_permission_denied';
+  message: string;
+}
+
 export type CardErrors = Partial<Record<CardField, string>>;
 
 export const CARD_FIELD_ORDER: CardField[] = ['number', 'holder', 'expiry', 'cvv'];
@@ -213,6 +223,9 @@ export function useCheckout(routeToken?: string) {
   // Conta do painel no mesmo domínio (ver `useLoggedUser.ts`).
   const { user: loggedUser, loading: loggedUserLoading, signOut: signOutAccount } = useLoggedUser();
   const [identityErrors, setIdentityErrors] = useState<IdentityErrors>({});
+  // E-mail de conta existente usado sem login nela (ou login sem permissão de
+  // cobrança). Vira aviso no passo de identificação, com o link para entrar.
+  const [accountConflict, setAccountConflict] = useState<AccountConflict | null>(null);
   const [focusRequest, setFocusRequest] = useState<FocusRequest | null>(null);
 
   // ─── Passos ────────────────────────────────────────────────────────────────
@@ -501,6 +514,25 @@ export function useCheckout(routeToken?: string) {
       setSession((current) => (current ? { ...current, status: 'paid' } : current));
       return true;
     }
+    // O servidor recusa o e-mail de uma conta existente quando quem compra não
+    // está logado nela. Pode chegar na identificação ou no pagamento (conta
+    // criada no meio do caminho); nos dois casos a pessoa volta ao passo 1,
+    // onde está o link para entrar.
+    if (error.code === 'email_has_account' || error.code === 'billing_permission_denied') {
+      setAccountConflict({ code: error.code, message: error.message });
+      // Mensagem curta no campo: a explicação e o link ficam no aviso acima dele.
+      setIdentityErrors((current) => ({
+        ...current,
+        email:
+          error.code === 'email_has_account'
+            ? 'Entre na sua conta ou use outro e-mail.'
+            : 'Esta conta não pode contratar planos.',
+      }));
+      setCompleted((current) => ({ ...current, identify: false }));
+      setActiveStep('identify');
+      setFocusRequest({ field: 'email', nonce: Date.now() });
+      return true;
+    }
     return false;
   }, []);
 
@@ -525,6 +557,7 @@ export function useCheckout(routeToken?: string) {
         const next = await updateSession(token, payload);
         setSession(next);
         setSyncFailed(false);
+        setAccountConflict(null);
         return true;
       } catch (error) {
         if (handleFatal(error)) return false;
@@ -689,6 +722,7 @@ export function useCheckout(routeToken?: string) {
   const signOutLoggedUser = useCallback(() => {
     const accountEmail = loggedUser?.email;
     signOutAccount();
+    setAccountConflict(null);
     setIdentity((current) => (current.email === accountEmail ? { ...current, email: '' } : current));
   }, [signOutAccount, loggedUser]);
 
@@ -699,6 +733,7 @@ export function useCheckout(routeToken?: string) {
   const setIdentityField = useCallback((field: IdentityField, value: string) => {
     // E-mail travado na conta logada: nem o preenchimento de teste o troca.
     if (field === 'email' && loggedUser) return;
+    if (field === 'email') setAccountConflict(null);
     setIdentity((current) => {
       if (field === 'phone') return { ...current, phone: maskPhone(value) };
       if (field === 'document') {
@@ -1122,6 +1157,8 @@ export function useCheckout(routeToken?: string) {
     screens,
     identity,
     identityErrors,
+    /** E-mail recusado por já ter conta (ou conta sem permissão de cobrança). */
+    accountConflict,
     focusRequest,
     result: result ?? onlineResult,
     /** Conta do painel aberta neste navegador, ou `null` para visitante. */

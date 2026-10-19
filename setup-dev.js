@@ -167,7 +167,7 @@ APP_URL=http://localhost:4110
 
 # Checkout (upgrade de plano pelo painel). Sem esta linha a API manda para o
 # checkout de PRODUÇÃO.
-CHECKOUT_URL=http://localhost:4130/c
+CHECKOUT_URL=/checkout/c
 
 # CORS
 CORS_ORIGINS=http://localhost:4100,http://localhost:4110,http://localhost:4130
@@ -214,7 +214,7 @@ VITE_DEV_MASTER_PASSWORD=${devMasterPassword}
 # Destinos externos em desenvolvimento (ver libs/external-urls.ts). Sem eles o
 # painel local manda "ver planos"/upgrade para os domínios de PRODUÇÃO.
 VITE_SITE_URL=http://localhost:4100
-VITE_CHECKOUT_URL=http://localhost:4130
+VITE_CHECKOUT_URL=/checkout
 
 # Atalhos "Entrar como plano X" da tela de login (só em \`npm run dev\`).
 # Contas criadas por \`npm run db:seed-demo-users\` na API (senha padrão Demo@123).

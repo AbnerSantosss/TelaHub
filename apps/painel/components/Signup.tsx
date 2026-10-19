@@ -47,10 +47,10 @@ const PRIVACY_URL = `${SITE_URL}/privacidade`;
  * campo mais caro da jornada inteira, porque veio de clique pago.
  */
 const EXEMPLOS_ORGANIZACAO = [
-  'Ex.: Condomínio Jardins',
-  'Ex.: Clínica Vida',
   'Ex.: Padaria do Sol',
-  'Ex.: Academia Corpo e Movimento',
+  'Ex.: Loja Bela Vista',
+  'Ex.: Farmácia Central',
+  'Ex.: Clínica Vida',
 ];
 
 export interface SignupAttribution {
@@ -365,18 +365,18 @@ const Signup: React.FC = () => {
           <div>
             <h2 className="auth-vitrine-titulo">Use a TV que você já tem para mostrar avisos e ofertas.</h2>
             <p className="auth-vitrine-texto">
-              Crie a conta, conecte a TV que já existe no lugar e publique o primeiro aviso pelo
-              celular. Dá para fazer tudo em poucos minutos.
+              Crie a conta, conecte a TV que já está no seu negócio e publique a primeira oferta
+              pelo celular. Dá para fazer tudo em poucos minutos.
             </p>
           </div>
 
           <ul className="auth-lugares">
-            <li>Portaria de condomínio</li>
-            <li>Recepção de empresa</li>
-            <li>Sala de espera de clínica</li>
             <li>Vitrine de loja</li>
-            <li>Grade da academia</li>
             <li>Balcão da padaria</li>
+            <li>Corredor do mercado</li>
+            <li>Balcão da farmácia</li>
+            <li>Corredor do shopping</li>
+            <li>Sala de espera de clínica</li>
           </ul>
 
           <ul className="auth-provas">
@@ -469,7 +469,7 @@ const Signup: React.FC = () => {
                       aria-describedby={describedBy('companyName', 'signup-company-hint')}
                     />
                     <p id="signup-company-hint" className="auth-dica">
-                      O nome do condomínio, escritório, clínica, loja ou academia. É ele que
+                      O nome da sua loja, padaria, farmácia ou empresa. É ele que
                       aparece no seu painel.
                     </p>
                     {renderFieldError('companyName')}

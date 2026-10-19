@@ -1231,7 +1231,7 @@ export const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                 <div>
                   <label className="text-[9px] font-black text-tinta-3 uppercase mb-1 block">Conteúdo</label>
                   <textarea
-                    value={w => currentWidget.data.content}
+                    value={currentWidget.data.content ?? ''}
                     onChange={e => updateWidgetData(selectedWidget!, { content: e.target.value })}
                     className="w-full bg-papel-2 border border-borda-3 rounded p-2 text-base md:text-xs text-tinta outline-none focus:border-marca h-24"
                   />

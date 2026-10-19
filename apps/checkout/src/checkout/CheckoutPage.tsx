@@ -113,11 +113,14 @@ const CheckoutPage = () => {
     concluded,
   } = checkout;
 
-  const panels: Record<StepId, RefObject<HTMLDivElement>> = {
-    identify: useRef<HTMLDivElement>(null),
-    plan: useRef<HTMLDivElement>(null),
-    payment: useRef<HTMLDivElement>(null),
-  };
+  // O objeto também é estável (`useRef`), não só as refs dentro dele. Recriado a
+  // cada render, ele disparava o efeito de foco abaixo a cada tecla e devolvia o
+  // cursor ao primeiro campo do passo: quem digitava o e-mail caía no nome.
+  const panels = useRef<Record<StepId, RefObject<HTMLDivElement>>>({
+    identify: { current: null },
+    plan: { current: null },
+    payment: { current: null },
+  }).current;
 
   // O passo que abre recebe o foco: sem isso, quem usa teclado ou leitor de tela
   // continua no botão do passo anterior e não percebe que o conteúdo mudou.
@@ -129,11 +132,24 @@ const CheckoutPage = () => {
     }
     const panel = panels[activeStep].current;
     if (!panel) return;
-    const focusable = panel.querySelector<HTMLElement>(
-      'input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled])'
-    );
-    (focusable ?? panel).focus();
-    // `panels` só contém refs estáveis; o efeito reage à troca de passo.
+    const target =
+      panel.querySelector<HTMLElement>(
+        'input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled])'
+      ) ?? panel;
+    // O painel abre com transição de `visibility`, que no primeiro frame ainda
+    // vale `hidden`, e `focus()` em elemento oculto falha em silêncio. Tenta de
+    // novo nos frames seguintes, até cerca de 300 ms (a duração da transição).
+    let tries = 0;
+    let frame = 0;
+    const tryFocus = (): void => {
+      target.focus();
+      if (document.activeElement !== target && tries++ < 20) {
+        frame = requestAnimationFrame(tryFocus);
+      }
+    };
+    tryFocus();
+    return () => cancelAnimationFrame(frame);
+    // `panels` é estável; o efeito reage só à troca de passo.
   }, [activeStep, panels]);
 
   if (expired) {

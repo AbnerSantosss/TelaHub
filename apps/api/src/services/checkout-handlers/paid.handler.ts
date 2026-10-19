@@ -3,6 +3,7 @@ import crypto from 'crypto';
 import prisma from '../../lib/prisma';
 import { isAsaasNfseEnabled } from '../asaas.provider';
 import { hashPassword } from '../auth.service';
+import { isAuthorizedAccountLink } from '../checkout-account-link';
 import { normalizeInterval } from '../checkout.service';
 import { PRIVACY_VERSION, TERMS_VERSION } from '../../schemas/signup.schema';
 import { planService } from '../plan.service';
@@ -20,6 +21,12 @@ import { auditOnce } from './shared';
 /** Ações de auditoria do provisionamento pós-pagamento. */
 export const PAID_AUDIT_ACTION = 'checkout.paid.provisioned';
 export const PAID_AUDIT_ACTION_ALREADY = 'checkout.paid.already_provisioned';
+/**
+ * Pagamento com o e-mail de uma conta existente SEM a sessão ter sido ligada a
+ * ela por quem estava logado. O plano NÃO é aplicado: fica para a equipe
+ * resolver (estorno ou vínculo manual) a partir desta auditoria.
+ */
+export const PAID_AUDIT_ACTION_CONFLICT = 'checkout.paid.account_conflict';
 
 /**
  * Tratador do evento `paid`.
@@ -43,7 +50,9 @@ export const PAID_AUDIT_ACTION_ALREADY = 'checkout.paid.already_provisioned';
  * também): cada passo verifica antes de criar.
  *   - sessão já com `organizationId` → nada a fazer;
  *   - e-mail já pertence a um usuário → reaproveita a organização dele em vez
- *     de criar uma segunda conta para a mesma pessoa;
+ *     de criar uma segunda conta para a mesma pessoa, MAS só se a sessão foi
+ *     ligada a essa conta por quem estava logado nela (`account_linked`, ver
+ *     `checkout-account-link.ts`). Sem a ligação, nada é aplicado;
  *   - assinatura já existente na organização → não cria outra.
  * O resultado é o mesmo rodando 1 ou N vezes.
  */
@@ -118,8 +127,36 @@ export const paidHandler: CheckoutEventHandler = {
       select: { id: true, organizationId: true },
     });
 
-    // Já existe conta para este e-mail: não se cria uma segunda. Vincula a
-    // sessão e garante que a assinatura reflita o plano contratado.
+    // E-mail de conta existente sem prova de que quem comprou É essa conta.
+    // O checkout é público: digitar o e-mail de outra pessoa não pode mexer na
+    // assinatura dela (trocar o plano, zerar um cancelamento agendado). A
+    // identificação e o `/pay` já recusam esse caso; isto é a última trava,
+    // para corrida (conta criada entre o `/pay` e a confirmação) e sessões
+    // antigas. Não lança: retentar não muda nada, e a falha em loop esconderia
+    // o caso na fila. Fica auditado para a equipe resolver.
+    if (
+      existingUser &&
+      !(await isAuthorizedAccountLink(current.id, existingUser))
+    ) {
+      await auditOnce({
+        eventId: event.id,
+        action: PAID_AUDIT_ACTION_CONFLICT,
+        organizationId: null,
+        metadata: {
+          sessionId: current.id,
+          existingUserId: existingUser.id,
+          planCode: current.planCode,
+          amountCents: current.amountCents,
+          paymentProvider: current.paymentProvider,
+          reason: existingUser.organizationId ? 'account_not_linked' : 'user_without_organization',
+        },
+      });
+      return;
+    }
+
+    // Já existe conta para este e-mail e a sessão foi ligada a ela pelo
+    // próprio usuário logado: não se cria uma segunda. Vincula a sessão e
+    // garante que a assinatura reflita o plano contratado.
     if (existingUser?.organizationId) {
       await ensureSubscription(existingUser.organizationId, plan.id, billing);
       await recordPayment(existingUser.organizationId, current.id, billing);

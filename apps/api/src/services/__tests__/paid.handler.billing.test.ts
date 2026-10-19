@@ -11,7 +11,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 // MENSAL. Quem comprava 12 meses adiantados via o ciclo vencer em 30 dias.
 // ─────────────────────────────────────────────────────────────────────────────
 
-const { prismaMock, auditOnce, sendPurchaseConfirmationEmail } = vi.hoisted(() => {
+const { prismaMock, auditOnce, sendPurchaseConfirmationEmail, isAuthorizedAccountLink } = vi.hoisted(() => {
   const tx = {
     organization: { create: vi.fn() },
     user: { create: vi.fn(), findUnique: vi.fn() },
@@ -31,6 +31,9 @@ const { prismaMock, auditOnce, sendPurchaseConfirmationEmail } = vi.hoisted(() =
     },
     auditOnce: vi.fn(async (..._args: unknown[]) => true),
     sendPurchaseConfirmationEmail: vi.fn(async (..._args: unknown[]) => {}),
+    // A ligação "comprou logado na própria conta" é coberta contra o banco em
+    // `checkout.email-alheio.test.ts`; aqui o alvo é a aritmética de cobrança.
+    isAuthorizedAccountLink: vi.fn(async (..._args: unknown[]) => true),
   };
 });
 
@@ -44,6 +47,9 @@ vi.mock('../email.service', () => ({
   sendPurchaseConfirmationEmail: (...args: unknown[]) => sendPurchaseConfirmationEmail(...args),
 }));
 vi.mock('../auth.service', () => ({ hashPassword: async () => 'hash-fake' }));
+vi.mock('../checkout-account-link', () => ({
+  isAuthorizedAccountLink: (...args: unknown[]) => isAuthorizedAccountLink(...args),
+}));
 
 import type { CheckoutEvent, CheckoutSession } from '@prisma/client';
 
@@ -198,6 +204,7 @@ describe('conta que já existe para o mesmo e-mail', () => {
 
     await provisionar(sessao({ billingInterval: 'yearly' }));
 
+    expect(isAuthorizedAccountLink).toHaveBeenCalledWith('sess-1', { id: 'user-9', organizationId: 'org-9' });
     const update = prismaMock.subscription.update.mock.calls[0]?.[0];
     expect(update.data.billingInterval).toBe('yearly');
     expect(update.data.status).toBe('active');
@@ -209,5 +216,24 @@ describe('conta que já existe para o mesmo e-mail', () => {
     expect(prismaMock.payment.upsert).toHaveBeenCalled();
     // Não cria uma segunda organização para a mesma pessoa.
     expect(prismaMock.tx.organization.create).not.toHaveBeenCalled();
+  });
+});
+
+describe('conta que já existe, mas a sessão não foi ligada a ela', () => {
+  it('não toca na assinatura nem registra pagamento na organização alheia', async () => {
+    prismaMock.user.findUnique.mockResolvedValue({ id: 'user-9', organizationId: 'org-9' });
+    prismaMock.subscription.findUnique.mockResolvedValue({ id: 'sub-9' });
+    isAuthorizedAccountLink.mockResolvedValueOnce(false);
+
+    await provisionar(sessao({ billingInterval: 'yearly' }));
+
+    expect(prismaMock.subscription.update).not.toHaveBeenCalled();
+    expect(prismaMock.subscription.create).not.toHaveBeenCalled();
+    expect(prismaMock.payment.upsert).not.toHaveBeenCalled();
+    expect(prismaMock.checkoutSession.update).not.toHaveBeenCalled();
+    expect(auditOnce.mock.calls.at(-1)?.[0]).toMatchObject({
+      action: 'checkout.paid.account_conflict',
+      organizationId: null,
+    });
   });
 });

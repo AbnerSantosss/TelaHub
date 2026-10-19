@@ -56,12 +56,19 @@ export class DeviceService {
   /**
    * Registro PÚBLICO da TV. O device nasce sem organização — o tenant é definido
    * no ato do pareamento (`link`).
+   *
+   * A rota é pública e só pede `deviceId` + `code`. Antes, re-registrar um
+   * device já pareado com outro código o devolvia a `pending`: qualquer pessoa
+   * que soubesse o id despareava a TV de uma loja (e podia pareá-la na própria
+   * conta com o código dela). Agora device pareado não muda: nem status, nem
+   * código, nem organização, nem display.
+   *
+   * Re-parear continua possível pelos caminhos do painel: remover a TV apaga a
+   * linha (o próximo register cria do zero) e apagar o display deixa o device
+   * sem display, que volta a aceitar código (ver `registerUnlessPaired`).
    */
   async register(deviceId: string, code: string) {
-    return deviceRepository.upsert(deviceId, {
-      pairingCode: code,
-      status: 'pending',
-    });
+    return deviceRepository.registerUnlessPaired(deviceId, code);
   }
 
   /** Status PÚBLICO (a TV consulta o próprio id). Sem escopo por design. */
@@ -99,6 +106,13 @@ export class DeviceService {
     // da requisição). `activatedAt` marca quando ele passou a contar como tela
     // ativa para cobrança — só é gravado uma vez.
     const organizationId = display.organizationId ?? tenantId ?? null;
+
+    // Device pendente que JÁ pertence a uma organização (era pareado e o
+    // display foi apagado) só volta a ser pareado na mesma organização. Sem
+    // isso, quem soubesse o id da TV re-registrava com o próprio código e a
+    // levava para a conta dele. Para mudar a TV de conta, a dona remove antes.
+    // Mesma resposta de "código inválido", para não confirmar que o código existe.
+    if (device.organizationId && device.organizationId !== organizationId) return null;
 
     // PRIMEIRO pareamento deste aparelho. `activatedAt` já responde isso sem
     // consulta extra: ele é gravado uma única vez, na primeira ativação, e
@@ -190,10 +204,22 @@ export class DeviceService {
     return count > 0;
   }
 
-  /** Heartbeat PÚBLICO da TV. Sem escopo por design. */
+  /**
+   * Heartbeat PÚBLICO da TV. Sem escopo por design.
+   *
+   * Retorna `null` quando o device não existe (removido no painel, ou id
+   * inventado): a rota responde 404 em vez de deixar o P2025 do Prisma virar
+   * 500.
+   */
   async heartbeat(deviceId: string) {
     // Volta a alertar numa próxima queda — limpa o marcador de alerta já enviado.
-    const device = await deviceRepository.update(deviceId, { lastSeen: new Date(), lastAlertedAt: null });
+    let device;
+    try {
+      device = await deviceRepository.update(deviceId, { lastSeen: new Date(), lastAlertedAt: null });
+    } catch (err: any) {
+      if (err?.code === 'P2025') return null;
+      throw err;
+    }
 
     // O heartbeat é a única prova de que a tela voltou. Registrar aqui a
     // transição para `online` — o `recordStatusChange` já ignora o caso em que

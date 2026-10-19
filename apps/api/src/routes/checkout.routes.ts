@@ -19,6 +19,19 @@ import {
 const router = Router();
 
 /**
+ * Token do painel, quando o visitante está logado (mesmo origin, mesmo
+ * `localStorage.authToken`). As rotas continuam públicas: token ausente ou
+ * inválido vale como visitante anônimo, e quem decide o que isso permite é o
+ * `checkoutService` (e-mail de conta existente exige o token dessa conta).
+ */
+function bearerToken(req: Request): string | null {
+  const header = req.get('authorization');
+  if (!header) return null;
+  const [scheme, token] = header.split(' ');
+  return scheme?.toLowerCase() === 'bearer' && token ? token.trim() : null;
+}
+
+/**
  * O checkout é público por natureza (a sessão nasce antes do login), então
  * precisa de limite próprio: o `authRateLimit` (10 por 15 min) derrubaria um
  * visitante legítimo, porque cada passo do formulário é um PATCH.
@@ -128,7 +141,11 @@ router.patch(
   validateBody(updateCheckoutSessionSchema),
   async (req: Request, res: Response): Promise<void> => {
     try {
-      const session = await checkoutService.updateSession(req.params.publicToken as string, req.body);
+      const session = await checkoutService.updateSession(
+        req.params.publicToken as string,
+        req.body,
+        bearerToken(req)
+      );
       res.json({ session });
     } catch (error) {
       handleError(error, res, 'atualizar sessão');
@@ -192,6 +209,8 @@ router.post(
   validateBody(startPaymentSchema),
   async (req: Request, res: Response): Promise<void> => {
     try {
+      // Antes de cobrar: e-mail de conta existente só paga logado nela.
+      await checkoutService.assertAccountOwnership(req.params.publicToken as string, bearerToken(req));
       const result = await paymentService.startPayment(req.params.publicToken as string, req.body);
       res.json(result);
     } catch (error) {
@@ -235,6 +254,7 @@ router.post(
       }
 
       const session = await checkoutService.getPublicSession(req.params.publicToken as string);
+      await checkoutService.assertAccountOwnership(req.params.publicToken as string, bearerToken(req));
 
       const outcome = await paymentService.confirmPayment({
         publicToken: req.params.publicToken as string,

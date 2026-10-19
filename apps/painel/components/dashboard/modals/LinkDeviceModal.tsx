@@ -65,7 +65,7 @@ export const LinkDeviceModal: React.FC<LinkDeviceModalProps> = ({
       <DialogContent showCloseButton={false} className="sm:max-w-md max-w-md">
         <div className="flex items-center justify-between p-5 border-b border-borda">
           <DialogTitle className="font-bold text-lg flex items-center gap-2 text-tinta">
-            <Tv className="text-marca" size={20} /> Vincular Nova TV / Player
+            <Tv className="text-marca" size={20} /> Conectar nova TV
           </DialogTitle>
           <DialogClose asChild>
             <Button variant="ghost" size="icon" className="size-11 md:size-8 rounded-lg text-tinta-3 hover:text-tinta" aria-label="Fechar">
@@ -183,7 +183,7 @@ export const LinkDeviceModal: React.FC<LinkDeviceModalProps> = ({
               ) : (
                 <LinkIcon size={16} />
               )}
-              <span>Vincular Dispositivo</span>
+              <span>Conectar TV</span>
             </Button>
           </div>
         </form>

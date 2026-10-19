@@ -41,20 +41,45 @@ import './Assinatura.css';
 // lista de pagamentos vazia diz "nenhuma cobrança ainda", não some.
 // =============================================================================
 
+// Valores reais de `Payment.status` (schema.prisma): pending | confirmed |
+// refunded | failed | canceled. `paid` e `overdue` ficam por segurança (o status
+// do checkout usa `paid`; o Asaas fala em vencido). Valor desconhecido aparece
+// como veio.
 const rotuloStatusPagamento = (status: string): string => {
   switch (status) {
+    case 'confirmed':
     case 'paid':
-      return 'Pago';
+      return 'Confirmado';
     case 'pending':
-      return 'Aguardando';
+      return 'Pendente';
+    case 'overdue':
+      return 'Vencido';
     case 'failed':
       return 'Não aprovado';
     case 'refunded':
-      return 'Devolvido';
+      return 'Estornado';
     case 'canceled':
       return 'Cancelado';
     default:
       return status;
+  }
+};
+
+// Valores de `Payment.method`: pix | credit_card | boleto | manual.
+const rotuloFormaPagamento = (method: string | null): string => {
+  switch (method) {
+    case null:
+      return '-';
+    case 'pix':
+      return 'Pix';
+    case 'credit_card':
+      return 'Cartão de crédito';
+    case 'boleto':
+      return 'Boleto';
+    case 'manual':
+      return 'Manual';
+    default:
+      return method;
   }
 };
 
@@ -63,7 +88,7 @@ const LinhaPagamento: React.FC<{ pagamento: BillingPayment }> = ({ pagamento }) 
     <td>{formatDateBR(pagamento.paidAt) ?? formatDateBR(pagamento.dueDate) ?? '-'}</td>
     <td>{rotuloStatusPagamento(pagamento.status)}</td>
     <td>{formatCentsOrDash(pagamento.amountCents)}</td>
-    <td>{pagamento.method ?? '-'}</td>
+    <td>{rotuloFormaPagamento(pagamento.method)}</td>
     <td>
       {/* Só mostramos link quando ele existe. Botão de fatura que não abre nada
           é pior do que não ter botão. */}
@@ -123,7 +148,19 @@ const Assinatura: React.FC = () => {
     setProcessando(true);
     setErroAcao(null);
     try {
-      const destino = await startCheckout({ planCode: conta?.planCode ?? undefined });
+      // Plano grátis (ou conta sem assinatura) não é destino de compra: mandar
+      // `plan=gratis` abria o checkout num plano que não se paga. Sem plano
+      // pago, o checkout abre no passo de escolha de plano. A API exige
+      // `planCode`, então nesse caso nem a chamamos.
+      const planoPago =
+        conta && !conta.free && conta.planCode && conta.planCode !== 'gratis'
+          ? conta.planCode
+          : undefined;
+      if (!planoPago) {
+        window.location.href = checkoutUrl();
+        return;
+      }
+      const destino = await startCheckout({ planCode: planoPago });
       window.location.href = destino;
     } catch (error) {
       // O gateway ainda não está integrado (501). Em vez de encerrar aqui,

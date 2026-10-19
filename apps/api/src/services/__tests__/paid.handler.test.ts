@@ -172,11 +172,11 @@ describe('paidHandler — provisionamento', () => {
     expect(sendPurchaseConfirmationEmail).toHaveBeenCalledTimes(1);
   });
 
-  it('reaproveita a conta quando o e-mail já pertence a um usuário', async () => {
+  it('reaproveita a conta quando o e-mail já pertence a um usuário que ligou a sessão logado', async () => {
     const org = await prisma.organization.create({ data: { name: `Preexistente ${SUFFIX}` } });
     orgIds.push(org.id);
     const email = `reuso-${SUFFIX}@example.com`;
-    await prisma.user.create({
+    const owner = await prisma.user.create({
       data: {
         username: `reuso-${SUFFIX}`,
         name: 'Já Existe',
@@ -188,6 +188,17 @@ describe('paidHandler — provisionamento', () => {
     });
 
     const ctx = await seed({ email, companyName: `Ignorado ${SUFFIX}` });
+    // A ligação que a identificação grava quando o usuário está logado (ver
+    // `checkoutService.checkAccountOwnership`). Sem ela o plano não é aplicado.
+    await prisma.checkoutEvent.create({
+      data: {
+        sessionId: ctx.session.id,
+        type: 'account_linked',
+        metadata: JSON.stringify({ userId: owner.id, organizationId: org.id, email }),
+        dispatchStatus: 'skipped',
+        dispatchedAt: new Date(),
+      },
+    });
     await paidHandler.handle(ctx);
 
     const session = await reloadSession(ctx.session.id);

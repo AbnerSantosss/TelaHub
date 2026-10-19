@@ -2,6 +2,12 @@ import crypto from 'crypto';
 import type { CheckoutEvent, CheckoutSession, Prisma } from '@prisma/client';
 
 import prisma from '../lib/prisma';
+import {
+  ACCOUNT_LINK_EVENT_TYPE,
+  latestAccountLink,
+  resolveAuthenticatedBuyer,
+  type AccountLink,
+} from './checkout-account-link';
 import { planService } from './plan.service';
 import { estimateMonthlyCents, type BillingInterval } from './subscription.service';
 import type {
@@ -347,14 +353,28 @@ export class CheckoutService {
     return toPublic(session);
   }
 
-  /** Enriquecimento por passo. Recalcula o valor e avança o status. */
+  /**
+   * Enriquecimento por passo. Recalcula o valor e avança o status.
+   *
+   * `authToken` é o token do painel, quando o visitante está logado. Só ele
+   * permite identificar a sessão com o e-mail de uma conta que já existe (ver
+   * `checkAccountOwnership`).
+   */
   async updateSession(
     publicToken: string,
-    input: UpdateCheckoutSessionInput
+    input: UpdateCheckoutSessionInput,
+    authToken?: string | null
   ): Promise<PublicCheckoutSession> {
     const session = await this.requireByToken(publicToken);
     const now = new Date();
     this.assertMutable(session, now);
+
+    // Antes de gravar qualquer coisa: e-mail de conta existente sem login da
+    // própria conta é recusado aqui, cedo, e não na confirmação do pagamento.
+    const linkToRecord =
+      input.email !== undefined
+        ? await this.checkAccountOwnership(session.id, input.email, authToken)
+        : null;
 
     const nextPlanCode = input.planCode ?? session.planCode;
     const nextScreens = input.screens ?? session.screens;
@@ -423,18 +443,90 @@ export class CheckoutService {
         identifiedAt,
         lastSeenAt: now,
         abandonedAt: recovered ? null : session.abandonedAt,
-        events: events.length
+        events: events.length || linkToRecord
           ? {
-              create: events.map((event) => ({
-                type: event.type,
-                metadata: event.metadata === undefined ? null : JSON.stringify(event.metadata),
-              })),
+              create: [
+                ...events.map((event) => ({
+                  type: event.type,
+                  metadata: event.metadata === undefined ? null : JSON.stringify(event.metadata),
+                })),
+                ...(linkToRecord ? [accountLinkEventData(linkToRecord, now)] : []),
+              ],
             }
           : undefined,
       },
     });
 
     return toPublic(updated);
+  }
+
+  /**
+   * Trava do pagamento: repete a checagem de posse do e-mail antes de cobrar.
+   *
+   * Cobre o caso em que a conta passou a existir DEPOIS da identificação (o
+   * e-mail era novo no PATCH e alguém se cadastrou com ele antes do `/pay`), e
+   * sessões identificadas antes desta trava existir. Sessão já paga ou já
+   * provisionada passa direto: quem responde 409/`alreadyPaid` é o
+   * `paymentService`, como antes.
+   */
+  async assertAccountOwnership(publicToken: string, authToken?: string | null): Promise<void> {
+    const session = await this.requireByToken(publicToken);
+    if (session.status === 'paid' || session.organizationId || !session.email) return;
+
+    const link = await this.checkAccountOwnership(session.id, session.email, authToken);
+    if (link) {
+      await prisma.checkoutEvent.create({
+        data: { sessionId: session.id, ...accountLinkEventData(link, new Date()) },
+      });
+    }
+  }
+
+  /**
+   * O e-mail informado pode ser usado nesta sessão?
+   *
+   * - E-mail sem conta: sim (conta nova, nasce no pagamento). Devolve `null`.
+   * - E-mail de conta e o token do painel é DESSA conta, com `billing:write`:
+   *   sim, e devolve a ligação a gravar (ou `null` se já está gravada).
+   * - Mesma conta, mas sem permissão de cobrança: 403 `billing_permission_denied`.
+   * - Qualquer outro caso (anônimo, token de outra pessoa, token inválido):
+   *   só passa se a sessão JÁ foi ligada a essa conta antes; senão 403
+   *   `email_has_account`. O status não é 409 de propósito: o checkout trata
+   *   409 como "sessão já paga".
+   */
+  private async checkAccountOwnership(
+    sessionId: string,
+    email: string,
+    authToken: string | null | undefined
+  ): Promise<AccountLink | null> {
+    const normalizedEmail = email.trim().toLowerCase();
+    const existing = await prisma.user.findUnique({
+      where: { email: normalizedEmail },
+      select: { id: true, organizationId: true },
+    });
+    if (!existing) return null;
+
+    const buyer = await resolveAuthenticatedBuyer(authToken);
+    const previous = await latestAccountLink(sessionId);
+    const alreadyLinked =
+      !!previous &&
+      previous.userId === existing.id &&
+      previous.organizationId === existing.organizationId;
+
+    if (buyer && buyer.userId === existing.id) {
+      if (!buyer.canManageBilling || !buyer.organizationId) {
+        throw new CheckoutError(
+          'Sua conta não tem permissão para contratar planos. Peça para quem administra a conta.',
+          403,
+          'billing_permission_denied'
+        );
+      }
+      if (alreadyLinked) return null;
+      return { userId: buyer.userId, organizationId: buyer.organizationId, email: normalizedEmail };
+    }
+
+    if (alreadyLinked) return null;
+
+    throw new CheckoutError('Este e-mail já tem conta. Entre para contratar.', 403, 'email_has_account');
   }
 
   /**
@@ -870,6 +962,19 @@ export class CheckoutService {
 
     return where;
   }
+}
+
+/**
+ * Evento de ligação de conta. `skipped` porque não há tratador: ele é prova
+ * lida pelo `paid.handler`, não trabalho para o despachante.
+ */
+function accountLinkEventData(link: AccountLink, now: Date) {
+  return {
+    type: ACCOUNT_LINK_EVENT_TYPE,
+    metadata: JSON.stringify(link),
+    dispatchStatus: 'skipped',
+    dispatchedAt: now,
+  };
 }
 
 const CHECKOUT_STATUS_ZERO = (): Record<CheckoutStatus, number> => ({

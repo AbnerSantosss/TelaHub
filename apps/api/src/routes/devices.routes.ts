@@ -48,8 +48,25 @@ router.post('/register', deviceRegisterRateLimit, validateBody(registerDeviceSch
   try {
     const { deviceId, code } = req.body;
 
-    await deviceService.register(deviceId, code);
-    res.json({ message: 'Dispositivo registrado.' });
+    const { outcome, device } = await deviceService.register(deviceId, code);
+
+    if (outcome === 'already-paired') {
+      // Nada foi alterado. Devolve só o que o player precisa para seguir
+      // (o mesmo que o `GET /:id/status` público já expõe para este id):
+      // sem nome, sem organização, sem código.
+      res.json({
+        message: 'Dispositivo já pareado.',
+        status: device.status,
+        display_id: device.displayId,
+      });
+      return;
+    }
+
+    res.json({
+      message: 'Dispositivo registrado.',
+      status: device.status,
+      pairing_code: device.pairingCode,
+    });
   } catch (error: any) {
     console.error('Erro ao registrar dispositivo:', error);
     res.status(500).json({ error: 'Erro ao registrar dispositivo.' });
@@ -137,7 +154,11 @@ router.post('/link', authMiddleware, requireTenant, requireActiveSubscription, e
 // PATCH /api/devices/:id/heartbeat (PÚBLICO — a TV bate o próprio id)
 router.patch('/:id/heartbeat', deviceTelemetryRateLimit, async (req: Request, res: Response): Promise<void> => {
   try {
-    await deviceService.heartbeat(req.params.id as string);
+    const device = await deviceService.heartbeat(req.params.id as string);
+    if (!device) {
+      res.status(404).json({ error: 'Dispositivo não encontrado.' });
+      return;
+    }
     res.json({ message: 'Heartbeat registrado.' });
   } catch (error: any) {
     console.error('Erro no heartbeat:', error);

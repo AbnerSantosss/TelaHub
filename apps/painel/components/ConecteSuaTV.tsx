@@ -725,8 +725,8 @@ const ConecteSuaTV: React.FC<ConecteSuaTVProps> = ({
             <h1 className="ctv-titulo">Conecte sua TV</h1>
             <p className="ctv-subtitulo">
               São dois passos: abrir um endereço na TV e digitar aqui o código que aparecer nela.
-              Funciona com qualquer TV que já esteja na parede: condomínio, escritório, clínica, loja,
-              academia.
+              Funciona com qualquer TV que já esteja na parede da sua loja, padaria, mercado ou
+              farmácia.
             </p>
           </div>
           {variante === 'pagina' ? (

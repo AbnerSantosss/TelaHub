@@ -4,6 +4,19 @@ import { hashPassword, comparePassword, generateToken } from './auth.service';
 import { testSmtpConnection, sendInviteEmail, sendResetPasswordEmail } from './email.service';
 import prisma from '../lib/prisma';
 import crypto from 'crypto';
+import { INVITE_ROLES } from '../schemas/users.schema';
+
+/** Papéis que um convite pode gravar (papéis de organização + `user` legado). */
+const INVITABLE_ROLES: ReadonlySet<string> = new Set(INVITE_ROLES);
+
+/** Papel de convite fora da organização (ex.: `master`). A rota responde 400. */
+export class InvalidInviteRoleError extends Error {
+  readonly statusCode = 400;
+  constructor() {
+    super('Papel inválido. Use Administrador, Editor ou Leitor.');
+    this.name = 'InvalidInviteRoleError';
+  }
+}
 
 export class UserService {
   async login(loginInput: string, password: string) {
@@ -97,6 +110,14 @@ export class UserService {
    * possível convidar alguém para outra organização.
    */
   async inviteUser(email: string, role: string = 'user', tenantId: TenantScope = null) {
+    // 0. Convite só cria papel DE ORGANIZAÇÃO. A rota já barra (schema +
+    //    `canAssignRole`), mas o serviço não confia no chamador: um `master`
+    //    criado por convite seria dono da plataforma inteira.
+    const requestedRole = (role || 'user').trim();
+    if (!INVITABLE_ROLES.has(requestedRole)) {
+      throw new InvalidInviteRoleError();
+    }
+
     // 1. Validar SMTP antes de tudo
     const smtpCheck = await testSmtpConnection();
     if (!smtpCheck.ok) {
@@ -117,7 +138,7 @@ export class UserService {
       username,
       email,
       password: hashedPwd,
-      role: role || 'user',
+      role: requestedRole,
       organizationId: tenantId ?? null,
       // Senha GERADA pelo sistema e enviada por e-mail: vale só até o primeiro
       // acesso. Enquanto não for trocada, quem tiver a caixa de entrada tem a

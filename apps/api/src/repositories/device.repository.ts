@@ -52,6 +52,42 @@ export class DeviceRepository {
     });
   }
 
+  /**
+   * Registro da TV que NUNCA mexe em device pareado.
+   *
+   * "Pareado" = `status: 'linked'` COM display. O update é condicional na
+   * própria query (não "lê e depois grava"), para que um `link` concorrente não
+   * seja desfeito entre a leitura e a escrita.
+   *
+   * Retorna:
+   * - `registered` → device criado, ou não pareado que recebeu o código novo;
+   * - `already-paired` → device pareado, devolvido como está (nada gravado).
+   *
+   * Device `linked` SEM display (o display foi apagado: `onDelete: SetNull`)
+   * conta como não pareado e volta a `pending`, mantendo a organização. É o
+   * caminho pelo qual essa TV volta a mostrar um código válido no boot.
+   */
+  async registerUnlessPaired(id: string, pairingCode: string) {
+    const now = new Date();
+    const updated = await prisma.device.updateMany({
+      where: { id, OR: [{ status: { not: 'linked' } }, { displayId: null }] },
+      data: { pairingCode, status: 'pending', lastSeen: now },
+    });
+
+    if (updated.count > 0) {
+      const device = await prisma.device.findUnique({ where: { id } });
+      return { outcome: 'registered' as const, device: device! };
+    }
+
+    const existing = await prisma.device.findUnique({ where: { id } });
+    if (existing) return { outcome: 'already-paired' as const, device: existing };
+
+    const created = await prisma.device.create({
+      data: { id, pairingCode, status: 'pending', lastSeen: now },
+    });
+    return { outcome: 'registered' as const, device: created };
+  }
+
   async update(id: string, data: Record<string, any>) {
     return prisma.device.update({ where: { id }, data });
   }

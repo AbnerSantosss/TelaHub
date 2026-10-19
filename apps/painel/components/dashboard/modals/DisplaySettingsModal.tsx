@@ -123,8 +123,8 @@ export const DisplaySettingsModal: React.FC<DisplaySettingsModalProps> = ({
             {linkedDevices.length === 0 ? (
               <div className="text-center py-6 px-4 border border-dashed border-borda-2 rounded-xl bg-papel-2 text-tinta-2">
                 <Tv size={22} className="mx-auto mb-2 text-tinta-3" aria-hidden="true" />
-                <p className="text-sm font-medium">Nenhuma TV vinculada a este display.</p>
-                <p className="text-[13px] mt-1 text-tinta-3">Use o botão "Vincular TV" no painel principal.</p>
+                <p className="text-sm font-medium">Nenhuma TV conectada a este display.</p>
+                <p className="text-[13px] mt-1 text-tinta-3">Use o botão "Conectar TV" no painel principal.</p>
               </div>
             ) : (
               <div className="space-y-3">

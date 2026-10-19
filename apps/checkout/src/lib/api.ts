@@ -34,6 +34,28 @@ export const getAdminToken = (): string | null => {
   }
 };
 
+/**
+ * Token do PAINEL (`/app`), quando o visitante está logado nele. Mesmo origin,
+ * mesma chave que o painel grava. Vai nas chamadas da sessão de checkout para
+ * o servidor saber que quem identifica a compra com o e-mail de uma conta
+ * existente é o próprio dono dela; sem ele, esse e-mail é recusado.
+ */
+export const PANEL_TOKEN_KEY = 'authToken';
+
+export const getPanelToken = (): string | null => {
+  try {
+    return localStorage.getItem(PANEL_TOKEN_KEY);
+  } catch {
+    return null;
+  }
+};
+
+/**
+ * `true` = token do backoffice do checkout; `'panel'` = token do painel, se
+ * houver (a rota segue pública sem ele).
+ */
+export type AuthMode = boolean | 'panel';
+
 export const setAdminToken = (token: string | null): void => {
   try {
     if (token) localStorage.setItem(TOKEN_KEY, token);
@@ -43,12 +65,17 @@ export const setAdminToken = (token: string | null): void => {
   }
 };
 
-async function request<T>(method: string, path: string, body?: unknown, auth = false): Promise<T> {
+async function request<T>(
+  method: string,
+  path: string,
+  body?: unknown,
+  auth: AuthMode = false
+): Promise<T> {
   const headers: Record<string, string> = {};
   if (body !== undefined) headers['Content-Type'] = 'application/json';
 
   if (auth) {
-    const token = getAdminToken();
+    const token = auth === 'panel' ? getPanelToken() : getAdminToken();
     if (token) headers.Authorization = `Bearer ${token}`;
   }
 
@@ -80,9 +107,11 @@ async function request<T>(method: string, path: string, body?: unknown, auth = f
 }
 
 export const api = {
-  get: <T>(path: string, auth = false) => request<T>('GET', path, undefined, auth),
-  post: <T>(path: string, body?: unknown, auth = false) => request<T>('POST', path, body, auth),
-  patch: <T>(path: string, body?: unknown, auth = false) => request<T>('PATCH', path, body, auth),
+  get: <T>(path: string, auth: AuthMode = false) => request<T>('GET', path, undefined, auth),
+  post: <T>(path: string, body?: unknown, auth: AuthMode = false) =>
+    request<T>('POST', path, body, auth),
+  patch: <T>(path: string, body?: unknown, auth: AuthMode = false) =>
+    request<T>('PATCH', path, body, auth),
   // `put` e `delete` existem para o backoffice (concessão de recurso por
   // cliente, automações de e-mail). O checkout do comprador não usa nenhum dos
   // dois — só lê e cria.

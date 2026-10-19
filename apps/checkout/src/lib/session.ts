@@ -157,12 +157,22 @@ export const createSession = async (input: Attribution = {}): Promise<CheckoutSe
 export const getSession = async (publicToken: string): Promise<CheckoutSession> =>
   normalizeSession(await api.get<unknown>(`/checkout/sessions/${encodeURIComponent(publicToken)}`));
 
+/**
+ * As três chamadas que podem ligar a compra a uma conta existente (identificar,
+ * cobrar e confirmar o simulado) levam o token do painel quando ele existe: é
+ * ele que prova ao servidor que o e-mail da conta é de quem está comprando.
+ * Sem login, o e-mail de uma conta existente volta 403 `email_has_account`.
+ */
 export const updateSession = async (
   publicToken: string,
   input: UpdateSessionInput
 ): Promise<CheckoutSession> =>
   normalizeSession(
-    await api.patch<unknown>(`/checkout/sessions/${encodeURIComponent(publicToken)}`, input)
+    await api.patch<unknown>(
+      `/checkout/sessions/${encodeURIComponent(publicToken)}`,
+      input,
+      'panel'
+    )
   );
 
 export const submitSession = async (
@@ -362,7 +372,7 @@ export const startPayment = async (
       // `method` — mesma forma do cadastro (`signup.schema.ts`). Aninhá-los em
       // `tracking: {...}` obrigaria o backend a conhecer duas formas.
       ...(input.tracking ?? {}),
-    }),
+    }, 'panel'),
     input.method
   );
 
@@ -381,7 +391,8 @@ export const simulatePayment = async (
       // O Pix simulado é uma confirmação como qualquer outra: quando o webhook
       // real existir, é ele quem vai repetir o `Purchase` do servidor — e vai
       // precisar do mesmo `metaEventId` que sai daqui.
-      tracking
+      tracking,
+      'panel'
     )
   );
 

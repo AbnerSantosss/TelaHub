@@ -563,7 +563,7 @@ const Player: React.FC = () => {
           <div className="text-center space-y-2 max-w-md">
             <h2 className="text-xl font-bold text-slate-200 uppercase tracking-widest">Parear Dispositivo</h2>
             <p className="text-slate-500 text-sm leading-relaxed">
-              Acesse o painel administrativo e clique em <span className="text-cyan-400 font-bold">"Vincular TV"</span>.
+              Acesse o painel administrativo e clique em <span className="text-cyan-400 font-bold">"Conectar TV"</span>.
               <br/>Digite o código abaixo quando solicitado:
             </p>
           </div>
