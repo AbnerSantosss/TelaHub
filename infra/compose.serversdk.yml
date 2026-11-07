@@ -1,0 +1,33 @@
+# Override da VPS Hostinger (187.41.100.76) — domínio serversdk.tech.
+#
+# Uso, em /opt/telahub na VPS:
+#   docker compose -f docker-compose.prod.yml -f infra/compose.serversdk.yml up -d --build
+#
+# Diferenças em relação ao docker-compose.prod.yml (que é o das stacks do
+# Portainer em proxserverabner.site e continua valendo lá):
+# 1. SEM PORTA PUBLICADA. Nesta VPS não há túnel: o Caddy (container
+#    `hive-caddy`, projeto /opt/hive-site) termina o HTTPS com Let's Encrypt e
+#    chega ao gateway pela rede Docker externa `web`, pelo apelido
+#    `telahub-gateway`. Porta publicada com `ports:` passaria por cima do UFW.
+# 2. MÍDIA EM DISCO. Sem R2, `MEDIA_STORAGE=local` grava em /app/uploads, que é
+#    o volume persistente `uploads_data` — sobrevive a deploy e reinício.
+#
+# Domínio, segredos e TRUST_PROXY=2 (Caddy → nginx → backend) ficam no `.env`
+# da pasta na VPS (chmod 600), nunca no Git.
+
+services:
+  backend:
+    environment:
+      - MEDIA_STORAGE=local
+
+  gateway:
+    ports: !reset []
+    networks:
+      default: {}
+      web:
+        aliases:
+          - telahub-gateway
+
+networks:
+  web:
+    external: true
