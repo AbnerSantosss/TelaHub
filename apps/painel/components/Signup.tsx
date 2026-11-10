@@ -173,6 +173,24 @@ const Signup: React.FC = () => {
   const [attribution] = useState<SignupAttribution>(() => readAttribution());
 
   // Exemplo do campo de organização, rotacionando devagar.
+  // Vídeo da vitrine: só no layout de duas colunas (>= 1000 px, o mesmo corte
+  // do Auth.css) e sem "reduzir movimento". Nasce desligado para o celular
+  // nunca pedir o arquivo.
+  const [vitrineAnimada, setVitrineAnimada] = useState(false);
+  useEffect(() => {
+    if (typeof window.matchMedia !== 'function') return;
+    const largo = window.matchMedia('(min-width: 1000px)');
+    const calmo = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const decidir = () => setVitrineAnimada(largo.matches && !calmo.matches);
+    decidir();
+    largo.addEventListener('change', decidir);
+    calmo.addEventListener('change', decidir);
+    return () => {
+      largo.removeEventListener('change', decidir);
+      calmo.removeEventListener('change', decidir);
+    };
+  }, []);
+
   const [exemploIndex, setExemploIndex] = useState(0);
   useEffect(() => {
     if (companyName) return; // já digitou: para de trocar debaixo do dedo dela
@@ -354,7 +372,11 @@ const Signup: React.FC = () => {
   return (
     <div className="auth-page">
       <div className="auth-shell auth-shell-larga">
-        <aside className="auth-vitrine">
+        {/* Vitrine do cadastro: faixa "noite" da marca com uma TV ligada. O que
+            passa na TV é um vídeo de 16 s em loop (HyperFrames, artes próprias),
+            com quatro exemplos de aviso e oferta. Substitui o parágrafo e a lista
+            de lugares: mostrar a tela funcionando diz mais que descrevê-la. */}
+        <aside className="auth-vitrine auth-vitrine-noite">
           <a className="auth-marca" href={`${SITE_URL}/`} aria-label="TelaHub: ir para a página inicial">
             <LogoHub size={34} />
             <span className="auth-marca-nome">
@@ -362,22 +384,43 @@ const Signup: React.FC = () => {
             </span>
           </a>
 
-          <div>
-            <h2 className="auth-vitrine-titulo">Use a TV que você já tem para mostrar avisos e ofertas.</h2>
-            <p className="auth-vitrine-texto">
-              Crie a conta, conecte a TV que já está no seu negócio e publique a primeira oferta
-              pelo celular. Dá para fazer tudo em poucos minutos.
-            </p>
-          </div>
+          <h2 className="auth-vitrine-titulo">Use a TV que você já tem para mostrar avisos e ofertas.</h2>
 
-          <ul className="auth-lugares">
-            <li>Vitrine de loja</li>
-            <li>Balcão da padaria</li>
-            <li>Corredor do mercado</li>
-            <li>Balcão da farmácia</li>
-            <li>Corredor do shopping</li>
-            <li>Sala de espera de clínica</li>
-          </ul>
+          <figure className="auth-tv">
+            <div className="auth-tv-moldura">
+              {/* O vídeo é enfeite: o que ele mostra está dito no título e na
+                  legenda. Só entra no desktop e sem "reduzir movimento"; fora
+                  disso fica a foto parada e o celular não baixa o arquivo. */}
+              {vitrineAnimada ? (
+                <video
+                  className="auth-tv-tela"
+                  src={`${import.meta.env.BASE_URL}cadastro/vitrine.mp4`}
+                  poster={`${import.meta.env.BASE_URL}cadastro/vitrine-poster.jpg`}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  preload="metadata"
+                  disablePictureInPicture
+                  tabIndex={-1}
+                  aria-hidden="true"
+                />
+              ) : (
+                <img
+                  className="auth-tv-tela"
+                  src={`${import.meta.env.BASE_URL}cadastro/vitrine-poster.jpg`}
+                  alt=""
+                  loading="lazy"
+                  aria-hidden="true"
+                />
+              )}
+            </div>
+            <span className="auth-tv-pe" aria-hidden="true" />
+            <figcaption className="auth-tv-legenda">
+              Exemplos do que dá para colocar na TV: aviso do condomínio, oferta do pet shop, horário
+              da barbearia.
+            </figcaption>
+          </figure>
 
           <ul className="auth-provas">
             <li>
@@ -386,13 +429,11 @@ const Signup: React.FC = () => {
             </li>
             <li>
               <Check size={18} aria-hidden="true" />
-              <span>Para conectar a TV, basta digitar um código. Não precisa de pen-drive nem de técnico.</span>
+              <span>Conecta a TV digitando um código. Sem pen-drive e sem técnico.</span>
             </li>
             <li>
               <Check size={18} aria-hidden="true" />
-              <span>
-                A cobrança só começa quando você liga a 2ª tela, proporcional ao período. Nada é cobrado de forma retroativa.
-              </span>
+              <span>Cobrança só a partir da 2ª tela, proporcional ao período. Nada retroativo.</span>
             </li>
           </ul>
         </aside>
@@ -404,7 +445,9 @@ const Signup: React.FC = () => {
               Voltar ao site
             </a>
 
-            <div className="auth-topo-mobile">
+            {/* No cadastro o título fica também no desktop (`auth-topo-fixo`):
+                sem ele a coluna começava direto nos campos, sem dizer o que era. */}
+            <div className="auth-topo-mobile auth-topo-fixo">
               <a className="auth-logo-link" href={`${SITE_URL}/`} aria-label="TelaHub: ir para a página inicial">
                 <LogoHub size={44} />
               </a>
@@ -469,8 +512,7 @@ const Signup: React.FC = () => {
                       aria-describedby={describedBy('companyName', 'signup-company-hint')}
                     />
                     <p id="signup-company-hint" className="auth-dica">
-                      O nome da sua loja, padaria, farmácia ou empresa. É ele que
-                      aparece no seu painel.
+                      Loja, condomínio, clínica ou empresa. É o nome que aparece no seu painel.
                     </p>
                     {renderFieldError('companyName')}
                   </div>
@@ -631,14 +673,13 @@ const Signup: React.FC = () => {
                     </label>
 
                     {/* Motivo em TEXTO. Botão apagado sem explicação faz a
-                        pessoa achar que o site quebrou e ir embora. */}
+                        pessoa achar que o site quebrou e ir embora. Em tom
+                        neutro (`auth-motivo-calmo`): em laranja, logo de cara,
+                        parecia erro de quem ainda nem começou a preencher. */}
                     {!acceptedTerms && (
-                      <p id="signup-termos-motivo" className="auth-motivo">
+                      <p id="signup-termos-motivo" className="auth-motivo auth-motivo-calmo">
                         <Info size={14} aria-hidden="true" />
-                        <span>
-                          Para criar a conta, marque que você leu e aceita os Termos e a Política de
-                          Privacidade.
-                        </span>
+                        <span>Marque a caixa acima para liberar o botão.</span>
                       </p>
                     )}
                   </div>

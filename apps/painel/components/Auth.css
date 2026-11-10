@@ -922,3 +922,165 @@
     overflow-y: auto;
   }
 }
+
+/* ------------------------------------------------- cadastro: vitrine acesa */
+
+/* Só o cadastro usa (`Signup.tsx`). A coluna da esquerda vira a faixa "noite"
+   da marca com uma TV ligada; o Entrar segue com a vitrine dele. Tudo aqui é
+   modificador: nenhuma regra de cima muda, então o login não é afetado.
+   Contraste sobre --noite: --noite-titulo 16:1, --noite-texto 12:1, --luz 9,8:1. */
+.auth-vitrine-noite {
+  /* o logo pinta os traços com --brand-accent: no escuro é a luz, não a marca
+     (--marca sobre --noite dá 3:1 e some) */
+  --brand-accent: var(--luz);
+  background: var(--noite);
+  border-right: 0;
+  color: var(--noite-texto);
+}
+
+/* `identity.css` pinta a vitrine e a coluna de TODAS as telas de conta com a
+   arte de fundo da marca (`--hub-art`). No cadastro ela sai: a única imagem da
+   coluna é a TV, e arte por baixo disputava com ela. Três classes de propósito,
+   para vencer `.auth-page .auth-vitrine` seja qual for a ordem de carga. */
+.auth-page .auth-vitrine.auth-vitrine-noite {
+  background-image: linear-gradient(160deg, var(--noite-2), var(--noite) 62%);
+}
+
+.auth-page .auth-shell-larga .auth-coluna {
+  background-image: none;
+}
+
+.auth-vitrine-noite .auth-marca-nome {
+  color: var(--noite-titulo);
+}
+
+.auth-vitrine-noite .auth-marca-nome em {
+  color: var(--luz);
+}
+
+.auth-vitrine-noite .auth-marca:focus-visible {
+  outline-color: var(--luz);
+}
+
+.auth-vitrine-noite .auth-vitrine-titulo {
+  max-width: 20ch;
+  font-size: clamp(26px, 2.6vw, 38px);
+  color: var(--noite-titulo);
+  text-wrap: balance;
+}
+
+/* A TV. Largura presa também à ALTURA da janela (`--auth-v`): em notebook de
+   768 px ela encolhe em vez de empurrar as provas para fora da coluna. */
+.auth-tv {
+  margin: 0;
+  width: 100%;
+  max-width: min(640px, calc(var(--auth-v) * 62));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.auth-tv-moldura {
+  width: 100%;
+  padding: clamp(6px, 0.8vw, 10px);
+  border-radius: var(--raio-12);
+  background: var(--noite-2);
+  border: 1px solid var(--noite-borda-2);
+  box-shadow: var(--sombra-tv);
+}
+
+/* `aspect-ratio` reserva o lugar antes de o vídeo chegar: sem ele a coluna
+   pula quando o primeiro quadro carrega. */
+.auth-tv-tela {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: var(--raio-4);
+  background: var(--noite);
+}
+
+/* Pé da TV: haste e base num elemento só. */
+.auth-tv-pe {
+  position: relative;
+  width: 12%;
+  height: clamp(10px, calc(var(--auth-v) * 1.8), 18px);
+  background: var(--noite-2);
+  border-left: 1px solid var(--noite-borda-2);
+  border-right: 1px solid var(--noite-borda-2);
+}
+
+.auth-tv-pe::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  width: 280%;
+  height: 6px;
+  transform: translateX(-50%);
+  border-radius: 3px;
+  background: var(--noite-2);
+  border: 1px solid var(--noite-borda-2);
+}
+
+.auth-tv-legenda {
+  margin-top: 22px;
+  align-self: stretch;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--noite-texto);
+}
+
+.auth-vitrine-noite .auth-provas {
+  gap: 10px;
+}
+
+.auth-vitrine-noite .auth-provas li {
+  color: var(--noite-texto);
+}
+
+.auth-vitrine-noite .auth-provas svg {
+  color: var(--luz);
+}
+
+/* Aviso do aceite em tom neutro: explica o botão travado sem parecer erro. */
+.auth-motivo-calmo {
+  color: var(--auth-tinta-3);
+}
+
+@media (min-width: 1000px) {
+  /* Título do cadastro também no desktop, alinhado à esquerda e sem o logo
+     (ele já está na vitrine ao lado). */
+  .auth-topo-fixo {
+    display: flex;
+    align-items: flex-start;
+    text-align: left;
+    margin-bottom: clamp(2px, calc(var(--auth-v) * 1), 10px);
+  }
+
+  .auth-topo-fixo .auth-logo-link {
+    display: none;
+  }
+
+  .auth-topo-fixo .auth-titulo {
+    font-size: 30px;
+  }
+
+  /* A coluna do formulário já é papel branco: caixa com borda e sombra dentro
+     dela era moldura em cima de moldura. `container-type` continua valendo
+     para o par de campos. */
+  .auth-shell-larga .auth-caixa {
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    background: transparent;
+  }
+
+  /* A promessa do plano grátis é a primeira prova da vitrine ao lado, palavra
+     por palavra, e o subtítulo já diz "não pede cartão". O plano pago
+     escolhido continua aparecendo: só ele traz informação nova. */
+  .auth-shell-larga .auth-promessa-repetida {
+    display: none;
+  }
+}
