@@ -203,10 +203,12 @@ services:
       # Botões "Entrar como plano X" na tela de login, SEM senha (decisão do
       # dono em 15/10/2026: este painel de teste é público de propósito).
       # `true` faz o boot criar as contas demo com senha aleatória e liga a rota
-      # POST /api/auth/demo-login. Não é segredo, por isso tem padrão. Para
-      # desligar, cadastre DEMO_LOGIN=false na stack. Ver `src/lib/demo-login.ts`.
+      # POST /api/auth/demo-login. Ver `src/lib/demo-login.ts`.
+      # PADRÃO DESLIGADO desde 10/11/2026: entrar sem senha tem de ser uma
+      # escolha escrita no ambiente, não o que acontece quando alguém esquece a
+      # variável. No ambiente de teste público, cadastre DEMO_LOGIN=true.
       # DEMO_USER_PASSWORD NÃO é repassada de propósito: nenhuma senha conhecida.
-      - DEMO_LOGIN=${DEMO_LOGIN:-true}
+      - DEMO_LOGIN=${DEMO_LOGIN:-false}
     depends_on:
       db:
         condition: service_healthy
