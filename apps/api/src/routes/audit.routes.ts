@@ -4,6 +4,7 @@ import { authMiddleware, adminMiddleware } from '../middlewares/auth.middleware'
 import { requireTenant } from '../middlewares/tenant.middleware';
 import { requireFeature } from '../middlewares/feature.middleware';
 import { auditService } from '../services/audit.service';
+import { requirePermission } from '../middlewares/permission.middleware';
 
 const router = Router();
 
@@ -25,6 +26,7 @@ router.get(
   '/',
   authMiddleware,
   requireTenant,
+  requirePermission('audit:read'),
   adminMiddleware,
   requireFeature('auditoria'),
   async (req: Request, res: Response): Promise<void> => {

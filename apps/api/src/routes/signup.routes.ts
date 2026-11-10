@@ -4,6 +4,7 @@ import { authRateLimit } from '../middlewares/rate-limit.middleware';
 import { validateBody } from '../middlewares/validate.middleware';
 import { checkEmailQuerySchema, signupSchema } from '../schemas/signup.schema';
 import { SignupError, signupService } from '../services/signup.service';
+import { publicRoute } from '../middlewares/permission.middleware';
 
 const router = Router();
 
@@ -18,6 +19,7 @@ const router = Router();
  */
 router.post(
   '/',
+  publicRoute('auto-cadastro: quem se cadastra ainda não tem conta'),
   authRateLimit,
   validateBody(signupSchema),
   async (req: Request, res: Response): Promise<void> => {
@@ -56,7 +58,7 @@ router.post(
  * GET /api/signup/check-email?email= — validação em tempo real do formulário.
  * Devolve apenas um booleano: nunca expõe dados da conta existente.
  */
-router.get('/check-email', authRateLimit, async (req: Request, res: Response): Promise<void> => {
+router.get('/check-email', publicRoute('validação do formulário de cadastro, antes de existir conta'), authRateLimit, async (req: Request, res: Response): Promise<void> => {
   const parsed = checkEmailQuerySchema.safeParse(req.query);
 
   if (!parsed.success) {

@@ -8,11 +8,12 @@ import { deviceService } from '../services/device.service';
 import { sseService } from '../services/sse.service';
 import { auditService } from '../services/audit.service';
 import { deviceRegisterRateLimit, deviceTelemetryRateLimit } from '../middlewares/rate-limit.middleware';
+import { publicRoute, requirePermission } from '../middlewares/permission.middleware';
 
 const router = Router();
 
 // GET /api/devices — só os devices do tenant
-router.get('/', authMiddleware, requireTenant, async (req: Request, res: Response): Promise<void> => {
+router.get('/', authMiddleware, requireTenant, requirePermission('device:read'), async (req: Request, res: Response): Promise<void> => {
   try {
     const devices = await deviceService.getAll(req.tenantId);
     res.json(
@@ -33,7 +34,7 @@ router.get('/', authMiddleware, requireTenant, async (req: Request, res: Respons
 });
 
 // GET /api/devices/health — painel de saúde do tenant: contagem online/offline
-router.get('/health', authMiddleware, requireTenant, async (req: Request, res: Response): Promise<void> => {
+router.get('/health', authMiddleware, requireTenant, requirePermission('device:read'), async (req: Request, res: Response): Promise<void> => {
   try {
     const summary = await deviceService.getHealthSummary(req.tenantId);
     res.json(summary);
@@ -44,7 +45,7 @@ router.get('/health', authMiddleware, requireTenant, async (req: Request, res: R
 });
 
 // POST /api/devices/register (PÚBLICO — dispositivo se registra; ainda sem tenant)
-router.post('/register', deviceRegisterRateLimit, validateBody(registerDeviceSchema), async (req: Request, res: Response): Promise<void> => {
+router.post('/register', publicRoute('a TV ainda não tem conta nem tenant: registra o próprio id'), deviceRegisterRateLimit, validateBody(registerDeviceSchema), async (req: Request, res: Response): Promise<void> => {
   try {
     const { deviceId, code } = req.body;
 
@@ -74,7 +75,7 @@ router.post('/register', deviceRegisterRateLimit, validateBody(registerDeviceSch
 });
 
 // GET /api/devices/:id/status (PÚBLICO — dispositivo verifica o SEU status)
-router.get('/:id/status', deviceTelemetryRateLimit, async (req: Request, res: Response): Promise<void> => {
+router.get('/:id/status', publicRoute('player da TV consulta o próprio status, sem login'), deviceTelemetryRateLimit, async (req: Request, res: Response): Promise<void> => {
   try {
     const device = await deviceService.getStatus(req.params.id as string);
 
@@ -98,7 +99,7 @@ router.get('/:id/status', deviceTelemetryRateLimit, async (req: Request, res: Re
 });
 
 // GET /api/devices/player/:id/live — Conexão SSE em tempo real (Player Pareado, PÚBLICO)
-router.get('/player/:id/live', (req: Request, res: Response): void => {
+router.get('/player/:id/live', publicRoute('SSE do player da TV pareada, sem login'), (req: Request, res: Response): void => {
   sseService.addClient('device', req.params.id as string, res);
 });
 
@@ -106,7 +107,7 @@ router.get('/player/:id/live', (req: Request, res: Response): void => {
 // Parear um device é o que cria uma "tela ativa" — é aqui que a quota de
 // telas do plano é cobrada. Leitura e heartbeat seguem livres de propósito:
 // assinatura vencida bloqueia criar/editar, nunca derruba tela já no ar.
-router.post('/link', authMiddleware, requireTenant, requireActiveSubscription, enforceQuota('device'), validateBody(linkDeviceSchema), async (req: Request, res: Response): Promise<void> => {
+router.post('/link', authMiddleware, requireTenant, requirePermission('device:link'), requireActiveSubscription, enforceQuota('device'), validateBody(linkDeviceSchema), async (req: Request, res: Response): Promise<void> => {
   try {
     const { code, displayId, name } = req.body;
 
@@ -152,7 +153,7 @@ router.post('/link', authMiddleware, requireTenant, requireActiveSubscription, e
 });
 
 // PATCH /api/devices/:id/heartbeat (PÚBLICO — a TV bate o próprio id)
-router.patch('/:id/heartbeat', deviceTelemetryRateLimit, async (req: Request, res: Response): Promise<void> => {
+router.patch('/:id/heartbeat', publicRoute('a TV bate o próprio id, sem login'), deviceTelemetryRateLimit, async (req: Request, res: Response): Promise<void> => {
   try {
     const device = await deviceService.heartbeat(req.params.id as string);
     if (!device) {
@@ -167,7 +168,7 @@ router.patch('/:id/heartbeat', deviceTelemetryRateLimit, async (req: Request, re
 });
 
 // PATCH /api/devices/:id/display (AUTENTICADO — reatribuir display de um dispositivo)
-router.patch('/:id/display', authMiddleware, requireTenant, validateBody(updateDeviceDisplaySchema), async (req: Request, res: Response): Promise<void> => {
+router.patch('/:id/display', authMiddleware, requireTenant, requirePermission('device:write'), validateBody(updateDeviceDisplaySchema), async (req: Request, res: Response): Promise<void> => {
   try {
     const { displayId } = req.body;
 
@@ -191,7 +192,7 @@ router.patch('/:id/display', authMiddleware, requireTenant, validateBody(updateD
 });
 
 // DELETE /api/devices/:id — 404 se for de outro tenant
-router.delete('/:id', authMiddleware, requireTenant, async (req: Request, res: Response): Promise<void> => {
+router.delete('/:id', authMiddleware, requireTenant, requirePermission('device:delete'), async (req: Request, res: Response): Promise<void> => {
   try {
     const id = req.params.id as string;
     const deleted = await deviceService.unlinkScoped(id, req.tenantId);

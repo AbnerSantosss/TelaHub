@@ -7,13 +7,15 @@ import { userService } from '../services/user.service';
 import { requireTenant } from '../middlewares/tenant.middleware';
 import { requireActiveSubscription, enforceQuota } from '../middlewares/quota.middleware';
 import { auditService } from '../services/audit.service';
-import { requirePermission } from '../middlewares/permission.middleware';
+import { publicRoute, requirePermission } from '../middlewares/permission.middleware';
 import { canAssignRole, normalizeRole } from '../lib/permissions';
 
 const router = Router();
 
 // GET /api/users — apenas usuários da MESMA organização
-router.get('/', authMiddleware, requireTenant, async (req: Request, res: Response): Promise<void> => {
+// `team:read` é do Editor para cima: o Leitor não vê a equipe (o painel, que lê
+// esta lista após o login, trata o 403 como lista vazia).
+router.get('/', authMiddleware, requireTenant, requirePermission('team:read'), async (req: Request, res: Response): Promise<void> => {
   try {
     const users = await userService.getAll(req.tenantId);
     res.json(users);
@@ -66,7 +68,7 @@ router.post('/invite', authMiddleware, requireTenant, requirePermission('team:wr
 });
 
 // POST /api/users/:id/resend-invite (ADMIN — reenvia convite com nova senha)
-router.post('/:id/resend-invite', authMiddleware, requireTenant, adminMiddleware, async (req: Request, res: Response): Promise<void> => {
+router.post('/:id/resend-invite', authMiddleware, requireTenant, requirePermission('team:write'), adminMiddleware, async (req: Request, res: Response): Promise<void> => {
   try {
     const result = await userService.resendInvite(req.params.id as string, req.tenantId);
     res.json(result);
@@ -77,7 +79,7 @@ router.post('/:id/resend-invite', authMiddleware, requireTenant, adminMiddleware
 });
 
 // POST /api/users/:id/send-reset (ADMIN — envia email de redefinição para o usuário)
-router.post('/:id/send-reset', authMiddleware, requireTenant, adminMiddleware, async (req: Request, res: Response): Promise<void> => {
+router.post('/:id/send-reset', authMiddleware, requireTenant, requirePermission('team:write'), adminMiddleware, async (req: Request, res: Response): Promise<void> => {
   try {
     const result = await userService.adminSendPasswordReset(req.params.id as string, req.tenantId);
     res.json(result);
@@ -88,7 +90,7 @@ router.post('/:id/send-reset', authMiddleware, requireTenant, adminMiddleware, a
 });
 
 // POST /api/users/forgot-password (PÚBLICO — solicita reset de senha)
-router.post('/forgot-password', authRateLimit, validateBody(forgotPasswordSchema), async (req: Request, res: Response): Promise<void> => {
+router.post('/forgot-password', publicRoute('recuperação de senha: quem esqueceu a senha não está logado'), authRateLimit, validateBody(forgotPasswordSchema), async (req: Request, res: Response): Promise<void> => {
   try {
     const { email } = req.body;
 
@@ -101,7 +103,7 @@ router.post('/forgot-password', authRateLimit, validateBody(forgotPasswordSchema
 });
 
 // POST /api/users/reset-password (PÚBLICO — reseta a senha com token)
-router.post('/reset-password', authRateLimit, validateBody(resetPasswordSchema), async (req: Request, res: Response): Promise<void> => {
+router.post('/reset-password', publicRoute('recuperação de senha: a credencial é o token enviado por e-mail'), authRateLimit, validateBody(resetPasswordSchema), async (req: Request, res: Response): Promise<void> => {
   try {
     const { token, password } = req.body;
 
@@ -114,7 +116,7 @@ router.post('/reset-password', authRateLimit, validateBody(resetPasswordSchema),
 });
 
 // DELETE /api/users/:id (ADMIN ONLY, e só dentro da própria organização)
-router.delete('/:id', authMiddleware, requireTenant, adminMiddleware, async (req: Request, res: Response): Promise<void> => {
+router.delete('/:id', authMiddleware, requireTenant, requirePermission('team:write'), adminMiddleware, async (req: Request, res: Response): Promise<void> => {
   try {
     const id = req.params.id as string;
     const result = await userService.deleteScoped(id, req.tenantId);
@@ -156,7 +158,7 @@ router.put('/me/email', authMiddleware, masterMiddleware, validateBody(updateEma
 });
 
 // PUT /api/users/me/password (autenticado — qualquer usuário pode alterar sua própria senha)
-router.put('/me/password', authMiddleware, validateBody(changePasswordSchema), async (req: Request, res: Response): Promise<void> => {
+router.put('/me/password', authMiddleware, publicRoute('conta própria: qualquer papel troca a própria senha'), validateBody(changePasswordSchema), async (req: Request, res: Response): Promise<void> => {
   try {
     const { currentPassword, newPassword } = req.body;
     const result = await userService.changePassword(req.user!.id, currentPassword, newPassword);
@@ -168,7 +170,7 @@ router.put('/me/password', authMiddleware, validateBody(changePasswordSchema), a
 });
 
 // PUT /api/users/me/name (autenticado — qualquer usuário pode alterar seu nome)
-router.put('/me/name', authMiddleware, validateBody(updateNameSchema), async (req: Request, res: Response): Promise<void> => {
+router.put('/me/name', authMiddleware, publicRoute('conta própria: qualquer papel troca o próprio nome'), validateBody(updateNameSchema), async (req: Request, res: Response): Promise<void> => {
   try {
     const { name } = req.body;
     const result = await userService.updateName(req.user!.id, name.trim());

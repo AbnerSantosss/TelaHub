@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { authMiddleware } from '../middlewares/auth.middleware';
 import { requireTenant } from '../middlewares/tenant.middleware';
 import { requireFeature } from '../middlewares/feature.middleware';
+import { requirePermission } from '../middlewares/permission.middleware';
 import { uptimeService, DeviceUptimeReport, UptimePeriod } from '../services/uptime.service';
 
 const router = Router();
@@ -72,7 +73,7 @@ function serializeDevice(report: DeviceUptimeReport) {
 // (`alerta-offline`) continua em TODOS os planos, inclusive o Grátis: ele é a
 // promessa central da página de vendas e o diferencial declarado do produto.
 // O que o plano pago libera é o histórico consolidado, não o aviso.
-router.get('/devices', authMiddleware, requireTenant, requireFeature('relatorios'), async (req: Request, res: Response): Promise<void> => {
+router.get('/devices', authMiddleware, requireTenant, requirePermission('report:read'), requireFeature('relatorios'), async (req: Request, res: Response): Promise<void> => {
   try {
     const period = parsePeriod(req);
     if ('error' in period) {
@@ -94,7 +95,7 @@ router.get('/devices', authMiddleware, requireTenant, requireFeature('relatorios
 });
 
 // GET /api/uptime/summary — agregado da organização no período.
-router.get('/summary', authMiddleware, requireTenant, requireFeature('relatorios'), async (req: Request, res: Response): Promise<void> => {
+router.get('/summary', authMiddleware, requireTenant, requirePermission('report:read'), requireFeature('relatorios'), async (req: Request, res: Response): Promise<void> => {
   try {
     const period = parsePeriod(req);
     if ('error' in period) {

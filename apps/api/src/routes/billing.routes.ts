@@ -4,6 +4,7 @@ import type { Payment } from '@prisma/client';
 
 import { adminMiddleware, authMiddleware } from '../middlewares/auth.middleware';
 import { resolveTenantId } from '../middlewares/quota.middleware';
+import { requirePermission } from '../middlewares/permission.middleware';
 import { validateBody } from '../middlewares/validate.middleware';
 import {
   cancelSubscriptionSchema,
@@ -169,8 +170,14 @@ function serializeSubscription(
  * consumia `subscription.*` (inclusive os testes) continua funcionando. Quebrar
  * o formato antigo economizaria bytes e custaria uma tela em branco em
  * produção — não é troca que valha a pena no caminho do dinheiro.
+ *
+ * `plan:read` (todos os papéis) e não `billing:read`: o painel lê esta rota logo
+ * após o login, com qualquer papel, para a faixa de assinatura e para saber o que
+ * o plano libera. Pendente: `payments` (valores e links de fatura) ainda sai para
+ * todos os papéis, apesar de `plan:read` ser "SEM dados de pagamento" na matriz —
+ * filtrar muda a resposta, então fica para decisão do dono.
  */
-router.get('/subscription', async (req: Request, res: Response): Promise<void> => {
+router.get('/subscription', requirePermission('plan:read'), async (req: Request, res: Response): Promise<void> => {
   try {
     const organizationId = await resolveTenantId(req);
     if (!organizationId) {
@@ -227,13 +234,13 @@ router.get('/subscription', async (req: Request, res: Response): Promise<void> =
  * O motivo é opcional — exigir justificativa para sair é o padrão escuro que
  * este produto se recusa a ter.
  *
- * CONFERIR com o dono: a rota exige apenas autenticação, como o contrato da
- * página Assinatura pede. Se o desejado for restringir a admins (como faz
- * `POST /plan`), basta acrescentar `adminMiddleware` — hoje qualquer usuário da
- * organização consegue agendar o cancelamento.
+ * Só quem tem `billing:write` (Titular/Administrador) agenda o cancelamento: antes
+ * da matriz de permissões a rota exigia apenas autenticação e um Operador
+ * conseguia cancelar a assinatura da conta.
  */
 router.post(
   '/cancel',
+  requirePermission('billing:write'),
   validateBody(cancelSubscriptionSchema),
   async (req: Request, res: Response): Promise<void> => {
     try {
@@ -277,7 +284,7 @@ router.post(
  * `canceled` e voltar exige contratação nova (com cobrança nova no gateway) —
  * responder "reativado" ali entregaria plano pago sem pagamento.
  */
-router.post('/reactivate', async (req: Request, res: Response): Promise<void> => {
+router.post('/reactivate', requirePermission('billing:write'), async (req: Request, res: Response): Promise<void> => {
   try {
     const organizationId = await resolveTenantId(req);
     if (!organizationId) {
@@ -312,6 +319,7 @@ router.post('/reactivate', async (req: Request, res: Response): Promise<void> =>
  */
 router.post(
   '/plan',
+  requirePermission('billing:write'),
   adminMiddleware,
   validateBody(changePlanSchema),
   async (req: Request, res: Response): Promise<void> => {
@@ -390,6 +398,7 @@ router.post(
  */
 router.post(
   '/checkout',
+  requirePermission('billing:write'),
   validateBody(checkoutSchema),
   async (req: Request, res: Response): Promise<void> => {
     try {

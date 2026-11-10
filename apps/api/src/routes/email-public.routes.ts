@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 
 import prisma from '../lib/prisma';
+import { publicRoute } from '../middlewares/permission.middleware';
 
 /**
  * Descadastro de novidades — `GET /api/email/unsubscribe/:token`.
@@ -90,13 +91,13 @@ async function unsubscribe(token: string): Promise<void> {
   }
 }
 
-router.get('/unsubscribe/:token', async (req: Request, res: Response): Promise<void> => {
+router.get('/unsubscribe/:token', publicRoute('link de descadastro do e-mail: a credencial é o token do link'), async (req: Request, res: Response): Promise<void> => {
   await unsubscribe(req.params.token as string);
   res.status(200).type('html').send(confirmationPage());
 });
 
 /** One-click de Gmail/Yahoo (RFC 8058). Responde texto: nada é exibido. */
-router.post('/unsubscribe/:token', async (req: Request, res: Response): Promise<void> => {
+router.post('/unsubscribe/:token', publicRoute('descadastro em um clique (RFC 8058): a credencial é o token do link'), async (req: Request, res: Response): Promise<void> => {
   await unsubscribe(req.params.token as string);
   res.status(200).type('text/plain').send('OK');
 });

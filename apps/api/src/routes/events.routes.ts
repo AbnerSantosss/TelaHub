@@ -3,6 +3,7 @@ import rateLimit from 'express-rate-limit';
 
 import { pageviewSchema } from '../schemas/metrics.schema';
 import { isFirstVisitToday, siteVisitService } from '../services/site-visit.service';
+import { publicRoute } from '../middlewares/permission.middleware';
 
 /**
  * Contagem própria de visitas (`POST /api/events/pageview`).
@@ -68,7 +69,7 @@ const pageviewRateLimit = rateLimit({
  *    sal do dia, guardado só em memória por 24 h — sem cookie, sem id de
  *    pessoa, sem nada que sobreviva à virada do dia.
  */
-router.post('/pageview', pageviewRateLimit, (req: Request, res: Response): void => {
+router.post('/pageview', publicRoute('medição de visita do site público, sem sessão'), pageviewRateLimit, (req: Request, res: Response): void => {
   res.status(204).end();
 
   // `safeParse` e não `validateBody`: o middleware devolveria 400 num corpo

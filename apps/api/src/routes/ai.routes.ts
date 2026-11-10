@@ -8,6 +8,7 @@ import { aiRateLimit } from '../middlewares/rate-limit.middleware';
 import { auditService } from '../services/audit.service';
 import { AI_ACTIONS, AI_PROMPT_MAX, AiUseError, aiService } from '../services/ai/ai.service';
 import { AiProviderError } from '../services/ai/providers';
+import { requirePermission } from '../middlewares/permission.middleware';
 
 /**
  * IA de criação para o cliente final (`/api/ai`).
@@ -58,7 +59,7 @@ function handleError(res: Response, error: unknown, label: string) {
 }
 
 // GET /api/ai/status — o que o painel pode mostrar (sem custo)
-router.get('/status', async (req: Request, res: Response): Promise<void> => {
+router.get('/status', requirePermission('media:read'), async (req: Request, res: Response): Promise<void> => {
   try {
     res.json(await aiService.status(req.tenantId ?? null, isMaster(req)));
   } catch (error) {
@@ -66,9 +67,12 @@ router.get('/status', async (req: Request, res: Response): Promise<void> => {
   }
 });
 
+// Os três POST abaixo gravam na biblioteca de mídia e gastam o limite de IA do
+// plano, por isso exigem `media:write` (Editor e Administrador; Leitor não).
 // POST /api/ai/image — gera uma imagem e guarda na biblioteca do cliente
 router.post(
   '/image',
+  requirePermission('media:write'),
   requireActiveSubscription,
   aiRateLimit,
   validateBody(generateSchema),
@@ -93,6 +97,7 @@ router.post(
 // POST /api/ai/image/edit — edita uma imagem da própria biblioteca
 router.post(
   '/image/edit',
+  requirePermission('media:write'),
   requireActiveSubscription,
   aiRateLimit,
   validateBody(editSchema),
@@ -117,6 +122,7 @@ router.post(
 // POST /api/ai/preset — tela pronta: fundo gerado + textos editáveis
 router.post(
   '/preset',
+  requirePermission('media:write'),
   requireActiveSubscription,
   aiRateLimit,
   validateBody(generateSchema),

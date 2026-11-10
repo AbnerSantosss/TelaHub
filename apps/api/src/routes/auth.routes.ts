@@ -6,11 +6,12 @@ import { authRateLimit } from '../middlewares/rate-limit.middleware';
 import { validateBody } from '../middlewares/validate.middleware';
 import { acceptTermsSchema, PRIVACY_VERSION, TERMS_VERSION } from '../schemas/signup.schema';
 import { DEMO_LOGIN_ACCOUNTS, findDemoAccount, isDemoLoginEnabled } from '../lib/demo-login';
+import { publicRoute } from '../middlewares/permission.middleware';
 
 const router = Router();
 
 // POST /api/auth/login
-router.post('/login', authRateLimit, async (req: Request, res: Response): Promise<void> => {
+router.post('/login', publicRoute('login: quem entra ainda não tem sessão'), authRateLimit, async (req: Request, res: Response): Promise<void> => {
   try {
     const { email, password } = req.body;
 
@@ -48,7 +49,7 @@ router.post('/login', authRateLimit, async (req: Request, res: Response): Promis
 });
 
 // GET /api/auth/me
-router.get('/me', authMiddleware, async (req: Request, res: Response): Promise<void> => {
+router.get('/me', authMiddleware, publicRoute('identidade da própria sessão: todo papel, inclusive o Leitor, lê logo após o login'), async (req: Request, res: Response): Promise<void> => {
   try {
     const user = await userService.getById(req.user!.id);
 
@@ -96,6 +97,7 @@ router.get('/me', authMiddleware, async (req: Request, res: Response): Promise<v
 router.post(
   '/accept-terms',
   authMiddleware,
+  publicRoute('aceite dos termos é ato da própria pessoa, de qualquer papel'),
   validateBody(acceptTermsSchema),
   async (req: Request, res: Response): Promise<void> => {
     try {
@@ -127,7 +129,7 @@ router.post(
 // GET /api/auth/demo-accounts — o painel pergunta se mostra os botões de
 // demonstração. Desligado, responde lista vazia (e não erro) para a tela de
 // login não registrar falha à toa. Ver `lib/demo-login.ts`.
-router.get('/demo-accounts', (_req: Request, res: Response): void => {
+router.get('/demo-accounts', publicRoute('lista de botões de demonstração da tela de login, sem sessão'), (_req: Request, res: Response): void => {
   if (!isDemoLoginEnabled()) {
     res.json({ accounts: [] });
     return;
@@ -136,7 +138,7 @@ router.get('/demo-accounts', (_req: Request, res: Response): void => {
 });
 
 // POST /api/auth/demo-login { plan } — entra sem senha na conta demo do plano.
-router.post('/demo-login', authRateLimit, async (req: Request, res: Response): Promise<void> => {
+router.post('/demo-login', publicRoute('login de demonstração: quem entra ainda não tem sessão'), authRateLimit, async (req: Request, res: Response): Promise<void> => {
   if (!isDemoLoginEnabled()) {
     res.status(404).json({ error: 'Não encontrado.' });
     return;
@@ -171,7 +173,7 @@ router.post('/demo-login', authRateLimit, async (req: Request, res: Response): P
   }
 });
 
-router.post('/logout', (req: Request, res: Response): void => {
+router.post('/logout', publicRoute('só confirma; o token é descartado no cliente'), (req: Request, res: Response): void => {
   res.json({ message: 'Logout realizado com sucesso.' });
 });
 

@@ -5,12 +5,16 @@ import { validateBody } from '../middlewares/validate.middleware';
 import { requireFeature } from '../middlewares/feature.middleware';
 import { createOrganizationSchema } from '../schemas/organizations.schema';
 import { organizationService } from '../services/organization.service';
+import { requirePermission } from '../middlewares/permission.middleware';
 
 const router = Router();
 
 // GET /api/organizations
 // `master` vê todas; qualquer outro usuário vê exatamente a sua organização.
-router.get('/', authMiddleware, requireTenant, async (req: Request, res: Response): Promise<void> => {
+// A matriz não tem `org:read`: o painel lê esta lista logo após o login, com
+// qualquer papel, então vale `plan:read` (a permissão de leitura da conta que
+// todos os papéis têm).
+router.get('/', authMiddleware, requireTenant, requirePermission('plan:read'), async (req: Request, res: Response): Promise<void> => {
   try {
     const organizations = await organizationService.getAllScoped(req.tenantId);
     res.json(organizations);
@@ -36,7 +40,7 @@ router.post('/', authMiddleware, masterMiddleware, validateBody(createOrganizati
 // GET /api/organizations/:id/report?startDate=&endDate= — relatório agregado (US-017)
 // Mesma feature `relatorios` das rotas de uptime: é a mesma promessa de plano
 // ("Relatórios de exibição"), só que agregada por unidade.
-router.get('/:id/report', authMiddleware, requireTenant, requireFeature('relatorios'), async (req: Request, res: Response): Promise<void> => {
+router.get('/:id/report', authMiddleware, requireTenant, requirePermission('report:read'), requireFeature('relatorios'), async (req: Request, res: Response): Promise<void> => {
   try {
     const organizationId = req.params.id as string;
 

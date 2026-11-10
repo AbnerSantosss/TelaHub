@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 
 import { timingSafeTokenMatch } from '../services/asaas.provider';
 import { paymentService, type AsaasWebhookBody } from '../services/payment.service';
+import { publicRoute } from '../middlewares/permission.middleware';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // WEBHOOKS DE GATEWAY
@@ -36,7 +37,7 @@ const router = Router();
  * Cadastre esta URL no painel do Asaas (Integrações → Webhooks) com o mesmo
  * token de `ASAAS_WEBHOOK_TOKEN`.
  */
-router.post('/asaas', async (req: Request, res: Response): Promise<void> => {
+router.post('/asaas', publicRoute('webhook do Asaas: a credencial é o token comparado em tempo constante, não um usuário'), async (req: Request, res: Response): Promise<void> => {
   const expected = (process.env.ASAAS_WEBHOOK_TOKEN || '').trim();
 
   // Sem token configurado a rota fica FECHADA. A alternativa — aceitar tudo

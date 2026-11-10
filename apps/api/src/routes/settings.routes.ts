@@ -3,6 +3,7 @@ import { authMiddleware, masterMiddleware } from '../middlewares/auth.middleware
 import { settingsService } from '../services/settings.service';
 import { testSmtpConnection } from '../services/email.service';
 import { EMAIL_PROVIDERS, findProvider } from '../services/email-providers';
+import { publicRoute } from '../middlewares/permission.middleware';
 
 const router = Router();
 
@@ -135,7 +136,7 @@ router.post('/smtp/test', authMiddleware, masterMiddleware, async (req: Request,
 });
 
 // GET /api/settings/smtp/status (autenticado — qualquer usuário pode verificar se SMTP está ativo)
-router.get('/smtp/status', authMiddleware, async (req: Request, res: Response): Promise<void> => {
+router.get('/smtp/status', authMiddleware, publicRoute('só o booleano "SMTP da plataforma configurado", lido pelo painel após o login por qualquer papel'), async (req: Request, res: Response): Promise<void> => {
   try {
     const smtp = await settingsService.getSmtpConfig();
     res.json({ configured: !!(smtp?.user && smtp?.pass) });

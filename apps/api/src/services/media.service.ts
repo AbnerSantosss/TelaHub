@@ -1,3 +1,4 @@
+import { randomBytes } from 'node:crypto';
 import path from 'path';
 import fs from 'fs';
 import { getMediaStorage } from '../lib/media-storage';
@@ -135,7 +136,7 @@ export class MediaService {
     const { PutObjectCommand } = await import('@aws-sdk/client-s3');
     const client = await getS3Client();
     const safeName = file.originalname.replace(/[^a-zA-Z0-9.]/g, '');
-    const filename = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}_${safeName}`;
+    const filename = `${Date.now()}_${randomBytes(6).toString('hex')}_${safeName}`;
     // Toda mídia vive sob o prefixo da organização — é o que isola os tenants
     // dentro do mesmo bucket.
     const key = `${organizationId}/${filename}`;
@@ -166,7 +167,7 @@ export class MediaService {
     if (USE_R2) return this.uploadToR2(file, organizationId);
 
     const safeName = file.originalname.replace(/[^a-zA-Z0-9.]/g, '');
-    const filename = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}_${safeName}`;
+    const filename = `${Date.now()}_${randomBytes(6).toString('hex')}_${safeName}`;
     const dir = this.getUploadsDirFor(organizationId);
     await fs.promises.writeFile(path.join(dir, filename), file.buffer);
     const key = `${organizationId}/${filename}`;

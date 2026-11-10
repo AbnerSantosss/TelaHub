@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { planService } from '../services/plan.service';
+import { publicRoute } from '../middlewares/permission.middleware';
 
 const router = Router();
 
@@ -12,7 +13,7 @@ const router = Router();
  * `maxDevices` é sempre `null`, porque quem limita a expansão é a fatura por
  * tela ativa, não uma trava no software.
  */
-router.get('/', async (_req: Request, res: Response): Promise<void> => {
+router.get('/', publicRoute('catálogo de planos exibido na página de preços, sem sessão'), async (_req: Request, res: Response): Promise<void> => {
   try {
     const plans = await planService.listActivePublic();
     res.json({

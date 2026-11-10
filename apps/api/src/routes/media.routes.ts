@@ -1,3 +1,4 @@
+import { randomBytes } from 'node:crypto';
 import { Router, Request, Response, NextFunction } from 'express';
 import path from 'path';
 import multer from 'multer';
@@ -5,6 +6,7 @@ import { authMiddleware } from '../middlewares/auth.middleware';
 import { requireTenant } from '../middlewares/tenant.middleware';
 import { mediaService, MediaScope } from '../services/media.service';
 import { resolveDefaultOrganizationId } from '../services/organization.service';
+import { requirePermission } from '../middlewares/permission.middleware';
 
 const router = Router();
 
@@ -50,7 +52,7 @@ const storage = mediaService.isR2Enabled()
       },
       filename: (req, file, cb) => {
         const safeName = file.originalname.replace(/[^a-zA-Z0-9.]/g, '');
-        const uniqueName = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}_${safeName}`;
+        const uniqueName = `${Date.now()}_${randomBytes(6).toString('hex')}_${safeName}`;
         cb(null, uniqueName);
       },
     });
@@ -151,7 +153,7 @@ const handleUpload = (req: Request, res: Response, next: NextFunction): void => 
 };
 
 // POST /api/media/upload
-router.post('/upload', authMiddleware, requireTenant, handleUpload, async (req: Request, res: Response): Promise<void> => {
+router.post('/upload', authMiddleware, requireTenant, requirePermission('media:write'), handleUpload, async (req: Request, res: Response): Promise<void> => {
   try {
     const organizationId = req.tenantId;
     if (!organizationId) {
@@ -197,7 +199,7 @@ router.post('/upload', authMiddleware, requireTenant, handleUpload, async (req: 
 });
 
 // GET /api/media — lista apenas o prefixo do tenant
-router.get('/', authMiddleware, requireTenant, async (req: Request, res: Response): Promise<void> => {
+router.get('/', authMiddleware, requireTenant, requirePermission('media:read'), async (req: Request, res: Response): Promise<void> => {
   try {
     const scope = await resolveMediaScope(req);
     if (!scope) {
@@ -219,7 +221,8 @@ router.get('/', authMiddleware, requireTenant, async (req: Request, res: Respons
 });
 
 // DELETE /api/media/:filename — 404 para chave fora do prefixo do tenant
-router.delete('/:filename', authMiddleware, requireTenant, async (req: Request, res: Response): Promise<void> => {
+// A matriz não tem `media:delete`: o Editor que envia a mídia também a remove.
+router.delete('/:filename', authMiddleware, requireTenant, requirePermission('media:write'), async (req: Request, res: Response): Promise<void> => {
   try {
     const scope = await resolveMediaScope(req);
     if (!scope) {
@@ -251,7 +254,7 @@ router.delete('/:filename', authMiddleware, requireTenant, async (req: Request, 
 });
 
 // POST /api/media/delete-batch (recebe array de filenames no body)
-router.post('/delete-batch', authMiddleware, requireTenant, async (req: Request, res: Response): Promise<void> => {
+router.post('/delete-batch', authMiddleware, requireTenant, requirePermission('media:write'), async (req: Request, res: Response): Promise<void> => {
   try {
     const scope = await resolveMediaScope(req);
     if (!scope) {

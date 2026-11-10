@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import rateLimit from 'express-rate-limit';
 
 import { validateBody } from '../middlewares/validate.middleware';
+import { publicRoute } from '../middlewares/permission.middleware';
 import {
   createCheckoutSessionSchema,
   startPaymentSchema,
@@ -85,6 +86,7 @@ function handleError(error: unknown, res: Response, context: string): void {
  */
 router.post(
   '/sessions',
+  publicRoute('checkout aberto a quem ainda não tem conta; a sessão nasce na primeira visita'),
   checkoutCreateRateLimit,
   validateBody(createCheckoutSessionSchema),
   async (req: Request, res: Response): Promise<void> => {
@@ -116,6 +118,7 @@ router.post(
  */
 router.get(
   '/sessions/:publicToken',
+  publicRoute('link de recuperação do checkout: a credencial é o token público da sessão'),
   checkoutSessionRateLimit,
   async (req: Request, res: Response): Promise<void> => {
     try {
@@ -137,6 +140,7 @@ router.get(
  */
 router.patch(
   '/sessions/:publicToken',
+  publicRoute('passos do checkout antes da conta existir: a credencial é o token público da sessão'),
   checkoutSessionRateLimit,
   validateBody(updateCheckoutSessionSchema),
   async (req: Request, res: Response): Promise<void> => {
@@ -161,6 +165,7 @@ router.patch(
  */
 router.post(
   '/sessions/:publicToken/submit',
+  publicRoute('finalização do checkout antes da conta existir: a credencial é o token público da sessão'),
   checkoutSessionRateLimit,
   validateBody(submitCheckoutSessionSchema),
   async (req: Request, res: Response): Promise<void> => {
@@ -182,7 +187,7 @@ router.post(
  * aviso de "pagamento simulado" que o front decidisse sozinho seria a primeira
  * coisa a ficar desatualizada quando o gateway real entrasse.
  */
-router.get('/payment-config', checkoutSessionRateLimit, (_req: Request, res: Response): void => {
+router.get('/payment-config', publicRoute('métodos de pagamento que a tela do checkout público pode oferecer'), checkoutSessionRateLimit, (_req: Request, res: Response): void => {
   try {
     const provider = resolveProvider();
     res.json({
@@ -205,6 +210,7 @@ router.get('/payment-config', checkoutSessionRateLimit, (_req: Request, res: Res
  */
 router.post(
   '/sessions/:publicToken/pay',
+  publicRoute('pagamento do checkout público: a credencial é o token da sessão e a posse da conta é checada no handler'),
   checkoutSessionRateLimit,
   validateBody(startPaymentSchema),
   async (req: Request, res: Response): Promise<void> => {
@@ -240,6 +246,7 @@ router.post(
  */
 router.post(
   '/sessions/:publicToken/simulate-payment',
+  publicRoute('confirmação do pagamento simulado; responde 404 quando o provedor ativo é real'),
   checkoutSessionRateLimit,
   async (req: Request, res: Response): Promise<void> => {
     try {

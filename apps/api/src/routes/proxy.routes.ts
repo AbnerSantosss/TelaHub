@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { proxyRateLimit } from '../middlewares/rate-limit.middleware';
 import { safeFetch, SsrfBlockedError, ResponseTooLargeError } from '../lib/safe-http';
+import { publicRoute } from '../middlewares/permission.middleware';
 
 const router = Router();
 
@@ -96,7 +97,7 @@ function parseRssXml(xml: string): any[] {
  * `169.254.169.254` ou outro container da rede interna, nem via redirect ou
  * DNS rebinding.
  */
-router.get('/rss', proxyRateLimit, async (req: Request, res: Response): Promise<void> => {
+router.get('/rss', publicRoute('o player da TV (sem login) busca feeds RSS por aqui; a proteção é o filtro SSRF e o limite de taxa'), proxyRateLimit, async (req: Request, res: Response): Promise<void> => {
   const rawUrl = typeof req.query.url === 'string' ? req.query.url.trim() : '';
 
   if (!rawUrl) {

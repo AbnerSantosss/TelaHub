@@ -5,6 +5,7 @@ import { authMiddleware, masterMiddleware } from '../middlewares/auth.middleware
 import { leadRateLimit } from '../middlewares/rate-limit.middleware';
 import { createLeadSchema } from '../schemas/leads.schema';
 import { leadService } from '../services/lead.service';
+import { publicRoute } from '../middlewares/permission.middleware';
 
 const router = Router();
 
@@ -17,6 +18,7 @@ const router = Router();
  */
 router.post(
   '/',
+  publicRoute('formulário de contato do site: quem preenche ainda não tem conta'),
   leadRateLimit,
   validateBody(createLeadSchema),
   async (req: Request, res: Response): Promise<void> => {

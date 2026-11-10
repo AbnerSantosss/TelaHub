@@ -14,11 +14,12 @@ import { broadcastService } from '../services/broadcast.service';
 import { displayService } from '../services/display.service';
 import { sseService } from '../services/sse.service';
 import { auditService } from '../services/audit.service';
+import { requirePermission } from '../middlewares/permission.middleware';
 
 const router = Router();
 
 // GET /api/broadcasts — só os broadcasts do tenant
-router.get('/', authMiddleware, requireTenant, async (req: Request, res: Response): Promise<void> => {
+router.get('/', authMiddleware, requireTenant, requirePermission('broadcast:read'), async (req: Request, res: Response): Promise<void> => {
   try {
     const broadcasts = await broadcastService.getAll(req.tenantId);
     res.json(
@@ -43,7 +44,7 @@ router.get('/', authMiddleware, requireTenant, async (req: Request, res: Respons
 });
 
 // POST /api/broadcasts — organizationId forçado pelo tenant; displayIds validados
-router.post('/', authMiddleware, requireTenant, validateBody(saveBroadcastSchema), async (req: Request, res: Response): Promise<void> => {
+router.post('/', authMiddleware, requireTenant, requirePermission('broadcast:write'), validateBody(saveBroadcastSchema), async (req: Request, res: Response): Promise<void> => {
   try {
     const {
       id, name, page, start_time, end_time,
@@ -141,7 +142,9 @@ router.post('/', authMiddleware, requireTenant, validateBody(saveBroadcastSchema
 });
 
 // DELETE /api/broadcasts/:id — 404 se for de outro tenant
-router.delete('/:id', authMiddleware, requireTenant, async (req: Request, res: Response): Promise<void> => {
+// A matriz não tem `broadcast:delete`: apagar um aviso agendado é parte de editá-lo
+// (o Editor já o cria e reagenda), então vale `broadcast:write`.
+router.delete('/:id', authMiddleware, requireTenant, requirePermission('broadcast:write'), async (req: Request, res: Response): Promise<void> => {
   try {
     const id = req.params.id as string;
 

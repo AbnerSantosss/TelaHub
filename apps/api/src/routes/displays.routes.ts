@@ -20,6 +20,7 @@ import {
 import { subscriptionService } from '../services/subscription.service';
 import { hasFeature } from '../services/plan.service';
 import { buildFeatureDenial, featureDenialMessage } from '../middlewares/feature.middleware';
+import { publicRoute, requirePermission } from '../middlewares/permission.middleware';
 
 const router = Router();
 
@@ -27,7 +28,7 @@ const router = Router();
 const WALL_FEATURE_KEY = 'videowall';
 
 // GET /api/displays — só os displays do tenant do usuário
-router.get('/', authMiddleware, requireTenant, async (req: Request, res: Response): Promise<void> => {
+router.get('/', authMiddleware, requireTenant, requirePermission('display:read'), async (req: Request, res: Response): Promise<void> => {
   try {
     const displays = await displayService.getAll(req.tenantId);
     res.json(displays);
@@ -39,7 +40,7 @@ router.get('/', authMiddleware, requireTenant, async (req: Request, res: Respons
 
 // GET /api/displays/slug/:slug/version — Endpoint LEVE para check de versão (Player)
 // PÚBLICO por design: as TVs dependem dele. Só expõe o updatedAt do próprio slug.
-router.get('/slug/:slug/version', async (req: Request, res: Response): Promise<void> => {
+router.get('/slug/:slug/version', publicRoute('player da TV checa a versão do display por token público'), async (req: Request, res: Response): Promise<void> => {
   try {
     // Aceita token público (preferido) ou slug legado.
     const version = await displayService.getVersionByPublicRef(req.params.slug as string);
@@ -74,12 +75,12 @@ router.get('/slug/:slug/version', async (req: Request, res: Response): Promise<v
 });
 
 // GET /api/displays/slug/:slug/live — Conexão SSE em tempo real (Player, PÚBLICO)
-router.get('/slug/:slug/live', (req: Request, res: Response): void => {
+router.get('/slug/:slug/live', publicRoute('SSE do player da TV, sem login'), (req: Request, res: Response): void => {
   sseService.addClient('slug', req.params.slug as string, res);
 });
 
 // GET /api/displays/slug/:slug (PÚBLICO — Player)
-router.get('/slug/:slug', async (req: Request, res: Response): Promise<void> => {
+router.get('/slug/:slug', publicRoute('player da TV carrega o display por token público'), async (req: Request, res: Response): Promise<void> => {
   try {
     // Aceita token público (preferido) ou slug legado.
     const display = await displayService.getByPublicRef(req.params.slug as string);
@@ -114,7 +115,7 @@ router.get('/slug/:slug', async (req: Request, res: Response): Promise<void> => 
 });
 
 // GET /api/displays/player/:id (PÚBLICO — Player busca display após vinculação)
-router.get('/player/:id', async (req: Request, res: Response): Promise<void> => {
+router.get('/player/:id', publicRoute('player da TV pareada busca o display vinculado, sem login'), async (req: Request, res: Response): Promise<void> => {
   try {
     const display = await displayService.getById(req.params.id as string);
 
@@ -148,7 +149,7 @@ router.get('/player/:id', async (req: Request, res: Response): Promise<void> => 
 });
 
 // GET /api/displays/:id (AUTENTICADO — Dashboard). 404 se for de outro tenant.
-router.get('/:id', authMiddleware, requireTenant, async (req: Request, res: Response): Promise<void> => {
+router.get('/:id', authMiddleware, requireTenant, requirePermission('display:read'), async (req: Request, res: Response): Promise<void> => {
   try {
     const display = await displayService.getByIdScoped(req.params.id as string, req.tenantId);
 
@@ -177,7 +178,7 @@ router.get('/:id', authMiddleware, requireTenant, async (req: Request, res: Resp
 // POST /api/displays (Cria ou atualiza) — organizationId é SEMPRE o do tenant
 // Não há quota de display (o que se cobra é tela ativa, ver devices/link),
 // mas assinatura inválida impede criar/editar conteúdo.
-router.post('/', authMiddleware, requireTenant, requireActiveSubscription, validateBody(saveDisplaySchema), async (req: Request, res: Response): Promise<void> => {
+router.post('/', authMiddleware, requireTenant, requirePermission('display:write'), requireActiveSubscription, validateBody(saveDisplaySchema), async (req: Request, res: Response): Promise<void> => {
   try {
     // `organizationId` do corpo é ignorado de propósito: o escopo vem do token.
     const { id, name, slug, pages, coverImage, orientation, wall } = req.body;
@@ -308,7 +309,7 @@ router.post('/', authMiddleware, requireTenant, requireActiveSubscription, valid
 });
 
 // DELETE /api/displays/:id — 404 se for de outro tenant
-router.delete('/:id', authMiddleware, requireTenant, async (req: Request, res: Response): Promise<void> => {
+router.delete('/:id', authMiddleware, requireTenant, requirePermission('display:delete'), async (req: Request, res: Response): Promise<void> => {
   try {
     const id = req.params.id as string;
     const deleted = await displayService.deleteScoped(id, req.tenantId);
