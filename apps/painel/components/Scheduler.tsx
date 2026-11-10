@@ -42,6 +42,7 @@ import {
 } from './ui/dialog';
 import { fadeUp, staggerGrid, cardItem } from '../libs/motion';
 import { motion } from 'motion/react';
+import { isDeviceOnline } from '../lib/deviceStatus';
 
 const isYouTubeUrl = (url: string) => {
   if (!url) return false;
@@ -1581,7 +1582,7 @@ const Scheduler: React.FC = () => {
           
           <div className="mt-4 overflow-y-auto flex-1 bg-papel-2 grid grid-cols-1 md:grid-cols-2 gap-4 p-1">
             {displays.map(display => {
-              const isOnline = devices.filter(d => d.display_id === display.id).some(d => (Date.now() - d.last_seen) < 60000);
+              const isOnline = devices.filter(d => d.display_id === display.id).some(d => isDeviceOnline(d.last_seen));
               
               return (
                 <div key={display.id} className="bg-papel-2 border border-borda hover:border-borda-3 p-5 rounded-2xl transition-all flex flex-col justify-between gap-4">

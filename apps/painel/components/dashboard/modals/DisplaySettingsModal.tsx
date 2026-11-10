@@ -22,6 +22,7 @@ import {
   Pencil 
 } from 'lucide-react';
 import { Display, Device } from '../../../types';
+import { isDeviceOnline } from '../../../lib/deviceStatus';
 
 interface DisplaySettingsModalProps {
   open: boolean;
@@ -129,7 +130,7 @@ export const DisplaySettingsModal: React.FC<DisplaySettingsModalProps> = ({
             ) : (
               <div className="space-y-3">
                 {linkedDevices.map(device => {
-                  const isOnline = (Date.now() - device.last_seen) < 60000;
+                  const isOnline = isDeviceOnline(device.last_seen);
                   return (
                     <div key={device.id} className="p-4 rounded-xl space-y-3 bg-papel-2 border border-borda">
                       <div className="flex items-center gap-3">

@@ -23,6 +23,7 @@ import { cardItem } from '../../libs/motion';
 import { Button } from '../ui/button';
 import { moverSpotlight } from '../../lib/spotlight';
 import { TelaVazia } from '../TelaVazia';
+import { isDeviceOnline } from '../../lib/deviceStatus';
 
 interface DisplayCardProps {
   display: Display;
@@ -54,7 +55,7 @@ export const DisplayCard: React.FC<DisplayCardProps> = ({
 }) => {
   const isDisplayOnline = devices
     .filter(d => d.display_id === display.id)
-    .some(d => (Date.now() - d.last_seen) < 60000);
+    .some(d => isDeviceOnline(d.last_seen));
 
   const isVertical = display.orientation === 'vertical';
 

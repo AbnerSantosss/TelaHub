@@ -385,9 +385,14 @@ const Player: React.FC = () => {
     // Faz o primeiro heartbeat imediatamente
     heartbeatDevice(deviceId);
 
+    // 60 s. A API considera a TV offline depois de 150 s sem sinal
+    // (`ONLINE_THRESHOLD_MS` em apps/api/src/services/device.service.ts): o
+    // intervalo daqui tem de ficar bem ABAIXO desse limite. Quando era 120 s
+    // contra um limite de 60 s, toda TV saudável aparecia offline metade do
+    // tempo. Se mudar aqui, mude lá.
     const interval = setInterval(() => {
       heartbeatDevice(deviceId);
-    }, 120000); // A cada 2 minutos (reduzido de 30s para economizar egress)
+    }, 60000);
 
     return () => clearInterval(interval);
   }, [deviceId]);
@@ -435,8 +440,19 @@ const Player: React.FC = () => {
     const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
     let eventSource: EventSource | null = null;
     let reconnectTimeout: any = null;
+    let closed = false;
+    // Recuo exponencial com variação aleatória. Com espera fixa de 5 s, todas
+    // as TVs de todos os clientes reconectavam JUNTAS depois de um deploy ou
+    // queda da API, e a rajada derrubava a API de novo.
+    let attempt = 0;
+    const nextDelay = () => {
+      const base = Math.min(60000, 2000 * 2 ** Math.min(attempt, 5));
+      attempt += 1;
+      return base / 2 + Math.random() * (base / 2);
+    };
 
     const connectSSE = () => {
+      if (closed) return;
       if (slug) {
         console.log(`🔌 [SSE] Conectando via slug: ${slug}`);
         eventSource = new EventSource(`${API_BASE}/displays/slug/${slug}/live`);
@@ -448,14 +464,17 @@ const Player: React.FC = () => {
       }
 
       eventSource.onopen = () => {
+        attempt = 0;
         console.log("🟢 [SSE] Conexão em tempo real estabelecida com sucesso.");
       };
 
-      eventSource.onerror = (err) => {
-        console.warn("⚠️ [SSE] Conexão perdida ou falha. Tentando reconectar em 5 segundos...", err);
+      eventSource.onerror = () => {
         eventSource?.close();
+        if (closed) return;
+        const delay = nextDelay();
+        console.warn(`⚠️ [SSE] Conexão perdida. Nova tentativa em ${Math.round(delay / 1000)} s.`);
         if (reconnectTimeout) clearTimeout(reconnectTimeout);
-        reconnectTimeout = setTimeout(connectSSE, 5000);
+        reconnectTimeout = setTimeout(connectSSE, delay);
       };
 
       eventSource.addEventListener('message', async (e) => {
@@ -504,6 +523,7 @@ const Player: React.FC = () => {
     connectSSE();
 
     return () => {
+      closed = true;
       if (eventSource) {
         eventSource.close();
       }

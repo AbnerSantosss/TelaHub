@@ -116,11 +116,18 @@ export function validarJanela(inicio: string, fim: string): string | null {
   return null;
 }
 
-/** Mesma regra da tela de status: online se algum aparelho da tela falou no último minuto. */
+/**
+ * Mesmo valor de `DEVICE_ONLINE_THRESHOLD_MS` (`lib/deviceStatus.ts`) e de
+ * `ONLINE_THRESHOLD_MS` na API. Repetido aqui porque este arquivo não pode ter
+ * import de runtime (o teste o transpila sozinho). Se mudar lá, mude aqui.
+ */
+export const LIMITE_ONLINE_MS = 150_000;
+
+/** Mesma regra da tela de status: online se algum aparelho da tela falou dentro do limite. */
 export function telaEstaOnline(
   displayId: string,
   aparelhos: { display_id: string | null; last_seen: number }[],
   agora: number,
 ): boolean {
-  return aparelhos.some(a => a.display_id === displayId && agora - a.last_seen < 60000);
+  return aparelhos.some(a => a.display_id === displayId && agora - a.last_seen < LIMITE_ONLINE_MS);
 }

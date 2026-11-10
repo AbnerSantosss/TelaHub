@@ -65,17 +65,18 @@ export default defineConfig(({ command }) => {
         rollupOptions: {
           output: {
             manualChunks(id) {
-              if (id.includes('node_modules')) {
-                if (id.includes('react') || id.includes('react-dom') || id.includes('scheduler')) {
-                  return 'vendor-react';
-                }
-                if (id.includes('motion') || id.includes('framer-motion')) {
-                  return 'vendor-motion';
-                }
-                if (id.includes('recharts') || id.includes('d3')) {
-                  return 'vendor-recharts';
-                }
+              // Casa o NOME EXATO do pacote. Com `id.includes('react')` todo
+              // pacote com "react" no nome (lucide-react, react-router,
+              // react-hook-form...) caía em vendor-react, que passou de 480 KB
+              // e era baixado inteiro pela TV só para abrir o player.
+              const match = id.replace(/\\/g, '/').match(/node_modules\/((?:@[^/]+\/)?[^/]+)/g);
+              if (!match) return;
+              const pkg = match[match.length - 1].replace('node_modules/', '');
+              if (pkg === 'react' || pkg === 'react-dom' || pkg === 'scheduler') return 'vendor-react';
+              if (pkg === 'motion' || pkg === 'framer-motion' || pkg === 'motion-dom' || pkg === 'motion-utils') {
+                return 'vendor-motion';
               }
+              if (pkg === 'recharts' || pkg.startsWith('d3-') || pkg === 'victory-vendor') return 'vendor-recharts';
             }
           }
         }

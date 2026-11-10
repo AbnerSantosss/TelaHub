@@ -78,14 +78,17 @@ test('paraDataHoraLocal: formato do datetime-local, na hora local', () => {
   assert.equal(paraDataHoraLocal(ms('2026-12-31T23:59:59')), '2026-12-31T23:59');
 });
 
-test('telaEstaOnline: aparelho visto há menos de 1 minuto', () => {
+test('telaEstaOnline: aparelho visto dentro do limite (2,5 batidas de 60 s)', () => {
   const aparelhos = [
     { display_id: 'tv-1', last_seen: AGORA - 10_000 },
-    { display_id: 'tv-2', last_seen: AGORA - 120_000 },
+    { display_id: 'tv-2', last_seen: AGORA - 200_000 },
+    { display_id: 'tv-4', last_seen: AGORA - 120_000 },
     { display_id: null, last_seen: AGORA },
   ];
   assert.equal(telaEstaOnline('tv-1', aparelhos, AGORA), true);
   assert.equal(telaEstaOnline('tv-2', aparelhos, AGORA), false);
+  // Uma batida perdida (player a cada 60 s) não derruba a tela.
+  assert.equal(telaEstaOnline('tv-4', aparelhos, AGORA), true);
   assert.equal(telaEstaOnline('tv-3', aparelhos, AGORA), false);
 });
 
