@@ -33,8 +33,14 @@ export const deviceRegisterRateLimit = rateLimit({
 });
 
 /**
- * Heartbeat e status são públicos e chamados pela própria TV — o player bate
- * a cada 2 minutos (7,5 chamadas por janela de 15 min).
+ * Heartbeat e status são públicos e chamados pela própria TV. Conta por janela
+ * de 15 min, POR TV (o contador é compartilhado entre as duas rotas):
+ *   - pareada: 15 heartbeats (um a cada 60 s) + 15 consultas de status = 30;
+ *   - aguardando pareamento: 90 consultas de status (uma a cada 10 s) + 15
+ *     heartbeats = 105.
+ * O padrão era 60: a TV na tela de pareamento tomava 429 depois de dez minutos
+ * esperando o código ser digitado. 150 cobre os dois casos com folga e ainda é
+ * uma chamada a cada 6 s — nenhuma TV consegue martelar o backend sozinha.
  *
  * **Não** dá para limitar por IP: uma rede com 300 telas sai por um NAT só e
  * somaria ~2.250 chamadas por janela, ou seja, o limite derrubaria justamente
@@ -45,7 +51,7 @@ const deviceIdKey = (req: Request): string => `device:${req.params.id ?? 'descon
 
 export const deviceTelemetryRateLimit = rateLimit({
   windowMs: 15 * 60 * 1000,
-  limit: positiveIntFromEnv('DEVICE_TELEMETRY_RATE_LIMIT', 60),
+  limit: positiveIntFromEnv('DEVICE_TELEMETRY_RATE_LIMIT', 150),
   standardHeaders: true,
   legacyHeaders: false,
   keyGenerator: deviceIdKey,

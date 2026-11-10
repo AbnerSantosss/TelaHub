@@ -14,6 +14,38 @@ export class DeviceRepository {
     });
   }
 
+  /**
+   * Contagem de devices pareados do tenant e de quantos deram sinal desde
+   * `seenSince`. Duas contagens no banco em vez de carregar a lista inteira só
+   * para contar (o painel de saúde é chamado a cada abertura do Dashboard).
+   */
+  async countLinked(organizationId: TenantScope, seenSince: Date) {
+    const where = { ...tenantWhere(organizationId), status: 'linked' };
+    const [total, online] = await Promise.all([
+      prisma.device.count({ where }),
+      prisma.device.count({ where: { ...where, lastSeen: { gte: seenSince } } }),
+    ]);
+    return { total, online };
+  }
+
+  /**
+   * Devices pareados cujo último sinal é ANTERIOR a `cutoff`, de todos os
+   * tenants. É a consulta dos jobs de varredura: filtra no banco (índice
+   * `status, lastSeen`) em vez de trazer a tabela inteira a cada minuto.
+   *
+   * `onlyNotAlerted` restringe aos que ainda não receberam alerta nesta queda.
+   */
+  async findLinkedSeenBefore(cutoff: Date, options: { onlyNotAlerted?: boolean } = {}) {
+    return prisma.device.findMany({
+      where: {
+        status: 'linked',
+        lastSeen: { lt: cutoff },
+        ...(options.onlyNotAlerted ? { lastAlertedAt: null } : {}),
+      },
+      select: { id: true, name: true, organizationId: true, lastSeen: true, lastAlertedAt: true },
+    });
+  }
+
   /** Busca sem escopo — rotas públicas do device (status/heartbeat). */
   async findById(id: string) {
     return prisma.device.findUnique({ where: { id } });

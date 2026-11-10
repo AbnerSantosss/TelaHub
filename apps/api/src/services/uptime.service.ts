@@ -117,6 +117,24 @@ export function classifyNines(availability: number, periodMs: number): NinesClas
 
 export class UptimeService {
   /**
+   * Dentre `deviceIds`, quais têm `status` como ÚLTIMA transição registrada.
+   *
+   * Uma consulta para o lote inteiro (usa o índice `deviceId, changedAt`). É o
+   * que deixa a varredura de quedas pular quem já está marcado como offline sem
+   * fazer um `findFirst` por device.
+   */
+  async devicesWithLastStatus(deviceIds: string[], status: DeviceStatus): Promise<Set<string>> {
+    if (deviceIds.length === 0) return new Set();
+    const latest = await prisma.deviceStatusChange.findMany({
+      where: { deviceId: { in: deviceIds } },
+      orderBy: [{ deviceId: 'asc' }, { changedAt: 'desc' }],
+      distinct: ['deviceId'],
+      select: { deviceId: true, status: true },
+    });
+    return new Set(latest.filter((row) => row.status === status).map((row) => row.deviceId));
+  }
+
+  /**
    * Grava uma transição de estado — e SÓ quando o estado muda de fato.
    *
    * A última linha de `DeviceStatusChange` do device é a máquina de estado:

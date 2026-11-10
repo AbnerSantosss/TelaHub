@@ -5,8 +5,27 @@ import { sendDeviceOfflineAlertEmail } from './email.service';
 import { newEventId, sendMetaEventAsync } from './meta-capi.service';
 import { uptimeService } from './uptime.service';
 
-// Um device é considerado offline se não manda heartbeat há mais desse tempo.
-export const ONLINE_THRESHOLD_MS = 60_000;
+/**
+ * De quanto em quanto tempo o player manda heartbeat. O painel
+ * (`apps/painel/components/Player.tsx`, `HEARTBEAT_INTERVAL_MS`) usa o mesmo
+ * valor; se mudar lá, mude aqui.
+ */
+export const HEARTBEAT_INTERVAL_MS = 60_000;
+
+/**
+ * Um device é considerado offline se não manda heartbeat há mais desse tempo.
+ *
+ * ARMADILHA (corrigida em 2026-11-10): este limite era 60 s enquanto o player
+ * batia a cada 120 s. Toda TV saudável passava metade do tempo "offline" no
+ * painel, o job gravava uma queda por ciclo e o relatório de disponibilidade
+ * ficava perto de 50%. O limite tem de ser MAIOR que o intervalo do heartbeat,
+ * com folga para uma batida perdida: 2,5 intervalos. Os 150 s também cobrem
+ * player antigo ainda em cache na TV, que bate a cada 120 s.
+ */
+export const ONLINE_THRESHOLD_MS = HEARTBEAT_INTERVAL_MS * 2.5;
+
+/** Tamanho do lote nas varreduras, para não montar um `IN (...)` gigante. */
+const SWEEP_BATCH_SIZE = 500;
 
 // Só alertamos se o device ficar offline por mais tempo que isso — evita
 // disparar e-mail para instabilidades curtas de rede.
@@ -42,15 +61,10 @@ export class DeviceService {
   // Agrega o status (online/offline) dos devices do tenant a partir do lastSeen —
   // fonte única de verdade para o painel de saúde do Dashboard.
   async getHealthSummary(tenantId?: TenantScope) {
-    const devices = await deviceRepository.findAll(tenantId);
-    const linked = devices.filter((d) => d.status === 'linked');
-    const online = linked.filter((d) => this.isOnline(d.lastSeen)).length;
+    const seenSince = new Date(Date.now() - ONLINE_THRESHOLD_MS);
+    const { total, online } = await deviceRepository.countLinked(tenantId, seenSince);
 
-    return {
-      total: linked.length,
-      online,
-      offline: linked.length - online,
-    };
+    return { total, online, offline: total - online };
   }
 
   /**
@@ -244,15 +258,33 @@ export class DeviceService {
    * arredondaria toda queda para cima.
    */
   async recordOfflineTransitions(): Promise<void> {
-    const devices = await deviceRepository.findAll();
+    // Custo: a consulta traz só quem está pareado e sem sinal além do limite
+    // (índice `status, lastSeen`), e o último estado de todos eles vem em UMA
+    // consulta por lote. TV desligada há meses já está marcada `offline` e não
+    // gera escrita. Antes, a tabela inteira de todos os clientes era carregada
+    // a cada minuto, com uma consulta por device.
     const now = Date.now();
+    const offline = await deviceRepository.findLinkedSeenBefore(new Date(now - ONLINE_THRESHOLD_MS));
 
-    for (const device of devices) {
-      if (device.status !== 'linked') continue;
-      if (this.isOnline(device.lastSeen)) continue;
+    for (let i = 0; i < offline.length; i += SWEEP_BATCH_SIZE) {
+      const batch = offline.slice(i, i + SWEEP_BATCH_SIZE);
 
-      const crossedAt = new Date(Math.min(device.lastSeen.getTime() + ONLINE_THRESHOLD_MS, now));
-      await this.recordStatusChangeSafely(device.id, 'offline', device.organizationId ?? null, crossedAt);
+      let alreadyOffline: Set<string>;
+      try {
+        alreadyOffline = await uptimeService.devicesWithLastStatus(
+          batch.map((d) => d.id),
+          'offline'
+        );
+      } catch (err) {
+        console.error('Erro ao ler o último estado dos devices offline:', err);
+        continue;
+      }
+
+      for (const device of batch) {
+        if (alreadyOffline.has(device.id)) continue;
+        const crossedAt = new Date(Math.min(device.lastSeen.getTime() + ONLINE_THRESHOLD_MS, now));
+        await this.recordStatusChangeSafely(device.id, 'offline', device.organizationId ?? null, crossedAt);
+      }
     }
   }
 
@@ -277,19 +309,19 @@ export class DeviceService {
   // não alertados nesta queda, e envia e-mail para os admins DA ORGANIZAÇÃO do
   // device (mais o master da plataforma).
   async checkOfflineDevicesAndAlert(): Promise<void> {
-    const devices = await deviceRepository.findAll();
-    const now = Date.now();
-
-    const toAlert = devices.filter((d) => {
-      if (d.status !== 'linked') return false;
-      const offlineFor = now - d.lastSeen.getTime();
-      if (offlineFor < OFFLINE_ALERT_THRESHOLD_MS) return false;
-      return !d.lastAlertedAt;
-    });
+    // Filtro no banco: pareado, sem sinal há mais que o limite do alerta e ainda
+    // não alertado nesta queda. Na imensa maioria das varreduras volta vazio.
+    const toAlert = await deviceRepository.findLinkedSeenBefore(
+      new Date(Date.now() - OFFLINE_ALERT_THRESHOLD_MS),
+      { onlyNotAlerted: true }
+    );
 
     if (toAlert.length === 0) return;
 
-    const users = await userRepository.findAll();
+    const organizationIds = [
+      ...new Set(toAlert.map((d) => d.organizationId).filter((id): id is string => Boolean(id))),
+    ];
+    const users = await userRepository.findAlertRecipients(organizationIds);
     const masters = users.filter((u) => u.role === 'master');
 
     for (const device of toAlert) {

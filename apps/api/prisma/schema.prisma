@@ -192,6 +192,10 @@ model Device {
 
   @@index([organizationId])
   @@index([organizationId, linkedById])
+  // SSE: "quais devices exibem este display" a cada salvamento de display.
+  @@index([displayId])
+  // Varreduras do job de heartbeat: pareados sem sinal desde um instante.
+  @@index([status, lastSeen])
 }
 
 model Broadcast {

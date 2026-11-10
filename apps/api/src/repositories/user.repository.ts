@@ -25,6 +25,25 @@ export class UserRepository {
     });
   }
 
+  /**
+   * Destinatários do alerta de tela offline: os admins das organizações
+   * informadas e os masters da plataforma. Filtra no banco para o job não
+   * carregar todos os usuários de todos os clientes a cada varredura.
+   */
+  async findAlertRecipients(organizationIds: string[]) {
+    return prisma.user.findMany({
+      where: {
+        OR: [
+          { role: 'master' },
+          ...(organizationIds.length > 0
+            ? [{ role: 'admin', organizationId: { in: organizationIds } }]
+            : []),
+        ],
+      },
+      select: PUBLIC_USER_SELECT,
+    });
+  }
+
   async findById(id: string) {
     return prisma.user.findUnique({ where: { id } });
   }
