@@ -147,6 +147,7 @@ export const PaymentStep = ({ checkout }: { checkout: CheckoutController }) => {
     paymentMethods,
     simulatedPayment,
     canPayOnline,
+    demoPurchase,
     paymentMethod,
     card,
     cardErrors,
@@ -192,6 +193,51 @@ export const PaymentStep = ({ checkout }: { checkout: CheckoutController }) => {
   // mesma tela, divergindo em silêncio (o texto daqui afirmava, no passado,
   // que o e-mail de credenciais já tinha sido enviado; o envio é assíncrono e
   // pode falhar — ver o cabeçalho de `ThankYouScreen.tsx`).
+
+  // ── 1b. Compra fictícia em um clique (provedor simulado) ──────────────────
+  //
+  // Decisão do dono em 2026-11-10: enquanto não há gateway, o passo 3 não pede
+  // forma de pagamento. Vem ANTES do bloco do Pix de propósito: entre gerar a
+  // cobrança simulada e confirmá-la existe um instante em `pending`, e sem este
+  // retorno a tela piscaria um QR Code que ninguém precisa pagar.
+  // O aviso de demonstração continua obrigatório (regra 1 do cabeçalho).
+  if (demoPurchase && !result) {
+    return (
+      <form
+        noValidate
+        onSubmit={(event) => {
+          event.preventDefault();
+          void finish();
+        }}
+        className="flex flex-col gap-4"
+      >
+        <DemoBanner />
+
+        <TotalRow
+          quoteOnly={quoteOnly}
+          yearly={yearly}
+          monthlyCents={totalCents}
+          yearCents={yearCents}
+        />
+
+        <Notice tone="info" icon={<Info size={15} />}>
+          <strong className="font-bold">Compra de demonstração.</strong> Ao concluir, a conta é
+          criada com o plano escolhido já ativo e as credenciais de acesso vão para o e-mail
+          informado. Não pedimos cartão nem Pix.
+        </Notice>
+
+        {paymentError ? (
+          <Notice tone="danger" role="alert" icon={<AlertTriangle size={15} />}>
+            {paymentError}
+          </Notice>
+        ) : null}
+
+        <PrimaryButton type="submit" busy={paying || confirmingPix} busyLabel="Concluindo…">
+          Concluir compra de demonstração
+        </PrimaryButton>
+      </form>
+    );
+  }
 
   // ── 2. Pix gerado, aguardando confirmação ─────────────────────────────────
   if (payment && payment.status === 'pending' && payment.pix) {

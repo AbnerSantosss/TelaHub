@@ -834,6 +834,19 @@ export function useCheckout(routeToken?: string) {
     !selectedPlan?.free &&
     (session?.amountCents ?? 0) > 0;
 
+  /**
+   * COMPRA FICTÍCIA EM UM CLIQUE (decisão do dono em 2026-11-10: "elimine o
+   * checkout por enquanto, deixe fictícia a compra").
+   *
+   * Com o provedor SIMULADO, o passo 3 não pede Pix nem cartão: um botão gera a
+   * cobrança simulada e a confirma em seguida. Nada disso existe com provedor
+   * real: a condição depende de `simulated`, que vem do servidor, e a rota
+   * `simulate-payment` responde 404 fora do simulado. No dia em que entrar um
+   * gateway de verdade, este atalho some sozinho e o formulário volta.
+   */
+  const demoPurchase =
+    canPayOnline && paymentConfig?.simulated === true && paymentConfig.methods.includes('pix');
+
   const selectPaymentMethod = useCallback(
     (method: PaymentMethod) => {
       setPaymentMethod(method);
@@ -894,22 +907,22 @@ export function useCheckout(routeToken?: string) {
   }, []);
 
   const payWith = useCallback(
-    async (method: PaymentMethod, cardOverride?: CardDraft) => {
+    async (method: PaymentMethod, cardOverride?: CardDraft): Promise<StartPaymentResult | null> => {
       const token = tokenRef.current;
-      if (!token) return;
+      if (!token) return null;
 
       const draft = cardOverride ?? card;
       if (method === 'credit_card') {
         const errors = validateCard(draft);
         setCardErrors(errors);
-        if (CARD_FIELD_ORDER.some((field) => errors[field])) return;
+        if (CARD_FIELD_ORDER.some((field) => errors[field])) return null;
       }
 
       // Mesma razão do fluxo antigo: a última mudança de telas em debounce
       // precisa estar gravada ANTES de cobrar — o valor cobrado é o do
       // servidor, e ele não pode ficar 600ms atrasado em relação à tela.
       const flushed = await sendPatch();
-      if (!flushed) return;
+      if (!flushed) return null;
 
       setPaymentError(null);
       setPaying(true);
@@ -950,10 +963,12 @@ export function useCheckout(routeToken?: string) {
           setCard(emptyCard());
           setCardErrors({});
         }
+        return outcome;
       } catch (error) {
         if (!handleFatal(error)) {
           setPaymentError(messageOf(error, 'Não conseguimos processar o pagamento agora.'));
         }
+        return null;
       } finally {
         setPaying(false);
       }
@@ -1031,6 +1046,15 @@ export function useCheckout(routeToken?: string) {
         else setPaymentError('Estamos aguardando a confirmação do seu Pix pelo banco.');
         return;
       }
+      if (demoPurchase) {
+        // Compra fictícia: gera a cobrança simulada e confirma na sequência,
+        // sem tela de QR no meio. Se a confirmação falhar, a cobrança fica
+        // `pending` e o próximo clique cai no ramo de cima (confirma, não gera
+        // outra).
+        const outcome = await payWith('pix');
+        if (outcome?.status === 'pending' && outcome.simulated) await confirmSimulated();
+        return;
+      }
       if (!paymentMethod) {
         setPaymentError('Escolha uma forma de pagamento para continuar.');
         return;
@@ -1066,6 +1090,7 @@ export function useCheckout(routeToken?: string) {
     canPayOnline,
     confirmSimulated,
     confirmingPix,
+    demoPurchase,
     handleFatal,
     payWith,
     payment,
@@ -1171,6 +1196,7 @@ export function useCheckout(routeToken?: string) {
     paymentMethods: paymentConfig?.methods ?? [],
     simulatedPayment: paymentConfig?.simulated === true,
     canPayOnline,
+    demoPurchase,
     paymentMethod,
     card,
     cardErrors,

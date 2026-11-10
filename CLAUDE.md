@@ -5,11 +5,8 @@
 A primeira mensagem da sessão, antes de qualquer outra coisa, tem de:
 
 1. **Colar na íntegra** o último bloco "### Resposta final desta sessão" de `wiki/log.md`. Esse bloco já traz o que foi feito e a lista numerada do que falta, dizendo quem faz cada item.
-2. **Perguntar** quais itens o dono já fez desde a última sessão, em especial:
-   - o redeploy das stacks 117, 118 e 119 da versão nova;
-   - o conserto do P1010 da produção antiga (`telahub-novo`, com os clientes reais).
-
-   Se ele disser que fez, rodar `bash scripts/verificar-deploy-dev.sh` e conferir `https://telahub.proxserverabner.site/api/health` antes de seguir.
+2. **Foco na VPS nova (decisão do dono em 2026-11-10).** O ambiente de trabalho é `https://serversdk.tech` (VPS Hostinger, `wiki/tecnico/deploy-e-infraestrutura.md` §14 e §14.1). Conferir `https://serversdk.tech/api/health` antes de seguir.
+   - **Não perguntar** mais sobre o redeploy das stacks 117, 118 e 119 nem sobre o P1010 da produção antiga (`telahub-novo`), a menos que o dono traga o assunto. Estado em 10/11: `telahub.proxserverabner.site/api/health` dava 502 e as stacks `devtelahub*` seguiam na imagem antiga. Ligar ou desligar a produção antiga continua sendo decisão dele.
 3. Retomar pelo "### Para continuar" da mesma entrada do log, que tem os passos detalhados.
 
 **Push, redeploy no Portainer e leitura do banco de produção ficam com o dono.** A permissão automática do Claude Code barra essas ações mesmo com autorização escrita. Preparar o comando ou os cliques e não retentar (`wiki/tecnico/deploy-e-infraestrutura.md` §3.6).

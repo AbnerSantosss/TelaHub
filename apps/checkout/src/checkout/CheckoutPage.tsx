@@ -294,7 +294,9 @@ const CheckoutPage = () => {
           Derivar do `canPayOnline` mantém os dois em acordo por construção.
         */}
         <p className="mt-1.5 max-w-[56ch] text-base leading-relaxed text-ink-muted sm:text-sm">
-          {checkout.canPayOnline
+          {checkout.demoPurchase
+            ? 'Três passos: identificação, plano e confirmação. Este é um ambiente de demonstração: nada é cobrado, não pedimos cartão nem Pix, e o acesso ao painel é liberado ao concluir.'
+            : checkout.canPayOnline
             ? 'Três passos: identificação, plano e pagamento. O acesso ao painel é liberado assim que o pagamento é confirmado.'
             : 'Três passos. A cobrança automática ainda não está integrada, então nada é debitado nesta tela. Ao concluir, nosso time comercial fecha a contratação com você.'}
         </p>
@@ -332,7 +334,7 @@ const CheckoutPage = () => {
 
             <StepCard
               index={3}
-              title="Pagamento"
+              title={checkout.demoPurchase ? 'Confirmação' : 'Pagamento'}
               state={stepState('payment')}
               summary="Solicitação enviada. Aguardando contato do comercial."
               onEdit={() => editStep('payment')}
